@@ -469,9 +469,12 @@ int handleLCtrlKey(InterceptionKeyStroke keyStroke) {
 			pressUpLCtrl();
 			OutputDebugString(L"\nhandledLCtrlKeyUp");
 			return EVENT_HANDLED;
+		} else if (isLCtrlKeyDown && isShiftCurrentKeyCode(keyStroke)) {
+			OutputDebugString(L"\nhandledLCtrlKeyUp");
+			sendCustomKeyUpEvent(SC_LSHIFT);
+			return EVENT_HANDLED;
 		} else if (isLCtrlKeyDown) {
 			OutputDebugString(L"\nhandledLCtrlKeyUp");
-			sendCustomKeyUpEvent(keyStroke.code);
 			return EVENT_HANDLED;
 		}
 	}
@@ -576,7 +579,9 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			}
 		}
 
-		if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
+		if (keyCode == SC_LSHIFT) {
+			sendCustomKeyDownEvent(SC_LSHIFT);
+		} else if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
 			sendCustomKeyEvent(SC_ESC);
 			pressDownLAltAsLCtrl();
 		} else if (keyCode == SC_ESC) { // alt + esc
@@ -616,14 +621,31 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			pressUpLAlt();
 			sendCustomKeyEvent(SC_PRIOR);
 			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_SPACE) {
+		} else if (keyCode == SC_SPACE) { // alt + espace
 			pressDownLAltAsLCtrl();
 			sendCustomKeyEvent(SC_F12);
+		} else if (
+			keyCode == SC_F1 || 
+			keyCode == SC_F2 ||
+			keyCode == SC_F3 ||
+			keyCode == SC_F4 ||
+			keyCode == SC_F5 ||
+			keyCode == SC_F6 ||
+			keyCode == SC_F7 ||
+			keyCode == SC_F8 ||
+			keyCode == SC_F9 ||
+			keyCode == SC_F10 ||
+			keyCode == SC_F11 ||
+			keyCode == SC_F12
+		) { // alt + f{n}
+			pressUpLAlt();
+			sendCustomKeyEvent(keyCode);
+			pressDownLAltAsLCtrl();
 		} else if (keyCode != SC_LALT && !isLAltAsLCtrl) { // alttabbed + letter
 			// DO NOTHING
 		} else if (keyCode != SC_LALT) { // alt + letter
 			pressDownLAltAsLCtrl();
-			sendCustomKeyDownEvent(keyCode);
+			sendCustomKeyEvent(keyCode);
 		} else {
 			pressDownLAltAsLCtrl(); // alt
 		}
@@ -635,8 +657,11 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			pressUpLAlt();
 			OutputDebugString(L"\nhandledLAltKeyUp");
 			return EVENT_HANDLED;
+		} else if (isLAltKeyDown && isShiftCurrentKeyCode(keyStroke)) {
+			OutputDebugString(L"\nhandledLAltKeyUp");
+			sendCustomKeyUpEvent(SC_LSHIFT);
+			return EVENT_HANDLED;
 		} else if (isLAltKeyDown) {
-			sendCustomKeyUpEvent(keyStroke.code);
 			OutputDebugString(L"\nhandledLAltKeyUp");
 			return EVENT_HANDLED;
 		}
