@@ -35,6 +35,9 @@ enum ScanCodes {
 	SC_8 = 0x09,
 	SC_9 = 0x0A,
 	SC_0 = 0x0B,
+	SC_MUTE = 0xA0,
+	SC_VOLUMEDOWN = 0xAE,
+	SC_VOLUMEUP = 0xB0,
 	SC_ESC = 0x01,
 	SC_CAPSLOCK = 0x3A,
 	SC_LEFT = 0xCB, // 0x4B
@@ -101,14 +104,11 @@ bool isStarcraft2ActiveProcess() {
 void setKeyToKeyRemaps(InterceptionKeyStroke &keyStroke) {
 	DWORD keyCode = keyStroke.code;
 	if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT) {
-		keyCode = SC_LSHIFT;
-		keyStroke.code = keyCode;
+		keyStroke.code = SC_LSHIFT;
 	} else if (keyCode == SC_RALT) {
-		keyCode = SC_LALT;
-		keyStroke.code = keyCode;
+		keyStroke.code = SC_LALT;
 	} else if (keyCode == SC_RCTRL) {
-		keyCode = SC_RCTRL;
-		keyStroke.code = keyCode;
+		keyStroke.code = SC_LCTRL;
 	}
 }
 
@@ -716,12 +716,24 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 			}
 		}
 
-		sendCustomKeyDownEvent(keyCode);
+		if (keyCode == SC_F10) {
+			sendCustomKeyEvent(SC_MUTE, 2, 3);
+			return EVENT_HANDLED;
+		}
+		if (keyCode == SC_F11) {
+			sendCustomKeyEvent(SC_VOLUMEDOWN, 2, 3);
+			return EVENT_HANDLED;
+		}
+		if (keyCode == SC_F12) {
+			sendCustomKeyEvent(SC_VOLUMEUP, 2, 3);
+			return EVENT_HANDLED;
+		}
+		sendCustomKeyEvent(keyCode);
 		OutputDebugString(L"\nhandledKeyDown");
 		return EVENT_HANDLED;
 	} else {
-		sendCustomKeyUpEvent(keyStroke.code);
-		OutputDebugString(L"\nhandledKeyUp");
+		//sendCustomKeyUpEvent(keyStroke.code);
+		//OutputDebugString(L"\nhandledKeyUp");
 		return EVENT_HANDLED;
 	}
 
