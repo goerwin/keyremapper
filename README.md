@@ -1,5 +1,5 @@
 # Interception KeyRemapper
-Powerful Key Remapper for windows using (interception)[https://github.com/oblitum/Interception] library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by LowLevelKeyboardWindowHook.
+Powerful Key Remapper for windows using (interception)[https://github.com/oblitum/Interception] library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
 
 ## Requirements
 -
@@ -74,6 +74,13 @@ Powerful Key Remapper for windows using (interception)[https://github.com/oblitu
 - F5 = Alt + M (Mute Tab)
 - F6 = Alt + T (Twitch Theather Mode)
 - Key = Key
+
+### General
+- F1 = BRIGHTNESSDOWN
+- F2 = BRIGHTNESSUP
+- F10 = MUTE
+- F11 = VOLUMEDOWN
+- F12 = VOLUMEUP
 
 ## Test Cases
 https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
