@@ -87,7 +87,8 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - TODO:
 
 ## Issues
-- alt + c (click) in external keyboard keeps repeating itself
+- alt + c (click) in mechanical keyboard keeps repeating itself.
+  It was because rapid a fire setting that was set to increase key repeat speed. (FIXED)
 - alt + tab, release tab, caps + h/l. Does not work properly (FIXED)
 - simulated drag then R_option + tab to switch tabs. Doesnt work
 - while in explorer, the lwin+lalt+c doesn't select multiple files/folders (FIXED)
