@@ -663,11 +663,18 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 		return EVENT_HANDLED;
 	} else {
 		if (isShiftCurrentKeyCode(keyStroke)) {
-			sendCustomKeyUpEvent(SC_LSHIFT);
+			// A shift keyup event is fired with a state 3 before the actual key released
+			// is released. That's why I'm making sure that the state is different of 3 
+			// in order to trigger the lshift properly
+			if (keyStroke.state != 3) {
+				sendCustomKeyUpEvent(SC_LSHIFT);
+			}
 			OutputDebugString(L"\nhandledLShiftKeyUp");
 			return EVENT_HANDLED;
 		} else if (isShiftKeyDown) {
-			sendCustomKeyUpEvent(keyStroke.code);
+			if (keyStroke.state != 3) {
+				sendCustomKeyUpEvent(keyStroke.code);
+			}
 			OutputDebugString(L"\nhandledLShiftKeyUp");
 			return EVENT_HANDLED;
 		}
