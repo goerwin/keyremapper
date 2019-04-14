@@ -134,6 +134,10 @@
   <ItemGroup>
     <ResourceCompile Include="InterceptionKeyRemapper.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="images\letter-e-red.ico" />
+    <Image Include="images\letter-e.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

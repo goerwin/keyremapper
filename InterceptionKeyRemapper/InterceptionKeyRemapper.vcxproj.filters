@@ -44,4 +44,12 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="images\letter-e.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\letter-e-red.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

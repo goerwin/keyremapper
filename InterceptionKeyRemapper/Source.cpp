@@ -1,9 +1,15 @@
+#ifndef UNICODE
+#define UNICODE
+#endif 
+
 #include <windows.h>
 #include <sstream>
 #include "interception.h"
 #include "utils.h"
 #include "erwinUtils.h"
 #include <chrono>
+#include <shellapi.h>
+#include "resource.h"
 
 enum ScanCodes {
 	SC_C = 0x2E,
@@ -13,10 +19,22 @@ enum ScanCodes {
 	SC_J = 0x24,
 	SC_K = 0x25,
 	SC_L = 0x26,
+	SC_M = 0x32,
 	SC_Q = 0x10,
 	SC_S = 0x1F,
+	SC_T = 0x14,
 	SC_X = 0x2D,
 	SC_Y = 0x15,
+	SC_1 = 0x02,
+	SC_2 = 0x03,
+	SC_3 = 0x04,
+	SC_4 = 0x05,
+	SC_5 = 0x06,
+	SC_6 = 0x07,
+	SC_7 = 0x08,
+	SC_8 = 0x09,
+	SC_9 = 0x0A,
+	SC_0 = 0x0B,
 	SC_ESC = 0x01,
 	SC_CAPSLOCK = 0x3A,
 	SC_LEFT = 0xCB, // 0x4B
@@ -32,6 +50,7 @@ enum ScanCodes {
 	SC_LSHIFT = 0x2A,
 	SC_RSHIFT = 0x36,
 	SC_LBSLASH = 0x56,
+	SC_RETURN = 0x1C,
 	SC_SUPR = 0x53,
 	SC_BACK = 0x0E,
 	SC_TAB = 0x0F,
@@ -39,6 +58,7 @@ enum ScanCodes {
 	SC_END = 0x4F,
 	SC_PRIOR = 0x49,
 	SC_NEXT = 0x51,
+	SC_SEMI = 0x27,
 	SC_F1 = 0x3B,
 	SC_F2 = 0x3C,
 	SC_F3 = 0x3D,
@@ -57,6 +77,11 @@ InterceptionContext context;
 InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
 
+HHOOK hHook = 0;
+HWINEVENTHOOK windowHook = 0;
+std::string activeProcessName;
+const auto appTitle = L"Windows KeyRemapper";
+
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
 
@@ -65,6 +90,13 @@ bool isShiftKeyDown;
 bool isLCtrlKeyDown;
 bool isLWinKeyDown;
 bool isLAltKeyDown;
+
+bool isChromeActiveProcess() {
+	return activeProcessName == "chrome.exe";
+}
+bool isStarcraft2ActiveProcess() {
+	return activeProcessName == "SC2_x64.exe";
+}
 
 void setKeyToKeyRemaps(InterceptionKeyStroke &keyStroke) {
 	DWORD keyCode = keyStroke.code;
@@ -168,6 +200,15 @@ void pressUpLAlt() {
 		sendCustomKeyUpEvent(SC_LALT); 
 	}
 	isLAltAsLCtrl = true;
+}
+
+// You have to phisically press a key to trigger
+// the correct clean up
+void handleAppCleanUp() {
+	sendCustomKeyEvent(SC_LALT);
+	sendCustomKeyEvent(SC_LCTRL);
+	sendCustomKeyEvent(SC_LWIN);
+	sendCustomKeyEvent(SC_LSHIFT);
 }
 
 DWORD keyForClick = SC_C;
@@ -377,7 +418,7 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 			pressUpLAlt();
 		}
 
-		OutputDebugString("\nhandledCapslockKeyDown");
+		OutputDebugString(L"\nhandledCapslockKeyDown");
 		return EVENT_HANDLED;
 	} else {
 		if (
@@ -391,7 +432,7 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyUpEvent(SC_LSHIFT);
 			}
 
-			OutputDebugString("\nhandledCapslockKeyUp");
+			OutputDebugString(L"\nhandledCapslockKeyUp");
 			return EVENT_HANDLED;
 		}
 	}
@@ -419,16 +460,16 @@ int handleLCtrlKey(InterceptionKeyStroke keyStroke) {
 			pressDownLCtrlAsLAlt();
 		}
 
-		OutputDebugString("\nhandledLCtrlKeyDown");
+		OutputDebugString(L"\nhandledLCtrlKeyDown");
 		return EVENT_HANDLED;
 
 	} else {
 		if (isLCTrlCurrentKeyCode(keyStroke)) {
 			pressUpLCtrl();
-			OutputDebugString("\nhandledLCtrlKeyUp");
+			OutputDebugString(L"\nhandledLCtrlKeyUp");
 			return EVENT_HANDLED;
 		} else if (isLCtrlKeyDown) {
-			OutputDebugString("\nhandledLCtrlKeyUp");
+			OutputDebugString(L"\nhandledLCtrlKeyUp");
 			sendCustomKeyUpEvent(keyStroke.code);
 			return EVENT_HANDLED;
 		}
@@ -445,21 +486,21 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 
 		DWORD keyCode = keyStroke.code;
 
-		/*if (activeProcessName == "SC2_x64.exe") {
-			if (keyCode == 0x58) { // win + x
+		if (isStarcraft2ActiveProcess()) {
+			if (keyCode == SC_X) {
 				sendCustomKeyDownEvent(SC_LALT);
-				sendCustomKeyEvent(0x58);
+				sendCustomKeyEvent(SC_X);
 				sendCustomKeyUpEvent(SC_LALT);
 				return EVENT_HANDLED;
 			}
-
-			if (keyCode == 0x31 || keyCode == 0x32 || keyCode == 0x33 || keyCode == 0x34) { // win + 1/2/3/4
+			
+			if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // win + 1/2/3/4
 				sendCustomKeyDownEvent(SC_LALT);
 				sendCustomKeyEvent(keyCode);
 				sendCustomKeyUpEvent(SC_LALT);
 				return EVENT_HANDLED;
 			}
-		}*/
+		}
 
 		if (keyCode == SC_H) { // win + h
 			sendCustomKeyDownEvent(SC_LALT);
@@ -488,11 +529,11 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 			sendCustomKeyEvent(SC_LWIN, 2, 3);
 		}
 
-		OutputDebugString("\nhandledLWinKeyDown");
+		OutputDebugString(L"\nhandledLWinKeyDown");
 		return EVENT_HANDLED;
 	} else {
 		if (isLWinCurrentKeyCode(keyStroke)) {
-			OutputDebugString("\nhandledLWinKeyUp");
+			OutputDebugString(L"\nhandledLWinKeyUp");
 			return EVENT_HANDLED;
 		}
 	}
@@ -508,31 +549,31 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 
 		DWORD keyCode = keyStroke.code;
 
-		/*if (activeProcessName == "chrome.exe") {
-			if (keyCode == VK_RETURN) { // alt + enter
+		if (isChromeActiveProcess()) {
+			if (keyCode == SC_RETURN) { // alt + enter
 				pressDownLAltAsLAlt();
 				sendCustomKeyDownEvent(keyCode);
 				pressDownLAltAsLCtrl();
 				return EVENT_HANDLED;
 			}
 
-			if (keyCode == 0x48) { // alt + h
+			if (keyCode == SC_H) { // alt + h
 				sendCustomKeyDownEvent(SC_LSHIFT);
 				sendCustomKeyEvent(SC_TAB);
 				sendCustomKeyUpEvent(SC_LSHIFT);
 				return EVENT_HANDLED;
 			}
 
-			if (keyCode == 0x4C) { // alt + l
+			if (keyCode == SC_L) { // alt + l
 				sendCustomKeyEvent(SC_TAB);
 				return EVENT_HANDLED;
 			}
 
-			if (keyCode == VK_OEM_1) { // alt + ;
-				sendCustomKeyEvent(0x4C);
+			if (keyCode == SC_SEMI) { // alt + ;
+				sendCustomKeyEvent(SC_L);
 				return EVENT_HANDLED;
 			}
-		}*/
+		}
 
 		if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
 			sendCustomKeyEvent(SC_ESC);
@@ -586,16 +627,16 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			pressDownLAltAsLCtrl(); // alt
 		}
 
-		OutputDebugString("\nhandledLAltKeyDown");
+		OutputDebugString(L"\nhandledLAltKeyDown");
 		return EVENT_HANDLED;
 	} else {
 		if (isLAltCurrentKeyCode(keyStroke)) {
 			pressUpLAlt();
-			OutputDebugString("\nhandledLAltKeyUp");
+			OutputDebugString(L"\nhandledLAltKeyUp");
 			return EVENT_HANDLED;
 		} else if (isLAltKeyDown) {
 			sendCustomKeyUpEvent(keyStroke.code);
-			OutputDebugString("\nhandledLAltKeyUp");
+			OutputDebugString(L"\nhandledLAltKeyUp");
 			return EVENT_HANDLED;
 		}
 	}
@@ -618,16 +659,16 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 			sendCustomKeyDownEvent(keyCode);
 		}
 
-		OutputDebugString("\nhandledLShiftKeyDown");
+		OutputDebugString(L"\nhandledLShiftKeyDown");
 		return EVENT_HANDLED;
 	} else {
 		if (isShiftCurrentKeyCode(keyStroke)) {
 			sendCustomKeyUpEvent(SC_LSHIFT);
-			OutputDebugString("\nhandledLShiftKeyUp");
+			OutputDebugString(L"\nhandledLShiftKeyUp");
 			return EVENT_HANDLED;
 		} else if (isShiftKeyDown) {
 			sendCustomKeyUpEvent(keyStroke.code);
-			OutputDebugString("\nhandledLShiftKeyUp");
+			OutputDebugString(L"\nhandledLShiftKeyUp");
 			return EVENT_HANDLED;
 		}
 	}
@@ -639,8 +680,8 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 	if (isKeyDown(keyStroke)) {
 		DWORD keyCode = keyStroke.code;
 
-		/*if (activeProcessName == "chrome.exe") {
-			if (keyCode == VK_F3) { // f3
+		if (isChromeActiveProcess()) {
+			if (keyCode == SC_F3) { // f3
 				sendCustomKeyDownEvent(SC_LCTRL);
 				sendCustomKeyDownEvent(SC_LSHIFT);
 				sendCustomKeyEvent(SC_TAB);
@@ -648,39 +689,142 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyUpEvent(SC_LCTRL);
 				return EVENT_HANDLED;
 			}
-			if (keyCode == VK_F4) { // f4
+			if (keyCode == SC_F4) { // f4
 				sendCustomKeyDownEvent(SC_LCTRL);
 				sendCustomKeyEvent(SC_TAB);
 				sendCustomKeyUpEvent(SC_LCTRL);
-		Shifturn EVENT_HANDLED;
+				EVENT_HANDLED;
 			}
-			if (keyCode == VK_F5) { // F5
+			if (keyCode == SC_F5) { // F5
 				sendCustomKeyDownEvent(SC_LALT);
-				sendCustomKeyEvent(0x4D);
+				sendCustomKeyEvent(SC_M);
 				sendCustomKeyUpEvent(SC_LALT);
 				return EVENT_HANDLED;
 			}
-			if (keyCode == VK_F6) { // f6
+			if (keyCode == SC_F6) { // f6
 				sendCustomKeyDownEvent(SC_LALT);
-				sendCustomKeyEvent(0x54);
+				sendCustomKeyEvent(SC_T);
 				sendCustomKeyUpEvent(SC_LALT);
 				return EVENT_HANDLED;
 			}
-		}*/
+		}
 
 		sendCustomKeyDownEvent(keyCode);
-		OutputDebugString("\nhandledKeyDown");
+		OutputDebugString(L"\nhandledKeyDown");
 		return EVENT_HANDLED;
 	} else {
 		sendCustomKeyUpEvent(keyStroke.code);
-		OutputDebugString("\nhandledKeyUp");
+		OutputDebugString(L"\nhandledKeyUp");
 		return EVENT_HANDLED;
 	}
 
 	return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow) {
+void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {
+	activeProcessName = ErwinUtils::getActiveWindowProcessName(hwnd);
+	OutputDebugStringA(activeProcessName.c_str());
+}
+
+bool isAppEnabled = true;
+NOTIFYICONDATA nid;
+const auto ctxMenuEnabled = L"Disable";
+const auto ctxMenuNotEnabled = L"Enable";
+auto ctxMenuEnabledMsg = ctxMenuEnabled;
+auto globalIconImage = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, 0));
+//auto globalIconImageDisabled = HICON(LoadImage(NULL, TEXT("images/letter-e-red.ico"), IMAGE_ICON, 0, 0, LR_LOADFROMFILE));
+auto globalIconImageDisabled = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 0, 0, 0));
+
+void toggleAppEnabled() {
+	isAppEnabled = !isAppEnabled;
+	ctxMenuEnabledMsg = isAppEnabled ? ctxMenuEnabled : ctxMenuNotEnabled;
+	nid.hIcon = isAppEnabled ? globalIconImage : globalIconImageDisabled;
+	Shell_NotifyIcon(NIM_MODIFY, &nid);
+}
+
+#define WM_MYMESSAGE (WM_USER + 1)
+const int IDM_EXIT = 5;
+const int IDM_ENABLE = 6;
+const auto ctxMenuExitMsg = L"Exit";
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg) {
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+		case WM_MYMESSAGE:
+			switch (lParam) {
+			case WM_LBUTTONUP:
+			case WM_RBUTTONUP:
+				// MessageBox(NULL, L"Clicked!", L"Title", MB_OK);
+				POINT pt;
+				GetCursorPos(&pt);
+				HMENU hPopMenu = CreatePopupMenu();
+				SetForegroundWindow(hWnd);
+
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, ctxMenuExitMsg);
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, ctxMenuEnabledMsg);
+				TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
+				return 0;
+			}
+		case WM_COMMAND: {
+			switch (LOWORD(wParam)) {
+				case IDM_EXIT:
+					exit(0);
+					return 0;
+				case IDM_ENABLE:
+					toggleAppEnabled();
+					return 0;
+			}
+			return 0;
+		}
+	}
+
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+void handleAppExit() {
+	Shell_NotifyIcon(NIM_DELETE, &nid);
+}
+
+HWND createWindow(HINSTANCE hInstance) {
+	// Register the window class.
+	const wchar_t CLASS_NAME[] = L"WinClass";
+	WNDCLASS wc = {};
+	wc.lpfnWndProc = WindowProc;
+	wc.hInstance = hInstance;
+	wc.lpszClassName = CLASS_NAME;
+
+	RegisterClass(&wc);
+	HWND hWnd = CreateWindowEx(
+		0,                              // Optional window styles.
+		CLASS_NAME,                     // Window class
+		appTitle,						// Window text
+		WS_OVERLAPPEDWINDOW,            // Window style
+		// Size and position
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		NULL,       // Parent window    
+		NULL,       // Menu
+		hInstance,  // Instance handle
+		NULL        // Additional application data
+	);
+
+	return hWnd;
+}
+
+// https://codingmisadventures.wordpress.com/2009/02/20/creating-a-system-tray-icon-using-visual-c-and-win32/
+void handleSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
+	nid.cbSize = sizeof(NOTIFYICONDATA);
+	nid.hWnd = hWnd;
+	nid.uID = 100;
+	nid.uVersion = NOTIFYICON_VERSION;
+	nid.uCallbackMessage = WM_MYMESSAGE;
+	nid.hIcon = globalIconImage;
+	wcscpy_s(nid.szTip, appTitle);
+	nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+	Shell_NotifyIcon(NIM_ADD, &nid);
+}
+
+DWORD WINAPI keyboardThreadFunc(void* data) {
 	raise_process_priority();
 	context = interception_create_context();
 	interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
@@ -710,7 +854,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 		}
 	});
 
-	while (interception_receive(context, device = interception_wait(context), (InterceptionStroke *)&keyStroke, 1) > 0) {				
+	auto lAltClick = ErwinUtils::KeyClick<void(int)>(SC_LALT, [](int consecutiveClicks) {
+		if (consecutiveClicks == 2) {
+			handleAppCleanUp();
+		}
+	});
+
+	while (interception_receive(
+		context, 
+		device = interception_wait(context), 
+		(InterceptionStroke *)&keyStroke, 
+		1
+	) > 0) {
+		if (!isAppEnabled) {
+			interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
+			continue;
+		}
+
 		bool isCurrentKeyDown = isKeyDown(keyStroke);
 		setKeyToKeyRemaps(keyStroke);
 
@@ -718,6 +878,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 
 		shiftClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 		capslockClick.handleKeyStroke(keyCode, isCurrentKeyDown);
+		lAltClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 
 		if (isCurrentKeyDown) {
 			if (isCapslockCurrentKeyCode(keyStroke)) {
@@ -733,14 +894,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 			}
 		}
 
-		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {}
-		else if (handleLWinLAltKeyDown(keyStroke) == EVENT_HANDLED) {}
-		else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {}
-		else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {}
-		else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {}
-		else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {}
-		else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {}
-		else if (handleKey(keyStroke) == EVENT_HANDLED) {}
+		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {} else if (handleLWinLAltKeyDown(keyStroke) == EVENT_HANDLED) {} else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {} else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {} else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {} else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {} else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {} else if (handleKey(keyStroke) == EVENT_HANDLED) {}
 
 		if (!isCurrentKeyDown) {
 			if (isCapslockCurrentKeyCode(keyStroke)) {
@@ -760,4 +914,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 	interception_destroy_context(context);
 
 	return 0;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow) {
+	std::atexit(handleAppExit);
+
+	// SYSTEM TRAY ICON
+
+	HWND hWnd = createWindow(hInstance);
+
+	if (!hWnd) {
+		return 0;
+	}
+
+	handleSystemTrayIcon(hInstance, hWnd);
+	
+	// WINDOW CHANGE EVENT
+
+	windowHook = SetWinEventHook(
+		EVENT_SYSTEM_FOREGROUND,
+		EVENT_SYSTEM_FOREGROUND,
+		NULL,
+		handleWindowChange,
+		0, 0,
+		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
+	);
+
+	// KEYBOARD
+
+	CreateThread(NULL, 0, keyboardThreadFunc, NULL, 0, NULL);
+
+	MSG messages;
+	while (GetMessage(&messages, NULL, 0, 0)) {
+		TranslateMessage(&messages);
+		DispatchMessage(&messages);
+	}
+
+	return messages.wParam;
 }
