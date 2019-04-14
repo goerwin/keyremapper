@@ -119,12 +119,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="erwinUtils.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="utils.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="erwinUtils.h" />
     <ClInclude Include="interception.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="utils.h" />

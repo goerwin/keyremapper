@@ -2,6 +2,8 @@
 #include <sstream>
 #include "interception.h"
 #include "utils.h"
+#include "erwinUtils.h"
+#include <chrono>
 
 enum ScanCodes {
 	SC_C = 0x2E,
@@ -680,14 +682,42 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow) {
 	raise_process_priority();
-
 	context = interception_create_context();
-
 	interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
+
+	auto shiftClick = ErwinUtils::KeyClick<void(int)>(SC_LSHIFT, [](int consecutiveClicks) {
+		if (consecutiveClicks > 1) {
+			if ((GetKeyState(VK_CAPITAL) & 0x0001) == 0) { // Capslock OFF
+				sendCustomKeyEvent(SC_CAPSLOCK);
+			}
+		} else {
+			if ((GetKeyState(VK_CAPITAL) & 0x0001) != 0) { // Capslock ON
+				sendCustomKeyEvent(SC_CAPSLOCK);
+			}
+		}
+	});
+
+	auto capslockClick = ErwinUtils::KeyClick<void(int)>(SC_CAPSLOCK, [](int consecutiveClicks) {
+		if (consecutiveClicks == 1) {
+			if (isLAltKeyDown && !isLAltAsLCtrl) { // altTabbed + esc
+				sendCustomKeyEvent(SC_ESC);
+				pressDownLAltAsLCtrl();
+			} else if (isLAltKeyDown) { // alt + esc
+				// DO NOTHING
+			} else {
+				sendCustomKeyEvent(SC_ESC);
+			}
+		}
+	});
 
 	while (interception_receive(context, device = interception_wait(context), (InterceptionStroke *)&keyStroke, 1) > 0) {				
 		bool isCurrentKeyDown = isKeyDown(keyStroke);
 		setKeyToKeyRemaps(keyStroke);
+
+		DWORD keyCode = keyStroke.code;
+
+		shiftClick.handleKeyStroke(keyCode, isCurrentKeyDown);
+		capslockClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 
 		if (isCurrentKeyDown) {
 			if (isCapslockCurrentKeyCode(keyStroke)) {
