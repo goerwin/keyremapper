@@ -423,14 +423,14 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 	} else {
 		if (
 			isCapslockCurrentKeyCode(keyStroke) || 
-			currentKeyCode == shiftLetterForVimMode ||
+			(isCapslockKeyDown && currentKeyCode == shiftLetterForVimMode) ||
 			(isCapslockKeyDown && (isShiftCurrentKeyCode(keyStroke)))
 		) {
 			if (isVimShiftKeyDown) {
-				isVimShiftKeyDown = false;
-				isShiftLetterForVimModeKeyDown = false;
 				sendCustomKeyUpEvent(SC_LSHIFT);
 			}
+			isVimShiftKeyDown = false;
+			isShiftLetterForVimModeKeyDown = false;
 
 			OutputDebugString(L"\nhandledCapslockKeyUp");
 			return EVENT_HANDLED;
@@ -765,7 +765,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, ctxMenuEnabledMsg);
 				TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
 				return 0;
-			}
+			};
 		case WM_COMMAND: {
 			switch (LOWORD(wParam)) {
 				case IDM_EXIT:
