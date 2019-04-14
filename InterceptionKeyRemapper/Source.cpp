@@ -24,6 +24,7 @@ enum ScanCodes {
 	SC_Q = 0x10,
 	SC_S = 0x1F,
 	SC_T = 0x14,
+	SC_V = 0x2F,
 	SC_X = 0x2D,
 	SC_Y = 0x15,
 	SC_1 = 0x02,
@@ -265,7 +266,7 @@ int handleSimulateMouseClick(InterceptionKeyStroke keyStroke) {
 	return 0;
 }
 
-int handleLWinLAltKeyDown(InterceptionKeyStroke keyStroke) {
+int handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
 	if (isKeyDown(keyStroke)) {
 		if (!(isLWinKeyDown && isLAltKeyDown)) {
 			return 0;
@@ -315,7 +316,6 @@ int handleLWinLAltKeyDown(InterceptionKeyStroke keyStroke) {
 			pressDownLAltAsLCtrl();
 			return EVENT_HANDLED;
 		} else if (isLWinKeyDown && isLAltKeyDown) {
-			sendCustomKeyUpEvent(keyStroke.code);
 			return EVENT_HANDLED;
 		}
 	}
@@ -363,11 +363,17 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 		} else if (isLAltKeyDown && isLAltAsLCtrl) {
 			// Here you are OUT of the Alt+Tab switcher
 
-			if (isVimShiftKeyDown) {
+			if (isVimShiftKeyDown) { // caps + lalt + shift
 				sendCustomKeyDownEvent(SC_LSHIFT);
 			}
 
-			if (isHCurrentKeyCode) {
+			if (currentKeyCode == SC_V) { // caps + lalt + V
+				pressUpLAlt();
+				sendCustomKeyDownEvent(SC_LWIN, 2);
+				sendCustomKeyEvent(SC_V);
+				sendCustomKeyUpEvent(SC_LWIN, 3);
+				pressDownLAltAsLCtrl();
+			} if (isHCurrentKeyCode) {
 				pressUpLAlt();
 				sendCustomKeyEvent(SC_HOME);
 				pressDownLAltAsLCtrl();
@@ -637,10 +643,9 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			keyCode == SC_F10 ||
 			keyCode == SC_F11 ||
 			keyCode == SC_F12
-		) { // alt + f{n}
+		) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
 			pressUpLAlt();
 			sendCustomKeyEvent(keyCode);
-			pressDownLAltAsLCtrl();
 		} else if (keyCode != SC_LALT && !isLAltAsLCtrl) { // alttabbed + letter
 			// DO NOTHING
 		} else if (keyCode != SC_LALT) { // alt + letter
@@ -948,7 +953,7 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 		}
 
 		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleLWinLAltKeyDown(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleLWinLAltKeys(keyStroke) == EVENT_HANDLED) {} 
 		else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {} 
 		else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {} 
 		else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {} 
