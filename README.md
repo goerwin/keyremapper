@@ -97,3 +97,4 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - drag a file with win + c and open alt + tab doesnt work
 - LWin + D weird behavior when pressed twice (FIXED)
 - ctrl + alt + supr, open the task manager, luego alt + tab no funciona
+- get a text selected, press down capslock, see how the selection is lost (FIXED)
