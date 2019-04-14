@@ -38,6 +38,9 @@
     <ClInclude Include="erwinUtils.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="brightness.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="InterceptionKeyRemapper.rc">

@@ -4,12 +4,13 @@
 
 #include <windows.h>
 #include <sstream>
-#include "interception.h"
-#include "utils.h"
-#include "erwinUtils.h"
 #include <chrono>
 #include <shellapi.h>
 #include "resource.h"
+#include "brightness.h"
+#include "interception.h"
+#include "utils.h"
+#include "erwinUtils.h"
 
 enum ScanCodes {
 	SC_C = 0x2E,
@@ -728,6 +729,14 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 			sendCustomKeyEvent(SC_VOLUMEUP, 2, 3);
 			return EVENT_HANDLED;
 		}
+		if (keyCode == SC_F1) {
+			BrightnessHandler::Increment(-10);
+			return EVENT_HANDLED;
+		}
+		if (keyCode == SC_F2) {
+			BrightnessHandler::Increment(10);
+			return EVENT_HANDLED;
+		}
 		sendCustomKeyEvent(keyCode);
 		OutputDebugString(L"\nhandledKeyDown");
 		return EVENT_HANDLED;
@@ -913,7 +922,14 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 			}
 		}
 
-		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {} else if (handleLWinLAltKeyDown(keyStroke) == EVENT_HANDLED) {} else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {} else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {} else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {} else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {} else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {} else if (handleKey(keyStroke) == EVENT_HANDLED) {}
+		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleLWinLAltKeyDown(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {} 
+		else if (handleKey(keyStroke) == EVENT_HANDLED) {}
 
 		if (!isCurrentKeyDown) {
 			if (isCapslockCurrentKeyCode(keyStroke)) {
