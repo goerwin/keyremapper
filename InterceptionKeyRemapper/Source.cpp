@@ -86,6 +86,7 @@ HHOOK hHook = 0;
 HWINEVENTHOOK windowHook = 0;
 std::string activeProcessName;
 const auto appTitle = L"Windows KeyRemapper";
+DWORD globalDelayMSBetweenKeyEvents = 5;
 
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
@@ -141,6 +142,7 @@ void sendCustomKeyDownEvent(DWORD keyCode, int state = 0) {
 	InterceptionKeyStroke newKeyStroke;
 	newKeyStroke.code = keyCode;
 	newKeyStroke.state = state;
+	Sleep(globalDelayMSBetweenKeyEvents);
 	interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
 	OutputDebugStringW(std::wstring(L"\nkeydown: ").append(std::to_wstring(keyCode)).c_str());
 }
@@ -148,6 +150,7 @@ void sendCustomKeyUpEvent(DWORD keyCode, int state = 1) {
 	InterceptionKeyStroke newKeyStroke;
 	newKeyStroke.code = keyCode;
 	newKeyStroke.state = state;
+	Sleep(globalDelayMSBetweenKeyEvents);
 	interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
 	OutputDebugStringW(std::wstring(L"\nkeyup: ").append(std::to_wstring(keyCode)).c_str());
 }
@@ -585,6 +588,19 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			}
 		}
 
+		if (isStarcraft2ActiveProcess()) {
+			if (
+				keyCode == SC_F1 ||
+				keyCode == SC_F2 ||
+				keyCode == SC_F3 ||
+				keyCode == SC_F4
+			) {
+				pressDownLAltAsLCtrl();
+				sendCustomKeyEvent(keyCode);
+				return EVENT_HANDLED;
+			}
+		}
+
 		if (keyCode == SC_LSHIFT) {
 			sendCustomKeyDownEvent(SC_LSHIFT);
 		} else if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
@@ -714,6 +730,7 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 	return 0;
 }
 
+bool shouldKeyRelease = false;
 int handleKey(InterceptionKeyStroke keyStroke) {
 	if (isKeyDown(keyStroke)) {
 		DWORD keyCode = keyStroke.code;
@@ -767,11 +784,16 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 			BrightnessHandler::Increment(10);
 			return EVENT_HANDLED;
 		}
-		sendCustomKeyEvent(keyCode);
+
+		shouldKeyRelease = true;
+		sendCustomKeyDownEvent(keyCode);
 		OutputDebugString(L"\nhandledKeyDown");
 		return EVENT_HANDLED;
 	} else {
-		//sendCustomKeyUpEvent(keyStroke.code);
+		if (shouldKeyRelease) {
+			sendCustomKeyUpEvent(keyStroke.code);
+			shouldKeyRelease = false;
+		}
 		//OutputDebugString(L"\nhandledKeyUp");
 		return EVENT_HANDLED;
 	}

@@ -99,3 +99,5 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - LWin + D weird behavior when pressed twice (FIXED)
 - ctrl + alt + supr, open the task manager, luego alt + tab no funciona
 - get a text selected, press down capslock, see how the selection is lost (FIXED)
+- how to handle multiple single key pressed? If you try to play games that rely on
+  keyup events, some of then may not never be released. Check https://www.retrogames.cz/play_910-SNES.php?language=EN for example
