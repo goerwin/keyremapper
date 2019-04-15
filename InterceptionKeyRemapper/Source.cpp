@@ -143,7 +143,6 @@ void sendCustomKeyDownEvent(DWORD keyCode, int state = 0) {
 	InterceptionKeyStroke newKeyStroke;
 	newKeyStroke.code = keyCode;
 	newKeyStroke.state = state;
-	Sleep(globalDelayMSBetweenKeyEvents);
 	interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
 	OutputDebugStringW(std::wstring(L"\nkeydown: ").append(std::to_wstring(keyCode)).c_str());
 }
@@ -151,7 +150,6 @@ void sendCustomKeyUpEvent(DWORD keyCode, int state = 1) {
 	InterceptionKeyStroke newKeyStroke;
 	newKeyStroke.code = keyCode;
 	newKeyStroke.state = state;
-	Sleep(globalDelayMSBetweenKeyEvents);
 	interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
 	OutputDebugStringW(std::wstring(L"\nkeyup: ").append(std::to_wstring(keyCode)).c_str());
 }
