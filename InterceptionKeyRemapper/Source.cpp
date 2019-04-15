@@ -6,6 +6,7 @@
 #include <sstream>
 #include <chrono>
 #include <shellapi.h>
+#include <vector>
 #include "resource.h"
 #include "brightness.h"
 #include "interception.h"
@@ -157,6 +158,11 @@ void sendCustomKeyUpEvent(DWORD keyCode, int state = 1) {
 void sendCustomKeyEvent(DWORD keyCode, int keyDownState = 0, int keyUpState = 1) {
 	sendCustomKeyDownEvent(keyCode, keyDownState);
 	sendCustomKeyUpEvent(keyCode, keyUpState);
+}
+
+std::wstring getStringKeyInfo(InterceptionKeyStroke keyStroke) {
+	std::wstring pressedStatus = isKeyDown(keyStroke) ? L"down" : L"up";
+	return std::to_wstring(keyStroke.code).append(L" ").append(pressedStatus);
 }
 
 bool isLCtrlAsLAlt = true;
@@ -730,75 +736,94 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 	return 0;
 }
 
-bool shouldKeyRelease = false;
-int handleKey(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		DWORD keyCode = keyStroke.code;
+struct CustomKeyCode {
+	DWORD keyCode;
+	int stateDown;
+	int stateUp;
 
-		if (isChromeActiveProcess()) {
-			if (keyCode == SC_F3) { // f3
-				sendCustomKeyDownEvent(SC_LCTRL);
-				sendCustomKeyDownEvent(SC_LSHIFT);
-				sendCustomKeyEvent(SC_TAB);
-				sendCustomKeyUpEvent(SC_LSHIFT);
-				sendCustomKeyUpEvent(SC_LCTRL);
-				return EVENT_HANDLED;
-			}
-			if (keyCode == SC_F4) { // f4
-				sendCustomKeyDownEvent(SC_LCTRL);
-				sendCustomKeyEvent(SC_TAB);
-				sendCustomKeyUpEvent(SC_LCTRL);
-				EVENT_HANDLED;
-			}
-			if (keyCode == SC_F5) { // F5
-				sendCustomKeyDownEvent(SC_LALT);
-				sendCustomKeyEvent(SC_M);
-				sendCustomKeyUpEvent(SC_LALT);
-				return EVENT_HANDLED;
-			}
-			if (keyCode == SC_F6) { // f6
-				sendCustomKeyDownEvent(SC_LALT);
-				sendCustomKeyEvent(SC_T);
-				sendCustomKeyUpEvent(SC_LALT);
-				return EVENT_HANDLED;
-			}
-		}
+	CustomKeyCode(DWORD cKeyCode, int cStateDown = 0, int cStateUp = 1) {
+		keyCode = cKeyCode;
+		stateDown = cStateDown;
+		stateUp = cStateUp;
+	}
+};
 
-		if (keyCode == SC_F10) {
-			sendCustomKeyEvent(SC_MUTE, 2, 3);
-			return EVENT_HANDLED;
+void sendCustomKeyEventsTakingIntoAccountPressedStatus(bool isKeyDown, std::vector<CustomKeyCode> keyCodes) {
+	int i = 0;
+	int length = keyCodes.size();
+	
+	if (isKeyDown) {
+		for (i = 0; i < length; i++) {
+			sendCustomKeyDownEvent(keyCodes[i].keyCode, keyCodes[i].stateDown);
 		}
-		if (keyCode == SC_F11) {
-			sendCustomKeyEvent(SC_VOLUMEDOWN, 2, 3);
-			return EVENT_HANDLED;
-		}
-		if (keyCode == SC_F12) {
-			sendCustomKeyEvent(SC_VOLUMEUP, 2, 3);
-			return EVENT_HANDLED;
-		}
-		if (keyCode == SC_F1) {
-			BrightnessHandler::Increment(-10);
-			return EVENT_HANDLED;
-		}
-		if (keyCode == SC_F2) {
-			BrightnessHandler::Increment(10);
-			return EVENT_HANDLED;
-		}
-
-		shouldKeyRelease = true;
-		sendCustomKeyDownEvent(keyCode);
-		OutputDebugString(L"\nhandledKeyDown");
-		return EVENT_HANDLED;
 	} else {
-		if (shouldKeyRelease) {
-			sendCustomKeyUpEvent(keyStroke.code);
-			shouldKeyRelease = false;
+		for (i = length - 1; i >= 0; i--) {
+			sendCustomKeyDownEvent(keyCodes[i].keyCode, keyCodes[i].stateUp);
 		}
-		//OutputDebugString(L"\nhandledKeyUp");
+	}
+}
+
+int handleKey(InterceptionKeyStroke keyStroke) {
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
+
+	if (isChromeActiveProcess()) {
+		if (keyCode == SC_F3) { // f3
+			sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, {
+				CustomKeyCode(SC_LCTRL),
+				CustomKeyCode(SC_LSHIFT),
+				CustomKeyCode(SC_TAB)
+			});
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_F4) { // f4
+			sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, {
+				CustomKeyCode(SC_LCTRL),
+				CustomKeyCode(SC_TAB)
+			});
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_F5) { // F5
+			sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, {
+				CustomKeyCode(SC_LALT),
+				CustomKeyCode(SC_M)
+			});
+			return EVENT_HANDLED;
+		}
+		if (keyCode == SC_F6) { // f6
+			sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, {
+				CustomKeyCode(SC_LALT),
+				CustomKeyCode(SC_T)
+			});
+			return EVENT_HANDLED;
+		}
+	}
+
+	if (keyCode == SC_F10) {
+		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_MUTE, 2, 3) });
+		return EVENT_HANDLED;
+	}
+	if (keyCode == SC_F11) {
+		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_VOLUMEDOWN, 2, 3) });
+		return EVENT_HANDLED;
+	}
+	if (keyCode == SC_F12) {
+		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_VOLUMEUP, 2, 3) });
+		return EVENT_HANDLED;
+	}
+	if (keyCode == SC_F1) {
+		BrightnessHandler::Increment(-10);
+		return EVENT_HANDLED;
+	}
+	if (keyCode == SC_F2) {
+		BrightnessHandler::Increment(10);
 		return EVENT_HANDLED;
 	}
 
-	return 0;
+	sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(keyCode) });
+	return EVENT_HANDLED;
 }
 
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {
@@ -950,6 +975,12 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 			interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
 			continue;
 		}
+
+		/*
+		OutputDebugString(getStringKeyInfo(keyStroke).append(L"\n").c_str());
+		interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
+		continue;
+		*/
 
 		bool isCurrentKeyDown = isKeyDown(keyStroke);
 		setKeyToKeyRemaps(keyStroke);
