@@ -757,6 +757,7 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 	}
 
 	if (isGitBashActiveProcess()) {
+		// TODO: lalt + a : select all
 		if (keyCode == SC_C) { // lalt + c : copy
 			if (isCurrentKeyDown) {
 				sendCustomKeyEvent(SC_NP0);
@@ -1019,19 +1020,25 @@ int handleKey(InterceptionKeyStroke keyStroke) {
 		return EVENT_HANDLED;
 	}
 	if (keyCode == SC_F11) {
-		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_VOLUMEDOWN, 2, 3) });
+		sendCustomKeyEvent(SC_VOLUMEDOWN, 2, 3);
+		sendCustomKeyEvent(SC_VOLUMEDOWN, 2, 3);
 		return EVENT_HANDLED;
 	}
 	if (keyCode == SC_F12) {
-		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_VOLUMEUP, 2, 3) });
+		sendCustomKeyEvent(SC_VOLUMEUP, 2, 3);
+		sendCustomKeyEvent(SC_VOLUMEUP, 2, 3);
 		return EVENT_HANDLED;
 	}
 	if (keyCode == SC_F1) {
-		BrightnessHandler::Increment(-10);
+		if (isCurrentKeyDown) {
+			BrightnessHandler::Increment(-10);
+		}
 		return EVENT_HANDLED;
 	}
 	if (keyCode == SC_F2) {
-		BrightnessHandler::Increment(10);
+		if (isCurrentKeyDown) {
+			BrightnessHandler::Increment(10);
+		}
 		return EVENT_HANDLED;
 	}
 
