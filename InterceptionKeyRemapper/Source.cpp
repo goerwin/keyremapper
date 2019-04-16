@@ -366,25 +366,28 @@ DWORD shiftLetterForVimMode = SC_S;
 bool isVimShiftKeyDown = false;
 bool isShiftLetterForVimModeKeyDown = false;
 int handleCapslockKey(InterceptionKeyStroke keyStroke) {
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
 	DWORD currentKeyCode = keyStroke.code;
 
-	if (isKeyDown(keyStroke)) {
-		if (!isCapslockKeyDown) {
-			return 0;
-		}
+	if (!isCapslockKeyDown) {
+		return 0;
+	}
 
-		bool isLCurrentKeyCode = currentKeyCode == SC_L;
-		bool isHCurrentKeyCode = currentKeyCode == SC_H;
-		bool isJCurrentKeyCode = currentKeyCode == SC_J;
-		bool isKCurrentKeyCode = currentKeyCode == SC_K;
+	bool isLCurrentKeyCode = currentKeyCode == SC_L;
+	bool isHCurrentKeyCode = currentKeyCode == SC_H;
+	bool isJCurrentKeyCode = currentKeyCode == SC_J;
+	bool isKCurrentKeyCode = currentKeyCode == SC_K;
 
+	if (isCurrentKeyDown) {
 		if (currentKeyCode == shiftLetterForVimMode) {
 			isShiftLetterForVimModeKeyDown = true;
 		}
 
 		isVimShiftKeyDown = isShiftKeyDown || isShiftLetterForVimModeKeyDown;
+	}
 
-		if (isLWinKeyDown) {
+	if (isLWinKeyDown) {
+		if (isCurrentKeyDown) {
 			// Here you are OUT of the Alt+Tab switcher
 			if (isVimShiftKeyDown) {
 				sendCustomKeyDownEvent(SC_LSHIFT);
@@ -399,9 +402,13 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyEvent(SC_RIGHT);
 				sendCustomKeyUpEvent(SC_LCTRL);
 			}
-		} else if (isLAltKeyDown && isLAltAsLCtrl) {
+			return EVENT_HANDLED;
+		}
+	}
+	
+	if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (isCurrentKeyDown) {
 			// Here you are OUT of the Alt+Tab switcher
-
 			if (isVimShiftKeyDown) { // caps + lalt + shift
 				sendCustomKeyDownEvent(SC_LSHIFT);
 			}
@@ -433,7 +440,12 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyUpEvent(SC_LCTRL);
 				pressDownLAltAsLCtrl();
 			}
-		} else if (isVimShiftKeyDown) {
+			return EVENT_HANDLED;
+		}
+	}
+	
+	if (isVimShiftKeyDown) {
+		if (isCurrentKeyDown) {
 			// Here you are OUT of the Alt+Tab switcher
 			sendCustomKeyDownEvent(SC_LSHIFT);
 
@@ -446,41 +458,64 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 			} else if (isKCurrentKeyCode) {
 				sendCustomKeyEvent(SC_UP);
 			}
-		} else if (isHCurrentKeyCode) {
+			return EVENT_HANDLED;
+		}
+	}
+	
+	if (isHCurrentKeyCode) {
+		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			sendCustomKeyEvent(SC_LEFT);
-		} else if (isLCurrentKeyCode) {
+		}
+		return EVENT_HANDLED;
+	} 
+	
+	if (isLCurrentKeyCode) {
+		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			sendCustomKeyEvent(SC_RIGHT);
-		} else if (isJCurrentKeyCode) {
+		}
+		return EVENT_HANDLED;
+	}
+	
+	if (isJCurrentKeyCode) {
+		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			sendCustomKeyEvent(SC_DOWN);
-		} else if (isKCurrentKeyCode) {
+		}
+		return EVENT_HANDLED;
+	}
+	
+	if (isKCurrentKeyCode) {
+		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			sendCustomKeyEvent(SC_UP);
-		} else if (currentKeyCode == SC_SPACE) {
+		}
+		return EVENT_HANDLED;
+	}
+	
+	if (currentKeyCode == SC_SPACE) {
+		if (isCurrentKeyDown) {
 			pressDownLAltAsLCtrl();
 			sendCustomKeyEvent(currentKeyCode);
 			pressUpLAlt();
 		}
-
-		OutputDebugString(L"\nhandledCapslockKeyDown");
 		return EVENT_HANDLED;
-	} else {
-		if (
-			isCapslockCurrentKeyCode(keyStroke) ||
-			(isCapslockKeyDown && currentKeyCode == shiftLetterForVimMode) ||
-			(isCapslockKeyDown && (isShiftCurrentKeyCode(keyStroke)))
-		) {
+	}
+
+	if (
+		isCapslockCurrentKeyCode(keyStroke) ||
+		(isCapslockKeyDown && currentKeyCode == shiftLetterForVimMode) ||
+		(isCapslockKeyDown && (isShiftCurrentKeyCode(keyStroke)))
+	) {
+		if (!isCurrentKeyDown) {
 			if (isVimShiftKeyDown) {
 				sendCustomKeyUpEvent(SC_LSHIFT);
 			}
 			isVimShiftKeyDown = false;
 			isShiftLetterForVimModeKeyDown = false;
-
-			OutputDebugString(L"\nhandledCapslockKeyUp");
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
 	}
 
 	return 0;
