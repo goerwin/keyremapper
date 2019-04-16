@@ -249,50 +249,41 @@ void handleAppCleanUp() {
 DWORD keyForClick = SC_C;
 bool isMouseClickDown;
 int handleSimulateMouseClick(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		DWORD keyCode = keyStroke.code;
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
 
-		if (!(isLWinKeyDown && keyCode == keyForClick)) {
-			return 0;
-		}
+	if (!(isLWinKeyDown && keyCode == keyForClick) && !isMouseClickDown) {
+		return 0;
+	}
 
-		if (isMouseClickDown) {
-			return EVENT_HANDLED;
-		}
+	if (keyCode == keyForClick) {
+		if (isCurrentKeyDown) {
+			if (!isMouseClickDown) {
+				isMouseClickDown = true;
 
-		isMouseClickDown = true;
-
-		if (isCapslockKeyDown) {
-			mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-		} else if (isShiftKeyDown) {
-			sendCustomKeyDownEvent(SC_LSHIFT);
-			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-		} else if (isLAltKeyDown) {
-			pressDownLAltAsLCtrl();
-			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				if (isCapslockKeyDown) {
+					mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+				} else if (isShiftKeyDown) {
+					sendCustomKeyDownEvent(SC_LSHIFT);
+					mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				} else if (isLAltKeyDown) {
+					pressDownLAltAsLCtrl();
+					mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				} else {
+					mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+				}
+			}
 		} else {
-			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+			if (isMouseClickDown) {
+				isMouseClickDown = false;
+
+				if (isCapslockKeyDown) {
+					mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+				} else {
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+				}
+			}
 		}
-
-		return EVENT_HANDLED;
-	} else {
-		if (!(isMouseClickDown && keyStroke.code == keyForClick)) {
-			return 0;
-		}
-
-		isMouseClickDown = false;
-
-		if (isCapslockKeyDown) {
-			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-		} else if (isShiftKeyDown) {
-			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-			//sendCustomKeyUpEvent(SC_LSHIFT);
-		} else if (isLAltKeyDown) {
-			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		} else {
-			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		}
-
 		return EVENT_HANDLED;
 	}
 
@@ -481,41 +472,45 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 }
 
 int handleLCtrlKey(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		if (!isLCtrlKeyDown) {
-			return 0;
-		}
+	if (!isLCtrlKeyDown) {
+		return 0;
+	}
 
-		DWORD keyCode = keyStroke.code;
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
 
-		if (keyCode == SC_LSHIFT) {
+	if (keyCode == SC_LSHIFT) { // LCtrl + Shift
+		if (isCurrentKeyDown) {
 			sendCustomKeyDownEvent(SC_LSHIFT);
-		} else if (keyCode == SC_TAB) {
+		} else {
+			sendCustomKeyUpEvent(SC_LSHIFT);
+		}
+		return EVENT_HANDLED;
+	}
+	
+	if (keyCode == SC_TAB) { // LCtrl + Tab
+		if (isCurrentKeyDown) {
 			pressDownLCtrlAsLCtrl();
 			sendCustomKeyEvent(SC_TAB);
-		} else if (keyCode != SC_LCTRL) {
+		}
+		return EVENT_HANDLED;
+	}
+	
+	if (keyCode != SC_LCTRL) { // LCtrl + letter
+		if (isCurrentKeyDown) {
 			pressDownLCtrlAsLAlt();
 			sendCustomKeyEvent(keyCode);
-		} else {
-			pressDownLCtrlAsLAlt();
 		}
-
-		OutputDebugString(L"\nhandledLCtrlKeyDown");
 		return EVENT_HANDLED;
-
-	} else {
-		if (isLCTrlCurrentKeyCode(keyStroke)) {
+	}
+	
+	if (isLCTrlCurrentKeyCode(keyStroke)) { // LCtrl
+		if (isCurrentKeyDown) {
+			pressDownLCtrlAsLAlt();
+		} else {
 			pressUpLCtrl();
-			OutputDebugString(L"\nhandledLCtrlKeyUp");
-			return EVENT_HANDLED;
-		} else if (isLCtrlKeyDown && isShiftCurrentKeyCode(keyStroke)) {
-			OutputDebugString(L"\nhandledLCtrlKeyUp");
-			sendCustomKeyUpEvent(SC_LSHIFT);
-			return EVENT_HANDLED;
-		} else if (isLCtrlKeyDown) {
-			OutputDebugString(L"\nhandledLCtrlKeyUp");
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
 	}
 
 	return 0;
@@ -594,9 +589,10 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			sendCustomKeyEvent(SC_LWIN, 2, 3);
 		}
+		return EVENT_HANDLED;
 	}
 
-	return EVENT_HANDLED;
+	return 0;
 }
 
 int handleLAltKey(InterceptionKeyStroke keyStroke) {
@@ -818,9 +814,10 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 		} else {
 			pressUpLAlt();
 		}
+		return EVENT_HANDLED;
 	}
 
-	return EVENT_HANDLED;
+	return 0;
 }
 
 int handleShiftKey(InterceptionKeyStroke keyStroke) {
@@ -833,11 +830,11 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 
 	if (keyCode == SC_LSHIFT) {
 		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_LSHIFT) });
-	} else {
-		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(keyCode) });
+		return EVENT_HANDLED;
 	}
-
+	
 	OutputDebugString(L"\nhandledLShiftKey");
+	sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(keyCode) });
 	return EVENT_HANDLED;
 }
 
