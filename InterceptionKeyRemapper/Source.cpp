@@ -1,6 +1,6 @@
 #ifndef UNICODE
 #define UNICODE
-#endif 
+#endif
 
 #include <windows.h>
 #include <sstream>
@@ -15,7 +15,7 @@
 
 enum ScanCodes {
 	SC_C = 0x2E,
-	SC_D = 0x20, 
+	SC_D = 0x20,
 	SC_E = 0x12,
 	SC_H = 0x23,
 	SC_J = 0x24,
@@ -205,9 +205,9 @@ void pressDownLCtrlAsLCtrl() {
 	sendCustomKeyDownEvent(SC_LCTRL);
 }
 void pressUpLCtrl() {
-	if (isLCtrlAsLAlt) { 
-		sendCustomKeyUpEvent(SC_LALT); 
-	} else { 
+	if (isLCtrlAsLAlt) {
+		sendCustomKeyUpEvent(SC_LALT);
+	} else {
 		sendCustomKeyUpEvent(SC_LCTRL);
 	}
 	isLCtrlAsLAlt = true;
@@ -229,10 +229,10 @@ void pressDownLAltAsLAlt() {
 	sendCustomKeyDownEvent(SC_LALT);
 }
 void pressUpLAlt() {
-	if (isLAltAsLCtrl) { 
-		sendCustomKeyUpEvent(SC_LCTRL); 
-	} else { 
-		sendCustomKeyUpEvent(SC_LALT); 
+	if (isLAltAsLCtrl) {
+		sendCustomKeyUpEvent(SC_LCTRL);
+	} else {
+		sendCustomKeyUpEvent(SC_LALT);
 	}
 	isLAltAsLCtrl = true;
 }
@@ -352,7 +352,7 @@ int handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
 			return EVENT_HANDLED;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -462,7 +462,7 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 		return EVENT_HANDLED;
 	} else {
 		if (
-			isCapslockCurrentKeyCode(keyStroke) || 
+			isCapslockCurrentKeyCode(keyStroke) ||
 			(isCapslockKeyDown && currentKeyCode == shiftLetterForVimMode) ||
 			(isCapslockKeyDown && (isShiftCurrentKeyCode(keyStroke)))
 		) {
@@ -536,7 +536,7 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyUpEvent(SC_LALT);
 				return EVENT_HANDLED;
 			}
-			
+
 			if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // win + 1/2/3/4
 				sendCustomKeyDownEvent(SC_LALT);
 				sendCustomKeyEvent(keyCode);
@@ -580,145 +580,232 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 			return EVENT_HANDLED;
 		}
 	}
-	
+
 	return 0;
 }
 
 int handleLAltKey(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		if (!isLAltKeyDown) {
-			return 0;
-		}
+	if (!isLAltKeyDown) {
+		return 0;
+	}
 
-		DWORD keyCode = keyStroke.code;
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
 
-		if (isChromeActiveProcess()) {
-			if (keyCode == SC_RETURN) { // alt + enter
+	if (isChromeActiveProcess()) {
+		if (keyCode == SC_RETURN) { // lalt + enter to alt + enter
+			if (isCurrentKeyDown) {
 				pressDownLAltAsLAlt();
 				sendCustomKeyDownEvent(keyCode);
+			} else {
+				sendCustomKeyUpEvent(keyCode);
 				pressDownLAltAsLCtrl();
-				return EVENT_HANDLED;
 			}
+			return EVENT_HANDLED;
+		}
 
-			if (keyCode == SC_H) { // alt + h
+		if (keyCode == SC_H) { // alt + h
+			if (isCurrentKeyDown) {
 				sendCustomKeyDownEvent(SC_LSHIFT);
-				sendCustomKeyEvent(SC_TAB);
+				sendCustomKeyDownEvent(SC_TAB);
+			} else {
 				sendCustomKeyUpEvent(SC_LSHIFT);
-				return EVENT_HANDLED;
 			}
-
-			if (keyCode == SC_L) { // alt + l
-				sendCustomKeyEvent(SC_TAB);
-				return EVENT_HANDLED;
-			}
-
-			if (keyCode == SC_SEMI) { // alt + ;
-				sendCustomKeyEvent(SC_L);
-				return EVENT_HANDLED;
-			}
+			return EVENT_HANDLED;
 		}
 
-		if (isStarcraft2ActiveProcess()) {
-			if (
-				keyCode == SC_F1 ||
-				keyCode == SC_F2 ||
-				keyCode == SC_F3 ||
-				keyCode == SC_F4
-			) {
+		if (keyCode == SC_L) { // alt + l
+			if (isCurrentKeyDown) {
+				sendCustomKeyDownEvent(SC_TAB);
+			} else {
+				sendCustomKeyUpEvent(SC_TAB);
+			}
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_SEMI) { // alt + ;
+			if (isCurrentKeyDown) {
+				sendCustomKeyDownEvent(SC_L);
+			} else {
+				sendCustomKeyUpEvent(SC_L);
+			}
+			return EVENT_HANDLED;
+		}
+	}
+
+	if (isStarcraft2ActiveProcess()) {
+		if (
+			keyCode == SC_F1 ||
+			keyCode == SC_F2 ||
+			keyCode == SC_F3 ||
+			keyCode == SC_F4
+		) {
+			if (isCurrentKeyDown) {
 				pressDownLAltAsLCtrl();
-				sendCustomKeyEvent(keyCode);
-				return EVENT_HANDLED;
+				sendCustomKeyDownEvent(keyCode);
+			} else {
+				sendCustomKeyUpEvent(keyCode);
 			}
+			return EVENT_HANDLED;
 		}
+	}
 
-		if (keyCode == SC_LSHIFT) {
+	if (keyCode == SC_LSHIFT) {
+		if (isCurrentKeyDown) {
 			sendCustomKeyDownEvent(SC_LSHIFT);
-		} else if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
-			sendCustomKeyEvent(SC_ESC);
+		} else {
+			sendCustomKeyUpEvent(SC_LSHIFT);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_ESC);
+		} else {
+			sendCustomKeyUpEvent(SC_ESC);
 			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_ESC) { // alt + esc
-			// DO NOTHING
-		} else if (keyCode == SC_Q && !isLAltAsLCtrl) { // alt + tab + q
-			sendCustomKeyEvent(SC_SUPR);
-		} else if (keyCode == SC_Q) { // alt + q
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_ESC) { // alt + esc
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_Q && !isLAltAsLCtrl) { // alt + tab + q
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_SUPR);
+		} else {
+			sendCustomKeyUpEvent(SC_SUPR);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_Q) { // alt + q
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			pressDownLAltAsLAlt();
-			sendCustomKeyEvent(SC_F4);
+			sendCustomKeyDownEvent(SC_F4);
+		} else {
+			sendCustomKeyUpEvent(SC_F4);
 			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_TAB) { // alt + tab
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_TAB) { // alt + tab
+		if (isCurrentKeyDown) {
 			pressDownLAltAsLAlt();
-			sendCustomKeyEvent(SC_TAB);
-		} else if (keyCode == SC_BACK) { // alt + backspace
+			sendCustomKeyDownEvent(SC_TAB);
+		} else {
+			sendCustomKeyUpEvent(SC_TAB);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_BACK) { // alt + backspace
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			sendCustomKeyDownEvent(SC_LSHIFT);
 			sendCustomKeyEvent(SC_HOME);
 			sendCustomKeyUpEvent(SC_LSHIFT);
 			sendCustomKeyEvent(SC_BACK);
 			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_J && isShiftKeyDown) { // alt + shift + j
-			pressUpLAlt();
-			sendCustomKeyDownEvent(SC_LSHIFT);
-			sendCustomKeyEvent(SC_NEXT);
-			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_K && isShiftKeyDown) { // alt + shift + k
-			pressUpLAlt();
-			sendCustomKeyDownEvent(SC_LSHIFT);
-			sendCustomKeyEvent(SC_PRIOR);
-			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_J) { // alt + j
-			pressUpLAlt();
-			sendCustomKeyEvent(SC_NEXT);
-			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_K) { // alt + k
-			pressUpLAlt();
-			sendCustomKeyEvent(SC_PRIOR);
-			pressDownLAltAsLCtrl();
-		} else if (keyCode == SC_SPACE) { // alt + espace
-			pressDownLAltAsLCtrl();
-			sendCustomKeyEvent(SC_F12);
-		} else if (
-			keyCode == SC_F1 || 
-			keyCode == SC_F2 ||
-			keyCode == SC_F3 ||
-			keyCode == SC_F4 ||
-			keyCode == SC_F5 ||
-			keyCode == SC_F6 ||
-			keyCode == SC_F7 ||
-			keyCode == SC_F8 ||
-			keyCode == SC_F9 ||
-			keyCode == SC_F10 ||
-			keyCode == SC_F11 ||
-			keyCode == SC_F12
-		) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
-			pressUpLAlt();
-			sendCustomKeyEvent(keyCode);
-		} else if (keyCode != SC_LALT && !isLAltAsLCtrl) { // alttabbed + letter
-			// DO NOTHING
-		} else if (keyCode != SC_LALT) { // alt + letter
-			pressDownLAltAsLCtrl();
-			sendCustomKeyEvent(keyCode);
-		} else {
-			pressDownLAltAsLCtrl(); // alt
 		}
-
-		OutputDebugString(L"\nhandledLAltKeyDown");
 		return EVENT_HANDLED;
-	} else {
-		if (isLAltCurrentKeyCode(keyStroke)) {
+	}
+
+	if (keyCode == SC_J && isShiftKeyDown) { // alt + shift + j
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
-			OutputDebugString(L"\nhandledLAltKeyUp");
-			return EVENT_HANDLED;
-		} else if (isLAltKeyDown && isShiftCurrentKeyCode(keyStroke)) {
-			OutputDebugString(L"\nhandledLAltKeyUp");
-			sendCustomKeyUpEvent(SC_LSHIFT);
-			return EVENT_HANDLED;
-		} else if (isLAltKeyDown) {
-			OutputDebugString(L"\nhandledLAltKeyUp");
-			return EVENT_HANDLED;
+			sendCustomKeyDownEvent(SC_LSHIFT);
+			sendCustomKeyEvent(SC_NEXT);
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_K && isShiftKeyDown) { // alt + shift + k
+		if (isCurrentKeyDown) {
+			pressUpLAlt();
+			sendCustomKeyDownEvent(SC_LSHIFT);
+			sendCustomKeyEvent(SC_PRIOR);
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_J) { // alt + j
+		if (isCurrentKeyDown) {
+			pressUpLAlt();
+			sendCustomKeyEvent(SC_NEXT);
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_K) { // alt + k
+		if (isCurrentKeyDown) {
+			pressUpLAlt();
+			sendCustomKeyEvent(SC_PRIOR);
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_SPACE) { // alt + espace
+		if (isCurrentKeyDown) {
+			pressDownLAltAsLCtrl();
+			sendCustomKeyDownEvent(SC_F12);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (
+		keyCode == SC_F1 ||
+		keyCode == SC_F2 ||
+		keyCode == SC_F3 ||
+		keyCode == SC_F4 ||
+		keyCode == SC_F5 ||
+		keyCode == SC_F6 ||
+		keyCode == SC_F7 ||
+		keyCode == SC_F8 ||
+		keyCode == SC_F9 ||
+		keyCode == SC_F10 ||
+		keyCode == SC_F11 ||
+		keyCode == SC_F12
+	) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
+		if (isCurrentKeyDown) {
+			pressUpLAlt();
+			sendCustomKeyDownEvent(keyCode);
+		} else {
+			sendCustomKeyUpEvent(keyCode);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode != SC_LALT && !isLAltAsLCtrl) { // alttabbed + letter
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode != SC_LALT) { // alt + letter
+		if (isCurrentKeyDown) {
+			pressDownLAltAsLCtrl();
+			sendCustomKeyEvent(keyCode);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (isLAltCurrentKeyCode(keyStroke)) {
+		if (isCurrentKeyDown) {
+			pressDownLAltAsLCtrl(); // alt
+		} else {
+			pressUpLAlt();
 		}
 	}
 
-	return 0;
+	return EVENT_HANDLED;
 }
 
 int handleShiftKey(InterceptionKeyStroke keyStroke) {
@@ -737,24 +824,6 @@ int handleShiftKey(InterceptionKeyStroke keyStroke) {
 
 	OutputDebugString(L"\nhandledLShiftKey");
 	return EVENT_HANDLED;
-
-	/* FOR SHIFT KEYUP
-	if (isShiftCurrentKeyCode(keyStroke)) {
-		// A shift keyup event is fired with a state 3 before the actual key released
-		// is released. That's why I'm making sure that the state is different of 3 
-		// in order to trigger the lshift properly
-		if (keyStroke.state != 3) {
-			sendCustomKeyUpEvent(SC_LSHIFT);
-		}
-		OutputDebugString(L"\nhandledLShiftKeyUp");
-		return EVENT_HANDLED;
-	} else if (isShiftKeyDown) {
-		if (keyStroke.state != 3) {
-			sendCustomKeyUpEvent(keyStroke.code);
-		}
-		OutputDebugString(L"\nhandledLShiftKeyUp");
-		return EVENT_HANDLED;
-	}*/
 }
 
 int handleKey(InterceptionKeyStroke keyStroke) {
@@ -901,7 +970,7 @@ HWND createWindow(HINSTANCE hInstance) {
 		WS_OVERLAPPEDWINDOW,            // Window style
 		// Size and position
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL,       // Parent window    
+		NULL,       // Parent window
 		NULL,       // Menu
 		hInstance,  // Instance handle
 		NULL        // Additional application data
@@ -960,9 +1029,9 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 	});
 
 	while (interception_receive(
-		context, 
-		device = interception_wait(context), 
-		(InterceptionStroke *)&keyStroke, 
+		context,
+		device = interception_wait(context),
+		(InterceptionStroke *)&keyStroke,
 		1
 	) > 0) {
 		if (!isAppEnabled) {
@@ -999,13 +1068,13 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 			}
 		}
 
-		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleLWinLAltKeys(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {} 
-		else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {} 
+		if (handleSimulateMouseClick(keyStroke) == EVENT_HANDLED) {}
+		else if (handleLWinLAltKeys(keyStroke) == EVENT_HANDLED) {}
+		else if (handleCapslockKey(keyStroke) == EVENT_HANDLED) {}
+		else if (handleLCtrlKey(keyStroke) == EVENT_HANDLED) {}
+		else if (handleLWinKey(keyStroke) == EVENT_HANDLED) {}
+		else if (handleLAltKey(keyStroke) == EVENT_HANDLED) {}
+		else if (handleShiftKey(keyStroke) == EVENT_HANDLED) {}
 		else if (handleKey(keyStroke) == EVENT_HANDLED) {}
 
 		if (!isCurrentKeyDown) {
@@ -1040,7 +1109,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 	}
 
 	handleSystemTrayIcon(hInstance, hWnd);
-	
+
 	// WINDOW CHANGE EVENT
 
 	windowHook = SetWinEventHook(
