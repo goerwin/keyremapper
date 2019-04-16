@@ -291,57 +291,72 @@ int handleSimulateMouseClick(InterceptionKeyStroke keyStroke) {
 }
 
 int handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		if (!(isLWinKeyDown && isLAltKeyDown)) {
-			return 0;
-		}
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
 
-		DWORD keyCode = keyStroke.code;
+	if (!(isLWinKeyDown && isLAltKeyDown)) {
+		return 0;
+	}
 
-		// NOTE: For this snapping windows function you have to disable
-		// the option "When I Snap a window, show what I can snap next to it"
-		// under "Multitasking" settings in control panel
-		if (keyCode == SC_K) { // win + alt + k
+	// NOTE: For this snapping windows function you have to disable
+	// the option "When I Snap a window, show what I can snap next to it"
+	// under "Multitasking" settings in control panel
+	if (keyCode == SC_K) { // win + alt + k
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			sendCustomKeyDownEvent(SC_LWIN, 2);
 			sendCustomKeyEvent(SC_UP);
 			sendCustomKeyUpEvent(SC_LWIN, 3);
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
+	}
 
-		if (keyCode == SC_J) { // win + alt + j
+	if (keyCode == SC_J) { // win + alt + j
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			sendCustomKeyDownEvent(SC_LWIN, 2);
 			sendCustomKeyEvent(SC_DOWN);
 			sendCustomKeyUpEvent(SC_LWIN, 3);
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
+	}
 
-		if (keyCode == SC_L) { // win + alt + l
+	if (keyCode == SC_L) { // win + alt + l
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			sendCustomKeyDownEvent(SC_LWIN, 2);
 			sendCustomKeyEvent(SC_RIGHT);
 			sendCustomKeyUpEvent(SC_LWIN, 3);
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
+	}
 
-		if (keyCode == SC_H) { // win + alt + h
+	if (keyCode == SC_H) { // win + alt + h
+		if (isCurrentKeyDown) {
 			pressUpLAlt();
 			sendCustomKeyDownEvent(SC_LWIN, 2);
 			sendCustomKeyEvent(SC_LEFT);
 			sendCustomKeyUpEvent(SC_LWIN, 3);
-			return EVENT_HANDLED;
 		}
-	} else {
-		if (isLWinKeyDown && isLAltCurrentKeyCode(keyStroke)) {
+		return EVENT_HANDLED;
+	}
+
+	if (isLAltCurrentKeyCode(keyStroke)) {
+		if (!isCurrentKeyDown) {
 			pressUpLAlt();
-			return EVENT_HANDLED;
-		} else if (isLAltKeyDown && isLWinCurrentKeyCode(keyStroke)) {
-			pressDownLAltAsLCtrl();
-			return EVENT_HANDLED;
-		} else if (isLWinKeyDown && isLAltKeyDown) {
-			return EVENT_HANDLED;
 		}
+		return EVENT_HANDLED;
+	}
+
+	if (isLWinCurrentKeyCode(keyStroke)) {
+		if (isCurrentKeyDown) {
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode) {
+		return EVENT_HANDLED;
 	}
 
 	return 0;
