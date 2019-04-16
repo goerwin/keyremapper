@@ -522,66 +522,81 @@ int handleLCtrlKey(InterceptionKeyStroke keyStroke) {
 }
 
 int handleLWinKey(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		if (!isLWinKeyDown) {
-			return 0;
-		}
+	if (!isLWinKeyDown) {
+		return 0;
+	}
 
-		DWORD keyCode = keyStroke.code;
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
 
-		if (isStarcraft2ActiveProcess()) {
-			if (keyCode == SC_X) {
+	if (isStarcraft2ActiveProcess()) {
+		if (keyCode == SC_X) { // lwin + x to alt + x
+			if (isCurrentKeyDown) {
 				sendCustomKeyDownEvent(SC_LALT);
 				sendCustomKeyEvent(SC_X);
 				sendCustomKeyUpEvent(SC_LALT);
-				return EVENT_HANDLED;
 			}
+			return EVENT_HANDLED;
+		}
 
-			if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // win + 1/2/3/4
+		if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // lwin + 1/2/3/4
+			if (isCurrentKeyDown) {
 				sendCustomKeyDownEvent(SC_LALT);
 				sendCustomKeyEvent(keyCode);
 				sendCustomKeyUpEvent(SC_LALT);
-				return EVENT_HANDLED;
 			}
-		}
-
-		if (keyCode == SC_H) { // win + h
-			sendCustomKeyDownEvent(SC_LALT);
-			sendCustomKeyEvent(SC_LEFT);
-			sendCustomKeyUpEvent(SC_LALT);
-			return EVENT_HANDLED;
-		}
-		if (keyCode == SC_L) { // win + l
-			sendCustomKeyDownEvent(SC_LALT);
-			sendCustomKeyEvent(SC_RIGHT);
-			sendCustomKeyUpEvent(SC_LALT);
-			return EVENT_HANDLED;
-		}
-
-		if (keyCode == SC_E) { // LWin + E
-			// TODO:
-		} else if (keyCode == SC_BACK) { // LWin + Backspace
-			sendCustomKeyDownEvent(SC_LCTRL);
-			sendCustomKeyEvent(keyCode);
-			sendCustomKeyUpEvent(SC_LCTRL);
-		} else if (keyCode == SC_D) { // LWin + D
-			sendCustomKeyDownEvent(SC_LWIN, 2);
-			sendCustomKeyEvent(keyCode);
-			sendCustomKeyUpEvent(SC_LWIN, 3);
-		} else if (keyCode == SC_SPACE) { // LWin + Space
-			sendCustomKeyEvent(SC_LWIN, 2, 3);
-		}
-
-		OutputDebugString(L"\nhandledLWinKeyDown");
-		return EVENT_HANDLED;
-	} else {
-		if (isLWinCurrentKeyCode(keyStroke)) {
-			OutputDebugString(L"\nhandledLWinKeyUp");
 			return EVENT_HANDLED;
 		}
 	}
 
-	return 0;
+	if (keyCode == SC_H) { // lwin + h
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_LALT);
+			sendCustomKeyEvent(SC_LEFT);
+			sendCustomKeyUpEvent(SC_LALT);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_L) { // lwin + l
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_LALT);
+			sendCustomKeyEvent(SC_RIGHT);
+			sendCustomKeyUpEvent(SC_LALT);
+		}
+		return EVENT_HANDLED;
+	}
+
+	// TODO: Probably to do a combo to for example, get accented keys
+	if (keyCode == SC_E) { // LWin + E
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_BACK) { // LWin + Backspace
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_LCTRL);
+			sendCustomKeyEvent(keyCode);
+			sendCustomKeyUpEvent(SC_LCTRL);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_D) { // LWin + D
+		if (isCurrentKeyDown) {
+			sendCustomKeyDownEvent(SC_LWIN, 2);
+			sendCustomKeyEvent(keyCode);
+			sendCustomKeyUpEvent(SC_LWIN, 3);
+		}
+		return EVENT_HANDLED;
+	}
+
+	if (keyCode == SC_SPACE) { // LWin + Space
+		if (isCurrentKeyDown) {
+			sendCustomKeyEvent(SC_LWIN, 2, 3);
+		}
+	}
+
+	return EVENT_HANDLED;
 }
 
 int handleLAltKey(InterceptionKeyStroke keyStroke) {
