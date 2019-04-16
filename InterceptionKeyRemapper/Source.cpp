@@ -98,6 +98,18 @@ bool isLCtrlKeyDown;
 bool isLWinKeyDown;
 bool isLAltKeyDown;
 
+struct CustomKeyCode {
+	DWORD keyCode;
+	int stateDown;
+	int stateUp;
+
+	CustomKeyCode(DWORD cKeyCode, int cStateDown = 0, int cStateUp = 1) {
+		keyCode = cKeyCode;
+		stateDown = cStateDown;
+		stateUp = cStateUp;
+	}
+};
+
 bool isChromeActiveProcess() {
 	return activeProcessName == "chrome.exe";
 }
@@ -156,6 +168,20 @@ void sendCustomKeyUpEvent(DWORD keyCode, int state = 1) {
 void sendCustomKeyEvent(DWORD keyCode, int keyDownState = 0, int keyUpState = 1) {
 	sendCustomKeyDownEvent(keyCode, keyDownState);
 	sendCustomKeyUpEvent(keyCode, keyUpState);
+}
+void sendCustomKeyEventsTakingIntoAccountPressedStatus(bool isKeyDown, std::vector<CustomKeyCode> keyCodes) {
+	int i = 0;
+	int length = keyCodes.size();
+
+	if (isKeyDown) {
+		for (i = 0; i < length; i++) {
+			sendCustomKeyDownEvent(keyCodes[i].keyCode, keyCodes[i].stateDown);
+		}
+	} else {
+		for (i = length - 1; i >= 0; i--) {
+			sendCustomKeyUpEvent(keyCodes[i].keyCode, keyCodes[i].stateUp);
+		}
+	}
 }
 
 std::wstring getStringKeyInfo(InterceptionKeyStroke keyStroke) {
@@ -696,69 +722,39 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 }
 
 int handleShiftKey(InterceptionKeyStroke keyStroke) {
-	if (isKeyDown(keyStroke)) {
-		if (!isShiftKeyDown) {
-			return 0;
+	bool isCurrentKeyDown = isKeyDown(keyStroke);
+	DWORD keyCode = keyStroke.code;
+
+	if (!isShiftKeyDown) {
+		return 0;
+	}
+
+	if (keyCode == SC_LSHIFT) {
+		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(SC_LSHIFT) });
+	} else {
+		sendCustomKeyEventsTakingIntoAccountPressedStatus(isCurrentKeyDown, { CustomKeyCode(keyCode) });
+	}
+
+	OutputDebugString(L"\nhandledLShiftKey");
+	return EVENT_HANDLED;
+
+	/* FOR SHIFT KEYUP
+	if (isShiftCurrentKeyCode(keyStroke)) {
+		// A shift keyup event is fired with a state 3 before the actual key released
+		// is released. That's why I'm making sure that the state is different of 3 
+		// in order to trigger the lshift properly
+		if (keyStroke.state != 3) {
+			sendCustomKeyUpEvent(SC_LSHIFT);
 		}
-
-		DWORD keyCode = keyStroke.code;
-
-		if (keyCode == SC_LSHIFT) {
-			sendCustomKeyDownEvent(SC_LSHIFT);
-		} else {
-			sendCustomKeyDownEvent(SC_LSHIFT);
-			sendCustomKeyDownEvent(keyCode);
-		}
-
-		OutputDebugString(L"\nhandledLShiftKeyDown");
+		OutputDebugString(L"\nhandledLShiftKeyUp");
 		return EVENT_HANDLED;
-	} else {
-		if (isShiftCurrentKeyCode(keyStroke)) {
-			// A shift keyup event is fired with a state 3 before the actual key released
-			// is released. That's why I'm making sure that the state is different of 3 
-			// in order to trigger the lshift properly
-			if (keyStroke.state != 3) {
-				sendCustomKeyUpEvent(SC_LSHIFT);
-			}
-			OutputDebugString(L"\nhandledLShiftKeyUp");
-			return EVENT_HANDLED;
-		} else if (isShiftKeyDown) {
-			if (keyStroke.state != 3) {
-				sendCustomKeyUpEvent(keyStroke.code);
-			}
-			OutputDebugString(L"\nhandledLShiftKeyUp");
-			return EVENT_HANDLED;
+	} else if (isShiftKeyDown) {
+		if (keyStroke.state != 3) {
+			sendCustomKeyUpEvent(keyStroke.code);
 		}
-	}
-
-	return 0;
-}
-
-struct CustomKeyCode {
-	DWORD keyCode;
-	int stateDown;
-	int stateUp;
-
-	CustomKeyCode(DWORD cKeyCode, int cStateDown = 0, int cStateUp = 1) {
-		keyCode = cKeyCode;
-		stateDown = cStateDown;
-		stateUp = cStateUp;
-	}
-};
-
-void sendCustomKeyEventsTakingIntoAccountPressedStatus(bool isKeyDown, std::vector<CustomKeyCode> keyCodes) {
-	int i = 0;
-	int length = keyCodes.size();
-	
-	if (isKeyDown) {
-		for (i = 0; i < length; i++) {
-			sendCustomKeyDownEvent(keyCodes[i].keyCode, keyCodes[i].stateDown);
-		}
-	} else {
-		for (i = length - 1; i >= 0; i--) {
-			sendCustomKeyDownEvent(keyCodes[i].keyCode, keyCodes[i].stateUp);
-		}
-	}
+		OutputDebugString(L"\nhandledLShiftKeyUp");
+		return EVENT_HANDLED;
+	}*/
 }
 
 int handleKey(InterceptionKeyStroke keyStroke) {
