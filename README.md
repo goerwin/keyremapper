@@ -87,17 +87,16 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - TODO:
 
 ## Issues
-- alt + c (click) in mechanical keyboard keeps repeating itself.
+- alt + c (click) in mechanical keyboard keeps repeating itself. (FIXED)
   It was because rapid a fire setting that was set to increase key repeat speed. (FIXED)
 - alt + tab, release tab, caps + h/l. Does not work properly (FIXED)
-- simulated drag then R_option + tab to switch tabs. Doesnt work
 - while in explorer, the lwin+lalt+c doesn't select multiple files/folders (FIXED)
 - alt + tab to `Git Bash` + C triggers a ^C command instead of just typing C (FIXED)
 - RAlt acting weird (having the value of LCtrl) (FIXED)
 - Caps + LAlt + v + enter = copy something from clipboard not working propery (FIXED)
-- drag a file with win + c and open alt + tab doesnt work
 - LWin + D weird behavior when pressed twice (FIXED)
-- ctrl + alt + supr, open the task manager, luego alt + tab no funciona
 - get a text selected, press down capslock, see how the selection is lost (FIXED)
 - how to handle multiple single key pressed? If you try to play games that rely on
-  keyup events, some of then may not never be released. Check https://www.retrogames.cz/play_910-SNES.php?language=EN for example
+  keyup events, some of then may not never be released. Check https://www.retrogames.cz/play_910-SNES.php?language=EN for example (FIXED)
+- lwin + c click does not work in Task Manager (You have to run the program with admin rights) (FIXED)
+- drag a file with win + c and open alt + tab doesnt work

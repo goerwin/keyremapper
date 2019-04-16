@@ -18,6 +18,7 @@ enum ScanCodes {
 	SC_D = 0x20,
 	SC_E = 0x12,
 	SC_H = 0x23,
+	SC_I = 0x17,
 	SC_J = 0x24,
 	SC_K = 0x25,
 	SC_L = 0x26,
@@ -26,9 +27,12 @@ enum ScanCodes {
 	SC_Q = 0x10,
 	SC_S = 0x1F,
 	SC_T = 0x14,
+	SC_U = 0x16,
 	SC_V = 0x2F,
+	SC_W = 0x11,
 	SC_X = 0x2D,
 	SC_Y = 0x15,
+	SC_Z = 0x2C,
 	SC_1 = 0x02,
 	SC_2 = 0x03,
 	SC_3 = 0x04,
@@ -66,6 +70,8 @@ enum ScanCodes {
 	SC_PRIOR = 0x49,
 	SC_NEXT = 0x51,
 	SC_SEMI = 0x27,
+	SC_NP0 = 0x52, // Insert
+	SC_MINUS = 0x0C,
 	SC_F1 = 0x3B,
 	SC_F2 = 0x3C,
 	SC_F3 = 0x3D,
@@ -119,6 +125,9 @@ bool isStarcraft2ActiveProcess() {
 }
 bool isSlackActiveProcess() {
 	return activeProcessName == "slack.exe";
+}
+bool isGitBashActiveProcess() {
+	return activeProcessName == "mintty.exe";
 }
 
 void setKeyToKeyRemaps(InterceptionKeyStroke &keyStroke) {
@@ -377,6 +386,17 @@ int handleCapslockKey(InterceptionKeyStroke keyStroke) {
 		return 0;
 	}
 
+	if (isGitBashActiveProcess()) {
+		if (currentKeyCode == SC_C && !isLAltKeyDown) { // capslock + c : ctrl + c : kill process
+			if (isCurrentKeyDown) {
+				pressDownLAltAsLCtrl();
+				sendCustomKeyEvent(SC_C);
+				pressUpLAlt();
+			}
+			return EVENT_HANDLED;
+		}
+	}
+
 	bool isLCurrentKeyCode = currentKeyCode == SC_L;
 	bool isHCurrentKeyCode = currentKeyCode == SC_H;
 	bool isJCurrentKeyCode = currentKeyCode == SC_J;
@@ -598,6 +618,17 @@ int handleLWinKey(InterceptionKeyStroke keyStroke) {
 		}
 	}
 
+	if (isGitBashActiveProcess()) {
+		if (keyCode == SC_BACK) { // lwin + backspace : delete from cursor to beginning of word
+			if (isCurrentKeyDown) {
+				pressDownLAltAsLCtrl();
+				sendCustomKeyEvent(SC_W);
+				pressUpLAlt();
+			}
+			return EVENT_HANDLED;
+		}
+	}
+
 	if (keyCode == SC_H) { // lwin + h
 		if (isCurrentKeyDown) {
 			sendCustomKeyDownEvent(SC_LALT);
@@ -719,8 +750,50 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 		if (keyCode == SC_P) {
 			if (isCurrentKeyDown) {
 				pressDownLAltAsLCtrl();
-				sendCustomKeyDownEvent(SC_K);
-				sendCustomKeyUpEvent(SC_K);
+				sendCustomKeyEvent(SC_K);
+			}
+			return EVENT_HANDLED;
+		}
+	}
+
+	if (isGitBashActiveProcess()) {
+		if (keyCode == SC_C) { // lalt + c : copy
+			if (isCurrentKeyDown) {
+				sendCustomKeyEvent(SC_NP0);
+			}
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_V) { // lalt + v : paste
+			if (isCurrentKeyDown) {
+				pressUpLAlt();
+				sendCustomKeyDownEvent(SC_LSHIFT);
+				sendCustomKeyEvent(SC_NP0);
+				sendCustomKeyUpEvent(SC_LSHIFT);
+				pressDownLAltAsLCtrl();
+			}
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_Z) { // lalt + z : undo
+			if (isCurrentKeyDown) {
+				sendCustomKeyDownEvent(SC_LSHIFT);
+				sendCustomKeyEvent(SC_MINUS);
+				sendCustomKeyUpEvent(SC_LSHIFT);
+			}
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_BACK) { // lalt + backspace : delete from cursor to beginning of line
+			if (isCurrentKeyDown) {
+				sendCustomKeyEvent(SC_U);
+			}
+			return EVENT_HANDLED;
+		}
+
+		if (keyCode == SC_I) { // lalt + i : Clear screen
+			if (isCurrentKeyDown) {
+				sendCustomKeyEvent(SC_L);
 			}
 			return EVENT_HANDLED;
 		}
