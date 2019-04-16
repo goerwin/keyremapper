@@ -22,6 +22,7 @@ enum ScanCodes {
 	SC_K = 0x25,
 	SC_L = 0x26,
 	SC_M = 0x32,
+	SC_P = 0x19,
 	SC_Q = 0x10,
 	SC_S = 0x1F,
 	SC_T = 0x14,
@@ -115,6 +116,9 @@ bool isChromeActiveProcess() {
 }
 bool isStarcraft2ActiveProcess() {
 	return activeProcessName == "SC2_x64.exe";
+}
+bool isSlackActiveProcess() {
+	return activeProcessName == "slack.exe";
 }
 
 void setKeyToKeyRemaps(InterceptionKeyStroke &keyStroke) {
@@ -706,6 +710,17 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 				sendCustomKeyDownEvent(keyCode);
 			} else {
 				sendCustomKeyUpEvent(keyCode);
+			}
+			return EVENT_HANDLED;
+		}
+	}
+
+	if (isSlackActiveProcess()) {
+		if (keyCode == SC_P) {
+			if (isCurrentKeyDown) {
+				pressDownLAltAsLCtrl();
+				sendCustomKeyDownEvent(SC_K);
+				sendCustomKeyUpEvent(SC_K);
 			}
 			return EVENT_HANDLED;
 		}
