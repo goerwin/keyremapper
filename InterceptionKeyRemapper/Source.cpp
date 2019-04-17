@@ -72,6 +72,7 @@ enum ScanCodes {
 	SC_SEMI = 0x27,
 	SC_NP0 = 0x52, // Insert
 	SC_MINUS = 0x0C,
+	SC_GRAVE = 0x29, // accent `
 	SC_F1 = 0x3B,
 	SC_F2 = 0x3C,
 	SC_F3 = 0x3D,
@@ -798,6 +799,15 @@ int handleLAltKey(InterceptionKeyStroke keyStroke) {
 			}
 			return EVENT_HANDLED;
 		}
+	}
+
+	if (keyCode == SC_GRAVE) { // lalt + ` to alt + enter
+		if (isCurrentKeyDown) {
+			pressDownLAltAsLAlt();
+			sendCustomKeyEvent(keyCode);
+			pressDownLAltAsLCtrl();
+		}
+		return EVENT_HANDLED;
 	}
 
 	if (keyCode == SC_LSHIFT) {

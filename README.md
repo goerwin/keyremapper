@@ -100,3 +100,4 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
   keyup events, some of then may not never be released. Check https://www.retrogames.cz/play_910-SNES.php?language=EN for example (FIXED)
 - lwin + c click does not work in Task Manager (You have to run the program with admin rights) (FIXED)
 - drag a file with win + c and open alt + tab doesnt work
+- in chrome, lalt↓ + `↕ + L↕  opens tab switcher (FIXED)
