@@ -9,6 +9,7 @@
 #include <vector>
 #include "resource.h"
 #include "interception.h"
+#include "brightness.h"
 #include "utils.h"
 #include "erwinUtils.h"
 #include "KeyEvent.h"
@@ -47,6 +48,10 @@ void sendKeyEvents(std::vector<Key> keyEvents) {
 			} else {
 				mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
 			}
+		} else if (keyCode == SC_BRIGHTNESSDOWN) {
+			BrightnessHandler::Increment(-10);
+		} else if (keyCode == SC_BRIGHTNESSUP) {
+			BrightnessHandler::Increment(10);
 		} else if (keyCode != SC_NULL) {
 			interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
 		}
@@ -190,9 +195,9 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 
 	auto capslockClick = ErwinUtils::KeyClick<void(int)>(SC_CAPSLOCK, [](int consecutiveClicks) {
 		if (consecutiveClicks == 1) {
-			if (isLAltKeyDown && !isLAltAsLCtrl) { // altTabbed + esc
+			if (g_isLAltKeyDown && !g_isLAltAsLCtrl) { // altTabbed + esc
 				sendKeyEvents(concatKeyVectors({ KeyDown(SC_ESC), KeyUp(SC_ESC) }, keyDownLAltAsLCtrl()));
-			} else if (isLAltKeyDown) { // alt + esc
+			} else if (g_isLAltKeyDown) { // alt + esc
 				// DO NOTHING
 			} else {
 				sendKeyEvents({ KeyDown(SC_ESC), KeyUp(SC_ESC) });

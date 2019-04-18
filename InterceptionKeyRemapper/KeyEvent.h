@@ -3,14 +3,14 @@
 #include <windows.h>
 #include <vector>
 
-extern bool isCapslockKeyDown;
-extern bool isShiftKeyDown;
-extern bool isLCtrlKeyDown;
-extern bool isLWinKeyDown;
-extern bool isLAltKeyDown;
+extern bool g_isCapslockKeyDown;
+extern bool g_isShiftKeyDown;
+extern bool g_isLCtrlKeyDown;
+extern bool g_isLWinKeyDown;
+extern bool g_isLAltKeyDown;
 
-extern bool isLCtrlAsLAlt;
-extern bool isLAltAsLCtrl;
+extern bool g_isLCtrlAsLAlt;
+extern bool g_isLAltAsLCtrl;
 
 enum ScanCodes {
 	SC_C = 0x2E,
@@ -87,7 +87,9 @@ enum ScanCodes {
 	// Custom ScanCodes. Hope no keyboard ever sends this.
 	SC_NULL = 0xF0,
 	SC_MOUSELEFT = 0xF1,
-	SC_MOUSERIGHT = 0xF2
+	SC_MOUSERIGHT = 0xF2,
+	SC_BRIGHTNESSDOWN = 0xF3,
+	SC_BRIGHTNESSUP = 0xF4
 };
 
 struct Key {
@@ -110,7 +112,7 @@ struct KeyUp : Key {
 	KeyUp(DWORD cKeyCode, int cState = 1) : Key(cKeyCode, cState) {}
 };
 
-extern std::vector<Key> nullKeyEvent;
+extern Key g_nullKeyEvent;
 
 std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes);
 
@@ -132,3 +134,4 @@ std::vector<Key> keyUpLCtrl();
 std::vector<Key> keyDownLAltAsLCtrl();
 std::vector<Key> keyDownLAltAsLAlt();
 std::vector<Key> keyUpLAlt();
+void setGlobalDefaultValues();

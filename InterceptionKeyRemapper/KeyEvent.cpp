@@ -4,32 +4,35 @@
 
 #include <vector>
 #include "interception.h"
-#include "brightness.h"
 #include "KeyEvent.h"
 
-std::string activeProcessName;
-std::vector<Key> nullKeyEvent = { KeyUp(SC_NULL) };
+std::string g_activeProcessName;
 
-bool isCapslockKeyDown;
-bool isShiftKeyDown;
-bool isLCtrlKeyDown;
-bool isLWinKeyDown;
-bool isLAltKeyDown;
+bool g_isCapslockKeyDown;
+bool g_isShiftKeyDown;
+bool g_isLCtrlKeyDown;
+bool g_isLWinKeyDown;
+bool g_isLAltKeyDown;
 
-bool isLCtrlAsLAlt = true;
-bool isLAltAsLCtrl = true;
+bool g_isLCtrlAsLAlt;
+bool g_isLAltAsLCtrl;
+
+bool g_isMouseClickDown;
+bool g_isVimShiftKeyDown;
+
+Key g_nullKeyEvent = KeyUp(SC_NULL);
 
 bool isChromeActiveProcess() {
-	return activeProcessName == "chrome.exe";
+	return g_activeProcessName == "chrome.exe";
 }
 bool isStarcraft2ActiveProcess() {
-	return activeProcessName == "SC2_x64.exe";
+	return g_activeProcessName == "SC2_x64.exe";
 }
 bool isSlackActiveProcess() {
-	return activeProcessName == "slack.exe";
+	return g_activeProcessName == "slack.exe";
 }
 bool isGitBashActiveProcess() {
-	return activeProcessName == "mintty.exe";
+	return g_activeProcessName == "mintty.exe";
 }
 
 std::vector<Key> concatKeyVectors(
@@ -67,83 +70,82 @@ bool isKeyDown(InterceptionKeyStroke keyStroke) {
 std::vector<Key> keyDownLCtrlAsLAlt() {
 	std::vector<Key> keys;
 
-	if (!isLCtrlAsLAlt && isLCtrlKeyDown) {
+	if (!g_isLCtrlAsLAlt && g_isLCtrlKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	isLCtrlAsLAlt = true;
+	g_isLCtrlAsLAlt = true;
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
 std::vector<Key> keyDownLCtrlAsLCtrl() {
 	std::vector<Key> keys;
 
-	if (isLCtrlAsLAlt && isLCtrlKeyDown) {
+	if (g_isLCtrlAsLAlt && g_isLCtrlKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
-	isLCtrlAsLAlt = false;
+	g_isLCtrlAsLAlt = false;
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
 std::vector<Key> keyUpLCtrl() {
 	std::vector<Key> keys;
 
-	if (isLCtrlAsLAlt) {
+	if (g_isLCtrlAsLAlt) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	} else {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	isLCtrlAsLAlt = true;
+	g_isLCtrlAsLAlt = true;
 	return keys;
 }
 
 std::vector<Key> keyDownLAltAsLCtrl() {
 	std::vector<Key> keys;
 
-	if (!isLAltAsLCtrl && isLAltKeyDown) {
+	if (!g_isLAltAsLCtrl && g_isLAltKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
-	isLAltAsLCtrl = true;
+	g_isLAltAsLCtrl = true;
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
 std::vector<Key> keyDownLAltAsLAlt() {
 	std::vector<Key> keys;
 
-	if (isLAltAsLCtrl && isLAltKeyDown) {
+	if (g_isLAltAsLCtrl && g_isLAltKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	isLAltAsLCtrl = false;
+	g_isLAltAsLCtrl = false;
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
 std::vector<Key> keyUpLAlt() {
 	std::vector<Key> keys;
 
-	if (isLAltAsLCtrl) {
+	if (g_isLAltAsLCtrl) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	} else {
 		keys.insert(keys.end(), { KeyUp(SC_LALT) });
 	}
 
-	isLAltAsLCtrl = true;
+	g_isLAltAsLCtrl = true;
 	return keys;
 }
 
-bool isMouseClickDown;
 std::vector<Key> handleSimulateMouseClick(InterceptionKeyStroke keyStroke) {
 	bool isCurrentKeyDown = isKeyDown(keyStroke);
 	DWORD keyCode = keyStroke.code;
 
 	if (
-		!(isLWinKeyDown && keyCode == SC_C) &&
-		!(isLWinKeyDown && keyCode == SC_LSHIFT) &&
-		!(isLWinKeyDown && keyCode == SC_LALT) &&
-		!isMouseClickDown
+		!(g_isLWinKeyDown && keyCode == SC_C) &&
+		!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
+		!(g_isLWinKeyDown && keyCode == SC_LALT) &&
+		!g_isMouseClickDown
 		) {
 		return {};
 	}
@@ -163,26 +165,26 @@ std::vector<Key> handleSimulateMouseClick(InterceptionKeyStroke keyStroke) {
 	}
 
 	if (keyCode == SC_C) {
-		if (isCapslockKeyDown) {
+		if (g_isCapslockKeyDown) {
 			if (isCurrentKeyDown) {
-				if (!isMouseClickDown) {
-					isMouseClickDown = true;
+				if (!g_isMouseClickDown) {
+					g_isMouseClickDown = true;
 					return { KeyDown(SC_MOUSERIGHT) };
 				}
-				return nullKeyEvent;
+				return { g_nullKeyEvent };
 			}
-			isMouseClickDown = false;
+			g_isMouseClickDown = false;
 			return { KeyUp(SC_MOUSERIGHT) };
 		}
 
 		if (isCurrentKeyDown) {
-			if (!isMouseClickDown) {
-				isMouseClickDown = true;
+			if (!g_isMouseClickDown) {
+				g_isMouseClickDown = true;
 				return { KeyDown(SC_MOUSELEFT) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
-		isMouseClickDown = false;
+		g_isMouseClickDown = false;
 		return { KeyUp(SC_MOUSELEFT) };
 	}
 
@@ -193,7 +195,7 @@ std::vector<Key> handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
 	bool isCurrentKeyDown = isKeyDown(keyStroke);
 	DWORD keyCode = keyStroke.code;
 
-	if (!(isLWinKeyDown && isLAltKeyDown)) {
+	if (!(g_isLWinKeyDown && g_isLAltKeyDown)) {
 		return {};
 	}
 
@@ -206,7 +208,7 @@ std::vector<Key> handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
 				KeyUp(SC_LWIN, 3)
 				});
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_J) { // win + alt + j
@@ -218,51 +220,50 @@ std::vector<Key> handleLWinLAltKeys(InterceptionKeyStroke keyStroke) {
 				KeyUp(SC_LWIN, 3)
 				});
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_L) { // win + alt + l
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LWIN, 3) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_H) { // win + alt + h
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LWIN, 3) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_LALT) {
 		if (isCurrentKeyDown) {
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 		return keyUpLAlt();
 	}
 
 	if (keyCode == SC_LCTRL) {
 		if (isCurrentKeyDown) {
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 		return keyDownLAltAsLCtrl();
 	}
 
-	return nullKeyEvent;
+	return { g_nullKeyEvent };
 }
 
-bool isVimShiftKeyDown = false;
 std::vector<Key> handleCapslockKey(InterceptionKeyStroke keyStroke) {
 	bool isCurrentKeyDown = isKeyDown(keyStroke);
 	DWORD currentKeyCode = keyStroke.code;
 
-	if (!isCapslockKeyDown) {
+	if (!g_isCapslockKeyDown) {
 		return {};
 	}
 
 	if (isGitBashActiveProcess()) {
-		if (currentKeyCode == SC_C && !isLAltKeyDown) { // capslock + c : ctrl + c : kill process
+		if (currentKeyCode == SC_C && !g_isLAltKeyDown) { // capslock + c : ctrl + c : kill process
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(
 					keyDownLAltAsLCtrl(),
@@ -270,29 +271,29 @@ std::vector<Key> handleCapslockKey(InterceptionKeyStroke keyStroke) {
 					keyUpLAlt()
 				);
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
 	if (currentKeyCode == SC_CAPSLOCK || currentKeyCode == SC_LSHIFT || currentKeyCode == SC_S) {
 		if (isCurrentKeyDown) {
 			if (currentKeyCode == SC_LSHIFT || currentKeyCode == SC_S) {
-				isVimShiftKeyDown = true;
+				g_isVimShiftKeyDown = true;
 				return { KeyDown(SC_LSHIFT) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
-		if (isVimShiftKeyDown) {
-			isVimShiftKeyDown = false;
+		if (g_isVimShiftKeyDown) {
+			g_isVimShiftKeyDown = false;
 			return { KeyUp(SC_LSHIFT) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_LALT) {
 		if (isCurrentKeyDown) {
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 		return keyUpLAlt();
 	}
@@ -301,103 +302,103 @@ std::vector<Key> handleCapslockKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LCTRL), KeyDown(SC_TAB), KeyUp(SC_TAB), KeyUp(SC_LCTRL) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_SPACE) {
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(currentKeyCode), KeyUp(currentKeyCode) }, keyUpLAlt());
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_H) {
-		if (isLWinKeyDown) {
+		if (g_isLWinKeyDown) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LCTRL) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
-		if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_HOME), KeyUp(SC_HOME) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LEFT), KeyUp(SC_LEFT) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_L) {
-		if (isLWinKeyDown) {
+		if (g_isLWinKeyDown) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LCTRL) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
-		if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_END), KeyUp(SC_END) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_RIGHT), KeyUp(SC_RIGHT) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_J) {
-		if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), KeyDown(SC_END), KeyUp(SC_END), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			return { KeyDown(SC_DOWN), KeyUp(SC_DOWN) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_K) {
-		if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), KeyDown(SC_HOME), KeyUp(SC_HOME), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (isCurrentKeyDown) {
 			// Here you MAY in the Alt+Tab switcher
 			return { KeyDown(SC_UP), KeyUp(SC_UP) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (currentKeyCode == SC_V) {
-		if (isLAltKeyDown && isLAltAsLCtrl) {
+		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
 			if (isCurrentKeyDown) { // caps + lalt + V
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_V), KeyUp(SC_V), KeyUp(SC_LWIN, 3) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
-	return nullKeyEvent;
+	return { g_nullKeyEvent };
 }
 
 std::vector<Key> handleLCtrlKey(InterceptionKeyStroke keyStroke) {
-	if (!isLCtrlKeyDown) {
+	if (!g_isLCtrlKeyDown) {
 		return {};
 	}
 
@@ -415,14 +416,14 @@ std::vector<Key> handleLCtrlKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLCtrlAsLCtrl(), { KeyDown(SC_TAB), KeyUp(SC_TAB) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode != SC_LCTRL) { // LCtrl + letter
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLCtrlAsLAlt(), { KeyDown(keyCode), KeyUp(keyCode) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_LCTRL) { // LCtrl
@@ -436,7 +437,7 @@ std::vector<Key> handleLCtrlKey(InterceptionKeyStroke keyStroke) {
 }
 
 std::vector<Key> handleLWinKey(InterceptionKeyStroke keyStroke) {
-	if (!isLWinKeyDown) {
+	if (!g_isLWinKeyDown) {
 		return {};
 	}
 
@@ -448,14 +449,14 @@ std::vector<Key> handleLWinKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(SC_X), KeyUp(SC_X), KeyUp(SC_LALT) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // lwin + 1/2/3/4
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LALT) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -464,7 +465,7 @@ std::vector<Key> handleLWinKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_W), KeyUp(SC_W) }, keyUpLAlt());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -472,47 +473,47 @@ std::vector<Key> handleLWinKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LALT), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LALT) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_L) { // lwin + l
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LALT), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LALT) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	// TODO: Probably to do a combo to for example, get accented keys
 	if (keyCode == SC_E) { // LWin + E
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_BACK) { // LWin + Backspace
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LCTRL), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LCTRL) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_D) { // LWin + D
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LWIN, 2), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LWIN, 3) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_SPACE) { // LWin + Space
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LWIN, 2), KeyUp(SC_LWIN, 3) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
-	return nullKeyEvent;
+	return { g_nullKeyEvent };
 }
 
 std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
-	if (!isLAltKeyDown) {
+	if (!g_isLAltKeyDown) {
 		return {};
 	}
 
@@ -524,7 +525,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_RETURN), KeyUp(SC_RETURN) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_H) { // alt + h
@@ -538,14 +539,14 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_TAB), KeyUp(SC_TAB) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_SEMI) { // alt + ;
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_L), KeyUp(SC_L) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -559,7 +560,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(keyCode), KeyUp(keyCode) });
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -568,7 +569,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_K), KeyUp(SC_K) });
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -578,35 +579,35 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_NP0), KeyUp(SC_NP0) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_V) { // lalt + v : paste
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_NP0), KeyUp(SC_NP0), KeyUp(SC_LSHIFT) }, keyDownLAltAsLCtrl());
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_Z) { // lalt + z : undo
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LSHIFT), KeyDown(SC_MINUS), KeyDown(SC_MINUS), KeyUp(SC_LSHIFT) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_BACK) { // lalt + backspace : delete from cursor to beginning of line
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_U), KeyUp(SC_U) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 
 		if (keyCode == SC_I) { // lalt + i : Clear screen
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_L), KeyUp(SC_L) };
 			}
-			return nullKeyEvent;
+			return { g_nullKeyEvent };
 		}
 	}
 
@@ -621,10 +622,10 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_GRAVE), KeyUp(SC_GRAVE) }, keyDownLAltAsLCtrl());
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
-	if (keyCode == SC_ESC && !isLAltAsLCtrl) { // alttabbed + esc
+	if (keyCode == SC_ESC && !g_isLAltAsLCtrl) { // alttabbed + esc
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_ESC), KeyUp(SC_ESC) };
 		}
@@ -632,21 +633,21 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 	}
 
 	if (keyCode == SC_ESC) { // alt + esc
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
-	if (keyCode == SC_Q && !isLAltAsLCtrl) { // alt + tab + q
+	if (keyCode == SC_Q && !g_isLAltAsLCtrl) { // alt + tab + q
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_SUPR), KeyUp(SC_SUPR) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_Q) { // alt + q
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), keyDownLAltAsLAlt(), { KeyDown(SC_F4), KeyUp(SC_F4) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_TAB) { // alt + tab
@@ -664,42 +665,44 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 				keyDownLAltAsLCtrl()
 			);
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
+	/*
 	if (keyCode == SC_J && isShiftKeyDown) { // alt + shift + j
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_NEXT), KeyUp(SC_NEXT) }, keyDownLAltAsLCtrl());
 		}
-		return nullKeyEvent;
+		return { nullKeyEvent };
 	}
 
 	if (keyCode == SC_K && isShiftKeyDown) { // alt + shift + k
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_PRIOR), KeyUp(SC_PRIOR) }, keyDownLAltAsLCtrl());
 		}
-		return nullKeyEvent;
+		return { nullKeyEvent };
 	}
+	*/
 
 	if (keyCode == SC_J) { // alt + j
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_NEXT), KeyUp(SC_NEXT) }, keyDownLAltAsLCtrl());
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_K) { // alt + k
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_PRIOR), KeyUp(SC_PRIOR) }, keyDownLAltAsLCtrl());
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_SPACE) { // alt + espace
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_F12), KeyUp(SC_F12) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (
@@ -719,18 +722,18 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyUpLAlt(), { KeyDown(keyCode), KeyUp(keyCode) });
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
-	if (keyCode != SC_LALT && !isLAltAsLCtrl) { // alttabbed + letter
-		return nullKeyEvent;
+	if (keyCode != SC_LALT && !g_isLAltAsLCtrl) { // alttabbed + letter
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode != SC_LALT) { // alt + letter
 		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(keyCode), KeyUp(keyCode) });
+			return { KeyDown(keyCode), KeyUp(keyCode) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_LALT) { // lalt
@@ -747,7 +750,7 @@ std::vector<Key> handleShiftKey(InterceptionKeyStroke keyStroke) {
 	bool isCurrentKeyDown = isKeyDown(keyStroke);
 	DWORD keyCode = keyStroke.code;
 
-	if (!isShiftKeyDown) {
+	if (!g_isShiftKeyDown) {
 		return {};
 	}
 
@@ -771,43 +774,43 @@ std::vector<Key> handleKey(InterceptionKeyStroke keyStroke) {
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), KeyDown(SC_TAB) };
 			}
-			return { KeyUp(SC_LCTRL), KeyUp(SC_LSHIFT), KeyUp(SC_TAB) };
+			return { KeyUp(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) };
 		}
 
 		if (keyCode == SC_F4) { // f4
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_TAB) };
 			}
-			return { KeyUp(SC_LCTRL), KeyUp(SC_TAB) };
+			return { KeyUp(SC_TAB), KeyUp(SC_LCTRL) };
 		}
 
 		if (keyCode == SC_F5) { // F5
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(SC_M) };
 			}
-			return { KeyUp(SC_LALT), KeyUp(SC_M) };
+			return { KeyUp(SC_M), KeyUp(SC_LALT) };
 		}
 
 		if (keyCode == SC_F6) { // f6
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(SC_T) };
 			}
-			return { KeyUp(SC_LALT), KeyUp(SC_T) };
+			return { KeyUp(SC_T), KeyUp(SC_LALT) };
 		}
 	}
 
 	if (keyCode == SC_F1) { // f1
 		if (isCurrentKeyDown) {
-			BrightnessHandler::Increment(-10);
-		} 
-		return nullKeyEvent;
+			return { KeyDown(SC_BRIGHTNESSDOWN) };
+		}
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_F2) { // f2
 		if (isCurrentKeyDown) {
-			BrightnessHandler::Increment(10);
+			return { KeyDown(SC_BRIGHTNESSUP) };
 		}
-		return nullKeyEvent;
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_F10) { // f10
@@ -862,38 +865,38 @@ std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes) {
 
 		if (isCurrentKeyDown) {
 			if (keyCode == SC_CAPSLOCK) {
-				isCapslockKeyDown = true;
+				g_isCapslockKeyDown = true;
 			} else if (keyCode == SC_LSHIFT) {
-				isShiftKeyDown = true;
+				g_isShiftKeyDown = true;
 			} else if (keyCode == SC_LCTRL) {
-				isLCtrlKeyDown = true;
+				g_isLCtrlKeyDown = true;
 			} else if (keyCode == SC_LWIN) {
-				isLWinKeyDown = true;
+				g_isLWinKeyDown = true;
 			} else if (keyCode == SC_LALT) {
-				isLAltKeyDown = true;
+				g_isLAltKeyDown = true;
 			}
 		}
 
-		if (keyEvents = handleSimulateMouseClick(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
+		if (keyEvents = handleSimulateMouseClick(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleLWinLAltKeys(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleCapslockKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
-		else if (keyEvents = handleLCtrlKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
-		else if (keyEvents = handleLWinKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
-		else if (keyEvents = handleLAltKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
-		else if (keyEvents = handleShiftKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {} 
+		else if (keyEvents = handleCapslockKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		else if (keyEvents = handleLCtrlKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		else if (keyEvents = handleLWinKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		else if (keyEvents = handleLAltKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		else if (keyEvents = handleShiftKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleKey(keyStroke), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 
 		if (!isCurrentKeyDown) {
 			if (keyCode == SC_CAPSLOCK) {
-				isCapslockKeyDown = false;
+				g_isCapslockKeyDown = false;
 			} else if (keyCode == SC_LSHIFT) {
-				isShiftKeyDown = false;
+				g_isShiftKeyDown = false;
 			} else if (keyCode == SC_LCTRL) {
-				isLCtrlKeyDown = false;
+				g_isLCtrlKeyDown = false;
 			} else if (keyCode == SC_LWIN) {
-				isLWinKeyDown = false;
+				g_isLWinKeyDown = false;
 			} else if (keyCode == SC_LALT) {
-				isLAltKeyDown = false;
+				g_isLAltKeyDown = false;
 			}
 		}
 
@@ -904,6 +907,21 @@ std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes) {
 }
 
 void setActiveProcessName(std::string _activeProcessName) {
-	activeProcessName = _activeProcessName;
-	OutputDebugStringA(activeProcessName.c_str());
+	g_activeProcessName = _activeProcessName;
+	OutputDebugStringA(g_activeProcessName.c_str());
+}
+
+void setGlobalDefaultValues() {
+	g_isCapslockKeyDown = false;
+	g_isShiftKeyDown = false;
+	g_isLCtrlKeyDown = false;
+	g_isLWinKeyDown = false;
+	g_isLAltKeyDown = false;
+
+	g_isLCtrlAsLAlt = true;
+	g_isLAltAsLCtrl = true;
+
+	g_isMouseClickDown = false;
+	g_isVimShiftKeyDown = false;
+	g_activeProcessName = "";
 }
