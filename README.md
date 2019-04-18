@@ -2,7 +2,8 @@
 Powerful Key Remapper for windows using (interception)[https://github.com/oblitum/Interception] library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
 
 ## Requirements
--
+- For this snapping windows function you have to disable the option "When I Snap a window, show what I can snap next to it", under "Multitasking" settings in control panel
+- Remove ctrl + shift shortcut to change keyboard layouts: Settings -> Language -> Spelling, typing & keyboard settings -> Advanced keyboard settings -> Language bar options -> Advanced Key Settings -> Action: Between Input Languages -> Change Key Secuence -> Not Asigned
 
 ## LWin + LAlt
 - LWin + LAlt + H/J/K/L = LWin + arrowKeys
@@ -101,3 +102,5 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - lwin + c click does not work in Task Manager (You have to run the program with admin rights) (FIXED)
 - drag a file with win + c and open alt + tab doesnt work
 - in chrome, lalt↓ + `↕ + L↕  opens tab switcher (FIXED)
+- lalt + capslock + s triggers switch of input language (FIXED)
+- caps + (shift) + tab to ctrl + (shift) + tab (FIXED)
