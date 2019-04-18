@@ -645,7 +645,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 
 	if (keyCode == SC_Q) { // alt + q
 		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), keyDownLAltAsLAlt(), { KeyDown(SC_F4), KeyUp(SC_F4) });
+			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_F4), KeyUp(SC_F4) });
 		}
 		return { g_nullKeyEvent };
 	}
@@ -654,7 +654,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 		if (isCurrentKeyDown) {
 			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_TAB), KeyUp(SC_TAB) });
 		}
-		return { KeyUp(SC_TAB) };
+		return { g_nullKeyEvent };
 	}
 
 	if (keyCode == SC_BACK) { // alt + backspace
@@ -667,22 +667,6 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 		}
 		return { g_nullKeyEvent };
 	}
-
-	/*
-	if (keyCode == SC_J && isShiftKeyDown) { // alt + shift + j
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_NEXT), KeyUp(SC_NEXT) }, keyDownLAltAsLCtrl());
-		}
-		return { nullKeyEvent };
-	}
-
-	if (keyCode == SC_K && isShiftKeyDown) { // alt + shift + k
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_PRIOR), KeyUp(SC_PRIOR) }, keyDownLAltAsLCtrl());
-		}
-		return { nullKeyEvent };
-	}
-	*/
 
 	if (keyCode == SC_J) { // alt + j
 		if (isCurrentKeyDown) {
@@ -700,7 +684,7 @@ std::vector<Key> handleLAltKey(InterceptionKeyStroke keyStroke) {
 
 	if (keyCode == SC_SPACE) { // alt + espace
 		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_F12), KeyUp(SC_F12) });
+			return { KeyDown(SC_F12), KeyUp(SC_F12) };
 		}
 		return { g_nullKeyEvent };
 	}
