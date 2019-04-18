@@ -34,6 +34,33 @@ bool compareKeyEvents(std::vector<Key> keyEvents, std::vector<Key> keyEvents2) {
 	}
 }
 
+TEST(handleKey, F1) {
+	auto keyEvents = getKeyEvents({
+		InterceptionKeyStroke({ SC_F1, 0 }),
+		InterceptionKeyStroke({ SC_F1, 1 })
+		});
+
+	EXPECT_TRUE(compareKeyEvents(keyEvents, concatKeyVectors(nullKeyEvent, nullKeyEvent)));
+}
+
+TEST(handleKey, F2) {
+	auto keyEvents = getKeyEvents({
+		InterceptionKeyStroke({ SC_F2, 0 }),
+		InterceptionKeyStroke({ SC_F2, 1 })
+		});
+
+	EXPECT_TRUE(compareKeyEvents(keyEvents, concatKeyVectors(nullKeyEvent, nullKeyEvent)));
+}
+
+TEST(handleKey, F2) {
+	auto keyEvents = getKeyEvents({
+		InterceptionKeyStroke({ SC_F2, 0 }),
+		InterceptionKeyStroke({ SC_F2, 1 })
+		});
+
+	EXPECT_TRUE(compareKeyEvents(keyEvents, concatKeyVectors(nullKeyEvent, nullKeyEvent)));
+}
+
 TEST(handleKey, Letter) {
 	auto keyEvents = getKeyEvents({
 		InterceptionKeyStroke({ SC_C, 0 }),

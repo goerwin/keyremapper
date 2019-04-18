@@ -110,6 +110,8 @@ struct KeyUp : Key {
 	KeyUp(DWORD cKeyCode, int cState = 1) : Key(cKeyCode, cState) {}
 };
 
+extern std::vector<Key> nullKeyEvent;
+
 std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes);
 
 void sendKeyEvents(std::vector<Key> keyEvents);

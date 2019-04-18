@@ -770,60 +770,51 @@ std::vector<Key> handleKey(InterceptionKeyStroke keyStroke) {
 		if (keyCode == SC_F3) { // f3
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), KeyDown(SC_TAB) };
-			} else {
-				return { KeyUp(SC_LCTRL), KeyUp(SC_LSHIFT), KeyUp(SC_TAB) };
 			}
+			return { KeyUp(SC_LCTRL), KeyUp(SC_LSHIFT), KeyUp(SC_TAB) };
 		}
 
 		if (keyCode == SC_F4) { // f4
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LCTRL), KeyDown(SC_TAB) };
-			} else {
-				return { KeyUp(SC_LCTRL), KeyUp(SC_TAB) };
 			}
+			return { KeyUp(SC_LCTRL), KeyUp(SC_TAB) };
 		}
 
 		if (keyCode == SC_F5) { // F5
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(SC_M) };
-			} else {
-				return { KeyUp(SC_LALT), KeyUp(SC_M) };
 			}
+			return { KeyUp(SC_LALT), KeyUp(SC_M) };
 		}
 
 		if (keyCode == SC_F6) { // f6
 			if (isCurrentKeyDown) {
 				return { KeyDown(SC_LALT), KeyDown(SC_T) };
-			} else {
-				return { KeyUp(SC_LALT), KeyUp(SC_T) };
 			}
+			return { KeyUp(SC_LALT), KeyUp(SC_T) };
 		}
 	}
 
 	if (keyCode == SC_F1) { // f1
 		if (isCurrentKeyDown) {
 			BrightnessHandler::Increment(-10);
-			return { KeyDown(SC_NULL) };
-		} else {
-			return { KeyUp(SC_NULL) };
-		}
+		} 
+		return nullKeyEvent;
 	}
 
 	if (keyCode == SC_F2) { // f2
 		if (isCurrentKeyDown) {
 			BrightnessHandler::Increment(10);
-			return { KeyDown(SC_NULL) };
-		} else {
-			return { KeyUp(SC_NULL) };
 		}
+		return nullKeyEvent;
 	}
 
 	if (keyCode == SC_F10) { // f10
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_MUTE, 2) };
-		} else {
-			return { KeyUp(SC_MUTE, 3) };
 		}
+		return { KeyUp(SC_MUTE, 3) };
 	}
 
 	if (keyCode == SC_F11) { // f11
@@ -832,12 +823,11 @@ std::vector<Key> handleKey(InterceptionKeyStroke keyStroke) {
 				KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
 				KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3)
 			};
-		} else {
-			return {
-				KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
-				KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3)
-			};
 		}
+		return {
+			KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
+			KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3)
+		};
 	}
 
 	if (keyCode == SC_F12) { // f2
@@ -846,19 +836,17 @@ std::vector<Key> handleKey(InterceptionKeyStroke keyStroke) {
 				KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
 				KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3)
 			};
-		} else {
-			return {
-				KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
-				KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3)
-			};
 		}
+		return {
+			KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
+			KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3)
+		};
 	}
 
 	if (isCurrentKeyDown) {
 		return { KeyDown(keyCode) };
-	} else {
-		return { KeyUp(keyCode) };
 	}
+	return { KeyUp(keyCode) };
 }
 
 std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes) {
