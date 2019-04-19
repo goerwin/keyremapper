@@ -118,7 +118,7 @@ struct KeyUp : Key {
 extern Key g_nullKey;
 
 Keys getKeyEvents(Keys keys);
-Keys getKeysForEsc();
+Keys getParsedKeysForEsc();
 
 void setActiveProcessName(std::string _activeProcessName);
 Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {});

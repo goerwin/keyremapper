@@ -214,7 +214,7 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 	});
 
 	auto capslockClick = ErwinUtils::KeyClick<void(int)>(SC_CAPSLOCK, [](int consecutiveClicks) {
-		sendKeyEvents(getKeysForEsc());
+		sendKeyEvents(getParsedKeysForEsc());
 	});
 
 	auto lAltClick = ErwinUtils::KeyClick<void(int)>(SC_LALT, [](int consecutiveClicks) {

@@ -34,12 +34,7 @@ bool isGitBashActiveProcess() {
 	return g_activeProcessName == "mintty.exe";
 }
 
-Keys concatKeyVectors(
-	Keys keys,
-	Keys keys2,
-	Keys keys3,
-	Keys keys4
-) {
+Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3, Keys keys4) {
 	keys.insert(keys.end(), keys2.begin(), keys2.end());
 	keys.insert(keys.end(), keys3.begin(), keys3.end());
 	keys.insert(keys.end(), keys4.begin(), keys4.end());
@@ -125,40 +120,83 @@ Keys keyUpLAlt() {
 	return keys;
 }
 
-Keys concatKeysWithLAltLCtrl(
-	std::string pre,
-	Keys keys,
-	std::string pos = ""
+enum LAltLCtrl {
+	_keyDownLAltAsLCtrl = 1,
+	_keyDownLAltAsLAlt = 2,
+	_keyUpLAlt = 3,
+	_keyDownLCtrlAsLAlt = 4,
+	_keyDownLCtrlAsLCtrl = 5,
+	_keyUpLCtrl = 6,
+	_null = 0
+};
+
+struct TemplateKeys {
+	LAltLCtrl preLAltLCtrl = _null;
+	LAltLCtrl posLAltLCtrl = _null;
+	Keys keys;
+
+	TemplateKeys(LAltLCtrl _preLAltLCtrl, Keys _keys, LAltLCtrl _posLAltLCtrl = _null) {
+		preLAltLCtrl = _preLAltLCtrl;
+		keys = _keys;
+		posLAltLCtrl = _posLAltLCtrl;
+	}
+
+	TemplateKeys(Keys _keys, LAltLCtrl _posLAltLCtrl = _null) {
+		posLAltLCtrl = _posLAltLCtrl;
+		keys = _keys;
+	}
+
+	TemplateKeys(LAltLCtrl _preLAltLCtrl) {
+		preLAltLCtrl = _preLAltLCtrl;
+	}
+
+	Keys getParsedKeys() {
+		Keys parsedKeys = keys;
+
+		if (preLAltLCtrl == _null) {}
+		if (preLAltLCtrl == _keyDownLAltAsLCtrl) {
+			parsedKeys = concatKeyVectors(keyDownLAltAsLCtrl(), parsedKeys);
+		} else if (preLAltLCtrl == _keyDownLAltAsLAlt) {
+			parsedKeys = concatKeyVectors(keyDownLAltAsLAlt(), parsedKeys);
+		} else if (preLAltLCtrl == _keyUpLAlt) {
+			parsedKeys = concatKeyVectors(keyUpLAlt() , parsedKeys);
+		} else if (preLAltLCtrl == _keyDownLCtrlAsLAlt) {
+			parsedKeys = concatKeyVectors(keyDownLCtrlAsLAlt(), parsedKeys);
+		} else if (preLAltLCtrl == _keyDownLCtrlAsLCtrl) {
+			parsedKeys = concatKeyVectors(keyDownLCtrlAsLCtrl(), parsedKeys);
+		} else if (preLAltLCtrl == _keyUpLCtrl) {
+			parsedKeys = concatKeyVectors(keyUpLCtrl() , parsedKeys);
+		}
+
+		if (posLAltLCtrl == _null) {
+			return parsedKeys;
+		} else if (posLAltLCtrl == _keyDownLAltAsLCtrl) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyDownLAltAsLCtrl());
+		} else if (posLAltLCtrl == _keyDownLAltAsLAlt) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyDownLAltAsLAlt());
+		} else if (posLAltLCtrl == _keyUpLAlt) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyUpLAlt());
+		} else if (posLAltLCtrl == _keyDownLCtrlAsLAlt) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyDownLCtrlAsLAlt());
+		} else if (posLAltLCtrl == _keyDownLCtrlAsLCtrl) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyDownLCtrlAsLCtrl());
+		} else if (posLAltLCtrl == _keyUpLCtrl) {
+			parsedKeys = concatKeyVectors(parsedKeys, keyUpLCtrl());
+		}
+
+		return parsedKeys;
+	}
+};
+
+Keys getParsedKeyDownUpKeys(
+	bool isKeyDown,
+	TemplateKeys keyDownTemplateKeys,
+	TemplateKeys keyUpTemplateKeys
 ) {
-	if (pre == "keyDownLAltAsLCtrl") {
-		keys = concatKeyVectors(keyDownLAltAsLCtrl(), keys);
-	} else if (pre == "keyDownLAltAsLAlt") {
-		keys = concatKeyVectors(keyDownLAltAsLAlt(), keys);
-	} else if (pre == "keyUpLAlt") {
-		keys = concatKeyVectors(keyUpLAlt() , keys);
-	} else if (pre == "keyDownLCtrlAsLAlt") {
-		keys = concatKeyVectors(keyDownLCtrlAsLAlt(), keys);
-	} else if (pre == "keyDownLCtrlAsLCtrl") {
-		keys = concatKeyVectors(keyDownLCtrlAsLCtrl(), keys);
-	} else if (pre == "keyUpLCtrl") {
-		keys = concatKeyVectors(keyUpLCtrl() , keys);
+	if (isKeyDown) {
+		return keyDownTemplateKeys.getParsedKeys();
 	}
-
-	if (pos == "keyDownLAltAsLCtrl") {
-		keys = concatKeyVectors(keys, keyDownLAltAsLCtrl());
-	} else if (pos == "keyDownLAltAsLAlt") {
-		keys = concatKeyVectors(keys, keyDownLAltAsLAlt());
-	} else if (pos == "keyUpLAlt") {
-		keys = concatKeyVectors(keys, keyUpLAlt());
-	} else if (pos == "keyDownLCtrlAsLAlt") {
-		keys = concatKeyVectors(keys, keyDownLCtrlAsLAlt());
-	} else if (pos == "keyDownLCtrlAsLCtrl") {
-		keys = concatKeyVectors(keys, keyDownLCtrlAsLCtrl());
-	} else if (pos == "keyUpLCtrl") {
-		keys = concatKeyVectors(keys, keyUpLCtrl());
-	}
-
-	return keys;
+	return keyUpTemplateKeys.getParsedKeys();
 }
 
 bool isAFnKeyCode(unsigned short keyCode) {
@@ -196,16 +234,20 @@ unsigned short getVimPriorNextKeyCode(unsigned short keyCode) {
 		SC_NULL;
 }
 
-Keys getKeysForEsc() {
+TemplateKeys getTemplateKeysForEsc() {
 	if (!g_isLAltAsLCtrl) {
-		return concatKeysWithLAltLCtrl("", { Key(SC_ESC) }, "keyDownLAltAsLCtrl");
+		return TemplateKeys({ Key(SC_ESC) }, _keyDownLAltAsLCtrl);
 	}
 
 	if (!g_isLAltKeyDown) {
-		return { Key(SC_ESC) };
+		return TemplateKeys({ Key(SC_ESC) });
 	}
 
-	return { g_nullKey };
+	return TemplateKeys({ g_nullKey });
+}
+
+Keys getParsedKeysForEsc() {
+	return getTemplateKeysForEsc().getParsedKeys();
 }
 
 Keys handleSimulateMouseClick(Key key) {
@@ -214,25 +256,26 @@ Keys handleSimulateMouseClick(Key key) {
 
 	if (
 		!(g_isLWinKeyDown && keyCode == SC_C) &&
-		!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
+		//!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
 		!(g_isLWinKeyDown && keyCode == SC_LALT) &&
 		!g_isMouseClickDown
 		) {
 		return {};
 	}
-
+	/*
 	if (keyCode == SC_LSHIFT) {
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LSHIFT) };
 		}
 		return { KeyUp(SC_LSHIFT) };
-	}
+	}*/
 
 	if (keyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return keyDownLAltAsLCtrl();
-		}
-		return keyUpLAlt();
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLCtrl),
+			TemplateKeys(_keyUpLAlt)
+		);
 	}
 
 	if (keyCode == SC_C) {
@@ -273,26 +316,32 @@ Keys handleLWinLAltKeys(Key key) {
 	auto keyCode = key.code;
 
 	if (keyCode == SC_LWIN) {
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ g_nullKey }),
+			TemplateKeys(_keyDownLAltAsLCtrl)
+		);
 	}
 
 	if (keyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return { g_nullKey };
-		}
-		return keyUpLAlt();
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ g_nullKey }),
+			TemplateKeys(_keyUpLAlt)
+		);
 	}
 
 	if (keyCode == SC_K || keyCode == SC_J || keyCode == SC_L || keyCode == SC_H) {
 		auto arrowKeyCode = getVimArrowKeyCode(keyCode);
 
-		if (isCurrentKeyDown) {
-			return concatKeysWithLAltLCtrl(
-				"keyUpLAlt",
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(
+				_keyUpLAlt,
 				{ KeyDown(SC_LWIN, 2), Key(arrowKeyCode), KeyUp(SC_LWIN, 3) }
-			);
-		}
-		return { g_nullKey };
+			),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	return { g_nullKey };
@@ -308,10 +357,11 @@ Keys handleCapslockKey(Key key) {
 
 	if (isGitBashActiveProcess()) {
 		if (keyCode == SC_C) { // capslock + c : ctrl + c : kill process
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), Key(SC_C), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_C), KeyUp(SC_LCTRL) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
@@ -319,10 +369,11 @@ Keys handleCapslockKey(Key key) {
 		if (g_isVimShiftKeyDown) {
 			g_isVimShiftKeyDown = false;
 
-			if (isCurrentKeyDown) {
-				return { g_nullKey };
-			}
-			return { KeyUp(SC_LSHIFT) };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ g_nullKey }),
+				TemplateKeys({ KeyUp(SC_LSHIFT) })
+			);
 		}
 
 		return { g_nullKey };
@@ -331,53 +382,72 @@ Keys handleCapslockKey(Key key) {
 	if (keyCode == SC_LSHIFT || keyCode == SC_S) {
 		g_isVimShiftKeyDown = isCurrentKeyDown;
 
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LSHIFT) }),
+			TemplateKeys({ KeyUp(SC_LSHIFT) })
+		);
 	}
 
 	if (keyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return keyDownLAltAsLCtrl();
-		}
-		return keyUpLAlt();
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLCtrl),
+			TemplateKeys(_keyUpLAlt)
+		);
 	}
 
 	if (keyCode == SC_TAB || keyCode == SC_SPACE) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LCTRL), { Key(keyCode) }, KeyUp(SC_LCTRL) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LCTRL), { Key(keyCode) }, KeyUp(SC_LCTRL) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_H || keyCode == SC_L || keyCode == SC_J || keyCode == SC_K) {
-		auto arrowKeyCode = getVimArrowKeyCode(keyCode);
-		auto homeEndKeyCode = getVimHomeEndKeyCode(keyCode);
-
 		if (g_isLWinKeyDown) {
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), Key(arrowKeyCode), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LCTRL), Key(getVimArrowKeyCode(keyCode)), KeyUp(SC_LCTRL) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl && (keyCode == SC_H || keyCode == SC_L)) {
-			if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl("keyUpLAlt", { Key(homeEndKeyCode) }, "keyDownLAltAsLCtrl");
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys(_keyUpLAlt, { Key(getVimHomeEndKeyCode(keyCode)) }, _keyDownLAltAsLCtrl),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) {
-				return { Key(homeEndKeyCode) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(getVimHomeEndKeyCode(keyCode)) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			return { Key(arrowKeyCode) };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(getVimArrowKeyCode(keyCode)) }),
+			TemplateKeys({ g_nullKey })
+		);
+	}
+
+	if (keyCode == SC_V) {
+		if (g_isLAltKeyDown) {
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys(
+					_keyUpLAlt,
+					{ KeyDown(SC_LWIN, 2), Key(SC_V), KeyUp(SC_LWIN, 3) },
+					_keyDownLAltAsLCtrl
+				),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 		return { g_nullKey };
 	}
@@ -394,30 +464,37 @@ Keys handleLCtrlKey(Key key) {
 	auto keyCode = key.code;
 
 	if (keyCode == SC_LCTRL) { // LCtrl
-		if (isCurrentKeyDown) {
-			return keyDownLCtrlAsLAlt();
-		}
-		return keyUpLCtrl();
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLCtrlAsLAlt),
+			TemplateKeys(_keyUpLCtrl)
+		);
 	}
 
+	/*
 	if (keyCode == SC_LSHIFT) { // LCtrl + Shift
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LSHIFT) };
 		}
 		return { KeyUp(SC_LSHIFT) };
 	}
+	*/
 
 	if (keyCode == SC_TAB) { // LCtrl + Tab
-		if (isCurrentKeyDown) {
-			return concatKeysWithLAltLCtrl("keyDownLCtrlAsLCtrl", { Key(SC_TAB) });
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLCtrlAsLCtrl, { Key(SC_TAB) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
+	return {};
+	/*
 	if (isCurrentKeyDown) {
 		return { KeyDown(keyCode) };
 	}
 	return { KeyUp(keyCode) };
+	*/
 }
 
 Keys handleLWinKey(Key key) {
@@ -430,48 +507,54 @@ Keys handleLWinKey(Key key) {
 
 	if (isStarcraft2ActiveProcess()) {
 		if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // lwin + 1/2/3/4
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), Key(keyCode), KeyUp(SC_LALT) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LALT), Key(keyCode), KeyUp(SC_LALT) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
 	if (isGitBashActiveProcess()) {
 		if (keyCode == SC_BACK) { // lwin + back : delete from cursor to beginning of word
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), Key(SC_W), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_W), KeyUp(SC_LCTRL) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
 	if (keyCode == SC_H || keyCode == SC_L) { // lwin + h/l
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LALT), Key(getVimArrowKeyCode(keyCode)), KeyUp(SC_LALT) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LALT), Key(getVimArrowKeyCode(keyCode)), KeyUp(SC_LALT) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_BACK) { // LWin + back
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LCTRL), Key(SC_BACK), KeyUp(SC_LCTRL) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_BACK), KeyUp(SC_LCTRL) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_D) { // LWin + D
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LWIN, 2), Key(SC_D), KeyUp(SC_LWIN, 3) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LWIN, 2), Key(SC_D), KeyUp(SC_LWIN, 3) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_SPACE) { // LWin + Space
-		if (isCurrentKeyDown) {
-			return { Key(SC_LWIN, 5) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(SC_LWIN, 5) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	return { g_nullKey };
@@ -487,190 +570,214 @@ Keys handleLAltKey(Key key) {
 
 	if (isChromeActiveProcess()) {
 		if (keyCode == SC_RETURN) { // lalt + enter to alt + enter
-			if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl("keyDownLAltAsLAlt", { Key(SC_RETURN) }, "keyDownLAltAsLCtrl");
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_RETURN) }, _keyDownLAltAsLCtrl),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_H) { // alt + h
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_L) { // alt + l
-			if (isCurrentKeyDown) {
-				return { Key(SC_TAB) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_TAB) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_SEMI) { // alt + ;
-			if (isCurrentKeyDown) {
-				return { Key(SC_L) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_L) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
 	if (isStarcraft2ActiveProcess()) {
 		if (keyCode == SC_F1 || keyCode == SC_F2 || keyCode == SC_F3 || keyCode == SC_F4) {
-			if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl("keyDownLAltAsLCtrl", { Key(keyCode) });
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys(_keyDownLAltAsLCtrl, { Key(keyCode) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
 	if (isSlackActiveProcess()) {
 		if (keyCode == SC_P) {
-			if (isCurrentKeyDown) {
-				return { Key(SC_K) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_K) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
 	if (isGitBashActiveProcess()) {
 		// TODO: lalt + a : select all
-		if (keyCode == SC_C) { // lalt + c : copy
-			if (isCurrentKeyDown) {
-				return { Key(SC_NP0) };
-			}
-			return { g_nullKey };
-		}
 
 		if (keyCode == SC_V) { // lalt + v : paste
-			if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl(
-					"keyUpLAlt",
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys(
+					_keyUpLAlt,
 					{ KeyDown(SC_LSHIFT), Key(SC_NP0), KeyUp(SC_LSHIFT) },
-					"keyDownLAltAsLCtrl"
-				);
-			}
-			return { g_nullKey };
+					_keyDownLAltAsLCtrl
+				),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_Z) { // lalt + z : undo
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LSHIFT), Key(SC_MINUS), KeyUp(SC_LSHIFT) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LSHIFT), Key(SC_MINUS), KeyUp(SC_LSHIFT) }),
+				TemplateKeys({ g_nullKey })
+			);
+		}
+
+		if (keyCode == SC_C) { // lalt + c : copy
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_NP0) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_BACK) { // lalt + back : delete from cursor to beginning of line
-			if (isCurrentKeyDown) {
-				return { Key(SC_U) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_U) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_I) { // lalt + i : Clear screen
-			if (isCurrentKeyDown) {
-				return { Key(SC_L) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_L) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
-	if (keyCode == SC_LALT) { // lalt
-		if (isCurrentKeyDown) {
-			return keyDownLAltAsLCtrl();
-		}
-		return keyUpLAlt();
+	if (keyCode == SC_LALT) {
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLCtrl),
+			TemplateKeys(_keyUpLAlt)
+		);
 	}
 
+	/*
 	if (keyCode == SC_LSHIFT) {
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LSHIFT) };
 		}
 		return { KeyUp(SC_LSHIFT) };
-	}
+	}*/
 
 	if (keyCode == SC_GRAVE) { // lalt + ` to alt + `
-		if (isCurrentKeyDown) {
-			return concatKeysWithLAltLCtrl("keyDownLAltAsLAlt", { Key(SC_GRAVE) }, "keyDownLAltAsLCtrl");
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_GRAVE) }, _keyDownLAltAsLCtrl),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_ESC) { // alt + esc
-		if (isCurrentKeyDown) {
-			return getKeysForEsc();
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			getTemplateKeysForEsc(),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_Q) { // alt + q
 		if (!g_isLAltAsLCtrl) { // alt + tabbed + q
-			if (isCurrentKeyDown) {
-				return { Key(SC_SUPR) };
-			}
-			return { g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ Key(SC_SUPR) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			return concatKeysWithLAltLCtrl("keyDownLAltAsLAlt", { Key(SC_F4) }, "keyDownLAltAsLCtrl");
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_F4) }, _keyDownLAltAsLCtrl),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_TAB) { // alt + tab
-		if (isCurrentKeyDown) {
-			return concatKeysWithLAltLCtrl("keyDownLAltAsLAlt", { Key(SC_TAB) });
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_TAB) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_BACK) { // alt + back
-		if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl(
-					"keyUpLAlt",
-					{ KeyDown(SC_LSHIFT), Key(SC_HOME), KeyUp(SC_LSHIFT), Key(SC_BACK) },
-					"keyDownLAltAsLCtrl"
-				);
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(
+				_keyUpLAlt,
+				{ KeyDown(SC_LSHIFT), Key(SC_HOME), KeyUp(SC_LSHIFT), Key(SC_BACK) },
+				_keyDownLAltAsLCtrl
+			),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_J || keyCode == SC_K) { // alt + j/k
-		if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl(
-					"keyUpLAlt",
-					{ Key(getVimPriorNextKeyCode(keyCode)) },
-					"keyDownLAltAsLCtrl"
-				);
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(
+				_keyUpLAlt,
+				{ Key(keyCode == SC_J ? SC_NEXT : SC_PRIOR) },
+				_keyDownLAltAsLCtrl
+			),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_SPACE) { // alt + espace
-		if (isCurrentKeyDown) {
-				return { Key(SC_F12) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(SC_F12) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (isAFnKeyCode(keyCode)) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
-		if (isCurrentKeyDown) {
-				return concatKeysWithLAltLCtrl("keyUpLAlt", { Key(keyCode) });
-		}
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys(_keyUpLAlt, { Key(keyCode) }, _keyDownLAltAsLCtrl),
+			TemplateKeys({ g_nullKey })
+		);
+	}
+
+	if (keyCode != SC_LSHIFT && !g_isLAltAsLCtrl) { // alttabbed + letter
 		return { g_nullKey };
 	}
 
-	if (!g_isLAltAsLCtrl) { // alttabbed + letter
-		return { g_nullKey };
-	}
-
-	if (isCurrentKeyDown) {
+	return {};
+	/*if (isCurrentKeyDown) {
 		return { KeyDown(keyCode) };
 	}
-	return { KeyUp(keyCode) };
+	return { KeyUp(keyCode) };*/
 }
 
-Keys handleShiftKey(Key key) {
+/*Keys handleShiftKey(Key key) {
 	if (!g_isShiftKeyDown) {
 		return {};
 	}
@@ -679,17 +786,19 @@ Keys handleShiftKey(Key key) {
 	auto keyCode = key.code;
 
 	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(SC_LSHIFT) }),
+			TemplateKeys({ KeyUp(SC_LSHIFT) })
+		);
 	}
 
-	if (isCurrentKeyDown) {
-		return { KeyDown(keyCode) };
-	}
-	return { KeyUp(keyCode) };
-}
+	return getParsedKeyDownUpKeys(
+		isCurrentKeyDown,
+		TemplateKeys({ KeyDown(keyCode) }),
+		TemplateKeys({ KeyUp(keyCode) })
+	);
+}*/
 
 Keys handleKey(Key key) {
 	auto isCurrentKeyDown = isKeyDown(key);
@@ -697,73 +806,67 @@ Keys handleKey(Key key) {
 
 	if (isChromeActiveProcess()) {
 		if (keyCode == SC_F3) { // f3
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) };
-			}
-			return{ g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
 		if (keyCode == SC_F4) { // f4
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) };
-			}
-			return{ g_nullKey };
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 
-		if (keyCode == SC_F5) { // F5
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), Key(SC_M), KeyUp(SC_LALT) };
-			}
-			return{ g_nullKey };
-		}
-
-		if (keyCode == SC_F6) { // f6
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), Key(SC_T), KeyUp(SC_LALT) };
-			}
-			return{ g_nullKey };
+		if (keyCode == SC_F5 || keyCode == SC_F6) { // f5/f6
+			return getParsedKeyDownUpKeys(
+				isCurrentKeyDown,
+				TemplateKeys({ KeyDown(SC_LALT), Key(keyCode == SC_F5 ? SC_M : SC_T), KeyUp(SC_LALT) }),
+				TemplateKeys({ g_nullKey })
+			);
 		}
 	}
 
-	if (keyCode == SC_F1) { // f1
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_BRIGHTNESSDOWN) };
-		}
-		return { g_nullKey };
-	}
-
-	if (keyCode == SC_F2) { // f2
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_BRIGHTNESSUP) };
-		}
-		return { g_nullKey };
+	if (keyCode == SC_F1 || keyCode == SC_F2) { // f1/f2
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ KeyDown(keyCode == SC_F1 ? SC_BRIGHTNESSDOWN : SC_BRIGHTNESSUP) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_F10) { // f10
-		if (isCurrentKeyDown) {
-			return { Key(SC_MUTE, 5) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(SC_MUTE, 5) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_F11) { // f11
-		if (isCurrentKeyDown) {
-			return{ Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
 	if (keyCode == SC_F12) { // f12
-		if (isCurrentKeyDown) {
-			return { Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5) };
-		}
-		return { g_nullKey };
+		return getParsedKeyDownUpKeys(
+			isCurrentKeyDown,
+			TemplateKeys({ Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5) }),
+			TemplateKeys({ g_nullKey })
+		);
 	}
 
-	if (isCurrentKeyDown) {
-		return { KeyDown(keyCode) };
-	}
-	return { KeyUp(keyCode) };
+	return getParsedKeyDownUpKeys(
+		isCurrentKeyDown,
+		TemplateKeys({ KeyDown(keyCode) }),
+		TemplateKeys({ KeyUp(keyCode) })
+	);
 }
 
 Keys getKeyEvents(Keys keys) {
@@ -797,7 +900,7 @@ Keys getKeyEvents(Keys keys) {
 		else if (keyEvents = handleLCtrlKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleLWinKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleLAltKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleShiftKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		// else if (keyEvents = handleShiftKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 
 		if (!isCurrentKeyDown) {

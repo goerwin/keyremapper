@@ -355,6 +355,32 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_THEN_ESC) {
 	}));
 }
 
+TEST_F(KeyEventTest, handleLAltKey_LALT_LSHIFT_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
 TEST_F(KeyEventTest, handleLAltKey_LALT_ESC) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -457,6 +483,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
 			KeyDown(SC_LCTRL),
 			KeyUp(SC_LCTRL),
 			Key(SC_F3),
+			KeyDown(SC_LCTRL),
 			KeyUp(SC_LCTRL)
 		}
 	}));
