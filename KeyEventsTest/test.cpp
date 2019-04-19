@@ -75,6 +75,10 @@ class KeyEventTest : public ::testing::Test {
 	}
 };
 
+// handleLWinLAltKeys
+
+//handleCapslockKey
+
 // handleLCtrlKey
 
 TEST_F(KeyEventTest, handleLCtrlKey_LCTRL_LSHIFT) {

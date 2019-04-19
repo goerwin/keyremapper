@@ -146,245 +146,268 @@ std::vector<Key> handleSimulateMouseClick(Key key) {
 	}
 
 	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LSHIFT) },
+			{ KeyUp(SC_LSHIFT) }
+		);
 	}
 
 	if (keyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return keyDownLAltAsLCtrl();
-		}
-		return keyUpLAlt();
+		return getMapKeys(
+			isCurrentKeyDown,
+			keyDownLAltAsLCtrl(),
+			keyUpLAlt()
+		);
 	}
 
 	if (keyCode == SC_C) {
 		if (g_isCapslockKeyDown) {
-			if (isCurrentKeyDown) {
-				if (!g_isMouseClickDown) {
-					g_isMouseClickDown = true;
-					return { KeyDown(SC_MOUSERIGHT) };
-				}
-				return { g_nullKey };
-			}
-			g_isMouseClickDown = false;
-			return { KeyUp(SC_MOUSERIGHT) };
-		}
-
-		if (isCurrentKeyDown) {
-			if (!g_isMouseClickDown) {
+			if (isCurrentKeyDown && !g_isMouseClickDown) {
 				g_isMouseClickDown = true;
-				return { KeyDown(SC_MOUSELEFT) };
+				return { KeyDown(SC_MOUSERIGHT) };
 			}
+
+			if (!isCurrentKeyDown && g_isMouseClickDown) {
+				g_isMouseClickDown = false;
+				return { KeyUp(SC_MOUSERIGHT) };
+			}
+
 			return { g_nullKey };
 		}
-		g_isMouseClickDown = false;
-		return { KeyUp(SC_MOUSELEFT) };
-	}
 
-	return {};
+		if (isCurrentKeyDown && !g_isMouseClickDown) {
+			g_isMouseClickDown = true;
+			return { KeyDown(SC_MOUSELEFT) };
+		}
+
+		if (!isCurrentKeyDown && g_isMouseClickDown) {
+			g_isMouseClickDown = false;
+			return { KeyUp(SC_MOUSELEFT) };
+		}
+
+		return { g_nullKey };
+	}
 }
 
 std::vector<Key> handleLWinLAltKeys(Key key) {
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
 	if (!(g_isLWinKeyDown && g_isLAltKeyDown)) {
 		return {};
 	}
 
+	auto isCurrentKeyDown = isKeyDown(key);
+	auto keyCode = key.code;
+
 	if (keyCode == SC_K) { // win + alt + k
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), {
-				KeyDown(SC_LWIN, 2),
-				KeyDown(SC_UP),
-				KeyUp(SC_UP),
-				KeyUp(SC_LWIN, 3)
-				});
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), Key(SC_UP), KeyUp(SC_LWIN, 3) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_J) { // win + alt + j
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), {
-				KeyDown(SC_LWIN, 2),
-				KeyDown(SC_DOWN),
-				KeyUp(SC_DOWN),
-				KeyUp(SC_LWIN, 3)
-				});
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), Key(SC_DOWN), KeyUp(SC_LWIN, 3) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_L) { // win + alt + l
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LWIN, 3) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), Key(SC_RIGHT), KeyUp(SC_LWIN, 3) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_H) { // win + alt + h
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LWIN, 3) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), Key(SC_LEFT), KeyUp(SC_LWIN, 3) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return { g_nullKey };
-		}
-		return keyUpLAlt();
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ g_nullKey },
+			keyUpLAlt()
+		);
 	}
 
 	if (keyCode == SC_LCTRL) {
-		if (isCurrentKeyDown) {
-			return { g_nullKey };
-		}
-		return keyDownLAltAsLCtrl();
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ g_nullKey },
+			keyDownLAltAsLCtrl()
+		);
 	}
 
 	return { g_nullKey };
 }
 
 std::vector<Key> handleCapslockKey(Key key) {
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto currentKeyCode = key.code;
-
 	if (!g_isCapslockKeyDown) {
 		return {};
 	}
 
+	auto isCurrentKeyDown = isKeyDown(key);
+	auto currentKeyCode = key.code;
+
 	if (isGitBashActiveProcess()) {
 		if (currentKeyCode == SC_C && !g_isLAltKeyDown) { // capslock + c : ctrl + c : kill process
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(
 					keyDownLAltAsLCtrl(),
-					{ KeyDown(SC_C), KeyUp(SC_C) },
+					{ Key(SC_C) },
 					keyUpLAlt()
-				);
-			}
-			return { g_nullKey };
+				),
+				{ g_nullKey }
+			);
 		}
 	}
 
-	if (currentKeyCode == SC_CAPSLOCK || currentKeyCode == SC_LSHIFT || currentKeyCode == SC_S) {
-		if (isCurrentKeyDown) {
-			if (currentKeyCode == SC_LSHIFT || currentKeyCode == SC_S) {
-				g_isVimShiftKeyDown = true;
-				return { KeyDown(SC_LSHIFT) };
-			}
-			return { g_nullKey };
-		}
+	if (currentKeyCode == SC_CAPSLOCK) {
+		std::vector<Key> keyUpKeys = { g_nullKey };
 
 		if (g_isVimShiftKeyDown) {
 			g_isVimShiftKeyDown = false;
-			return { KeyUp(SC_LSHIFT) };
+			keyUpKeys = { KeyUp(SC_LSHIFT) };
 		}
-		return { g_nullKey };
+
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ g_nullKey },
+			keyUpKeys
+		);
+	}
+
+	if (currentKeyCode == SC_LSHIFT || currentKeyCode == SC_S) {
+		g_isVimShiftKeyDown = isCurrentKeyDown;
+
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LSHIFT) },
+			{ KeyDown(SC_UP) }
+		);
 	}
 
 	if (currentKeyCode == SC_LALT) {
-		if (isCurrentKeyDown) {
-			return { g_nullKey };
-		}
-		return keyUpLAlt();
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ g_nullKey },
+			keyUpLAlt()
+		);
 	}
 
 	if (currentKeyCode == SC_TAB) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LCTRL), KeyDown(SC_TAB), KeyUp(SC_TAB), KeyUp(SC_LCTRL) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) },
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_SPACE) {
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(currentKeyCode), KeyUp(currentKeyCode) }, keyUpLAlt());
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyDownLAltAsLCtrl(), { Key(currentKeyCode) }, keyUpLAlt()),
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_H) {
 		if (g_isLWinKeyDown) {
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LCTRL), Key(SC_LEFT), KeyUp(SC_LCTRL) },
+				{ g_nullKey }
+			);
 		}
 
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_HOME), KeyUp(SC_HOME) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyUpLAlt(), { Key(SC_HOME) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LEFT), KeyUp(SC_LEFT) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LEFT), KeyUp(SC_LEFT) },
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_L) {
 		if (g_isLWinKeyDown) {
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LCTRL), Key(SC_RIGHT), KeyUp(SC_LCTRL) },
+				{ g_nullKey }
+			);
 		}
 
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_END), KeyUp(SC_END) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyUpLAlt(), { Key(SC_END) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_RIGHT), KeyUp(SC_RIGHT) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_RIGHT), KeyUp(SC_RIGHT) },
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_J) {
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), KeyDown(SC_END), KeyUp(SC_END), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), Key(SC_END), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			// Here you MAY in the Alt+Tab switcher
-			return { KeyDown(SC_DOWN), KeyUp(SC_DOWN) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_DOWN), KeyUp(SC_DOWN) },
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_K) {
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), KeyDown(SC_HOME), KeyUp(SC_HOME), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LCTRL), Key(SC_HOME), KeyUp(SC_LCTRL) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 
-		if (isCurrentKeyDown) {
-			// Here you MAY in the Alt+Tab switcher
-			return { KeyDown(SC_UP), KeyUp(SC_UP) };
-		}
-		return { g_nullKey };
+		// Here you MAY in the Alt+Tab switcher
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_UP), KeyUp(SC_UP) },
+			{ g_nullKey }
+		);
 	}
 
 	if (currentKeyCode == SC_V) {
 		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
-			if (isCurrentKeyDown) { // caps + lalt + V
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), KeyDown(SC_V), KeyUp(SC_V), KeyUp(SC_LWIN, 3) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LWIN, 2), Key(SC_V), KeyUp(SC_LWIN, 3) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 		return { g_nullKey };
 	}
@@ -748,12 +771,12 @@ std::vector<Key> handleLAltKey(Key key) {
 }
 
 std::vector<Key> handleShiftKey(Key key) {
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
 	if (!g_isShiftKeyDown) {
 		return {};
 	}
+
+	auto isCurrentKeyDown = isKeyDown(key);
+	auto keyCode = key.code;
 
 	if (keyCode == SC_LSHIFT) {
 		return getMapKeys(
