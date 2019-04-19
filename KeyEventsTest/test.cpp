@@ -77,314 +77,281 @@ class KeyEventTest : public ::testing::Test {
 
 // handleLAltKey
 
-/*
 // LALT↓TAB↕Q↕LALT↑ = LCTRL↕LALT↓TAB↕SUPR↕LALT↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_Q) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 1 }),
-		InterceptionKeyStroke({ SC_Q, 0 }),
-		InterceptionKeyStroke({ SC_Q, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	convertStringTemplateToKeyEvents("LALT0TAB2Q2LALT1");
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_LALT),
-		KeyDown(SC_TAB),
-		KeyUp(SC_TAB),
-		KeyDown(SC_SUPR),
-		KeyUp(SC_SUPR),
-		KeyUp(SC_LALT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_Q),
+			KeyUp(SC_Q),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			Key(SC_SUPR),
+			KeyUp(SC_LALT)
+		}
+	}));
 }
 
 // LALT↓Q↕LALT↑ = LCTRL↕LALT↓F4↕LALT↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_Q, 0 }),
-		InterceptionKeyStroke({ SC_Q, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_LALT),
-		KeyDown(SC_F4),
-		KeyUp(SC_F4),
-		KeyUp(SC_LALT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_Q),
+			KeyUp(SC_Q),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			KeyDown(SC_F4),
+			KeyUp(SC_F4),
+			KeyUp(SC_LALT)
+		}
+	}));
 }
 
 // LALT↓BACK↕LALT↑ = LCTRL↕LSHIFT↓HOME↕LSHIFT↑BACK↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_BACK, 0 }),
-		InterceptionKeyStroke({ SC_BACK, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_LSHIFT),
-		KeyDown(SC_HOME),
-		KeyUp(SC_HOME),
-		KeyUp(SC_LSHIFT),
-		KeyDown(SC_BACK),
-		KeyUp(SC_BACK),
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			Key(SC_HOME),
+			KeyUp(SC_LSHIFT),
+			Key(SC_BACK),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓LSHIFT↓J↕LSHIFT↑LALT↑ = LCTRL↕LSHIFT↓PgDown↕LSHIFT↑LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_LSHIFT_J) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_LSHIFT, 0 }),
-		InterceptionKeyStroke({ SC_J, 0 }),
-		InterceptionKeyStroke({ SC_J, 1 }),
-		InterceptionKeyStroke({ SC_LSHIFT, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_LSHIFT),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_NEXT),
-		KeyUp(SC_NEXT),
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LSHIFT),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_J),
+			KeyUp(SC_J),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LCTRL),
+			Key(SC_NEXT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓LSHIFT↓K↕LSHIFT↑LALT↑ = LCTRL↕LSHIFT↓PgUp↕LSHIFT↑LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_LSHIFT_K) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_LSHIFT, 0 }),
-		InterceptionKeyStroke({ SC_K, 0 }),
-		InterceptionKeyStroke({ SC_K, 1 }),
-		InterceptionKeyStroke({ SC_LSHIFT, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_LSHIFT),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_PRIOR),
-		KeyUp(SC_PRIOR),
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LSHIFT),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LCTRL),
+			Key(SC_PRIOR),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓J↕LALT↑ = LCTRL↕PgDown↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_J) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_J, 0 }),
-		InterceptionKeyStroke({ SC_J, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_NEXT),
-		KeyUp(SC_NEXT),
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_J),
+			KeyUp(SC_J),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			Key(SC_NEXT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓K↕LALT↑ = LCTRL↕PgUp↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_K) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_K, 0 }),
-		InterceptionKeyStroke({ SC_K, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_PRIOR),
-		KeyUp(SC_PRIOR),
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			Key(SC_PRIOR),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓Space↕LALT↑ = LCTRL↓F12↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Space) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_SPACE, 0 }),
-		InterceptionKeyStroke({ SC_SPACE, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_F12),
-		KeyUp(SC_F12),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_SPACE),
+			KeyUp(SC_SPACE),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_F12),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓F{n}↕LALT↑ = LCTRL↕F{n}↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_F3, 0 }),
-		InterceptionKeyStroke({ SC_F3, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_F3),
-		KeyUp(SC_F3),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_F3),
+			KeyUp(SC_F3),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			Key(SC_F3),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓TAB↕Letter↕ = LCTRL↕LALT↓TAB↕
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 1 }),
-		InterceptionKeyStroke({ SC_C, 0 }),
-		InterceptionKeyStroke({ SC_C, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_LALT),
-		KeyDown(SC_TAB),
-		KeyUp(SC_TAB)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_C),
+			KeyUp(SC_C)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB)
+		}
+	}));
 }
 
 // LALT↓TAB↕ = LCTRL↕LALT↓TAB↕
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 0 }),
-		InterceptionKeyStroke({ SC_TAB, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL),
-		KeyDown(SC_LALT),
-		KeyDown(SC_TAB),
-		KeyUp(SC_TAB)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB)
+		}
+	}));
 }
 
 // LALT↓Letter↓ = LCTRL↓Letter↕
 TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_C, 0 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_C),
-		KeyUp(SC_C)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_C)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_C)
+		}
+	}));
 }
 
 // LALT↓Letter↕LALT↑ = LCTRL↓Letter↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_C, 0 }),
-		InterceptionKeyStroke({ SC_C, 1 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_C),
-		KeyUp(SC_C),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_C),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↓ = LCTRL↓
 TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
-		auto keyEvents = getKeyEvents({
-			InterceptionKeyStroke({ SC_LALT, 0 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL)
+		}
+	}));
 }
 
 // LALT↕ = LCTRL↕
 TEST_F(KeyEventTest, handleLAltKey_LALT) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_LALT, 0 }),
-		InterceptionKeyStroke({ SC_LALT, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
-
-*/
 
 // handleShiftKey
 

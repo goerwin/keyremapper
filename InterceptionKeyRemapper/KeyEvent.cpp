@@ -456,7 +456,7 @@ std::vector<Key> handleLWinKey(Key key) {
 	}
 
 	if (isGitBashActiveProcess()) {
-		if (keyCode == SC_BACK) { // lwin + backspace : delete from cursor to beginning of word
+		if (keyCode == SC_BACK) { // lwin + back : delete from cursor to beginning of word
 			if (isCurrentKeyDown) {
 				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_W), KeyUp(SC_W) }, keyUpLAlt());
 			}
@@ -483,7 +483,7 @@ std::vector<Key> handleLWinKey(Key key) {
 		return { g_nullKey };
 	}
 
-	if (keyCode == SC_BACK) { // LWin + Backspace
+	if (keyCode == SC_BACK) { // LWin + back
 		if (isCurrentKeyDown) {
 			return { KeyDown(SC_LCTRL), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LCTRL) };
 		}
@@ -517,114 +517,127 @@ std::vector<Key> handleLAltKey(Key key) {
 
 	if (isChromeActiveProcess()) {
 		if (keyCode == SC_RETURN) { // lalt + enter to alt + enter
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_RETURN), KeyUp(SC_RETURN) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyDownLAltAsLAlt(), { Key(SC_RETURN) }, keyDownLAltAsLCtrl()),
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_H) { // alt + h
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LSHIFT), KeyDown(SC_TAB), KeyUp(SC_TAB) };
-			}
-			return { KeyUp(SC_LSHIFT) };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LSHIFT), KeyDown(SC_TAB), KeyUp(SC_TAB), KeyUp(SC_LSHIFT) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_L) { // alt + l
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_TAB), KeyUp(SC_TAB) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_TAB), KeyUp(SC_TAB) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_SEMI) { // alt + ;
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_L), KeyUp(SC_L) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_L), KeyUp(SC_L) },
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (isStarcraft2ActiveProcess()) {
-		if (
-			keyCode == SC_F1 ||
-			keyCode == SC_F2 ||
-			keyCode == SC_F3 ||
-			keyCode == SC_F4
-			) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(keyCode), KeyUp(keyCode) });
-			}
-			return { g_nullKey };
+		if (keyCode == SC_F1 || keyCode == SC_F2 || keyCode == SC_F3 || keyCode == SC_F4) {
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(keyCode), KeyUp(keyCode) }),
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (isSlackActiveProcess()) {
 		if (keyCode == SC_P) {
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_K), KeyUp(SC_K) });
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_K), KeyUp(SC_K) }),
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (isGitBashActiveProcess()) {
 		// TODO: lalt + a : select all
 		if (keyCode == SC_C) { // lalt + c : copy
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_NP0), KeyUp(SC_NP0) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_NP0), KeyUp(SC_NP0) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_V) { // lalt + v : paste
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_LSHIFT), KeyDown(SC_NP0), KeyUp(SC_NP0), KeyUp(SC_LSHIFT) }, keyDownLAltAsLCtrl());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(
+					keyUpLAlt(),
+					{ KeyDown(SC_LSHIFT), Key(SC_NP0), KeyUp(SC_LSHIFT) },
+					keyDownLAltAsLCtrl()
+				),
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_Z) { // lalt + z : undo
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LSHIFT), KeyDown(SC_MINUS), KeyDown(SC_MINUS), KeyUp(SC_LSHIFT) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LSHIFT), KeyDown(SC_MINUS), KeyDown(SC_MINUS), KeyUp(SC_LSHIFT) },
+				{ g_nullKey }
+			);
 		}
 
-		if (keyCode == SC_BACK) { // lalt + backspace : delete from cursor to beginning of line
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_U), KeyUp(SC_U) };
-			}
-			return { g_nullKey };
+		if (keyCode == SC_BACK) { // lalt + back : delete from cursor to beginning of line
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_U), KeyUp(SC_U) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_I) { // lalt + i : Clear screen
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_L), KeyUp(SC_L) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_L), KeyUp(SC_L) },
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LSHIFT) },
+			{ KeyUp(SC_LSHIFT) }
+		);
 	}
 
 	if (keyCode == SC_GRAVE) { // lalt + ` to alt + enter
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_GRAVE), KeyUp(SC_GRAVE) }, keyDownLAltAsLCtrl());
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_GRAVE), KeyUp(SC_GRAVE) }, keyDownLAltAsLCtrl()),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_ESC && !g_isLAltAsLCtrl) { // alttabbed + esc
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_ESC), KeyUp(SC_ESC) };
-		}
-		return keyDownLAltAsLCtrl();
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_ESC), KeyUp(SC_ESC) },
+			keyDownLAltAsLCtrl()
+		);
 	}
 
 	if (keyCode == SC_ESC) { // alt + esc
@@ -632,56 +645,63 @@ std::vector<Key> handleLAltKey(Key key) {
 	}
 
 	if (keyCode == SC_Q && !g_isLAltAsLCtrl) { // alt + tab + q
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_SUPR), KeyUp(SC_SUPR) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(SC_SUPR) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_Q) { // alt + q
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_F4), KeyUp(SC_F4) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_F4), KeyUp(SC_F4) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_TAB) { // alt + tab
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLAltAsLAlt(), { KeyDown(SC_TAB), KeyUp(SC_TAB) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyDownLAltAsLAlt(), { Key(SC_TAB) }),
+			{ g_nullKey }
+		);
 	}
 
-	if (keyCode == SC_BACK) { // alt + backspace
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(
+	if (keyCode == SC_BACK) { // alt + back
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(
 				keyUpLAlt(),
-				{ KeyDown(SC_LSHIFT), KeyDown(SC_HOME), KeyUp(SC_HOME), KeyUp(SC_LSHIFT), KeyDown(SC_BACK), KeyUp(SC_BACK) },
+				{ KeyDown(SC_LSHIFT), Key(SC_HOME), KeyUp(SC_LSHIFT), Key(SC_BACK) },
 				keyDownLAltAsLCtrl()
-			);
-		}
-		return { g_nullKey };
+			),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_J) { // alt + j
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_NEXT), KeyUp(SC_NEXT) }, keyDownLAltAsLCtrl());
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { Key(SC_NEXT) }, keyDownLAltAsLCtrl()),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_K) { // alt + k
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(SC_PRIOR), KeyUp(SC_PRIOR) }, keyDownLAltAsLCtrl());
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { Key(SC_PRIOR) }, keyDownLAltAsLCtrl()),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_SPACE) { // alt + espace
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_F12), KeyUp(SC_F12) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(SC_F12) },
+			{ g_nullKey }
+		);
 	}
 
 	if (
@@ -697,11 +717,12 @@ std::vector<Key> handleLAltKey(Key key) {
 		keyCode == SC_F10 ||
 		keyCode == SC_F11 ||
 		keyCode == SC_F12
-		) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyUpLAlt(), { KeyDown(keyCode), KeyUp(keyCode) });
-		}
-		return { g_nullKey };
+	) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyUpLAlt(), { Key(keyCode) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode != SC_LALT && !g_isLAltAsLCtrl) { // alttabbed + letter
@@ -709,17 +730,19 @@ std::vector<Key> handleLAltKey(Key key) {
 	}
 
 	if (keyCode != SC_LALT) { // alt + letter
-		if (isCurrentKeyDown) {
-			return { Key(keyCode) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(keyCode) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_LALT) { // lalt
-		if (isCurrentKeyDown) {
-			return keyDownLAltAsLCtrl();
-		}
-		return keyUpLAlt();
+		return getMapKeys(
+			isCurrentKeyDown,
+			keyDownLAltAsLCtrl(),
+			keyUpLAlt()
+		);
 	}
 
 	return {};
@@ -734,10 +757,11 @@ std::vector<Key> handleShiftKey(Key key) {
 	}
 
 	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LSHIFT) },
+			{ KeyUp(SC_LSHIFT) }
+		);
 	}
 
 	return {};
