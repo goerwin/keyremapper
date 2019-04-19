@@ -66,6 +66,13 @@ class KeyEventTest : public ::testing::Test {
 			return false;
 		}
 	}
+
+	static bool validateKeyMapsAndOutputThem(
+		std::string name,
+		std::pair<std::vector<Key>, std::vector<Key>> keys
+	) {
+		return compareKeyEvents(getKeyEvents(keys.first), keys.second);
+	}
 };
 
 // handleLAltKey
@@ -382,206 +389,188 @@ TEST_F(KeyEventTest, handleLAltKey_LALT) {
 // handleShiftKey
 
 TEST_F(KeyEventTest, handleShiftKey_LSHIFT_Letter) {
-	auto keyEvents = getKeyEvents({
-		KeyDown(SC_LSHIFT),
-		KeyDown(SC_C),
-		KeyUp(SC_C),
-		KeyUp(SC_LSHIFT)
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LSHIFT),
-		KeyDown(SC_C),
-		KeyUp(SC_C),
-		KeyUp(SC_LSHIFT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LSHIFT)
+		},
+		{
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LSHIFT)
+		}
+	}));
 }
 
 TEST_F(KeyEventTest, handleShiftKey_LSHIFT) {
-	auto keyEvents = getKeyEvents({
-		KeyDown(SC_LSHIFT),
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LSHIFT)
+		},
+		{
+			KeyDown(SC_LSHIFT),
 		KeyUp(SC_LSHIFT)
-	});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LSHIFT),
-		KeyUp(SC_LSHIFT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+		}
+	}));
 }
 
 // handleKey
-/*
+
 // F3↕ = LCTRL↓LSHIFT↓TAB↕LSHIFT↑LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F3) {
 	setActiveProcessName("chrome.exe");
 
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F3, 0 }),
-		InterceptionKeyStroke({ SC_F3, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_LSHIFT),
-		KeyDown(SC_TAB),
-		KeyUp(SC_TAB),
-		KeyUp(SC_LSHIFT),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F3),
+			KeyUp(SC_F3)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			Key(SC_TAB),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // F4↕ = LCTRL↓TAB↕LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F4) {
 	setActiveProcessName("chrome.exe");
 
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F4, 0 }),
-		InterceptionKeyStroke({ SC_F4, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LCTRL),
-		KeyDown(SC_TAB),
-		KeyUp(SC_TAB),
-		KeyUp(SC_LCTRL)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F4),
+			KeyUp(SC_F4)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_TAB),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 // F5↕ = LALT↓M↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F5) {
 	setActiveProcessName("chrome.exe");
 
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F5, 0 }),
-		InterceptionKeyStroke({ SC_F5, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LALT),
-		KeyDown(SC_M),
-		KeyUp(SC_M),
-		KeyUp(SC_LALT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F5),
+			KeyUp(SC_F5)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_M),
+			KeyUp(SC_LALT)
+		}
+	}));
 }
 
 // F6↕ = LALT↓T↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F6) {
 	setActiveProcessName("chrome.exe");
 
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F6, 0 }),
-		InterceptionKeyStroke({ SC_F6, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_LALT),
-		KeyDown(SC_T),
-		KeyUp(SC_T),
-		KeyUp(SC_LALT)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F6),
+			KeyUp(SC_F6)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_T),
+			KeyUp(SC_LALT)
+		}
+	}));
 }
 
 // F1↕ = BRIGHTNESSDOWN↕
 TEST_F(KeyEventTest, handleKey_F1) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F1, 0 }),
-		InterceptionKeyStroke({ SC_F1, 1 })
-	});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_BRIGHTNESSDOWN),
-		g_nullKeyEvent
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F1),
+			KeyUp(SC_F1)
+		},
+		{
+			KeyDown(SC_BRIGHTNESSDOWN)
+		}
+	}));
 }
 
 // F2↕ = BRIGHTNESSUP↕
 TEST_F(KeyEventTest, handleKey_F2) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F2, 0 }),
-		InterceptionKeyStroke({ SC_F2, 1 })
-	});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_BRIGHTNESSUP),
-		g_nullKeyEvent
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F2),
+			KeyUp(SC_F2)
+		},
+		{
+			KeyDown(SC_BRIGHTNESSUP)
+		}
+	}));
 }
 
 // F10↕ = MUTE↕
 TEST_F(KeyEventTest, handleKey_F10) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F10, 0 }),
-		InterceptionKeyStroke({ SC_F10, 1 })
-	});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_MUTE, 2),
-		KeyUp(SC_MUTE, 3)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F10),
+			KeyUp(SC_F10)
+		},
+		{
+			Key(SC_MUTE, 5)
+		}
+	}));
 }
 
 // F11↕ = VOLUMEDOWN↕
 TEST_F(KeyEventTest, handleKey_F11) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F11, 0 }),
-		InterceptionKeyStroke({ SC_F11, 1 })
-	});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
-		KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
-		KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3),
-		KeyDown(SC_VOLUMEDOWN, 2), KeyUp(SC_VOLUMEDOWN, 3)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F11),
+			KeyUp(SC_F11)
+		},
+		{
+			Key(SC_VOLUMEDOWN, 5),
+			Key(SC_VOLUMEDOWN, 5),
+			Key(SC_VOLUMEDOWN, 5),
+			Key(SC_VOLUMEDOWN, 5)
+		}
+	}));
 }
 
 // F12↕ = VOLUMEUP↕
 TEST_F(KeyEventTest, handleKey_F12) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_F12, 0 }),
-		InterceptionKeyStroke({ SC_F12, 1 })
-		});
-
-	std::vector<Key> expectedKeyEvents = {
-		KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
-		KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
-		KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3),
-		KeyDown(SC_VOLUMEUP, 2), KeyUp(SC_VOLUMEUP, 3)
-	};
-
-	EXPECT_TRUE(compareKeyEvents(keyEvents, expectedKeyEvents));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_F12),
+			KeyUp(SC_F12)
+		},
+		{
+			Key(SC_VOLUMEUP, 5),
+			Key(SC_VOLUMEUP, 5),
+			Key(SC_VOLUMEUP, 5),
+			Key(SC_VOLUMEUP, 5)
+		}
+	}));
 }
 
 // Letter↕
 TEST_F(KeyEventTest, handleKey_Letter) {
-	auto keyEvents = getKeyEvents({
-		InterceptionKeyStroke({ SC_C, 0 }),
-		InterceptionKeyStroke({ SC_C, 1 })
-	});
-
-	EXPECT_TRUE(compareKeyEvents(
-		keyEvents,
-		{ KeyDown(SC_C), KeyUp(SC_C) }
-	));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+		{
+			KeyDown(SC_C),
+			KeyUp(SC_C)
+		},
+		{
+			KeyDown(SC_C),
+			KeyUp(SC_C)
+		}
+	}));
 }
-*/

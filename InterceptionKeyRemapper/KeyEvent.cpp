@@ -125,6 +125,13 @@ std::vector<Key> keyUpLAlt() {
 	return keys;
 }
 
+std::vector<Key> getMapKeys(bool isCurrentKeyDown, std::vector<Key> onKeyDownKeys, std::vector<Key> onKeyUpKeys) {
+	if (isCurrentKeyDown) {
+		return onKeyDownKeys;
+	}
+	return onKeyUpKeys;
+}
+
 std::vector<Key> handleSimulateMouseClick(Key key) {
 	auto isCurrentKeyDown = isKeyDown(key);
 	auto keyCode = key.code;
@@ -742,73 +749,83 @@ std::vector<Key> handleKey(Key key) {
 
 	if (isChromeActiveProcess()) {
 		if (keyCode == SC_F3) { // f3
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_F4) { // f4
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_F5) { // F5
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), Key(SC_M), KeyUp(SC_LALT) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LALT), Key(SC_M), KeyUp(SC_LALT) },
+				{ g_nullKey }
+			);
 		}
 
 		if (keyCode == SC_F6) { // f6
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), Key(SC_T), KeyUp(SC_LALT) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LALT), Key(SC_T), KeyUp(SC_LALT) },
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (keyCode == SC_F1) { // f1
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_BRIGHTNESSDOWN) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_BRIGHTNESSDOWN) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_F2) { // f2
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_BRIGHTNESSUP) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_BRIGHTNESSUP) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_F10) { // f10
-		if (isCurrentKeyDown) {
-			return { Key(SC_MUTE, 5) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(SC_MUTE, 5) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_F11) { // f11
-		if (isCurrentKeyDown) {
-			return { Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_F12) { // f12
-		if (isCurrentKeyDown) {
-			return { Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+		 	{ Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5) },
+			{ g_nullKey }
+		);
 	}
 
-	if (isCurrentKeyDown) {
-		return { KeyDown(keyCode) };
-	}
-	return { KeyUp(keyCode) };
+	return getMapKeys(
+		isCurrentKeyDown,
+		{ KeyDown(keyCode) },
+		{ KeyUp(keyCode) }
+	);
 }
 
 std::vector<Key> getKeyEvents(std::vector<Key> keys) {
