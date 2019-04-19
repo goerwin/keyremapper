@@ -214,15 +214,7 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 	});
 
 	auto capslockClick = ErwinUtils::KeyClick<void(int)>(SC_CAPSLOCK, [](int consecutiveClicks) {
-		if (consecutiveClicks == 1) {
-			if (g_isLAltKeyDown && !g_isLAltAsLCtrl) { // altTabbed + esc
-				sendKeyEvents(concatKeyVectors({ KeyDown(SC_ESC), KeyUp(SC_ESC) }, keyDownLAltAsLCtrl()));
-			} else if (g_isLAltKeyDown) { // alt + esc
-				// DO NOTHING
-			} else {
-				sendKeyEvents({ KeyDown(SC_ESC), KeyUp(SC_ESC) });
-			}
-		}
+		sendKeyEvents(getKeysForEsc());
 	});
 
 	auto lAltClick = ErwinUtils::KeyClick<void(int)>(SC_LALT, [](int consecutiveClicks) {

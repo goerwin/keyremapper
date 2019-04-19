@@ -103,4 +103,4 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - drag a file with win + c and open alt + tab doesnt work
 - lalt + capslock + s triggers switch of input language (FIXED)
 - caps + (shift) + tab to ctrl + (shift) + tab (FIXED)
-- in chrome, lalt↓ + `↕ + L↕  opens tab switcher-
+- in chrome, lalt↓ + `↕ + L↕ + tab↕ + lalt(up)  (FIXED)

@@ -196,6 +196,18 @@ unsigned short getVimPriorNextKeyCode(unsigned short keyCode) {
 		SC_NULL;
 }
 
+Keys getKeysForEsc() {
+	if (!g_isLAltAsLCtrl) {
+		return concatKeysWithLAltLCtrl("", { Key(SC_ESC) }, "keyDownLAltAsLCtrl");
+	}
+
+	if (!g_isLAltKeyDown) {
+		return { Key(SC_ESC) };
+	}
+
+	return { g_nullKey };
+}
+
 Keys handleSimulateMouseClick(Key key) {
 	auto isCurrentKeyDown = isKeyDown(key);
 	auto keyCode = key.code;
@@ -585,13 +597,9 @@ Keys handleLAltKey(Key key) {
 	}
 
 	if (keyCode == SC_ESC) { // alt + esc
-		if (!g_isLAltAsLCtrl) { // alt + tabbed + esc
-			if (isCurrentKeyDown) {
-				return { Key(SC_ESC) };
-			}
-			return keyDownLAltAsLCtrl();
+		if (isCurrentKeyDown) {
+			return getKeysForEsc();
 		}
-
 		return { g_nullKey };
 	}
 

@@ -311,8 +311,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_GRAVE_THEN_TAB) {
 	}));
 }
 
-// LALT↓TAB↕Q↕LALT↑ = LCTRL↕LALT↓TAB↕SUPR↕LALT↑
-TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_Q) {
+TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_THEN_Q) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
 			KeyDown(SC_LALT),
@@ -329,6 +328,44 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_Q) {
 			Key(SC_TAB),
 			Key(SC_SUPR),
 			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_THEN_ESC) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_ESC),
+			KeyUp(SC_ESC),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			Key(SC_ESC),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLAltKey_LALT_ESC) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_ESC),
+			KeyUp(SC_ESC),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
 		}
 	}));
 }
@@ -353,7 +390,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
 	}));
 }
 
-// LALT↓BACK↕LALT↑ = LCTRL↕LSHIFT↓HOME↕LSHIFT↑BACK↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -375,54 +411,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
 	}));
 }
 
-// LALT↓LSHIFT↓J↕LSHIFT↑LALT↑ = LCTRL↕LSHIFT↓PgDown↕LSHIFT↑LCTRL↑
-TEST_F(KeyEventTest, handleLAltKey_LALT_LSHIFT_J) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_LSHIFT),
-			KeyDown(SC_J),
-			KeyUp(SC_J),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			KeyUp(SC_LCTRL),
-			Key(SC_NEXT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-// LALT↓LSHIFT↓K↕LSHIFT↑LALT↑ = LCTRL↕LSHIFT↓PgUp↕LSHIFT↑LCTRL↑
-TEST_F(KeyEventTest, handleLAltKey_LALT_LSHIFT_K) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_LSHIFT),
-			KeyDown(SC_K),
-			KeyUp(SC_K),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			KeyUp(SC_LCTRL),
-			Key(SC_PRIOR),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-// LALT↓J↕LALT↑ = LCTRL↕PgDown↕LCTRL↑
-TEST_F(KeyEventTest, handleLAltKey_LALT_J) {
+TEST_F(KeyEventTest, handleLAltKey_LALT_J_OR_K) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
 			KeyDown(SC_LALT),
@@ -440,26 +429,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_J) {
 	}));
 }
 
-// LALT↓K↕LALT↑ = LCTRL↕PgUp↕LCTRL↑
-TEST_F(KeyEventTest, handleLAltKey_LALT_K) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_K),
-			KeyUp(SC_K),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			Key(SC_PRIOR),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-// LALT↓Space↕LALT↑ = LCTRL↓F12↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Space) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -476,7 +445,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Space) {
 	}));
 }
 
-// LALT↓F{n}↕LALT↑ = LCTRL↕F{n}↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -512,7 +480,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
 	}));
 }
 
-// LALT↓TAB↕ = LCTRL↕LALT↓TAB↕
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -529,7 +496,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
 	}));
 }
 
-// LALT↓Letter↓ = LCTRL↓Letter↕
 TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -560,7 +526,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
 	}));
 }
 
-// LALT↓ = LCTRL↓
 TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -572,7 +537,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
 	}));
 }
 
-// LALT↕ = LCTRL↕
 TEST_F(KeyEventTest, handleLAltKey_LALT) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{

@@ -105,6 +105,7 @@ struct Key {
 };
 
 typedef std::vector<Key> Keys;
+typedef std::string String;
 
 struct KeyDown : Key {
 	KeyDown(unsigned short cCode, unsigned short cState = 0) : Key(cCode, cState) {}
@@ -117,6 +118,7 @@ struct KeyUp : Key {
 extern Key g_nullKey;
 
 Keys getKeyEvents(Keys keys);
+Keys getKeysForEsc();
 
 void setActiveProcessName(std::string _activeProcessName);
 Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {});
