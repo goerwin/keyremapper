@@ -401,31 +401,35 @@ std::vector<Key> handleLCtrlKey(Key key) {
 	auto keyCode = key.code;
 
 	if (keyCode == SC_LSHIFT) { // LCtrl + Shift
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LSHIFT) },
+			{ KeyUp(SC_LSHIFT) }
+		);
 	}
 
 	if (keyCode == SC_TAB) { // LCtrl + Tab
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLCtrlAsLCtrl(), { KeyDown(SC_TAB), KeyUp(SC_TAB) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			concatKeyVectors(keyDownLCtrlAsLCtrl(), { Key(SC_TAB) }),
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode != SC_LCTRL) { // LCtrl + letter
-		if (isCurrentKeyDown) {
-			return concatKeyVectors(keyDownLCtrlAsLAlt(), { KeyDown(keyCode), KeyUp(keyCode) });
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(keyCode) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_LCTRL) { // LCtrl
-		if (isCurrentKeyDown) {
-			return keyDownLCtrlAsLAlt();
-		}
-		return keyUpLCtrl();
+		return getMapKeys(
+			isCurrentKeyDown,
+			keyDownLCtrlAsLAlt(),
+			keyUpLCtrl()
+		);
 	}
 
 	return {};

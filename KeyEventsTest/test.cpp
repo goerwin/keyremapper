@@ -75,9 +75,99 @@ class KeyEventTest : public ::testing::Test {
 	}
 };
 
+// handleLCtrlKey
+
+TEST_F(KeyEventTest, handleLCtrlKey_LCTRL_LSHIFT) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLCtrlKey_LCTRL_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			Key(SC_TAB),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLCtrlKey_LCTRLDown_LetterDown) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_C)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_C)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLCTrlKey_LCTRL_Letter) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_C),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLCtrlKey_LCTRLDown) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleLCtrlKey_LCTRL) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
 // handleLWinKey
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_1234) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
 	setActiveProcessName("SC2_x64.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
@@ -95,7 +185,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_1234) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_BACK_gitbash) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
 	setActiveProcessName("mintty.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
@@ -113,7 +203,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_BACK_gitbash) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_H) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_H) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
 			KeyDown(SC_LWIN),
@@ -129,7 +219,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_H) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_L) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_L) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
 			KeyDown(SC_LWIN),
@@ -145,7 +235,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_L) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_BACK) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
 			KeyDown(SC_LWIN),
@@ -161,7 +251,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_BACK) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN_D) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN_D) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
 			KeyDown(SC_LWIN),
@@ -177,7 +267,7 @@ TEST_F(KeyEventTest, handleWinKey_LWIN_D) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleWinKey_LWIN) {
+TEST_F(KeyEventTest, handleLWinKey_LWIN) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
 			KeyDown(SC_LWIN),
