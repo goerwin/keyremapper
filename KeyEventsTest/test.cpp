@@ -77,7 +77,7 @@ class KeyEventTest : public ::testing::Test {
 
 // handleLWinLAltKeys
 
-//handleCapslockKey
+// handleCapslockKey
 
 // handleLCtrlKey
 
@@ -124,7 +124,7 @@ TEST_F(KeyEventTest, handleLCtrlKey_LCTRLDown_LetterDown) {
 		},
 		{
 			KeyDown(SC_LALT),
-			Key(SC_C)
+			KeyDown(SC_C)
 		}
 	}));
 }
@@ -139,7 +139,8 @@ TEST_F(KeyEventTest, handleLCTrlKey_LCTRL_Letter) {
 		},
 		{
 			KeyDown(SC_LALT),
-			Key(SC_C),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
 			KeyUp(SC_LALT)
 		}
 	}));
@@ -283,6 +284,33 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN) {
 
 // handleLAltKey
 
+// TODO: MORE
+
+TEST_F(KeyEventTest, handleLAltKey_LALT_GRAVE_THEN_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_GRAVE),
+			KeyUp(SC_GRAVE),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_GRAVE),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
 // LALT↓TAB↕Q↕LALT↑ = LCTRL↕LALT↓TAB↕SUPR↕LALT↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_Q) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
@@ -305,7 +333,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_TAB_Q) {
 	}));
 }
 
-// LALT↓Q↕LALT↑ = LCTRL↕LALT↓F4↕LALT↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -318,9 +345,10 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
 			KeyDown(SC_LCTRL),
 			KeyUp(SC_LCTRL),
 			KeyDown(SC_LALT),
-			KeyDown(SC_F4),
-			KeyUp(SC_F4),
-			KeyUp(SC_LALT)
+			Key(SC_F4),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
 		}
 	}));
 }
@@ -466,7 +494,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
 	}));
 }
 
-// LALT↓TAB↕Letter↕ = LCTRL↕LALT↓TAB↕
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -511,12 +538,11 @@ TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
 		},
 		{
 			KeyDown(SC_LCTRL),
-			Key(SC_C)
+			KeyDown(SC_C)
 		}
 	}));
 }
 
-// LALT↓Letter↕LALT↑ = LCTRL↓Letter↕LCTRL↑
 TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
 		{
@@ -527,7 +553,8 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
 		},
 		{
 			KeyDown(SC_LCTRL),
-			Key(SC_C),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
 			KeyUp(SC_LCTRL)
 		}
 	}));

@@ -104,6 +104,8 @@ struct Key {
 	}
 };
 
+typedef std::vector<Key> Keys;
+
 struct KeyDown : Key {
 	KeyDown(unsigned short cCode, unsigned short cState = 0) : Key(cCode, cState) {}
 };
@@ -114,22 +116,17 @@ struct KeyUp : Key {
 
 extern Key g_nullKey;
 
-std::vector<Key> getKeyEvents(std::vector<Key> keys);
+Keys getKeyEvents(Keys keys);
 
 void setActiveProcessName(std::string _activeProcessName);
-std::vector<Key> concatKeyVectors(
-	std::vector<Key> keys,
-	std::vector<Key> keys2,
-	std::vector<Key> keys3 = {},
-	std::vector<Key> keys4 = {}
-);
+Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {});
 
 bool isKeyDown(Key key);
 
-std::vector<Key> keyDownLCtrlAsLAlt();
-std::vector<Key> keyDownLCtrlAsLCtrl();
-std::vector<Key> keyUpLCtrl();
-std::vector<Key> keyDownLAltAsLCtrl();
-std::vector<Key> keyDownLAltAsLAlt();
-std::vector<Key> keyUpLAlt();
+Keys keyDownLCtrlAsLAlt();
+Keys keyDownLCtrlAsLCtrl();
+Keys keyUpLCtrl();
+Keys keyDownLAltAsLCtrl();
+Keys keyDownLAltAsLAlt();
+Keys keyUpLAlt();
 void setGlobalDefaultValues();
