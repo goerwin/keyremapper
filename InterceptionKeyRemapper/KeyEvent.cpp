@@ -440,68 +440,63 @@ std::vector<Key> handleLWinKey(Key key) {
 	auto keyCode = key.code;
 
 	if (isStarcraft2ActiveProcess()) {
-		if (keyCode == SC_X) { // lwin + x to alt + x
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), KeyDown(SC_X), KeyUp(SC_X), KeyUp(SC_LALT) };
-			}
-			return { g_nullKey };
-		}
-
 		if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) { // lwin + 1/2/3/4
-			if (isCurrentKeyDown) {
-				return { KeyDown(SC_LALT), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LALT) };
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				{ KeyDown(SC_LALT), Key(keyCode), KeyUp(SC_LALT) },
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (isGitBashActiveProcess()) {
 		if (keyCode == SC_BACK) { // lwin + back : delete from cursor to beginning of word
-			if (isCurrentKeyDown) {
-				return concatKeyVectors(keyDownLAltAsLCtrl(), { KeyDown(SC_W), KeyUp(SC_W) }, keyUpLAlt());
-			}
-			return { g_nullKey };
+			return getMapKeys(
+				isCurrentKeyDown,
+				concatKeyVectors(keyDownLAltAsLCtrl(), { Key(SC_W) }, keyUpLAlt()),
+				{ g_nullKey }
+			);
 		}
 	}
 
 	if (keyCode == SC_H) { // lwin + h
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LALT), KeyDown(SC_LEFT), KeyUp(SC_LEFT), KeyUp(SC_LALT) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LALT), Key(SC_LEFT), KeyUp(SC_LALT) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_L) { // lwin + l
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LALT), KeyDown(SC_RIGHT), KeyUp(SC_RIGHT), KeyUp(SC_LALT) };
-		}
-		return { g_nullKey };
-	}
-
-	// TODO: Probably to do a combo to for example, get accented keys
-	if (keyCode == SC_E) { // LWin + E
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LALT), Key(SC_RIGHT), KeyUp(SC_LALT) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_BACK) { // LWin + back
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LCTRL), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LCTRL) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LCTRL), Key(SC_BACK), KeyUp(SC_LCTRL) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_D) { // LWin + D
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LWIN, 2), KeyDown(keyCode), KeyUp(keyCode), KeyUp(SC_LWIN, 3) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ KeyDown(SC_LWIN, 2), Key(SC_D), KeyUp(SC_LWIN, 3) },
+			{ g_nullKey }
+		);
 	}
 
 	if (keyCode == SC_SPACE) { // LWin + Space
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LWIN, 2), KeyUp(SC_LWIN, 3) };
-		}
-		return { g_nullKey };
+		return getMapKeys(
+			isCurrentKeyDown,
+			{ Key(SC_LWIN, 5) },
+			{ g_nullKey }
+		);
 	}
 
 	return { g_nullKey };

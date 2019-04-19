@@ -75,6 +75,118 @@ class KeyEventTest : public ::testing::Test {
 	}
 };
 
+// handleLWinKey
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_1234) {
+	setActiveProcessName("SC2_x64.exe");
+
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_1),
+			KeyUp(SC_1),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_1),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_BACK_gitbash) {
+	setActiveProcessName("mintty.exe");
+
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_W),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_H) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_H),
+			KeyUp(SC_H),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_LEFT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_L) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_L),
+			KeyUp(SC_L),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LALT),
+			Key(SC_RIGHT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_BACK) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			Key(SC_BACK),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN_D) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_D),
+			KeyUp(SC_D),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LWIN, 2),
+			Key(SC_D),
+			KeyUp(SC_LWIN, 3)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, handleWinKey_LWIN) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyUp(SC_LWIN)
+		},
+		{}
+	}));
+}
+
 // handleLAltKey
 
 // LALT↓TAB↕Q↕LALT↑ = LCTRL↕LALT↓TAB↕SUPR↕LALT↑
