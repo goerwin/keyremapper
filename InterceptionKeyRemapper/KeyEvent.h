@@ -3,15 +3,6 @@
 #include <windows.h>
 #include <vector>
 
-extern bool g_isCapslockKeyDown;
-extern bool g_isShiftKeyDown;
-extern bool g_isLCtrlKeyDown;
-extern bool g_isLWinKeyDown;
-extern bool g_isLAltKeyDown;
-
-extern bool g_isLCtrlAsLAlt;
-extern bool g_isLAltAsLCtrl;
-
 enum ScanCodes {
 	SC_C = 0x2E,
 	SC_D = 0x20,
@@ -115,20 +106,9 @@ struct KeyUp : Key {
 	KeyUp(unsigned short cCode, unsigned short cState = 1) : Key(cCode, cState) {}
 };
 
-extern Key g_nullKey;
-
 Keys getKeyEvents(Keys keys);
 Keys getParsedKeysForEsc();
 
 void setActiveProcessName(std::string _activeProcessName);
-Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {});
-
 bool isKeyDown(Key key);
-
-Keys keyDownLCtrlAsLAlt();
-Keys keyDownLCtrlAsLCtrl();
-Keys keyUpLCtrl();
-Keys keyDownLAltAsLCtrl();
-Keys keyDownLAltAsLAlt();
-Keys keyUpLAlt();
 void setGlobalDefaultValues();

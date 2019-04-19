@@ -34,7 +34,7 @@ bool isGitBashActiveProcess() {
 	return g_activeProcessName == "mintty.exe";
 }
 
-Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3, Keys keys4) {
+Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
 	keys.insert(keys.end(), keys2.begin(), keys2.end());
 	keys.insert(keys.end(), keys3.begin(), keys3.end());
 	keys.insert(keys.end(), keys4.begin(), keys4.end());
