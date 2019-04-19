@@ -26,15 +26,27 @@ DWORD globalDelayMSBetweenKeyEvents = 5;
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
 
-void sendKeyEvents(std::vector<Key> keyEvents) {
-	auto keyEventsSize = keyEvents.size();
+void commonKeyRemaps(InterceptionKeyStroke &keyStroke) {
+	DWORD keyCode = keyStroke.code;
+	if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT) {
+		keyStroke.code = SC_LSHIFT;
+	} else if (keyCode == SC_RALT) {
+		keyStroke.code = SC_LALT;
+	} else if (keyCode == SC_RCTRL) {
+		keyStroke.code = SC_LCTRL;
+	}
+}
 
-	for (int i = 0; i < keyEventsSize; i++) {
-		DWORD keyCode = keyEvents[i].keyCode;
-		int state = keyEvents[i].state;
-		InterceptionKeyStroke newKeyStroke;
-		newKeyStroke.code = keyCode;
-		newKeyStroke.state = state;
+Key getKeyFromKeyStroke(InterceptionKeyStroke keyStroke) {
+	return Key(keyStroke.code, keyStroke.state);
+}
+
+void sendKeyEvents(std::vector<Key> keys) {
+	auto keysSize = keys.size();
+
+	for (int i = 0; i < keysSize; i++) {
+		auto keyCode = keys[i].code;
+		auto state = keys[i].state;
 
 		if (keyCode == SC_MOUSELEFT) {
 			if (state == 0) {
@@ -53,7 +65,16 @@ void sendKeyEvents(std::vector<Key> keyEvents) {
 		} else if (keyCode == SC_BRIGHTNESSUP) {
 			BrightnessHandler::Increment(10);
 		} else if (keyCode != SC_NULL) {
-			interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
+			if (state == 4) {
+				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 0 }), 1);
+				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 1 }), 1);
+			} else if (state == 5) {
+				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 2 }), 1);
+				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 3 }), 1);
+			}
+			else {
+				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, state }), 1);
+			}
 		}
 	}
 }
@@ -175,7 +196,6 @@ void handleAppCleanUp() {
 	});
 }
 
-
 DWORD WINAPI keyboardThreadFunc(void* data) {
 	raise_process_priority();
 	context = interception_create_context();
@@ -228,14 +248,16 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 		continue;
 		*/
 		commonKeyRemaps(keyStroke);
-		
-		DWORD keyCode = keyStroke.code;
-		bool isCurrentKeyDown = isKeyDown(keyStroke);
+
+		auto key = getKeyFromKeyStroke(keyStroke);
+		auto keyCode = key.code;
+
+		bool isCurrentKeyDown = isKeyDown(key);
 		shiftClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 		capslockClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 		lAltClick.handleKeyStroke(keyCode, isCurrentKeyDown);
 
-		sendKeyEvents(getKeyEvents({ keyStroke }));
+		sendKeyEvents(getKeyEvents({ key }));
 	}
 
 	interception_destroy_context(context);

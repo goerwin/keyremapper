@@ -93,31 +93,29 @@ enum ScanCodes {
 };
 
 struct Key {
-	DWORD keyCode;
-	int state;
+	unsigned short code;
+	unsigned short state;
 
 	Key() {}
 
-	Key(DWORD cKeyCode, int cState) {
-		keyCode = cKeyCode;
+	Key(unsigned short cCode, unsigned short cState = 4) {
+		code = cCode;
 		state = cState;
 	}
 };
 
 struct KeyDown : Key {
-	KeyDown(DWORD cKeyCode, int cState = 0) : Key(cKeyCode, cState) {}
+	KeyDown(unsigned short cCode, unsigned short cState = 0) : Key(cCode, cState) {}
 };
 
 struct KeyUp : Key {
-	KeyUp(DWORD cKeyCode, int cState = 1) : Key(cKeyCode, cState) {}
+	KeyUp(unsigned short cCode, unsigned short cState = 1) : Key(cCode, cState) {}
 };
 
-extern Key g_nullKeyEvent;
+extern Key g_nullKey;
 
-std::vector<Key> getKeyEvents(std::vector<InterceptionKeyStroke> keyStrokes);
+std::vector<Key> getKeyEvents(std::vector<Key> keys);
 
-void sendKeyEvents(std::vector<Key> keyEvents);
-void commonKeyRemaps(InterceptionKeyStroke &keyStroke);
 void setActiveProcessName(std::string _activeProcessName);
 std::vector<Key> concatKeyVectors(
 	std::vector<Key> keys,
@@ -126,7 +124,7 @@ std::vector<Key> concatKeyVectors(
 	std::vector<Key> keys4 = {}
 );
 
-bool isKeyDown(InterceptionKeyStroke keyStroke);
+bool isKeyDown(Key key);
 
 std::vector<Key> keyDownLCtrlAsLAlt();
 std::vector<Key> keyDownLCtrlAsLCtrl();
