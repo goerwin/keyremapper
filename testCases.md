@@ -2,171 +2,171 @@
 
 ### Mouse
 ```
-❖↓ C↓ C↑ ❖↑ = LeftClick↓ LeftClick↑
-❖↓ Caps↓ C↓ C↑ Caps↑ ❖↑ = RightClick↓ RightClick↑
-❖↓ C↓ C↓ C↓ C↓ C↑ ❖↑ = LeftClick↓ LeftClick↑
-❖↓ Caps↓ C↓ C↓ C↓ C↓ C↑ Caps↓ ❖↑ = RightClick↓ RightClick↑
-❖↓ ⇧↓ C↓ C↑ ⇧↑ ❖↑ = ⇧↓ LeftClick↓ LeftClick↑ ⇧↑
-❖↓ Alt↓ C↓ C↑ Alt↑ ❖↑ = Ctrl↓ LeftClick↓ LeftClick↑ Ctrl↑
+❖↓ C↓↑ ❖↑ = LeftClick↓↑
+❖↓ Caps↓ C↓↑ Caps↑ ❖↑ = RightClick↓↑
+❖↓ C↓↓↓↓↑ ❖↑ = LeftClick↓↑
+❖↓ Caps↓ C↓↓↓↓↑ Caps↓ ❖↑ = RightClick↓↑
+❖↓ Shift↓ C↓↑ Shift↑ ❖↑ = Shift↓ LeftClick↓↑ Shift↑
+❖↓ Alt↓ C↓↑ Alt↑ ❖↑ = Ctrl↓ LeftClick↓↑ Ctrl↑
 ```
 
 ### Key
 ```
-H↓ H↑ = H↓ H↑
-H↓ H↓ H↓ = H↓ H↓ H↓
-H↓ H↓ H↑ = H↓ H↓ H↑
-H↓ J↓ J↑ H↑ = H↓ J↓ J↑ H↑
+H↓↑ = H↓↑
+H↓↓↓ = H↓↓↓
+H↓↓↑ = H↓↓↑
+H↓ J↓↑ H↑ = H↓ J↓↑ H↑
 H↓ J↓ H↑ J↑ = H↓ J↓ H↑ J↑
-H↓ J↓ K↓ K↑ J↑ H↑ = H↓ J↓ K↓ K↑ J↑ H↑
-H↓ J↓ K↓ K↑ H↑ J↑ = H↓ J↓ K↓ K↑ H↑ J↑
-F3↓ F3↑ = Ctrl↓ ⇧↓ ⭾↕ ⇧↑ Ctrl↑ // chrome.exe
-F4↓ F4↑ = Ctrl↓ ⭾↕ Ctrl↑ // chrome.exe
-F5↓ F5↑ = Alt↓ M↕ Alt↑ // chrome.exe
-F6↓ F6↑ = Alt↓ T↕ Alt↑ // chrome.exe
-F1↓ F1↑ = F1↓
-F2↓ F2↑ = F1↓
-F10↓ F10↑ = Mute↕
-F11↓ F11↑ = VolumeDown↕ VolumeDown↕ VolumeDown↕ VolumeDown↕
-F12↓ F12↑ = VolumeUp↕ VolumeUp↕ VolumeUp↕ VolumeUp↕
-C↓ C↑ = C↓ C↑
+H↓ J↓ K↓↑ J↑ H↑ = H↓ J↓ K↓↑ J↑ H↑
+H↓ J↓ K↓↑ H↑ J↑ = H↓ J↓ K↓↑ H↑ J↑
+F3↓↑ = Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑ // chrome.exe
+F4↓↑ = Ctrl↓ Tab↕ Ctrl↑ // chrome.exe
+F5↓↑ = Alt↓ M↕ Alt↑ // chrome.exe
+F6↓↑ = Alt↓ T↕ Alt↑ // chrome.exe
+F1↓↑ = F1↓
+F2↓↑ = F1↓
+F10↓↑ = Mute↕
+F11↓↑ = VolumeDown↕↕↕↕
+F12↓↑ = VolumeUp↕↕↕↕
+C↓↑ = C↓↑
 ```
 
 ### Vim Mode
 ```
-Caps↓ H↓ H↑ Caps↑ = ⇦↕
-Caps↓ L↓ L↑ Caps↑ = ⇨↕
-Caps↓ J↓ J↑ Caps↑ = ⇩↕
-Caps↓ K↓ K↑ Caps↑ = ⇧↕
-Caps↓ H↓ H↑ H↓ H↑ Caps↑ = ⇦↕ ⇦↕
-Caps↓ L↓ L↑ L↓ L↑ Caps↑ = ⇨↕ ⇨↕
-Caps↓ J↓ J↑ J↓ J↑ Caps↑ = ⇩↕ ⇩↕
-Caps↓ K↓ K↑ K↓ K↑ Caps↑ = ⇧↕ ⇧↕
-Caps↓ H↓ H↑ Caps↑ = ⇦↕ // AppSwitcher
-Caps↓ L↓ L↑ Caps↑ = ⇨↕ // AppSwitcher
-Caps↓ J↓ J↑ Caps↑ = ⇩↕ // AppSwitcher
-Caps↓ K↓ K↑ Caps↑ = ⇧↕ // AppSwitcher
-Caps↓ H↓ H↑ H↓ H↑ Caps↑ = ⇦↕ ⇦↕ // AppSwitcher
-Caps↓ L↓ L↑ L↓ L↑ Caps↑ = ⇨↕ ⇨↕ // AppSwitcher
-Caps↓ J↓ J↑ J↓ J↑ Caps↑ = ⇩↕ ⇩↕ // AppSwitcher
-Caps↓ K↓ K↑ K↓ K↑ Caps↑ = ⇧↕ ⇧↕ // AppSwitcher
-Caps↓ S↓ H↓ H↑ S↑ Caps↑ = ⇧↓ ⇦↕ ⇧↑
-Caps↓ ⇧↓ H↓ H↑ ⇧↑ Caps↑ = ⇧↓ ⇦↕ ⇧↑
-Caps↓ S↓ L↓ L↑ S↑ Caps↑ = ⇧↓ ⇨↕ ⇧↑
-Caps↓ ⇧↓ L↓ L↑ ⇧↑ Caps↑ = ⇧↓ ⇨↕ ⇧↑
-Caps↓ S↓ J↓ J↑ S↑ Caps↑ = ⇧↓ ⇩↕ ⇧↑
-Caps↓ ⇧↓ J↓ J↑ ⇧↑ Caps↑ = ⇧↓ ⇩↕ ⇧↑
-Caps↓ S↓ K↓ K↑ S↑ Caps↑ = ⇧↓ ⇧↕ ⇧↑
-Caps↓ ⇧↓ K↓ K↑ ⇧↑ Caps↑ = ⇧↓ ⇧↕ ⇧↑
-Caps↓ S↓ H↓ H↑ H↓ H↑ S↑ Caps↑ = ⇧↓ ⇦↕ ⇦↕ ⇧↑
-Caps↓ ⇧↓ H↓ H↑ H↓ H↑ ⇧↑ Caps↑ = ⇧↓ ⇦↕ ⇦↕ ⇧↑
-Caps↓ S↓ L↓ L↑ L↓ L↑ S↑ Caps↑ = ⇧↓ ⇨↕ ⇨↕ ⇧↑
-Caps↓ ⇧↓ L↓ L↑ L↓ L↑ ⇧↑ Caps↑ = ⇧↓ ⇨↕ ⇨↕ ⇧↑
-Caps↓ S↓ J↓ J↑ J↓ J↑ S↑ Caps↑ = ⇧↓ ⇩↕ ⇩↕ ⇧↑
-Caps↓ ⇧↓ J↓ J↑ J↓ J↑ ⇧↑ Caps↑ = ⇧↓ ⇩↕ ⇩↕ ⇧↑
-Caps↓ S↓ K↓ K↑ K↓ K↑ S↑ Caps↑ = ⇧↓ ⇧↕ ⇧↕ ⇧↑
-Caps↓ ⇧↓ K↓ K↑ K↓ K↑ ⇧↑ Caps↑ = ⇧↓ ⇧↕ ⇧↕ ⇧↑
-Caps↓ ❖↓ H↓ H↑ ❖↑ Caps↑ = Ctrl↓ ⇦↕ Ctrl↑
-Caps↓ ❖↓ L↓ L↑ ❖↑ Caps↑ = Ctrl↓ ⇨↕ Ctrl↑
-Caps↓ ❖↓ J↓ J↑ ❖↑ Caps↑ = Ctrl↓ ⇩↕ Ctrl↑
-Caps↓ ❖↓ K↓ K↑ ❖↑ Caps↑ = Ctrl↓ ⇧↕ Ctrl↑
-Caps↓ ❖↓ H↓ H↑ H↓ H↑ ❖↑ Caps↑ = Ctrl↓ ⇦↕ Ctrl↑ Ctrl↓ ⇦↕ Ctrl↑
-Caps↓ ❖↓ L↓ L↑ L↓ L↑ ❖↑ Caps↑ = Ctrl↓ ⇨↕ Ctrl↑ Ctrl↓ ⇨↕ Ctrl↑
-Caps↓ ❖↓ J↓ J↑ J↓ J↑ ❖↑ Caps↑ = Ctrl↓ ⇩↕ Ctrl↑ Ctrl↓ ⇩↕ Ctrl↑
-Caps↓ ❖↓ K↓ K↑ K↓ K↑ ❖↑ Caps↑ = Ctrl↓ ⇧↕ Ctrl↑ Ctrl↓ ⇧↕ Ctrl↑
-Caps↓ S↓ ❖↓ H↓ H↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇦↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ H↓ H↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇦↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ L↓ L↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇨↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ L↓ L↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇨↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ J↓ J↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇩↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ J↓ J↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇩↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ K↓ K↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇧↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ K↓ K↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇧↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ H↓ H↑ H↓ H↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇦↕ Ctrl↑ Ctrl↓ ⇦↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ H↓ H↑ H↓ H↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇦↕ Ctrl↑ Ctrl↓ ⇦↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ L↓ L↑ L↓ L↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇨↕ Ctrl↑ Ctrl↓ ⇨↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ L↓ L↑ L↓ L↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇨↕ Ctrl↑ Ctrl↓ ⇨↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ J↓ J↑ J↓ J↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇩↕ Ctrl↑ Ctrl↓ ⇩↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ J↓ J↑ J↓ J↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇩↕ Ctrl↑ Ctrl↓ ⇩↕ Ctrl↑ ⇧↑
-Caps↓ S↓ ❖↓ K↓ K↑ K↓ K↑ ❖↑ S↑ Caps↑ = ⇧↓ Ctrl↓ ⇧↕ Ctrl↑ Ctrl↓ ⇧↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ ❖↓ K↓ K↑ K↓ K↑ ❖↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ ⇧↕ Ctrl↑ Ctrl↓ ⇧↕ Ctrl↑ ⇧↑
-Caps↓ Alt↓ H↓ H↑ Alt↑ Caps↑ = Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑
-Caps↓ Alt↓ L↓ L↑ Alt↑ Caps↑ = Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑
-Caps↓ Alt↓ H↓ H↑ H↓ H↑ Alt↑ Caps↑ = Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑
-Caps↓ Alt↓ L↓ L↑ L↓ L↑ Alt↑ Caps↑ = Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑
-Caps↓ S↓ Alt↓ H↓ H↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ H↓ H↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ L↓ L↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ L↓ L↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ H↓ H↑ H↓ H↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ H↓ H↑ H↓ H↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ Home↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ L↓ L↑ L↓ L↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ L↓ L↑ L↓ L↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ End↕ Ctrl↓ Ctrl↑ ⇧↑
-Caps↓ Alt↓ J↓ J↑ Alt↑ Caps↑ = Ctrl↓ End↕ Ctrl↑
-Caps↓ Alt↓ K↓ K↑ Alt↑ Caps↑ = Ctrl↓ Home↕ Ctrl↑
-Caps↓ Alt↓ J↓ J↑ J↓ J↑ Alt↑ Caps↑ = Ctrl↓ End↕ End↕ Ctrl↑
-Caps↓ Alt↓ K↓ K↑ K↓ K↑ Alt↑ Caps↑ = Ctrl↓ Home↕ Home↕ Ctrl↑
-Caps↓ S↓ Alt↓ J↓ J↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ End↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ J↓ J↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ End↕ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ K↓ K↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Home↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ K↓ K↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Home↕ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ J↓ J↑ J↓ J↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ End↕ End↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ J↓ J↑ J↓ J↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ End↕ End↕ Ctrl↑ ⇧↑
-Caps↓ S↓ Alt↓ K↓ K↑ K↓ K↑ Alt↑ S↑ Caps↑ = ⇧↓ Ctrl↓ Home↕ Home↕ Ctrl↑ ⇧↑
-Caps↓ ⇧↓ Alt↓ K↓ K↑ K↓ K↑ Alt↑ ⇧↑ Caps↑ = ⇧↓ Ctrl↓ Home↕ Home↕ Ctrl↑ ⇧↑
+Caps↓ H↓↑ Caps↑ = Left↕
+Caps↓ L↓↑ Caps↑ = Right↕
+Caps↓ J↓↑ Caps↑ = Down↕
+Caps↓ K↓↑ Caps↑ = Up↕
+Caps↓ H↓↑↓↑ Caps↑ = Left↕↕
+Caps↓ L↓↑↓↑ Caps↑ = Right↕↕
+Caps↓ J↓↑↓↑ Caps↑ = Down↕↕
+Caps↓ K↓↑↓↑ Caps↑ = Up↕↕
+Caps↓ H↓↑ Caps↑ = Left↕ // AppSwitcher
+Caps↓ L↓↑ Caps↑ = Right↕ // AppSwitcher
+Caps↓ J↓↑ Caps↑ = Down↕ // AppSwitcher
+Caps↓ K↓↑ Caps↑ = Up↕ // AppSwitcher
+Caps↓ H↓↑↓↑ Caps↑ = Left↕↕ // AppSwitcher
+Caps↓ L↓↑↓↑ Caps↑ = Right↕↕ // AppSwitcher
+Caps↓ J↓↑↓↑ Caps↑ = Down↕↕ // AppSwitcher
+Caps↓ K↓↑↓↑ Caps↑ = Up↕↕ // AppSwitcher
+Caps↓ S↓ H↓↑ S↑ Caps↑ = Shift↓ Left↕ Shift↑
+Caps↓ Shift↓ H↓↑ Shift↑ Caps↑ = Shift↓ Left↕ Shift↑
+Caps↓ S↓ L↓↑ S↑ Caps↑ = Shift↓ Right↕ Shift↑
+Caps↓ Shift↓ L↓↑ Shift↑ Caps↑ = Shift↓ Right↕ Shift↑
+Caps↓ S↓ J↓↑ S↑ Caps↑ = Shift↓ Down↕ Shift↑
+Caps↓ Shift↓ J↓↑ Shift↑ Caps↑ = Shift↓ Down↕ Shift↑
+Caps↓ S↓ K↓↑ S↑ Caps↑ = Shift↓ Up↕ Shift↑
+Caps↓ Shift↓ K↓↑ Shift↑ Caps↑ = Shift↓ Up↕ Shift↑
+Caps↓ S↓ H↓↑↓↑ S↑ Caps↑ = Shift↓ Left↕↕ Shift↑
+Caps↓ Shift↓ H↓↑↓↑ Shift↑ Caps↑ = Shift↓ Left↕↕ Shift↑
+Caps↓ S↓ L↓↑↓↑ S↑ Caps↑ = Shift↓ Right↕↕ Shift↑
+Caps↓ Shift↓ L↓↑↓↑ Shift↑ Caps↑ = Shift↓ Right↕↕ Shift↑
+Caps↓ S↓ J↓↑↓↑ S↑ Caps↑ = Shift↓ Down↕↕ Shift↑
+Caps↓ Shift↓ J↓↑↓↑ Shift↑ Caps↑ = Shift↓ Down↕↕ Shift↑
+Caps↓ S↓ K↓↑↓↑ S↑ Caps↑ = Shift↓ Up↕↕ Shift↑
+Caps↓ Shift↓ K↓↑↓↑ Shift↑ Caps↑ = Shift↓ Up↕↕ Shift↑
+Caps↓ ❖↓ H↓↑ ❖↑ Caps↑ = Ctrl↓ Left↕ Ctrl↑
+Caps↓ ❖↓ L↓↑ ❖↑ Caps↑ = Ctrl↓ Right↕ Ctrl↑
+Caps↓ ❖↓ J↓↑ ❖↑ Caps↑ = Ctrl↓ Down↕ Ctrl↑
+Caps↓ ❖↓ K↓↑ ❖↑ Caps↑ = Ctrl↓ Up↕ Ctrl↑
+Caps↓ ❖↓ H↓↑↓↑ ❖↑ Caps↑ = Ctrl↓ Left↕ Ctrl↑↓ Left↕ Ctrl↑
+Caps↓ ❖↓ L↓↑↓↑ ❖↑ Caps↑ = Ctrl↓ Right↕ Ctrl↑↓ Right↕ Ctrl↑
+Caps↓ ❖↓ J↓↑↓↑ ❖↑ Caps↑ = Ctrl↓ Down↕ Ctrl↑↓ Down↕ Ctrl↑
+Caps↓ ❖↓ K↓↑↓↑ ❖↑ Caps↑ = Ctrl↓ Up↕ Ctrl↑↓ Up↕ Ctrl↑
+Caps↓ S↓ ❖↓ H↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Left↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ H↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Left↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ L↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Right↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ L↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Right↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ J↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Down↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ J↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Down↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ K↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Up↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ K↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Up↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ H↓↑↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Left↕ Ctrl↑↓ Left↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ H↓↑↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Left↕ Ctrl↑↓ Left↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ L↓↑↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Right↕ Ctrl↑↓ Right↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ L↓↑↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Right↕ Ctrl↑↓ Right↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ J↓↑↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Down↕ Ctrl↑↓ Down↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ J↓↑↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Down↕ Ctrl↑↓ Down↕ Ctrl↑ Shift↑
+Caps↓ S↓ ❖↓ K↓↑↓↑ ❖↑ S↑ Caps↑ = Shift↓ Ctrl↓ Up↕ Ctrl↑↓ Up↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ ❖↓ K↓↑↓↑ ❖↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Up↕ Ctrl↑↓ Up↕ Ctrl↑ Shift↑
+Caps↓ Alt↓ H↓↑ Alt↑ Caps↑ = Ctrl↓↑ Home↕ Ctrl↓↑
+Caps↓ Alt↓ L↓↑ Alt↑ Caps↑ = Ctrl↓↑ End↕ Ctrl↓↑
+Caps↓ Alt↓ H↓↑↓↑ Alt↑ Caps↑ = Ctrl↓↑ Home↕ Ctrl↓↑ Home↕ Ctrl↓↑
+Caps↓ Alt↓ L↓↑↓↑ Alt↑ Caps↑ = Ctrl↓↑ End↕ Ctrl↓↑ End↕ Ctrl↓↑
+Caps↓ S↓ Alt↓ H↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓↑ Home↕ Ctrl↓↑ Shift↑
+Caps↓ Shift↓ Alt↓ H↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓↑ Home↕ Ctrl↓↑ Shift↑
+Caps↓ S↓ Alt↓ L↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓↑ End↕ Ctrl↓↑ Shift↑
+Caps↓ Shift↓ Alt↓ L↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓↑ End↕ Ctrl↓↑ Shift↑
+Caps↓ S↓ Alt↓ H↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓↑ Home↕ Ctrl↓↑ Home↕ Ctrl↓↑ Shift↑
+Caps↓ Shift↓ Alt↓ H↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓↑ Home↕ Ctrl↓↑ Home↕ Ctrl↓↑ Shift↑
+Caps↓ S↓ Alt↓ L↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓↑ End↕ Ctrl↓↑ End↕ Ctrl↓↑ Shift↑
+Caps↓ Shift↓ Alt↓ L↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓↑ End↕ Ctrl↓↑ End↕ Ctrl↓↑ Shift↑
+Caps↓ Alt↓ J↓↑ Alt↑ Caps↑ = Ctrl↓ End↕ Ctrl↑
+Caps↓ Alt↓ K↓↑ Alt↑ Caps↑ = Ctrl↓ Home↕ Ctrl↑
+Caps↓ Alt↓ J↓↑↓↑ Alt↑ Caps↑ = Ctrl↓ End↕↕ Ctrl↑
+Caps↓ Alt↓ K↓↑↓↑ Alt↑ Caps↑ = Ctrl↓ Home↕↕ Ctrl↑
+Caps↓ S↓ Alt↓ J↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ End↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ Alt↓ J↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ End↕ Ctrl↑ Shift↑
+Caps↓ S↓ Alt↓ K↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ Home↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ Alt↓ K↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Home↕ Ctrl↑ Shift↑
+Caps↓ S↓ Alt↓ J↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ End↕↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ Alt↓ J↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ End↕↕ Ctrl↑ Shift↑
+Caps↓ S↓ Alt↓ K↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ Home↕↕ Ctrl↑ Shift↑
+Caps↓ Shift↓ Alt↓ K↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Home↕↕ Ctrl↑ Shift↑
 ```
 
 ### LAlt
 ```
-Alt↓ `↓ `↑ ⭾↓ ⭾↑ Alt↑ = Ctrl↓ Ctrl↑ Alt↓ `↕ Alt↑ Ctrl↓ Ctrl↑ Alt↓ ⭾↕ Alt↑
-Alt↓ ⭾↓ ⭾↑ Q↓ Q↑ Alt↑ = Ctrl↓ Ctrl↑ Alt↓ ⭾↕ Supr↕ Alt↑
-Alt↓ ⭾↓ ⭾↑ Esc↓ Esc↑ Alt↑ = Ctrl↓ Ctrl↑ Alt↓ ⭾↕ Esc↕ Alt↑ Ctrl↓ Ctrl↑
-Alt↓ ⇧↓ ⭾↓ ⭾↑ ⭾↓ ⭾↑ ⇧↑ Alt↑ = Ctrl↓ ⇧↓ Ctrl↑ Alt↓ ⭾↕ Alt↓ ⭾↕ ⇧↑ Alt↑
-Alt↓ Esc↓ Esc↑ Alt↑ = Ctrl↓ Ctrl↑
-Alt↓ Q↓ Q↑ Alt↑ = Ctrl↓ Ctrl↑ Alt↓ F4↕ Alt↑ Ctrl↓ Ctrl↑
-Alt↓ ⌫↓ ⌫↑ Alt↑ = Ctrl↓ Ctrl↑ ⇧↓ Home↕ ⇧↑ ⌫↕ Ctrl↓ Ctrl↑
-Alt↓ J↓ J↑ Alt↑ = Ctrl↓ Ctrl↑ Next↕ Ctrl↓ Ctrl↑
-Alt↓ Space↓ Space↑ Alt↑ = Ctrl↓ F12↕ Ctrl↑
-Alt↓ F3↓ F3↑ Alt↑ = Ctrl↓ Ctrl↑ F3↕ Ctrl↓ Ctrl↑
-Alt↓ ⭾↓ ⭾↑ C↓ C↑ = Ctrl↓ Ctrl↑ Alt↓ ⭾↕
-Alt↓ ⭾↓ ⭾↑ = Ctrl↓ Ctrl↑ Alt↓ ⭾↕
+Alt↓ `↓↑ Tab↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑ Alt↓ Tab↕ Alt↑
+Alt↓ Tab↓↑ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Supr↕ Alt↑
+Alt↓ Tab↓↑ Esc↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Esc↕ Alt↑ Ctrl↓↑
+Alt↓ Shift↓ Tab↓↑↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Alt↓ Tab↕ Alt↓ Tab↕ Shift↑ Alt↑
+Alt↓ Esc↓↑ Alt↑ = Ctrl↓↑
+Alt↓ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ F4↕ Alt↑ Ctrl↓↑
+Alt↓ ⌫↓↑ Alt↑ = Ctrl↓↑ Shift↓ Home↕ Shift↑ ⌫↕ Ctrl↓↑
+Alt↓ J↓↑ Alt↑ = Ctrl↓↑ Next↕ Ctrl↓↑
+Alt↓ Space↓↑ Alt↑ = Ctrl↓ F12↕ Ctrl↑
+Alt↓ F3↓↑ Alt↑ = Ctrl↓↑ F3↕ Ctrl↓↑
+Alt↓ Tab↓↑ C↓↑ = Ctrl↓↑ Alt↓ Tab↕
+Alt↓ Tab↓↑ = Ctrl↓↑ Alt↓ Tab↕
 Alt↓ C↓ = Ctrl↓ C↓
-Alt↓ C↓ C↑ Alt↑ = Ctrl↓ C↓ C↑ Ctrl↑
+Alt↓ C↓↑ Alt↑ = Ctrl↓ C↓↑ Ctrl↑
 Alt↓ = Ctrl↓
-Alt↓ Alt↑ = Ctrl↓ Ctrl↑
+Alt↓↑ = Ctrl↓↑
 ```
 
 ### LCtrl
 ```
-Ctrl↓ ⭾↓ ⭾↑ Ctrl↑ = Alt↓ Alt↑ Ctrl↓ ⭾↕ Ctrl↑
+Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑
 ```
 
 ### LCtrl or LAlt
 ```
-Ctrl↓ C↓ C↑ Ctrl↑ = Alt↓ C↓ C↑ Alt↑
+Ctrl↓ C↓↑ Ctrl↑ = Alt↓ C↓↑ Alt↑
 Ctrl↓ C↓ = Alt↓ C↓
-Alt↓ C↓ C↑ Alt↑ = Ctrl↓ C↓ C↑ Ctrl↑
+Alt↓ C↓↑ Alt↑ = Ctrl↓ C↓↑ Ctrl↑
 Alt↓ C↓ = Ctrl↓ C↓
-Ctrl↓ ⇧↓ ⇧↑ Ctrl↑ = Alt↓ ⇧↓ ⇧↑ Alt↑
-Alt↓ ⇧↓ ⇧↑ Alt↑ = Ctrl↓ ⇧↓ ⇧↑ Ctrl↑
-Ctrl↓ Ctrl↑ = Alt↓ Alt↑
+Ctrl↓ Shift↓↑ Ctrl↑ = Alt↓ Shift↓↑ Alt↑
+Alt↓ Shift↓↑ Alt↑ = Ctrl↓ Shift↓↑ Ctrl↑
+Ctrl↓↑ = Alt↓↑
 Ctrl↓ = Alt↓
-Alt↓ Alt↑ = Ctrl↓ Ctrl↑
+Alt↓↑ = Ctrl↓↑
 Alt↓ = Ctrl↓
 ```
 
 ### LWin
 ```
-❖↓ 1↓ 1↑ ❖↑ = Alt↓ 1↕ Alt↑ // SC2_x64.exe
-❖↓ ⌫↓ ⌫↑ ❖↑ = Ctrl↓ W↕ Ctrl↑ // mintty.exe
-❖↓ H↓ H↑ ❖↑ = Alt↓ ⇦↕ Alt↑
-❖↓ L↓ L↑ ❖↑ = Alt↓ ⇨↕ Alt↑
-❖↓ ⌫↓ ⌫↑ ❖↑ = Ctrl↓ ⌫↕ Ctrl↑
-❖↓ D↓ D↑ ❖↑ = ❖↓ D↕ ❖↑
-❖↓ ❖↑ = 
+❖↓ 1↓↑ ❖↑ = Alt↓ 1↕ Alt↑ // SC2_x64.exe
+❖↓ ⌫↓↑ ❖↑ = Ctrl↓ W↕ Ctrl↑ // mintty.exe
+❖↓ H↓↑ ❖↑ = Alt↓ Left↕ Alt↑
+❖↓ L↓↑ ❖↑ = Alt↓ Right↕ Alt↑
+❖↓ ⌫↓↑ ❖↑ = Ctrl↓ ⌫↕ Ctrl↑
+❖↓ D↓↑ ❖↑ = ❖↓ D↕ ❖↑
+❖↓↑ = 
 ```
 
 ### Shift
 ```
-⇧↓ C↓ C↑ ⇧↑ = ⇧↓ C↓ C↑ ⇧↑
-⇧↓ ⇧↑ = ⇧↓ ⇧↑
+Shift↓ C↓↑ Shift↑ = Shift↓ C↓↑ Shift↑
+Shift↓↑ = Shift↓↑
 ```

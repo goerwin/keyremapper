@@ -72,16 +72,16 @@ class KeyEventTest : public ::testing::Test {
 		switch (code) {
 			case SC_BACK: return "⌫";
 			case SC_RETURN: return "⏎";
-			case SC_LSHIFT: return "⇧";
+			case SC_LSHIFT: return "Shift";
 			case SC_LALT: return "Alt";
 			case SC_LCTRL: return "Ctrl";
 			case SC_LWIN: return "❖";
 			case SC_CAPSLOCK: return "Caps";
-			case SC_TAB: return "⭾";
-			case SC_LEFT: return "⇦";
-			case SC_RIGHT: return "⇨";
-			case SC_UP: return "⇧";
-			case SC_DOWN: return "⇩";
+			case SC_TAB: return "Tab";
+			case SC_LEFT: return "Left";
+			case SC_RIGHT: return "Right";
+			case SC_UP: return "Up";
+			case SC_DOWN: return "Down";
 			case SC_SPACE: return "Space";
 			case SC_GRAVE: return "`";
 			case SC_MOUSELEFT: return "LeftClick";
@@ -149,13 +149,19 @@ class KeyEventTest : public ::testing::Test {
 		String result = "";
 
 		for (int i = 0; i < keysSize; i++) {
-			if (i != 0) {
-				result = result.append(" ");
+			auto code = keys[i].code;
+			String codeSymbol = getScanCodeSymbol(code);
+			String stateSymbol = getStateSymbol(keys[i].state);
+
+			if (i > 0) {
+				if (code == keys[i - 1].code) {
+					codeSymbol = "";
+				} else {
+					result = result.append(" ");
+				}
 			}
 
-			result = result
-				.append(getScanCodeSymbol(keys[i].code))
-				.append(getStateSymbol(keys[i].state));
+			result = result.append(codeSymbol).append(stateSymbol);
 		}
 
 		return result;
