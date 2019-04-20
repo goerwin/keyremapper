@@ -256,19 +256,11 @@ Keys handleSimulateMouseClick(Key key) {
 
 	if (
 		!(g_isLWinKeyDown && keyCode == SC_C) &&
-		//!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
 		!(g_isLWinKeyDown && keyCode == SC_LALT) &&
 		!g_isMouseClickDown
 		) {
 		return {};
 	}
-	/*
-	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
-	}*/
 
 	if (keyCode == SC_LALT) {
 		return getParsedKeyDownUpKeys(
@@ -471,15 +463,6 @@ Keys handleLCtrlKey(Key key) {
 		);
 	}
 
-	/*
-	if (keyCode == SC_LSHIFT) { // LCtrl + Shift
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
-	}
-	*/
-
 	if (keyCode == SC_TAB) { // LCtrl + Tab
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
@@ -489,12 +472,6 @@ Keys handleLCtrlKey(Key key) {
 	}
 
 	return {};
-	/*
-	if (isCurrentKeyDown) {
-		return { KeyDown(keyCode) };
-	}
-	return { KeyUp(keyCode) };
-	*/
 }
 
 Keys handleLWinKey(Key key) {
@@ -555,6 +532,10 @@ Keys handleLWinKey(Key key) {
 			TemplateKeys({ Key(SC_LWIN, 5) }),
 			TemplateKeys({ g_nullKey })
 		);
+	}
+
+	if (keyCode == SC_LSHIFT) {
+		return {};
 	}
 
 	return { g_nullKey };
@@ -678,14 +659,6 @@ Keys handleLAltKey(Key key) {
 		);
 	}
 
-	/*
-	if (keyCode == SC_LSHIFT) {
-		if (isCurrentKeyDown) {
-			return { KeyDown(SC_LSHIFT) };
-		}
-		return { KeyUp(SC_LSHIFT) };
-	}*/
-
 	if (keyCode == SC_GRAVE) { // lalt + ` to alt + `
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
@@ -771,34 +744,7 @@ Keys handleLAltKey(Key key) {
 	}
 
 	return {};
-	/*if (isCurrentKeyDown) {
-		return { KeyDown(keyCode) };
-	}
-	return { KeyUp(keyCode) };*/
 }
-
-/*Keys handleShiftKey(Key key) {
-	if (!g_isShiftKeyDown) {
-		return {};
-	}
-
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
-	if (keyCode == SC_LSHIFT) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ KeyDown(SC_LSHIFT) }),
-			TemplateKeys({ KeyUp(SC_LSHIFT) })
-		);
-	}
-
-	return getParsedKeyDownUpKeys(
-		isCurrentKeyDown,
-		TemplateKeys({ KeyDown(keyCode) }),
-		TemplateKeys({ KeyUp(keyCode) })
-	);
-}*/
 
 Keys handleKey(Key key) {
 	auto isCurrentKeyDown = isKeyDown(key);
@@ -900,7 +846,6 @@ Keys getKeyEvents(Keys keys) {
 		else if (keyEvents = handleLCtrlKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleLWinKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleLAltKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		// else if (keyEvents = handleShiftKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 		else if (keyEvents = handleKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
 
 		if (!isCurrentKeyDown) {

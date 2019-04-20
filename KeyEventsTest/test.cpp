@@ -75,9 +75,702 @@ class KeyEventTest : public ::testing::Test {
 	}
 };
 
-// handleLWinLAltKeys
+// Mouse events
 
-// handleCapslockKey
+TEST_F(KeyEventTest, mouseLeftClick) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_MOUSELEFT),
+			KeyUp(SC_MOUSELEFT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, mouseRightClick) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_CAPSLOCK),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_CAPSLOCK),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_MOUSERIGHT),
+			KeyUp(SC_MOUSERIGHT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, mouseHoldLeftClick) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_C),
+			KeyDown(SC_C),
+			KeyDown(SC_C),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_MOUSELEFT),
+			KeyUp(SC_MOUSELEFT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, mouseLShiftLeftClick) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_MOUSELEFT),
+			KeyUp(SC_MOUSELEFT),
+			KeyUp(SC_LSHIFT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, mouseLAltLeftClick) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+		{
+			KeyDown(SC_LWIN),
+			KeyDown(SC_LALT),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LALT),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_MOUSELEFT),
+			KeyUp(SC_MOUSELEFT),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, key) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+		{ KeyDown(SC_P), KeyUp(SC_P) },
+		{ KeyDown(SC_P), KeyUp(SC_P) }
+	}));
+}
+
+TEST_F(KeyEventTest, keyDown) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+		{ KeyDown(SC_P), KeyDown(SC_P), KeyDown(SC_P) },
+		{ KeyDown(SC_P), KeyDown(SC_P), KeyDown(SC_P) }
+	}));
+}
+
+TEST_F(KeyEventTest, keyDownUp) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+		{ KeyDown(SC_P), KeyDown(SC_P), KeyUp(SC_P) },
+		{ KeyDown(SC_P), KeyDown(SC_P), KeyUp(SC_P) }
+	}));
+}
+
+TEST_F(KeyEventTest, multipleKey2KeysInOrder) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) },
+		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) }
+	}));
+}
+
+TEST_F(KeyEventTest, multipleKey2KeysNoOrder) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) },
+		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) }
+	}));
+}
+
+TEST_F(KeyEventTest, multipleKey3KeysInOrder) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+		{
+			KeyDown(SC_H),
+			KeyDown(SC_J),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_J),
+			KeyUp(SC_H)
+		},
+		{
+			KeyDown(SC_H),
+			KeyDown(SC_J),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_J),
+			KeyUp(SC_H)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, multipleKey3KeysNoOrder) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+		{
+			KeyDown(SC_H),
+			KeyDown(SC_J),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_H),
+			KeyUp(SC_J)
+
+		},
+		{
+			KeyDown(SC_H),
+			KeyDown(SC_J),
+			KeyDown(SC_K),
+			KeyUp(SC_K),
+			KeyUp(SC_H),
+			KeyUp(SC_J)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, vimModeArrowKeys) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				Key(arrowKeys[i])
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeArrowKeysRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				Key(arrowKeys[i]),
+				Key(arrowKeys[i])
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeArrowKeysInAppSwitcher) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	// Get in AppSwitcher
+	getKeyEvents({
+		KeyDown(SC_LALT),
+		KeyDown(SC_TAB),
+		KeyUp(SC_TAB)
+	});
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				Key(arrowKeys[i])
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeArrowKeysInAppSwitcherRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	// Get in AppSwitcher (getKeyEvents modifies state)
+	getKeyEvents({
+		KeyDown(SC_LALT),
+		KeyDown(SC_TAB),
+		KeyUp(SC_TAB)
+	});
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				Key(arrowKeys[i]),
+				Key(arrowKeys[i])
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLShiftArrowKeys) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLShiftArrowKeysRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					Key(arrowKeys[i]),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLWinArrowKeys) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LWIN),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LWIN),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLWinArrowKeysRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LWIN),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LWIN),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LCTRL),
+				KeyDown(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLWinLShiftArrowKeys) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LWIN),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LWIN),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLWinLShiftArrowKeysRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L, SC_J, SC_K };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_RIGHT, SC_DOWN, SC_UP };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LWIN),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LWIN),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LCTRL),
+					KeyDown(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltArrowKeysHL) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L };
+	std::vector<ScanCodes> arrowKeys = { SC_HOME, SC_END };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LALT),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LALT),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltArrowKeysHLRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L };
+	std::vector<ScanCodes> arrowKeys = { SC_HOME, SC_END };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LALT),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LALT),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltLShiftArrowKeysHL) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L };
+	std::vector<ScanCodes> arrowKeys = { SC_HOME, SC_END };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LALT),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LALT),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					KeyUp(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyDown(SC_LCTRL),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltLShiftArrowKeysHLRepeat) {
+	std::vector<ScanCodes> keys = { SC_H, SC_L };
+	std::vector<ScanCodes> arrowKeys = { SC_HOME, SC_END };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LALT),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LALT),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					KeyUp(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyDown(SC_LCTRL),
+					KeyUp(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyDown(SC_LCTRL),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltArrowKeysJK) {
+	std::vector<ScanCodes> keys = { SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_END, SC_HOME };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LALT),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LALT),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltArrowKeysJKRepeat) {
+	std::vector<ScanCodes> keys = { SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_END, SC_HOME };
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			{
+				KeyDown(SC_CAPSLOCK),
+				KeyDown(SC_LALT),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LALT),
+				KeyUp(SC_CAPSLOCK)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				Key(arrowKeys[i]),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltLShiftArrowKeysJK) {
+	std::vector<ScanCodes> keys = { SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_END, SC_HOME };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LALT),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LALT),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
+
+TEST_F(KeyEventTest, vimModeLAltLShiftArrowKeysJKRepeat) {
+	std::vector<ScanCodes> keys = { SC_J, SC_K };
+	std::vector<ScanCodes> arrowKeys = { SC_END, SC_HOME };
+	std::vector<ScanCodes> vimShiftKeys = { SC_S, SC_LSHIFT };
+	int size = keys.size();
+	int vimShiftsize = vimShiftKeys.size();
+
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < vimShiftsize; j++) {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+				{
+					KeyDown(SC_CAPSLOCK),
+					KeyDown(vimShiftKeys[j]),
+					KeyDown(SC_LALT),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyDown(keys[i]),
+					KeyUp(keys[i]),
+					KeyUp(SC_LALT),
+					KeyUp(vimShiftKeys[j]),
+					KeyUp(SC_CAPSLOCK)
+				},
+				{
+					KeyDown(SC_LSHIFT),
+					KeyDown(SC_LCTRL),
+					Key(arrowKeys[i]),
+					Key(arrowKeys[i]),
+					KeyUp(SC_LCTRL),
+					KeyUp(SC_LSHIFT)
+				}
+			}));
+		}
+	}
+}
 
 // handleLCtrlKey
 
