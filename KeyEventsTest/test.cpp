@@ -8,6 +8,9 @@
 #include "../InterceptionKeyRemapper/interception.h"
 #include "../InterceptionKeyRemapper/KeyEvent.cpp"
 #include "../InterceptionKeyRemapper/erwinUtils.cpp"
+#include "../InterceptionKeyRemapper/erwinUtils.h"
+
+String filepath = "../testCases.md";
 
 class KeyEventTest : public ::testing::Test {
  protected:
@@ -65,7 +68,7 @@ class KeyEventTest : public ::testing::Test {
 		}
 	}
 
-	static String getKeySymbol(unsigned short code) {
+	static String getScanCodeSymbol(unsigned short code) {
 		switch (code) {
 			case SC_BACK: return "⌫";
 			case SC_RETURN: return "⏎";
@@ -141,49 +144,73 @@ class KeyEventTest : public ::testing::Test {
 		return "KEY_STATE_NOT_FOUND";
 	}
 
-	static bool validateKeyMapsAndOutputThem(
-		String name,
-		std::pair<Keys, Keys> keys
-	) {
+	static String getKeySymbols(Keys keys) {
+		int keysSize = keys.size();
+		String result = "";
+
+		for (int i = 0; i < keysSize; i++) {
+			if (i != 0) {
+				result = result.append(" ");
+			}
+
+			result = result
+				.append(getScanCodeSymbol(keys[i].code))
+				.append(getStateSymbol(keys[i].state));
+		}
+
+		return result;
+	}
+
+	static std::vector<std::pair<String, String>> KeyEventTest::outputSection;
+
+	static bool validateKeyMapsAndOutputThem(String title, std::pair<Keys, Keys> keys) {
 		auto inputKeys = keys.first;
 		auto convertedInputKeys = removeNullKeyEvents(getKeyEvents(inputKeys));
 		auto expectedKeys = removeNullKeyEvents(keys.second);
 		auto result = compareKeyEvents(convertedInputKeys, expectedKeys);
 
 		if (result) {
-			auto inputKeysSize = inputKeys.size();
-			auto convertedInputKeysSize = convertedInputKeys.size();
-
-			String symbolMappedKeys = "";
-			for (int i = 0; i < inputKeysSize; i++) {
-				symbolMappedKeys = symbolMappedKeys
-					.append(getKeySymbol(inputKeys[i].code))
-					.append(getStateSymbol(inputKeys[i].state));
-			}
-
+			String symbolMappedKeys = getKeySymbols(inputKeys);
 			symbolMappedKeys = symbolMappedKeys.append(" = ");
+			symbolMappedKeys = symbolMappedKeys.append(getKeySymbols(convertedInputKeys));
+			symbolMappedKeys = symbolMappedKeys.append("\n");
 
-			for (int i = 0; i < convertedInputKeysSize; i++) {
-				symbolMappedKeys = symbolMappedKeys
-					.append(getKeySymbol(convertedInputKeys[i].code))
-					.append(getStateSymbol(convertedInputKeys[i].state));
+			auto outputSectionSize = outputSection.size();
+			bool isSectionFound = false;
+			for (int i = 0; i < outputSectionSize; i++) {
+				if (outputSection[i].first == title) {
+					isSectionFound = true;
+					outputSection[i].second = outputSection[i].second.append(symbolMappedKeys);
+				}
+			}
+			if (!isSectionFound) {
+				outputSection.insert(outputSection.end(), { title, symbolMappedKeys });
 			}
 
-			ErwinUtils::writeToFile("lul.md", symbolMappedKeys);
+			outputSectionSize = outputSection.size();
+			String sections = "";
+			for (int i = 0; i < outputSectionSize; i++) {
+				sections = sections.append("### ")
+					.append(outputSection[i].first)
+					.append("\n```\n")
+					.append(outputSection[i].second)
+					.append("```\n")
+					.append(i == outputSectionSize - 1 ? "" : "\n");
+			}
+			sections = String("# Test Cases\n\n").append(sections);
+			ErwinUtils::writeToFile(filepath, sections, false, false);
 		}
 
 		return result;
 	}
 };
 
-TEST(CleanUpFile) {
-	ErwinUtils::writeToFile("lul.md", "", false, false);
-}
+std::vector<std::pair<String, String>> KeyEventTest::outputSection;
 
 // Mouse events
 
 TEST_F(KeyEventTest, MOUSE_LEFT_CLICK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_C),
@@ -198,7 +225,7 @@ TEST_F(KeyEventTest, MOUSE_LEFT_CLICK) {
 }
 
 TEST_F(KeyEventTest, MOUSE_RIGHT_CLICK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_CAPSLOCK),
@@ -215,7 +242,7 @@ TEST_F(KeyEventTest, MOUSE_RIGHT_CLICK) {
 }
 
 TEST_F(KeyEventTest, MOUSE_LEFT_CLICK_HOLD) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_C),
@@ -233,7 +260,7 @@ TEST_F(KeyEventTest, MOUSE_LEFT_CLICK_HOLD) {
 }
 
 TEST_F(KeyEventTest, MOUSE_RIGHT_CLICK_HOLD) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_CAPSLOCK),
@@ -253,7 +280,7 @@ TEST_F(KeyEventTest, MOUSE_RIGHT_CLICK_HOLD) {
 }
 
 TEST_F(KeyEventTest, MOUSE_LSHIFT_LEFT_CLICK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_LSHIFT),
@@ -272,7 +299,7 @@ TEST_F(KeyEventTest, MOUSE_LSHIFT_LEFT_CLICK) {
 }
 
 TEST_F(KeyEventTest, MOUSE_LALT_LEFT_CLICK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("mouse.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_LALT),
@@ -291,42 +318,42 @@ TEST_F(KeyEventTest, MOUSE_LALT_LEFT_CLICK) {
 }
 
 TEST_F(KeyEventTest, KEY) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{ KeyDown(SC_H), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyUp(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_DOWN) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_DOWN_THEN_UP) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_2KEYS_IN_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_2KEYS_NO_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) },
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_IN_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_H),
 			KeyDown(SC_J),
@@ -347,7 +374,7 @@ TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_IN_ORDER) {
 }
 
 TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_NO_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("multipleKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_H),
 			KeyDown(SC_J),
@@ -374,7 +401,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(keys[i]),
@@ -394,7 +421,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_REPEAT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(keys[i]),
@@ -424,7 +451,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER) {
 	});
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(keys[i]),
@@ -451,7 +478,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER_REPEAT) {
 	});
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(keys[i]),
@@ -477,7 +504,7 @@ TEST_F(KeyEventTest, VIM_MODE_LSHIFT_ARROWKEYS) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -505,7 +532,7 @@ TEST_F(KeyEventTest, VIM_MODE_LSHIFT_ARROWKEYS_REPEAT) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -533,7 +560,7 @@ TEST_F(KeyEventTest, VIM_MODE_LWIN_ARROWKEYS) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LWIN),
@@ -557,7 +584,7 @@ TEST_F(KeyEventTest, VIM_MODE_LWIN_ARROWKEYS_REPEAT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LWIN),
@@ -589,7 +616,7 @@ TEST_F(KeyEventTest, VIM_MODE_LWIN_SHIFT_ARROWKEYS) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -621,7 +648,7 @@ TEST_F(KeyEventTest, VIM_MODE_LWIN_SHIFT_ARROWKEYS_REPEAT) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -655,7 +682,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_ARROWKEYS_HL) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LALT),
@@ -681,7 +708,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_ARROWKEYS_HL_REPEAT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LALT),
@@ -715,7 +742,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_HL) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -749,7 +776,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_HL_REPEAT) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -785,7 +812,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_ARROWKEYS_JK) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LALT),
@@ -809,7 +836,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_ARROWKEYS_JK_REPEAT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 			{
 				KeyDown(SC_CAPSLOCK),
 				KeyDown(SC_LALT),
@@ -839,7 +866,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_JK) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -871,7 +898,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_JK_REPEAT) {
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < vimShiftsize; j++) {
-			EXPECT_TRUE(validateKeyMapsAndOutputThem("vimMode.md", {
+			EXPECT_TRUE(validateKeyMapsAndOutputThem("Vim Mode", {
 				{
 					KeyDown(SC_CAPSLOCK),
 					KeyDown(vimShiftKeys[j]),
@@ -898,7 +925,7 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_JK_REPEAT) {
 }
 
 TEST_F(KeyEventTest, LALT_GRAVE_THEN_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_GRAVE),
@@ -923,7 +950,7 @@ TEST_F(KeyEventTest, LALT_GRAVE_THEN_TAB) {
 }
 
 TEST_F(KeyEventTest, LALT_TAB_THEN_Q) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_TAB),
@@ -944,7 +971,7 @@ TEST_F(KeyEventTest, LALT_TAB_THEN_Q) {
 }
 
 TEST_F(KeyEventTest, LALT_TAB_THEN_ESC) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_TAB),
@@ -967,7 +994,7 @@ TEST_F(KeyEventTest, LALT_TAB_THEN_ESC) {
 }
 
 TEST_F(KeyEventTest, LALT_LSHIFT_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_LSHIFT),
@@ -993,7 +1020,7 @@ TEST_F(KeyEventTest, LALT_LSHIFT_TAB) {
 }
 
 TEST_F(KeyEventTest, LCTRL_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl", {
 		{
 			KeyDown(SC_LCTRL),
 			KeyDown(SC_TAB),
@@ -1016,7 +1043,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT_Letter) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i]),
 				KeyDown(SC_C),
@@ -1031,7 +1058,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT_Letter) {
 			}
 		}));
 
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i]),
 				KeyDown(SC_C)
@@ -1050,7 +1077,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT_LSHIFT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLCTrlKey.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i]),
 				KeyDown(SC_LSHIFT),
@@ -1073,7 +1100,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 	int size = keys.size();
 
 	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i]),
 				KeyUp(keys[i])
@@ -1084,7 +1111,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 			}
 		}));
 
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl.md", {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i])
 			},
@@ -1100,7 +1127,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
 	setActiveProcessName(L"SC2_x64.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_1),
@@ -1118,7 +1145,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
 TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
 	setActiveProcessName(L"mintty.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_BACK),
@@ -1134,7 +1161,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_H) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_H),
@@ -1150,7 +1177,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_H) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_L) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_L),
@@ -1166,7 +1193,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_L) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_BACK),
@@ -1182,7 +1209,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_D) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyDown(SC_D),
@@ -1198,7 +1225,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_D) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
 		{
 			KeyDown(SC_LWIN),
 			KeyUp(SC_LWIN)
@@ -1212,7 +1239,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN) {
 // TODO: MORE
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_ESC) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_ESC),
@@ -1227,7 +1254,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_ESC) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_Q),
@@ -1247,7 +1274,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_BACK),
@@ -1268,7 +1295,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_J_OR_K) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_J),
@@ -1286,7 +1313,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_J_OR_K) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_Space) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_SPACE),
@@ -1302,7 +1329,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Space) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_F3),
@@ -1320,7 +1347,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_TAB),
@@ -1338,7 +1365,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_TAB),
@@ -1354,7 +1381,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_C)
@@ -1367,7 +1394,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_C),
@@ -1384,7 +1411,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT)
 		},
@@ -1395,7 +1422,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
 }
 
 TEST_F(KeyEventTest, handleLAltKey_LALT) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLAltKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
 		{
 			KeyDown(SC_LALT),
 			KeyUp(SC_LALT)
@@ -1410,7 +1437,7 @@ TEST_F(KeyEventTest, handleLAltKey_LALT) {
 // handleShiftKey
 
 TEST_F(KeyEventTest, handleShiftKey_LSHIFT_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Shift", {
 		{
 			KeyDown(SC_LSHIFT),
 			KeyDown(SC_C),
@@ -1427,7 +1454,7 @@ TEST_F(KeyEventTest, handleShiftKey_LSHIFT_Letter) {
 }
 
 TEST_F(KeyEventTest, handleShiftKey_LSHIFT) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Shift", {
 		{
 			KeyDown(SC_LSHIFT),
 			KeyUp(SC_LSHIFT)
@@ -1441,11 +1468,10 @@ TEST_F(KeyEventTest, handleShiftKey_LSHIFT) {
 
 // handleKey
 
-// F3↕ = LCTRL↓LSHIFT↓TAB↕LSHIFT↑LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F3) {
 	setActiveProcessName(L"chrome.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F3),
 			KeyUp(SC_F3)
@@ -1460,11 +1486,10 @@ TEST_F(KeyEventTest, handleKey_chrome_F3) {
 	}));
 }
 
-// F4↕ = LCTRL↓TAB↕LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F4) {
 	setActiveProcessName(L"chrome.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F4),
 			KeyUp(SC_F4)
@@ -1477,11 +1502,10 @@ TEST_F(KeyEventTest, handleKey_chrome_F4) {
 	}));
 }
 
-// F5↕ = LALT↓M↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F5) {
 	setActiveProcessName(L"chrome.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F5),
 			KeyUp(SC_F5)
@@ -1494,11 +1518,10 @@ TEST_F(KeyEventTest, handleKey_chrome_F5) {
 	}));
 }
 
-// F6↕ = LALT↓T↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F6) {
 	setActiveProcessName(L"chrome.exe");
 
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F6),
 			KeyUp(SC_F6)
@@ -1511,9 +1534,8 @@ TEST_F(KeyEventTest, handleKey_chrome_F6) {
 	}));
 }
 
-// F1↕ = BRIGHTNESSDOWN↕
 TEST_F(KeyEventTest, handleKey_F1) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F1),
 			KeyUp(SC_F1)
@@ -1524,9 +1546,8 @@ TEST_F(KeyEventTest, handleKey_F1) {
 	}));
 }
 
-// F2↕ = BRIGHTNESSUP↕
 TEST_F(KeyEventTest, handleKey_F2) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F2),
 			KeyUp(SC_F2)
@@ -1539,7 +1560,7 @@ TEST_F(KeyEventTest, handleKey_F2) {
 
 // F10↕ = MUTE↕
 TEST_F(KeyEventTest, handleKey_F10) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F10),
 			KeyUp(SC_F10)
@@ -1552,7 +1573,7 @@ TEST_F(KeyEventTest, handleKey_F10) {
 
 // F11↕ = VOLUMEDOWN↕
 TEST_F(KeyEventTest, handleKey_F11) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F11),
 			KeyUp(SC_F11)
@@ -1568,7 +1589,7 @@ TEST_F(KeyEventTest, handleKey_F11) {
 
 // F12↕ = VOLUMEUP↕
 TEST_F(KeyEventTest, handleKey_F12) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_F12),
 			KeyUp(SC_F12)
@@ -1584,7 +1605,7 @@ TEST_F(KeyEventTest, handleKey_F12) {
 
 // Letter↕
 TEST_F(KeyEventTest, handleKey_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
 		{
 			KeyDown(SC_C),
 			KeyUp(SC_C)

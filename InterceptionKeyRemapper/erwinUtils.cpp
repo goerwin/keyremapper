@@ -26,7 +26,7 @@ namespace ErwinUtils {
 		return (clock1 - clock2) / CLOCKS_PER_SEC * 1000;
 	}
 
-	void writeToFile(std::string name, std::string content, bool append = true, bool newLine = true) {
+	void writeToFile(std::string name, std::string content, bool append, bool newLine) {
 		std::ofstream soutfile;
 
 		if (append) {
