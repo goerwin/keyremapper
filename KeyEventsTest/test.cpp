@@ -163,7 +163,11 @@ class KeyEventTest : public ::testing::Test {
 
 	static std::vector<std::pair<String, String>> KeyEventTest::outputSection;
 
-	static bool validateKeyMapsAndOutputThem(String title, std::pair<Keys, Keys> keys) {
+	static bool validateKeyMapsAndOutputThem(
+		String title,
+		std::pair<Keys, Keys> keys,
+		String comment = ""
+	) {
 		auto inputKeys = keys.first;
 		auto convertedInputKeys = removeNullKeyEvents(getKeyEvents(inputKeys));
 		auto expectedKeys = removeNullKeyEvents(keys.second);
@@ -171,9 +175,11 @@ class KeyEventTest : public ::testing::Test {
 
 		if (result) {
 			String symbolMappedKeys = getKeySymbols(inputKeys);
-			symbolMappedKeys = symbolMappedKeys.append(" = ");
-			symbolMappedKeys = symbolMappedKeys.append(getKeySymbols(convertedInputKeys));
-			symbolMappedKeys = symbolMappedKeys.append("\n");
+			symbolMappedKeys = symbolMappedKeys
+				.append(" = ")
+				.append(getKeySymbols(convertedInputKeys))
+				.append(comment != "" ? String(" // ").append(comment) : "")
+				.append("\n");
 
 			auto outputSectionSize = outputSection.size();
 			bool isSectionFound = false;
@@ -461,7 +467,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER) {
 			{
 				Key(arrowKeys[i])
 			}
-		}));
+		}, "AppSwitcher"));
 	}
 }
 
@@ -491,7 +497,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER_REPEAT) {
 				Key(arrowKeys[i]),
 				Key(arrowKeys[i])
 			}
-		}));
+		}, "AppSwitcher"));
 	}
 }
 
@@ -1139,7 +1145,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
 			Key(SC_1),
 			KeyUp(SC_LALT)
 		}
-	}));
+	}, "SC2_x64.exe"));
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
@@ -1157,7 +1163,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
 			Key(SC_W),
 			KeyUp(SC_LCTRL)
 		}
-	}));
+	}, "mintty.exe"));
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_H) {
@@ -1483,7 +1489,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F3) {
 			KeyUp(SC_LSHIFT),
 			KeyUp(SC_LCTRL)
 		}
-	}));
+	}, "chrome.exe"));
 }
 
 TEST_F(KeyEventTest, handleKey_chrome_F4) {
@@ -1499,7 +1505,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F4) {
 			Key(SC_TAB),
 			KeyUp(SC_LCTRL)
 		}
-	}));
+	}, "chrome.exe"));
 }
 
 TEST_F(KeyEventTest, handleKey_chrome_F5) {
@@ -1515,7 +1521,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F5) {
 			Key(SC_M),
 			KeyUp(SC_LALT)
 		}
-	}));
+	}, "chrome.exe"));
 }
 
 TEST_F(KeyEventTest, handleKey_chrome_F6) {
@@ -1531,7 +1537,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F6) {
 			Key(SC_T),
 			KeyUp(SC_LALT)
 		}
-	}));
+	}, "chrome.exe"));
 }
 
 TEST_F(KeyEventTest, handleKey_F1) {
