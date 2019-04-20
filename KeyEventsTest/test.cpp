@@ -7,6 +7,7 @@
 #include <windows.h>
 #include "../InterceptionKeyRemapper/interception.h"
 #include "../InterceptionKeyRemapper/KeyEvent.cpp"
+#include "../InterceptionKeyRemapper/erwinUtils.cpp"
 
 class KeyEventTest : public ::testing::Test {
  protected:
@@ -41,9 +42,6 @@ class KeyEventTest : public ::testing::Test {
 	}
 
 	static bool compareKeyEvents(std::vector<Key> keyEvents, std::vector<Key> keyEvents2) {
-		keyEvents = removeNullKeyEvents(keyEvents);
-		keyEvents2 = removeNullKeyEvents(keyEvents2);
-
 		int size1 = keyEvents.size();
 		int size2 = keyEvents2.size();
 
@@ -67,13 +65,120 @@ class KeyEventTest : public ::testing::Test {
 		}
 	}
 
+	static String getKeySymbol(unsigned short code) {
+		switch (code) {
+			case SC_BACK: return "⌫";
+			case SC_RETURN: return "⏎";
+			case SC_LSHIFT: return "⇧";
+			case SC_LALT: return "Alt";
+			case SC_LCTRL: return "Ctrl";
+			case SC_LWIN: return "❖";
+			case SC_CAPSLOCK: return "Caps";
+			case SC_TAB: return "⭾";
+			case SC_LEFT: return "⇦";
+			case SC_RIGHT: return "⇨";
+			case SC_UP: return "⇧";
+			case SC_DOWN: return "⇩";
+			case SC_SPACE: return "Space";
+			case SC_GRAVE: return "`";
+			case SC_MOUSELEFT: return "LeftClick";
+			case SC_MOUSERIGHT: return "RightClick";
+			case SC_PRIOR: return "Prior";
+			case SC_NEXT: return "Next";
+			case SC_HOME: return "Home";
+			case SC_END: return "End";
+			case SC_SUPR: return "Supr";
+			case SC_ESC: return "Esc";
+			case SC_MUTE: return "Mute";
+			case SC_VOLUMEDOWN: return "VolumeDown";
+			case SC_VOLUMEUP: return "VolumeUp";
+			case SC_BRIGHTNESSDOWN: "Brightnessdown";
+			case SC_BRIGHTNESSUP: "Brightnessup";
+			case SC_F1: return "F1";
+			case SC_F2: return "F2";
+			case SC_F3: return "F3";
+			case SC_F4: return "F4";
+			case SC_F5: return "F5";
+			case SC_F6: return "F6";
+			case SC_F7: return "F7";
+			case SC_F8: return "F8";
+			case SC_F9: return "F9";
+			case SC_F10: return "F10";
+			case SC_F11: return "F11";
+			case SC_F12: return "F12";
+			case SC_C: return "C";
+			case SC_D: return "D";
+			case SC_H: return "H";
+			case SC_J: return "J";
+			case SC_K: return "K";
+			case SC_L: return "L";
+			case SC_M: return "M";
+			case SC_Q: return "Q";
+			case SC_S: return "S";
+			case SC_T: return "T";
+			case SC_V: return "V";
+			case SC_W: return "W";
+			case SC_X: return "X";
+			case SC_Y: return "Y";
+			case SC_Z: return "Z";
+			case SC_1: return "1";
+			case SC_2: return "2";
+			case SC_3: return "3";
+			case SC_4: return "4";
+		}
+
+		return "KEY_CODE_NOT_FOUND";
+	}
+
+	static String getStateSymbol(unsigned short state) {
+		if (state == 0 || state == 2) {
+			return "↓";
+		} else if (state == 1 || state == 3) {
+			return "↑";
+		} else if (state == 4 || state == 5) {
+			return "↕";
+		}
+		return "KEY_STATE_NOT_FOUND";
+	}
+
 	static bool validateKeyMapsAndOutputThem(
-		std::string name,
-		std::pair<std::vector<Key>, std::vector<Key>> keys
+		String name,
+		std::pair<Keys, Keys> keys
 	) {
-		return compareKeyEvents(getKeyEvents(keys.first), keys.second);
+		auto inputKeys = keys.first;
+		auto convertedInputKeys = removeNullKeyEvents(getKeyEvents(inputKeys));
+		auto expectedKeys = removeNullKeyEvents(keys.second);
+		auto result = compareKeyEvents(convertedInputKeys, expectedKeys);
+
+		if (result) {
+			auto inputKeysSize = inputKeys.size();
+			auto convertedInputKeysSize = convertedInputKeys.size();
+
+			String symbolMappedKeys = "";
+			for (int i = 0; i < inputKeysSize; i++) {
+				symbolMappedKeys = symbolMappedKeys
+					.append(getKeySymbol(inputKeys[i].code))
+					.append(getStateSymbol(inputKeys[i].state));
+			}
+
+			symbolMappedKeys = symbolMappedKeys.append(" = ");
+
+			for (int i = 0; i < convertedInputKeysSize; i++) {
+				symbolMappedKeys = symbolMappedKeys
+					.append(getKeySymbol(convertedInputKeys[i].code))
+					.append(getStateSymbol(convertedInputKeys[i].state));
+			}
+
+			ErwinUtils::writeToFile("lul.md", symbolMappedKeys);
+		}
+
+		return result;
 	}
 };
+
+TEST(CleanUpFile) {
+	ErwinUtils::writeToFile("lul.md", "", false, false);
+}
 
 // Mouse events
 
@@ -187,22 +292,22 @@ TEST_F(KeyEventTest, MOUSE_LALT_LEFT_CLICK) {
 
 TEST_F(KeyEventTest, KEY) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
-		{ KeyDown(SC_P), KeyUp(SC_P) },
-		{ KeyDown(SC_P), KeyUp(SC_P) }
+		{ KeyDown(SC_H), KeyUp(SC_H) },
+		{ KeyDown(SC_H), KeyUp(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_DOWN) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
-		{ KeyDown(SC_P), KeyDown(SC_P), KeyDown(SC_P) },
-		{ KeyDown(SC_P), KeyDown(SC_P), KeyDown(SC_P) }
+		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) },
+		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) }
 	}));
 }
 
 TEST_F(KeyEventTest, KEY_DOWN_THEN_UP) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("key.md", {
-		{ KeyDown(SC_P), KeyDown(SC_P), KeyUp(SC_P) },
-		{ KeyDown(SC_P), KeyDown(SC_P), KeyUp(SC_P) }
+		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) },
+		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) }
 	}));
 }
 
@@ -993,7 +1098,7 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 // NICE TO HAVE
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
-	setActiveProcessName("SC2_x64.exe");
+	setActiveProcessName(L"SC2_x64.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
@@ -1011,7 +1116,7 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
 }
 
 TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
-	setActiveProcessName("mintty.exe");
+	setActiveProcessName(L"mintty.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleLWinKey.md", {
 		{
@@ -1338,7 +1443,7 @@ TEST_F(KeyEventTest, handleShiftKey_LSHIFT) {
 
 // F3↕ = LCTRL↓LSHIFT↓TAB↕LSHIFT↑LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F3) {
-	setActiveProcessName("chrome.exe");
+	setActiveProcessName(L"chrome.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
 		{
@@ -1357,7 +1462,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F3) {
 
 // F4↕ = LCTRL↓TAB↕LCTRL↑
 TEST_F(KeyEventTest, handleKey_chrome_F4) {
-	setActiveProcessName("chrome.exe");
+	setActiveProcessName(L"chrome.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
 		{
@@ -1374,7 +1479,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F4) {
 
 // F5↕ = LALT↓M↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F5) {
-	setActiveProcessName("chrome.exe");
+	setActiveProcessName(L"chrome.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
 		{
@@ -1391,7 +1496,7 @@ TEST_F(KeyEventTest, handleKey_chrome_F5) {
 
 // F6↕ = LALT↓T↕LALT↑
 TEST_F(KeyEventTest, handleKey_chrome_F6) {
-	setActiveProcessName("chrome.exe");
+	setActiveProcessName(L"chrome.exe");
 
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("handleShiftKey.md", {
 		{

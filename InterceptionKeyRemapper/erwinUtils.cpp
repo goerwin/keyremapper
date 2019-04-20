@@ -1,8 +1,23 @@
+#ifndef UNICODE
+#define UNICODE
+#endif
+
 #include <windows.h>
 #include <string>
 #include <psapi.h>
 #include <chrono>
 #include <fstream>
+#include <codecvt>
+
+std::string ws2utf8(std::wstring &input) {
+ std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+ return utf8conv.to_bytes(input);
+}
+
+std::wstring utf82ws(std::string &input) {
+ std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+ return utf8conv.from_bytes(input);
+}
 
 double previousTime = clock();
 
@@ -12,23 +27,28 @@ namespace ErwinUtils {
 	}
 
 	void writeToFile(std::string name, std::string content, bool append = true, bool newLine = true) {
-		std::ofstream outfile;
+		std::ofstream soutfile;
 
 		if (append) {
-			outfile.open(name, std::ios_base::app);
+			soutfile.open(name, std::ios_base::app);
 		} else {
-			outfile.open(name);
+			soutfile.open(name);
 		}
 
-		outfile << content.append(newLine ? "\n" : "");
+		content = content.append(newLine ? "\n" : "");
+
+		std::wbuffer_convert<std::codecvt_utf8<wchar_t>> converter(soutfile.rdbuf());
+		std::wostream out(&converter);
+		out << utf82ws(content);
+		soutfile.close();
 	}
 
-	std::string getActiveWindowProcessName(HWND hwnd) {
+	std::wstring getActiveWindowProcessName(HWND hwnd) {
 		if (!hwnd) {
 			return NULL;
 		}
 
-		std::string processName;
+		std::wstring processName;
 		DWORD dwPID;
 		GetWindowThreadProcessId(hwnd, &dwPID);
 		HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwPID);
@@ -38,7 +58,7 @@ namespace ErwinUtils {
 
 			if (GetModuleFileNameEx(handle, 0, path, MAX_PATH)) {
 				processName = path;
-				std::string::size_type idx = processName.rfind("\\");
+				std::string::size_type idx = processName.rfind(L"\\");
 
 				if (idx != std::string::npos) {
 					processName = processName.substr(idx + 1);

@@ -109,6 +109,6 @@ struct KeyUp : Key {
 Keys getKeyEvents(Keys keys);
 Keys getParsedKeysForEsc();
 
-void setActiveProcessName(std::string _activeProcessName);
+void setActiveProcessName(std::wstring _activeProcessName);
 bool isKeyDown(Key key);
 void setGlobalDefaultValues();

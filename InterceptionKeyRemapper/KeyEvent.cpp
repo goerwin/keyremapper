@@ -5,7 +5,7 @@
 #include <vector>
 #include "KeyEvent.h"
 
-std::string g_activeProcessName;
+std::wstring g_activeProcessName;
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
@@ -22,16 +22,16 @@ bool g_isVimShiftKeyDown;
 Key g_nullKey = KeyUp(SC_NULL);
 
 bool isChromeActiveProcess() {
-	return g_activeProcessName == "chrome.exe";
+	return g_activeProcessName == L"chrome.exe";
 }
 bool isStarcraft2ActiveProcess() {
-	return g_activeProcessName == "SC2_x64.exe";
+	return g_activeProcessName == L"SC2_x64.exe";
 }
 bool isSlackActiveProcess() {
-	return g_activeProcessName == "slack.exe";
+	return g_activeProcessName == L"slack.exe";
 }
 bool isGitBashActiveProcess() {
-	return g_activeProcessName == "mintty.exe";
+	return g_activeProcessName == L"mintty.exe";
 }
 
 Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
@@ -868,9 +868,9 @@ Keys getKeyEvents(Keys keys) {
 	return allKeyEvents;
 }
 
-void setActiveProcessName(std::string _activeProcessName) {
+void setActiveProcessName(std::wstring _activeProcessName) {
 	g_activeProcessName = _activeProcessName;
-	OutputDebugStringA(g_activeProcessName.c_str());
+	OutputDebugStringW(g_activeProcessName.c_str());
 }
 
 void setGlobalDefaultValues() {
@@ -885,5 +885,5 @@ void setGlobalDefaultValues() {
 
 	g_isMouseClickDown = false;
 	g_isVimShiftKeyDown = false;
-	g_activeProcessName = "";
+	g_activeProcessName = L"";
 }
