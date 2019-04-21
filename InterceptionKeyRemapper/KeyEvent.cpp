@@ -13,12 +13,12 @@ String g_activeProcessName;
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
-bool g_isLCtrlKeyDown;
-bool g_isLWinKeyDown;
-bool g_isLAltKeyDown;
+bool g_isCtrlKeyDown;
+bool g_isWinKeyDown;
+bool g_isAltKeyDown;
 
-bool g_isLCtrlAsLAlt;
-bool g_isLAltAsLCtrl;
+bool g_isCtrlAsAlt;
+bool g_isAltAsCtrl;
 
 bool g_isMouseClickDown;
 bool g_isVimShiftKeyDown;
@@ -255,70 +255,70 @@ Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
 Keys keyDownLCtrlAsLAlt() {
 	Keys keys;
 
-	if (!g_isLCtrlAsLAlt && g_isLCtrlKeyDown) {
+	if (!g_isCtrlAsAlt && g_isCtrlKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	g_isLCtrlAsLAlt = true;
+	g_isCtrlAsAlt = true;
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
 Keys keyDownLCtrlAsLCtrl() {
 	Keys keys;
 
-	if (g_isLCtrlAsLAlt && g_isLCtrlKeyDown) {
+	if (g_isCtrlAsAlt && g_isCtrlKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
-	g_isLCtrlAsLAlt = false;
+	g_isCtrlAsAlt = false;
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
 Keys keyUpLCtrl() {
 	Keys keys;
 
-	if (g_isLCtrlAsLAlt) {
+	if (g_isCtrlAsAlt) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	} else {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	g_isLCtrlAsLAlt = true;
+	g_isCtrlAsAlt = true;
 	return keys;
 }
 
 Keys keyDownLAltAsLCtrl() {
 	Keys keys;
 
-	if (!g_isLAltAsLCtrl && g_isLAltKeyDown) {
+	if (!g_isAltAsCtrl && g_isAltKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
-	g_isLAltAsLCtrl = true;
+	g_isAltAsCtrl = true;
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
 Keys keyDownLAltAsLAlt() {
 	Keys keys;
 
-	if (g_isLAltAsLCtrl && g_isLAltKeyDown) {
+	if (g_isAltAsCtrl && g_isAltKeyDown) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
-	g_isLAltAsLCtrl = false;
+	g_isAltAsCtrl = false;
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
 Keys keyUpLAlt() {
 	Keys keys;
 
-	if (g_isLAltAsLCtrl) {
+	if (g_isAltAsCtrl) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	} else {
 		keys.insert(keys.end(), { KeyUp(SC_LALT) });
 	}
 
-	g_isLAltAsLCtrl = true;
+	g_isAltAsCtrl = true;
 	return keys;
 }
 
@@ -571,7 +571,7 @@ UserHotKeys altShiftUserHotKeys = UserHotKeys({
 	getParsedUserHotkey("'' AltShift K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)"),
 	getParsedUserHotkey("'' AltShift Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)"),
 	getParsedUserHotkey("'' AltShift Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
-	getParsedUserHotkey("'' AltShift Shift => Down(Shift↓) Up(Shift↑)"), // ctrlD - ShiftD - ctrlU altD - tab -
+	getParsedUserHotkey("'' AltShift Shift => Down(Shift↓) Up(Shift↑)"),
 	getParsedUserHotkey("'' AltShift _ => Down(_↓) Up(_↑)"),
 });
 
@@ -673,11 +673,11 @@ unsigned short getVimPriorNextKeyCode(unsigned short keyCode) {
 }
 
 TemplateKeys getTemplateKeysForEsc() {
-	if (!g_isLAltAsLCtrl) {
+	if (!g_isAltAsCtrl) {
 		return TemplateKeys({ Key(SC_ESC) }, _keyDownLAltAsLCtrl);
 	}
 
-	if (!g_isLAltKeyDown) {
+	if (!g_isAltKeyDown) {
 		return TemplateKeys({ Key(SC_ESC) });
 	}
 
@@ -712,45 +712,22 @@ Keys handleUserHotKey(unsigned short keyCode, bool isKeyDown, UserHotKeys userHo
 	return { g_nullKey };
 }
 
-Keys handleMouseClick(Key key) {
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
+Keys handleMouseClick(unsigned short keyCode, bool isKeyDown) {
 	if (
 		!g_isMouseClickDown &&
-		!(g_isLWinKeyDown && keyCode == SC_C)
-		/*!(g_isLWinKeyDown && keyCode == SC_LALT) &&
-		!(g_isLWinKeyDown && keyCode == SC_LSHIFT)*/
-		) {
+		!(g_isWinKeyDown && keyCode == SC_C)
+	) {
 		return {};
 	}
 
-	/*if (keyCode == SC_LALT) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyDownLAltAsLCtrl),
-			TemplateKeys(_keyUpLAlt)
-		);
-	}*/
-
-	/*
-	if (keyCode == SC_LSHIFT) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ KeyDown(SC_LSHIFT) }),
-			TemplateKeys({ KeyUp(SC_LSHIFT) })
-		);
-	}
-	*/
-
 	if (keyCode == SC_C) {
 		if (g_isCapslockKeyDown) {
-			if (isCurrentKeyDown && !g_isMouseClickDown) {
+			if (isKeyDown && !g_isMouseClickDown) {
 				g_isMouseClickDown = true;
 				return { KeyDown(SC_MOUSERIGHT) };
 			}
 
-			if (!isCurrentKeyDown && g_isMouseClickDown) {
+			if (!isKeyDown && g_isMouseClickDown) {
 				g_isMouseClickDown = false;
 				return { KeyUp(SC_MOUSERIGHT) };
 			}
@@ -758,12 +735,12 @@ Keys handleMouseClick(Key key) {
 			return { g_nullKey };
 		}
 
-		if (isCurrentKeyDown && !g_isMouseClickDown) {
+		if (isKeyDown && !g_isMouseClickDown) {
 			g_isMouseClickDown = true;
 			return { KeyDown(SC_MOUSELEFT) };
 		}
 
-		if (!isCurrentKeyDown && g_isMouseClickDown) {
+		if (!isKeyDown && g_isMouseClickDown) {
 			g_isMouseClickDown = false;
 			return { KeyUp(SC_MOUSELEFT) };
 		}
@@ -774,20 +751,17 @@ Keys handleMouseClick(Key key) {
 	return { g_nullKey };
 }
 
-Keys handleVimMode(Key key) {
-	if (!g_isCapslockKeyDown && key.code != SC_CAPSLOCK) {
+Keys handleVimMode(unsigned short keyCode, bool isKeyDown) {
+	if (!g_isCapslockKeyDown && keyCode != SC_CAPSLOCK) {
 		return {};
 	}
-
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
 
 	if (keyCode == SC_CAPSLOCK) {
 		if (g_isVimShiftKeyDown) {
 			g_isVimShiftKeyDown = false;
 
 			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
+				isKeyDown,
 				TemplateKeys({ g_nullKey }),
 				TemplateKeys({ KeyUp(SC_LSHIFT) })
 			);
@@ -797,50 +771,50 @@ Keys handleVimMode(Key key) {
 	}
 
 	if (keyCode == SC_LSHIFT || keyCode == SC_S) {
-		g_isVimShiftKeyDown = isCurrentKeyDown;
+		g_isVimShiftKeyDown = isKeyDown;
 
 		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
+			isKeyDown,
 			TemplateKeys({ KeyDown(SC_LSHIFT) }),
 			TemplateKeys({ KeyUp(SC_LSHIFT) })
 		);
 	}
 
-	if (keyCode == SC_LALT) {
+	/*if (keyCode == SC_LALT) {
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
 			TemplateKeys(_keyDownLAltAsLCtrl),
 			TemplateKeys(_keyUpLAlt)
 		);
-	}
+	}*/
 
 	if (keyCode == SC_H || keyCode == SC_J || keyCode == SC_L || keyCode == SC_K) {
-		if (g_isLWinKeyDown) {
+		if (g_isWinKeyDown) {
 			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
+				isKeyDown,
 				TemplateKeys({ KeyDown(SC_LCTRL), Key(getVimArrowKeyCode(keyCode)), KeyUp(SC_LCTRL) }),
 				TemplateKeys({ g_nullKey })
 			);
 		}
 
-		if (g_isLAltKeyDown && g_isLAltAsLCtrl && (keyCode == SC_H || keyCode == SC_L)) {
+		if (g_isAltKeyDown && g_isAltAsCtrl && (keyCode == SC_H || keyCode == SC_L)) {
 			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
+				isKeyDown,
 				TemplateKeys(_keyUpLAlt, { Key(getVimHomeEndKeyCode(keyCode)) }, _keyDownLAltAsLCtrl),
 				TemplateKeys({ g_nullKey })
 			);
 		}
 
-		if (g_isLAltKeyDown && g_isLAltAsLCtrl) {
+		if (g_isAltKeyDown && g_isAltAsCtrl) {
 			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
+				isKeyDown,
 				TemplateKeys({ Key(getVimHomeEndKeyCode(keyCode)) }),
 				TemplateKeys({ g_nullKey })
 			);
 		}
 
 		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
+			isKeyDown,
 			TemplateKeys({ Key(getVimArrowKeyCode(keyCode)) }),
 			TemplateKeys({ g_nullKey })
 		);
@@ -849,40 +823,46 @@ Keys handleVimMode(Key key) {
 	return {};
 }
 
-Keys handleWinAltKeys(Key key) {
+Keys handleWinAltKeys(unsigned short keyCode, bool isKeyDown) {
 	if (
-		!(g_isLWinKeyDown && g_isLAltKeyDown) &&
-		!(g_isLWinKeyDown && key.code == SC_LALT) &&
-		!(g_isLAltKeyDown && key.code == SC_LWIN)
+		!(g_isWinKeyDown && g_isAltKeyDown) &&
+		!(g_isWinKeyDown && keyCode == SC_LALT) &&
+		!(g_isAltKeyDown && keyCode == SC_LWIN)
 
 		// NOTE: For triple keys
-		/*!(g_isLWinKeyDown && g_isLAltKeyDown && g_isShiftKeyDown) &&
-		!(g_isLWinKeyDown && g_isLAltKeyDown && key.code == SC_LSHIFT) &&
-		!(g_isLWinKeyDown && g_isShiftKeyDown && key.code == SC_LALT) &&
-		!(g_isLAltKeyDown && g_isShiftKeyDown && key.code == SC_LWIN)*/
+		/*!(g_isWinKeyDown && g_isAltKeyDown && g_isShiftKeyDown) &&
+		!(g_isWinKeyDown && g_isAltKeyDown && key.code == SC_LSHIFT) &&
+		!(g_isWinKeyDown && g_isShiftKeyDown && key.code == SC_LALT) &&
+		!(g_isAltKeyDown && g_isShiftKeyDown && key.code == SC_LWIN)*/
 	) {
 		return {};
 	}
 
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
-	return handleUserHotKey(keyCode, isCurrentKeyDown, winAltUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, winAltUserHotKeys);
 }
 
-Keys handleCtrlShiftKeys(Key key) {
+Keys handleCtrlShiftKeys(unsigned short keyCode, bool isKeyDown) {
 	if (
-		!(g_isLCtrlKeyDown && g_isShiftKeyDown) &&
-		!(g_isLCtrlKeyDown && key.code == SC_LSHIFT) &&
-		!(g_isShiftKeyDown && key.code == SC_LCTRL)
+		!(g_isCtrlKeyDown && g_isShiftKeyDown) &&
+		!(g_isCtrlKeyDown && keyCode == SC_LSHIFT) &&
+		!(g_isShiftKeyDown && keyCode == SC_LCTRL)
 	) {
 		return {};
 	}
 
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
+	return handleUserHotKey(keyCode, isKeyDown, ctrlShiftUserHotKeys);
+}
 
-	return handleUserHotKey(keyCode, isCurrentKeyDown, ctrlShiftUserHotKeys);
+Keys handleCapslockAltKeys(unsigned short keyCode, bool isKeyDown) {
+	if (
+		!((g_isCapslockKeyDown && g_isAltKeyDown) ||
+		(g_isCapslockKeyDown && keyCode == SC_LALT) ||
+		(g_isAltKeyDown && keyCode == SC_CAPSLOCK))
+	) {
+		return {};
+	}
+
+	return handleUserHotKey(keyCode, isKeyDown, capslockAltUserHotKeys);
 }
 
 Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
@@ -893,21 +873,18 @@ Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
 	return handleUserHotKey(keyCode, isKeyDown, capslockUserHotKeys);
 }
 
-Keys handleCtrlKey(Key key) {
-	if (!g_isLCtrlKeyDown && key.code != SC_LCTRL) {
+Keys handleCtrlKey(unsigned short keyCode, bool isKeyDown) {
+	if (!g_isCtrlKeyDown && keyCode != SC_LCTRL) {
 		return {};
 	}
 
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
-	return handleUserHotKey(keyCode, isCurrentKeyDown, ctrlUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, ctrlUserHotKeys);
 }
 
 Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
 	if (
-		!(g_isLWinKeyDown && g_isShiftKeyDown) &&
-		!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
+		!(g_isWinKeyDown && g_isShiftKeyDown) &&
+		!(g_isWinKeyDown && keyCode == SC_LSHIFT) &&
 		!(g_isShiftKeyDown && keyCode == SC_LCTRL)
 	) {
 		return {};
@@ -916,49 +893,40 @@ Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
 	return handleUserHotKey(keyCode, isKeyDown, winShiftUserHotKeys);
 }
 
-Keys handleWinKey(Key key) {
-	if (!g_isLWinKeyDown && key.code != SC_LWIN) {
+Keys handleWinKey(unsigned short keyCode, bool isKeyDown) {
+	if (!(g_isWinKeyDown || keyCode == SC_LWIN)) {
 		return {};
 	}
 
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
-	return handleUserHotKey(keyCode, isCurrentKeyDown, winUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, winUserHotKeys);
 }
 
-Keys handleAltShiftKeys(Key key) {
-	if (
-		!(g_isLAltKeyDown && g_isShiftKeyDown) &&
-		!(g_isLAltKeyDown && key.code == SC_LSHIFT) &&
-		!(g_isShiftKeyDown && key.code == SC_LALT)
-	) {
+Keys handleAltShiftKeys(unsigned short keyCode, bool isKeyDown) {
+	if (!(
+		(g_isAltKeyDown && g_isShiftKeyDown) ||
+		(g_isAltKeyDown && keyCode == SC_LSHIFT) ||
+		(g_isShiftKeyDown && keyCode == SC_LALT)
+	)) {
 		return {};
 	}
 
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
 	// Omit keys when in alt-tab mode
-	if (!g_isLAltAsLCtrl && keyCode != SC_LALT && keyCode != SC_TAB && keyCode != SC_LSHIFT) {
+	if (!g_isAltAsCtrl && keyCode != SC_LALT && keyCode != SC_TAB && keyCode != SC_LSHIFT) {
 		return { g_nullKey };
 	}
 
-	return handleUserHotKey(keyCode, isCurrentKeyDown, altShiftUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, altShiftUserHotKeys);
 }
 
-Keys handleAltKey(Key key) {
-	if (!g_isLAltKeyDown && key.code != SC_LALT) {
+Keys handleAltKey(unsigned short keyCode, bool isKeyDown) {
+	if (!(g_isAltKeyDown || keyCode == SC_LALT)) {
 		return {};
 	}
-
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
 
 	// alt + esc
 	if (keyCode == SC_ESC) {
 		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
+			isKeyDown,
 			getTemplateKeysForEsc(),
 			TemplateKeys({ g_nullKey })
 		);
@@ -966,34 +934,31 @@ Keys handleAltKey(Key key) {
 
 	// alt + q
 	if (keyCode == SC_Q) {
-		if (!g_isLAltAsLCtrl) { // alt + tabbed + q
+		if (!g_isAltAsCtrl) { // alt + tabbed + q
 			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
+				isKeyDown,
 				TemplateKeys({ Key(SC_SUPR) }),
 				TemplateKeys({ g_nullKey })
 			);
 		}
 
 		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
+			isKeyDown,
 			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_F4) }, _keyDownLAltAsLCtrl),
 			TemplateKeys({ g_nullKey })
 		);
 	}
 
 	// Omit keys when in alt-tab mode
-	if (!g_isLAltAsLCtrl && keyCode != SC_LALT && keyCode != SC_TAB) {
+	if (!g_isAltAsCtrl && keyCode != SC_LALT && keyCode != SC_TAB) {
 		return { g_nullKey };
 	}
 
-	return handleUserHotKey(keyCode, isCurrentKeyDown, altUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, altUserHotKeys);
 }
 
-Keys handleKey(Key key) {
-	auto isCurrentKeyDown = isKeyDown(key);
-	auto keyCode = key.code;
-
-	return handleUserHotKey(keyCode, isCurrentKeyDown, keyUserHotKeys);
+Keys handleKey(unsigned short keyCode, bool isKeyDown) {
+	return handleUserHotKey(keyCode, isKeyDown, keyUserHotKeys);
 }
 
 Keys getKeyEvents(Keys keys) {
@@ -1012,24 +977,25 @@ Keys getKeyEvents(Keys keys) {
 		} else if (keyCode == SC_LSHIFT) {
 			g_isShiftKeyDown = isCurrentKeyDown;
 		} else if (keyCode == SC_LCTRL) {
-			g_isLCtrlKeyDown = isCurrentKeyDown;
+			g_isCtrlKeyDown = isCurrentKeyDown;
 		} else if (keyCode == SC_LWIN) {
-			g_isLWinKeyDown = isCurrentKeyDown;
+			g_isWinKeyDown = isCurrentKeyDown;
 		} else if (keyCode == SC_LALT) {
-			g_isLAltKeyDown = isCurrentKeyDown;
+			g_isAltKeyDown = isCurrentKeyDown;
 		}
 
-		if (keyEvents = handleMouseClick(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleVimMode(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		if (keyEvents = handleMouseClick(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleVimMode(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCapslockAltKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
 		else if (keyEvents = handleCapslockKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCtrlShiftKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCtrlKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleWinAltKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCtrlShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCtrlKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleWinAltKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
 		else if (keyEvents = handleWinShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleWinKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleAltShiftKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleAltKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleWinKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleAltShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleAltKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
 
 		allKeyEvents = concatKeyVectors(allKeyEvents, keyEvents);
 	}
@@ -1045,12 +1011,12 @@ void setActiveProcessName(std::string _activeProcessName) {
 void setGlobalDefaultValues() {
 	g_isCapslockKeyDown = false;
 	g_isShiftKeyDown = false;
-	g_isLCtrlKeyDown = false;
-	g_isLWinKeyDown = false;
-	g_isLAltKeyDown = false;
+	g_isCtrlKeyDown = false;
+	g_isWinKeyDown = false;
+	g_isAltKeyDown = false;
 
-	g_isLCtrlAsLAlt = true;
-	g_isLAltAsLCtrl = true;
+	g_isCtrlAsAlt = true;
+	g_isAltAsCtrl = true;
 
 	g_isMouseClickDown = false;
 	g_isVimShiftKeyDown = false;

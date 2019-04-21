@@ -25,9 +25,7 @@ class KeyEventTest : public ::testing::Test {
 	// and cleaning up each test, you can define the following methods:
 
 	// Code here will be called immediately after the constructor (right before each test).
-	void SetUp() override {
-		setGlobalDefaultValues();
-	}
+	void SetUp() override {}
 
 	// Code here will be called immediately after each test (right before the destructor).
 	void TearDown() override {}
@@ -74,8 +72,11 @@ class KeyEventTest : public ::testing::Test {
 	static bool validateKeyMapsAndOutputThem(
 		String title,
 		std::pair<Keys, Keys> keys,
-		String comment = ""
+		String program = ""
 	) {
+		setGlobalDefaultValues();
+		setActiveProcessName(program);
+
 		auto inputKeys = keys.first;
 		auto convertedInputKeys = removeNullKeyEvents(getKeyEvents(inputKeys));
 		auto expectedKeys = removeNullKeyEvents(keys.second);
@@ -83,10 +84,11 @@ class KeyEventTest : public ::testing::Test {
 
 		if (result) {
 			String symbolMappedKeys = getKeySymbols(inputKeys);
+
 			symbolMappedKeys = symbolMappedKeys
 				.append(" = ")
 				.append(getKeySymbols(convertedInputKeys))
-				.append(comment != "" ? String(" // ").append(comment) : "")
+				.append(program != "" ? String(" // ").append(program) : "")
 				.append("\n");
 
 			auto outputSectionSize = outputSection.size();
@@ -247,43 +249,125 @@ TEST_F(KeyEventTest, MOUSE_LALT_LEFT_CLICK) {
 	}));
 }
 
+TEST_F(KeyEventTest, MODIFIER) {
+	String testName = "1 Modifier - ";
+	// tuple<title, key1, expectedKey1, expectedGeneral>
+	std::vector<std::tuple<String, ScanCodes, ScanCodes, ScanCodes>> modifiers = {
+		{ "Caps", SC_CAPSLOCK, SC_NULL, SC_NULL },
+		{ "Ctrl", SC_LCTRL, SC_LALT, SC_GENERAL },
+		{ "Win", SC_LWIN, SC_NULL, SC_NULL },
+		{ "Alt", SC_LALT, SC_LCTRL, SC_GENERAL },
+		{ "Shift", SC_LSHIFT, SC_LSHIFT, SC_GENERAL }
+	};
+
+	for (int i = 0; i < modifiers.size(); i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + std::get<0>(modifiers[i]), {
+			{
+				KeyDown(std::get<1>(modifiers[i])),
+				KeyUp(std::get<1>(modifiers[i]))
+			},
+			{
+				KeyDown(std::get<2>(modifiers[i])),
+				KeyUp(std::get<2>(modifiers[i]))
+			}
+		}));
+
+		EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + std::get<0>(modifiers[i]) + " + _", {
+			{
+				KeyDown(std::get<1>(modifiers[i])),
+				KeyDown(SC_GENERAL),
+				KeyUp(SC_GENERAL),
+				KeyUp(std::get<1>(modifiers[i]))
+			},
+			{
+				KeyDown(std::get<2>(modifiers[i])),
+				KeyDown(std::get<3>(modifiers[i])),
+				KeyUp(std::get<3>(modifiers[i])),
+				KeyUp(std::get<2>(modifiers[i]))
+			}
+		}));
+	}
+}
+
+TEST_F(KeyEventTest, TWO_MODIFIERS) {
+	String testName = "2 Modifiers - ";
+
+	// tuple<title, key1, key2, expectedKey1, expectedK2, expectedGeneral>
+	std::vector<std::tuple<String, ScanCodes, ScanCodes, ScanCodes, ScanCodes, ScanCodes>> modifiers = {
+		{ "Caps + Shift", SC_CAPSLOCK, SC_LSHIFT, SC_NULL, SC_LSHIFT, SC_NULL },
+		{ "Caps + Alt", SC_CAPSLOCK, SC_LALT, SC_NULL, SC_LCTRL, SC_NULL },
+		{ "Ctrl + Shift", SC_LCTRL, SC_LSHIFT, SC_LALT, SC_LSHIFT, SC_GENERAL },
+		// TODO: { "Ctrl + Alt", SC_LCTRL, SC_LALT, SC_LALT, SC_LCTRL },
+		{ "Win + Shift", SC_LWIN, SC_LSHIFT, SC_NULL, SC_LSHIFT, SC_NULL },
+		{ "Win + Alt", SC_LWIN, SC_LALT, SC_NULL, SC_LCTRL, SC_NULL },
+	};
+
+	for (int i = 0; i < modifiers.size(); i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + std::get<0>(modifiers[i]), {
+			{
+				KeyDown(std::get<1>(modifiers[i])),
+				KeyDown(std::get<2>(modifiers[i])),
+				KeyUp(std::get<2>(modifiers[i])),
+				KeyUp(std::get<1>(modifiers[i]))
+			},
+			{
+				KeyDown(std::get<3>(modifiers[i])),
+				KeyDown(std::get<4>(modifiers[i])),
+				KeyUp(std::get<4>(modifiers[i])),
+				KeyUp(std::get<3>(modifiers[i]))
+			}
+		}));
+
+		EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + std::get<0>(modifiers[i]) + " + _", {
+			{
+				KeyDown(std::get<1>(modifiers[i])),
+				KeyDown(std::get<2>(modifiers[i])),
+				KeyDown(SC_GENERAL),
+				KeyUp(SC_GENERAL),
+				KeyUp(std::get<2>(modifiers[i])),
+				KeyUp(std::get<1>(modifiers[i]))
+			},
+			{
+				KeyDown(std::get<3>(modifiers[i])),
+				KeyDown(std::get<4>(modifiers[i])),
+				KeyDown(std::get<5>(modifiers[i])),
+				KeyUp(std::get<5>(modifiers[i])),
+				KeyUp(std::get<4>(modifiers[i])),
+				KeyUp(std::get<3>(modifiers[i]))
+			}
+		}));
+	}
+}
+
 TEST_F(KeyEventTest, KEY) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	String testName = "Key - ";
+
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "DownUp", {
 		{ KeyDown(SC_H), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyUp(SC_H) }
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_DOWN) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "Down", {
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyDown(SC_H) }
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_DOWN_THEN_UP) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "Down then Up", {
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_H), KeyUp(SC_H) }
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_2KEYS_IN_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "2 Keys In Order", {
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) },
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_J), KeyUp(SC_H) }
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_2KEYS_NO_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "2 Keys No Order", {
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) },
 		{ KeyDown(SC_H), KeyDown(SC_J), KeyUp(SC_H), KeyUp(SC_J) }
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_IN_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "3 Keys In Order", {
 		{
 			KeyDown(SC_H),
 			KeyDown(SC_J),
@@ -301,10 +385,8 @@ TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_IN_ORDER) {
 			KeyUp(SC_H)
 		}
 	}));
-}
 
-TEST_F(KeyEventTest, KEY_MULTIPLE_KEYS_3KEYS_NO_ORDER) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem(testName + "3 Keys No Order", {
 		{
 			KeyDown(SC_H),
 			KeyDown(SC_J),
@@ -854,8 +936,242 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_JK_REPEAT) {
 	}
 }
 
-TEST_F(KeyEventTest, LALT_GRAVE_THEN_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
+// Ctrl
+
+TEST_F(KeyEventTest, CTRL_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Ctrl", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			Key(SC_TAB),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, CTRL_SHIFT_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Ctrl", {
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LCTRL)
+		},
+		{
+			KeyDown(SC_LALT),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			Key(SC_TAB),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+// Alt
+
+TEST_F(KeyEventTest, ALT_ESC) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_ESC),
+			KeyUp(SC_ESC),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_Q) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_Q),
+			KeyUp(SC_Q),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_F4),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_BACK) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			Key(SC_HOME),
+			KeyUp(SC_LSHIFT),
+			Key(SC_BACK),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_J_OR_K) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_J),
+			KeyUp(SC_J),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			Key(SC_NEXT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_SHIFT_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LSHIFT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			KeyUp(SC_LSHIFT),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_TAB_Letter) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_C),
+			KeyUp(SC_C)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_TAB_THEN_ESC) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_ESC),
+			KeyUp(SC_ESC),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			Key(SC_ESC),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_TAB_THEN_Q) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_TAB),
+			KeyUp(SC_TAB),
+			KeyDown(SC_Q),
+			KeyUp(SC_Q),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_TAB),
+			Key(SC_SUPR),
+			KeyUp(SC_LALT)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_GRAVE) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_GRAVE),
+			KeyUp(SC_GRAVE),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LALT),
+			Key(SC_GRAVE),
+			KeyUp(SC_LALT),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, ALT_GRAVE_THEN_TAB) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
 		{
 			KeyDown(SC_LALT),
 			KeyDown(SC_GRAVE),
@@ -879,499 +1195,10 @@ TEST_F(KeyEventTest, LALT_GRAVE_THEN_TAB) {
 	}));
 }
 
-TEST_F(KeyEventTest, LALT_TAB_THEN_Q) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
-			KeyDown(SC_Q),
-			KeyUp(SC_Q),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB),
-			Key(SC_SUPR),
-			KeyUp(SC_LALT)
-		}
-	}));
-}
+// CUSTOM - NOT SO IMPORTANT
 
-TEST_F(KeyEventTest, LALT_TAB_THEN_ESC) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
-			KeyDown(SC_ESC),
-			KeyUp(SC_ESC),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB),
-			Key(SC_ESC),
-			KeyUp(SC_LALT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, LALT_LSHIFT_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_LSHIFT),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB),
-			KeyUp(SC_LSHIFT),
-			KeyUp(SC_LALT)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, LCTRL_TAB) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl", {
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
-			KeyUp(SC_LCTRL)
-		},
-		{
-			KeyDown(SC_LALT),
-			KeyUp(SC_LALT),
-			KeyDown(SC_LCTRL),
-			Key(SC_TAB),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, LCTRL_OR_LALT_Letter) {
-	std::vector<ScanCodes> keys = { SC_LCTRL, SC_LALT };
-	std::vector<ScanCodes> switchedKeys = { SC_LALT, SC_LCTRL };
-	int size = keys.size();
-
-	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
-			{
-				KeyDown(keys[i]),
-				KeyDown(SC_C),
-				KeyUp(SC_C),
-				KeyUp(keys[i])
-			},
-			{
-				KeyDown(switchedKeys[i]),
-				KeyDown(SC_C),
-				KeyUp(SC_C),
-				KeyUp(switchedKeys[i])
-			}
-		}));
-
-		setGlobalDefaultValues();
-
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
-			{
-				KeyDown(keys[i]),
-				KeyDown(SC_C)
-			},
-			{
-				KeyDown(switchedKeys[i]),
-				KeyDown(SC_C)
-			}
-		}));
-
-		setGlobalDefaultValues();
-	}
-}
-
-TEST_F(KeyEventTest, LCTRL_OR_LALT_LSHIFT) {
-	std::vector<ScanCodes> keys = { SC_LCTRL, SC_LALT };
-	std::vector<ScanCodes> switchedKeys = { SC_LALT, SC_LCTRL };
-	int size = keys.size();
-
-	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
-			{
-				KeyDown(keys[i]),
-				KeyDown(SC_LSHIFT),
-				KeyUp(SC_LSHIFT),
-				KeyUp(keys[i])
-			},
-			{
-				KeyDown(switchedKeys[i]),
-				KeyDown(SC_LSHIFT),
-				KeyUp(SC_LSHIFT),
-				KeyUp(switchedKeys[i])
-			}
-		}));
-	}
-}
-
-TEST_F(KeyEventTest, LCTRL_OR_LALT) {
-	std::vector<ScanCodes> keys = { SC_LCTRL, SC_LALT };
-	std::vector<ScanCodes> switchedKeys = { SC_LALT, SC_LCTRL };
-	int size = keys.size();
-
-	for (int i = 0; i < size; i++) {
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
-			{
-				KeyDown(keys[i]),
-				KeyUp(keys[i])
-			},
-			{
-				KeyDown(switchedKeys[i]),
-				KeyUp(switchedKeys[i])
-			}
-		}));
-
-		setGlobalDefaultValues();
-
-		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
-			{
-				KeyDown(keys[i])
-			},
-			{
-				KeyDown(switchedKeys[i])
-			}
-		}));
-
-		setGlobalDefaultValues();
-	}
-}
-
-// NICE TO HAVE
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_1234_SC2) {
-	setActiveProcessName("SC2_x64.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_1),
-			KeyUp(SC_1),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LALT),
-			Key(SC_1),
-			KeyUp(SC_LALT)
-		}
-	}, "SC2_x64.exe"));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK_gitbash) {
-	setActiveProcessName("mintty.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_BACK),
-			KeyUp(SC_BACK),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			Key(SC_W),
-			KeyUp(SC_LCTRL)
-		}
-	}, "mintty.exe"));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_H) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_H),
-			KeyUp(SC_H),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LALT),
-			Key(SC_LEFT),
-			KeyUp(SC_LALT)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_L) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_L),
-			KeyUp(SC_L),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LALT),
-			Key(SC_RIGHT),
-			KeyUp(SC_LALT)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_BACK),
-			KeyUp(SC_BACK),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			Key(SC_BACK),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN_D) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyDown(SC_D),
-			KeyUp(SC_D),
-			KeyUp(SC_LWIN)
-		},
-		{
-			KeyDown(SC_LWIN),
-			Key(SC_D),
-			KeyUp(SC_LWIN)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLWinKey_LWIN) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LWin", {
-		{
-			KeyDown(SC_LWIN),
-			KeyUp(SC_LWIN)
-		},
-		{}
-	}));
-}
-
-// handleLAltKey
-
-// TODO: MORE
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_ESC) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_ESC),
-			KeyUp(SC_ESC),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_Q) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_Q),
-			KeyUp(SC_Q),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_F4),
-			KeyUp(SC_LALT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_BACK),
-			KeyUp(SC_BACK),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			Key(SC_HOME),
-			KeyUp(SC_LSHIFT),
-			Key(SC_BACK),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_J_OR_K) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_J),
-			KeyUp(SC_J),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			Key(SC_NEXT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_Tab_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
-			KeyDown(SC_C),
-			KeyUp(SC_C)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_Tab) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALTDown_LetterDown) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_C)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_C)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_C),
-			KeyUp(SC_C),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyDown(SC_C),
-			KeyUp(SC_C),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALTDown) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-// handleShiftKey
-
-TEST_F(KeyEventTest, handleShiftKey_LSHIFT_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Shift", {
-		{
-			KeyDown(SC_LSHIFT),
-			KeyDown(SC_C),
-			KeyUp(SC_C),
-			KeyUp(SC_LSHIFT)
-		},
-		{
-			KeyDown(SC_LSHIFT),
-			KeyDown(SC_C),
-			KeyUp(SC_C),
-			KeyUp(SC_LSHIFT)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleShiftKey_LSHIFT) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Shift", {
-		{
-			KeyDown(SC_LSHIFT),
-			KeyUp(SC_LSHIFT)
-		},
-		{
-			KeyDown(SC_LSHIFT),
-		KeyUp(SC_LSHIFT)
-		}
-	}));
-}
-
-// handleKey
-
-TEST_F(KeyEventTest, handleKey_chrome_F3) {
-	setActiveProcessName("chrome.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F3) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F3),
 			KeyUp(SC_F3)
@@ -1386,10 +1213,8 @@ TEST_F(KeyEventTest, handleKey_chrome_F3) {
 	}, "chrome.exe"));
 }
 
-TEST_F(KeyEventTest, handleKey_chrome_F4) {
-	setActiveProcessName("chrome.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F4) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F4),
 			KeyUp(SC_F4)
@@ -1402,10 +1227,8 @@ TEST_F(KeyEventTest, handleKey_chrome_F4) {
 	}, "chrome.exe"));
 }
 
-TEST_F(KeyEventTest, handleKey_chrome_F5) {
-	setActiveProcessName("chrome.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F5) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F5),
 			KeyUp(SC_F5)
@@ -1418,10 +1241,8 @@ TEST_F(KeyEventTest, handleKey_chrome_F5) {
 	}, "chrome.exe"));
 }
 
-TEST_F(KeyEventTest, handleKey_chrome_F6) {
-	setActiveProcessName("chrome.exe");
-
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F6) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F6),
 			KeyUp(SC_F6)
@@ -1434,8 +1255,8 @@ TEST_F(KeyEventTest, handleKey_chrome_F6) {
 	}, "chrome.exe"));
 }
 
-TEST_F(KeyEventTest, handleKey_F1) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F1) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F1),
 			KeyUp(SC_F1)
@@ -1446,8 +1267,8 @@ TEST_F(KeyEventTest, handleKey_F1) {
 	}));
 }
 
-TEST_F(KeyEventTest, handleKey_F2) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F2) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F2),
 			KeyUp(SC_F2)
@@ -1459,8 +1280,8 @@ TEST_F(KeyEventTest, handleKey_F2) {
 }
 
 // F10↕ = MUTE↕
-TEST_F(KeyEventTest, handleKey_F10) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F10) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F10),
 			KeyUp(SC_F10)
@@ -1472,8 +1293,8 @@ TEST_F(KeyEventTest, handleKey_F10) {
 }
 
 // F11↕ = VOLUMEDOWN↕
-TEST_F(KeyEventTest, handleKey_F11) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F11) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F11),
 			KeyUp(SC_F11)
@@ -1488,8 +1309,8 @@ TEST_F(KeyEventTest, handleKey_F11) {
 }
 
 // F12↕ = VOLUMEUP↕
-TEST_F(KeyEventTest, handleKey_F12) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+TEST_F(KeyEventTest, CUSTOM_F12) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
 		{
 			KeyDown(SC_F12),
 			KeyUp(SC_F12)
@@ -1499,20 +1320,6 @@ TEST_F(KeyEventTest, handleKey_F12) {
 			Key(SC_VOLUMEUP),
 			Key(SC_VOLUMEUP),
 			Key(SC_VOLUMEUP)
-		}
-	}));
-}
-
-// Letter↕
-TEST_F(KeyEventTest, handleKey_Letter) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
-		{
-			KeyDown(SC_C),
-			KeyUp(SC_C)
-		},
-		{
-			KeyDown(SC_C),
-			KeyUp(SC_C)
 		}
 	}));
 }

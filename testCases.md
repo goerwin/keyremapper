@@ -11,25 +11,139 @@ Win↓ Alt↓ C↓↑ Alt↑ Win↑ = Ctrl↓ MOUSELEFT↓↑ Ctrl↑
 Alt↓ Win↓ C↓↑ Alt↑ Win↑ = Ctrl↓ MOUSELEFT↓↑ Ctrl↑
 ```
 
-### Key
+### 1 Modifier - Caps
+```
+Caps↓↑ = 
+```
+
+### 1 Modifier - Caps + _
+```
+Caps↓ _↓↑ Caps↑ = 
+```
+
+### 1 Modifier - Ctrl
+```
+Ctrl↓↑ = Alt↓↑
+```
+
+### 1 Modifier - Ctrl + _
+```
+Ctrl↓ _↓↑ Ctrl↑ = Alt↓ _↓↑ Alt↑
+```
+
+### 1 Modifier - Win
+```
+Win↓↑ = 
+```
+
+### 1 Modifier - Win + _
+```
+Win↓ _↓↑ Win↑ = 
+```
+
+### 1 Modifier - Alt
+```
+Alt↓↑ = Ctrl↓↑
+```
+
+### 1 Modifier - Alt + _
+```
+Alt↓ _↓↑ Alt↑ = Ctrl↓ _↓↑ Ctrl↑
+```
+
+### 1 Modifier - Shift
+```
+Shift↓↑ = Shift↓↑
+```
+
+### 1 Modifier - Shift + _
+```
+Shift↓ _↓↑ Shift↑ = Shift↓ _↓↑ Shift↑
+```
+
+### 2 Modifiers - Caps + Shift
+```
+Caps↓ Shift↓↑ Caps↑ = Shift↓↑
+```
+
+### 2 Modifiers - Caps + Shift + _
+```
+Caps↓ Shift↓ _↓↑ Shift↑ Caps↑ = Shift↓↑
+```
+
+### 2 Modifiers - Caps + Alt
+```
+Caps↓ Alt↓↑ Caps↑ = Ctrl↓↑
+```
+
+### 2 Modifiers - Caps + Alt + _
+```
+Caps↓ Alt↓ _↓↑ Alt↑ Caps↑ = Ctrl↓↑
+```
+
+### 2 Modifiers - Ctrl + Shift
+```
+Ctrl↓ Shift↓↑ Ctrl↑ = Alt↓ Shift↓↑ Alt↑
+```
+
+### 2 Modifiers - Ctrl + Shift + _
+```
+Ctrl↓ Shift↓ _↓↑ Shift↑ Ctrl↑ = Alt↓ Shift↓ _↓↑ Shift↑ Alt↑
+```
+
+### 2 Modifiers - Win + Shift
+```
+Win↓ Shift↓↑ Win↑ = Shift↓↑
+```
+
+### 2 Modifiers - Win + Shift + _
+```
+Win↓ Shift↓ _↓↑ Shift↑ Win↑ = Shift↓↑
+```
+
+### 2 Modifiers - Win + Alt
+```
+Win↓ Alt↓↑ Win↑ = Ctrl↓↑
+```
+
+### 2 Modifiers - Win + Alt + _
+```
+Win↓ Alt↓ _↓↑ Alt↑ Win↑ = Ctrl↓↑
+```
+
+### Key - DownUp
 ```
 H↓↑ = H↓↑
+```
+
+### Key - Down
+```
 H↓↓↓ = H↓↓↓
+```
+
+### Key - Down then Up
+```
 H↓↓↑ = H↓↓↑
+```
+
+### Key - 2 Keys In Order
+```
 H↓ J↓↑ H↑ = H↓ J↓↑ H↑
+```
+
+### Key - 2 Keys No Order
+```
 H↓ J↓ H↑ J↑ = H↓ J↓ H↑ J↑
+```
+
+### Key - 3 Keys In Order
+```
 H↓ J↓ K↓↑ J↑ H↑ = H↓ J↓ K↓↑ J↑ H↑
+```
+
+### Key - 3 Keys No Order
+```
 H↓ J↓ K↓↑ H↑ J↑ = H↓ J↓ K↓↑ H↑ J↑
-F3↓↑ = Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑ // chrome.exe
-F4↓↑ = Ctrl↓ Tab↕ Ctrl↑ // chrome.exe
-F5↓↑ = Alt↓ M↕ Alt↑ // chrome.exe
-F6↓↑ = Alt↓ T↕ Alt↑ // chrome.exe
-F1↓↑ = BRIGHTNESSDOWN↕
-F2↓↑ = BRIGHTNESSUP↕
-F10↓↑ = MUTE↕
-F11↓↑ = VOLUMEDOWN↕↕↕↕
-F12↓↑ = VOLUMEUP↕↕↕↕
-C↓↑ = C↓↑
 ```
 
 ### Vim Mode
@@ -116,56 +230,36 @@ Caps↓ S↓ Alt↓ K↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ Home↕
 Caps↓ Shift↓ Alt↓ K↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Home↕↕ Ctrl↑ Shift↑
 ```
 
-### LAlt
+### Ctrl
 ```
-Alt↓ `↓↑ Tab↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑ Alt↓ Tab↕ Alt↑
-Alt↓ Tab↓↑ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Supr↕ Alt↑
-Alt↓ Tab↓↑ Esc↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Esc↕ Alt↑ Ctrl↓↑
-Alt↓ Shift↓ Tab↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Alt↓ Tab↕ Shift↑ Alt↑
+Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑
+Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑
+```
+
+### Alt
+```
 Alt↓ Esc↓↑ Alt↑ = Ctrl↓↑
 Alt↓ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ F4↕ Alt↑ Ctrl↓↑
 Alt↓ Back↓↑ Alt↑ = Ctrl↓↑ Shift↓ Home↕ Shift↑ Back↕ Ctrl↓↑
 Alt↓ J↓↑ Alt↑ = Ctrl↓↑ Next↕ Ctrl↓↑
-Alt↓ Tab↓↑ C↓↑ = Ctrl↓↑ Alt↓ Tab↕
 Alt↓ Tab↓↑ = Ctrl↓↑ Alt↓ Tab↕
-Alt↓ C↓ = Ctrl↓ C↓
-Alt↓ C↓↑ Alt↑ = Ctrl↓ C↓↑ Ctrl↑
-Alt↓ = Ctrl↓
-Alt↓↑ = Ctrl↓↑
+Alt↓ Shift↓ Tab↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Alt↓ Tab↕ Shift↑ Alt↑
+Alt↓ Tab↓↑ C↓↑ = Ctrl↓↑ Alt↓ Tab↕
+Alt↓ Tab↓↑ Esc↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Esc↕ Alt↑ Ctrl↓↑
+Alt↓ Tab↓↑ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Supr↕ Alt↑
+Alt↓ `↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑
+Alt↓ `↓↑ Tab↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑ Alt↓ Tab↕ Alt↑
 ```
 
-### LCtrl
+### Custom
 ```
-Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑
-```
-
-### LCtrl or LAlt
-```
-Ctrl↓ C↓↑ Ctrl↑ = Alt↓ C↓↑ Alt↑
-Ctrl↓ C↓ = Alt↓ C↓
-Alt↓ C↓↑ Alt↑ = Ctrl↓ C↓↑ Ctrl↑
-Alt↓ C↓ = Ctrl↓ C↓
-Ctrl↓ Shift↓↑ Ctrl↑ = Alt↓ Shift↓↑ Alt↑
-Alt↓ Shift↓↑ Alt↑ = Ctrl↓ Shift↓↑ Ctrl↑
-Ctrl↓↑ = Alt↓↑
-Ctrl↓ = Alt↓
-Alt↓↑ = Ctrl↓↑
-Alt↓ = Ctrl↓
-```
-
-### LWin
-```
-Win↓ 1↓↑ Win↑ = Alt↓ 1↕ Alt↑ // SC2_x64.exe
-Win↓ Back↓↑ Win↑ = Ctrl↓ W↕ Ctrl↑ // mintty.exe
-Win↓ H↓↑ Win↑ = Alt↓ Left↕ Alt↑
-Win↓ L↓↑ Win↑ = Alt↓ Right↕ Alt↑
-Win↓ Back↓↑ Win↑ = Ctrl↓ Back↕ Ctrl↑
-Win↓ D↓↑ Win↑ = Win↓ D↕ Win↑
-Win↓↑ = 
-```
-
-### Shift
-```
-Shift↓ C↓↑ Shift↑ = Shift↓ C↓↑ Shift↑
-Shift↓↑ = Shift↓↑
+F3↓↑ = Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑ // chrome.exe
+F4↓↑ = Ctrl↓ Tab↕ Ctrl↑ // chrome.exe
+F5↓↑ = Alt↓ M↕ Alt↑ // chrome.exe
+F6↓↑ = Alt↓ T↕ Alt↑ // chrome.exe
+F1↓↑ = BRIGHTNESSDOWN↕
+F2↓↑ = BRIGHTNESSUP↕
+F10↓↑ = MUTE↕
+F11↓↑ = VOLUMEDOWN↕↕↕↕
+F12↓↑ = VOLUMEUP↕↕↕↕
 ```

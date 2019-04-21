@@ -48,6 +48,10 @@ void sendKeyEvents(std::vector<Key> keys) {
 		auto keyCode = keys[i].code;
 		auto state = keys[i].state;
 
+		 if (keyCode == SC_NULL) {
+			 continue;
+		 }
+
 		if (keyCode == SC_MOUSELEFT) {
 			if (state == 0) {
 				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -64,7 +68,7 @@ void sendKeyEvents(std::vector<Key> keys) {
 			BrightnessHandler::Increment(-10);
 		} else if (keyCode == SC_BRIGHTNESSUP) {
 			BrightnessHandler::Increment(10);
-		} else if (keyCode != SC_NULL) {
+		} else {
 			unsigned short stateDown = 0;
 			unsigned short stateUp = 1;
 
@@ -81,7 +85,7 @@ void sendKeyEvents(std::vector<Key> keys) {
 					} else if (state == 1) {
 						state = 3;
 					}
-					
+
 					break;
 			}
 
