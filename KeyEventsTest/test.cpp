@@ -229,6 +229,22 @@ TEST_F(KeyEventTest, MOUSE_LALT_LEFT_CLICK) {
 			KeyUp(SC_LCTRL)
 		}
 	}));
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Mouse", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_LWIN),
+			KeyDown(SC_C),
+			KeyUp(SC_C),
+			KeyUp(SC_LALT),
+			KeyUp(SC_LWIN)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyDown(SC_MOUSELEFT),
+			KeyUp(SC_MOUSELEFT),
+			KeyUp(SC_LCTRL)
+		}
+	}));
 }
 
 TEST_F(KeyEventTest, KEY) {

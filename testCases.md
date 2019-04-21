@@ -8,6 +8,7 @@ Win↓ C↓↓↓↓↑ Win↑ = MOUSELEFT↓↑
 Win↓ Capslock↓ C↓↓↓↓↑ Capslock↓ Win↑ = MOUSERIGHT↓↑
 Win↓ Shift↓ C↓↑ Shift↑ Win↑ = Shift↓ MOUSELEFT↓↑ Shift↑
 Win↓ Alt↓ C↓↑ Alt↑ Win↑ = Ctrl↓ MOUSELEFT↓↑ Ctrl↑
+Alt↓ Win↓ C↓↑ Alt↑ Win↑ = Ctrl↓ MOUSELEFT↓↑ Ctrl↑
 ```
 
 ### Key
