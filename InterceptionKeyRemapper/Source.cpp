@@ -78,7 +78,7 @@ void sendKeyEvents(std::vector<Key> keys) {
 
 					if (state == 0) {
 						state = 2;
-					} else {
+					} else if (state == 1) {
 						state = 3;
 					}
 					

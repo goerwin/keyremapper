@@ -988,6 +988,8 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT_Letter) {
 			}
 		}));
 
+		setGlobalDefaultValues();
+
 		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i]),
@@ -998,6 +1000,8 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT_Letter) {
 				KeyDown(SC_C)
 			}
 		}));
+
+		setGlobalDefaultValues();
 	}
 }
 
@@ -1041,6 +1045,8 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 			}
 		}));
 
+		setGlobalDefaultValues();
+
 		EXPECT_TRUE(validateKeyMapsAndOutputThem("LCtrl or LAlt", {
 			{
 				KeyDown(keys[i])
@@ -1049,6 +1055,8 @@ TEST_F(KeyEventTest, LCTRL_OR_LALT) {
 				KeyDown(switchedKeys[i])
 			}
 		}));
+
+		setGlobalDefaultValues();
 	}
 }
 
