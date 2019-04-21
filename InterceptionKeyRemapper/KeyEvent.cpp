@@ -67,7 +67,7 @@ String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_VOLUMEDOWN) { return "VOLUMEDOWN"; }
 	if (code == SC_VOLUMEUP) { return "VOLUMEUP"; }
 	if (code == SC_ESC) { return "Esc"; }
-	if (code == SC_CAPSLOCK) { return "Capslock"; }
+	if (code == SC_CAPSLOCK) { return "Caps"; }
 	if (code == SC_LEFT) { return "Left"; }
 	if (code == SC_RIGHT) { return "Right"; }
 	if (code == SC_UP) { return "Up"; }
@@ -185,7 +185,7 @@ ScanCodes getScanCode(std::wstring symbol) {
 	if (symbol == L"VOLUMEDOWN") { return SC_VOLUMEDOWN; }
 	if (symbol == L"VOLUMEUP") { return SC_VOLUMEUP; }
 	if (symbol == L"Esc") { return SC_ESC; }
-	if (symbol == L"Capslock") { return SC_CAPSLOCK; }
+	if (symbol == L"Caps") { return SC_CAPSLOCK; }
 	if (symbol == L"Left") { return SC_LEFT; }
 	if (symbol == L"Right") { return SC_RIGHT; }
 	if (symbol == L"Up") { return SC_UP; }
@@ -344,12 +344,14 @@ struct TemplateKeys {
 		preLAltLCtrl = _preLAltLCtrl;
 	}
 
-	TemplateKeys replaceGeneral(bool replace, bool isDown, unsigned short code) {
+	TemplateKeys replaceGeneral(bool replace, unsigned short code) {
 		if (replace) {
-			if (isDown) {
-				keys = { KeyDown(code) };
-			} else {
-				keys = { KeyUp(code) };
+			auto keysSize = keys.size();
+
+			for (int i = 0; i < keysSize; i++) {
+				if (keys[i].code == SC_GENERAL) {
+					keys[i].code = code;
+				}
 			}
 		}
 		return *this;
@@ -506,13 +508,71 @@ UserHotKey getParsedUserHotkey(std::string userHotkeySymbol) {
 	return UserHotKey(userKeyInfo, templateKeysDown, templateKeysUp);
 }
 
+UserHotKeys capslockAltUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' Caps V => Down(keyUpLAlt Win↓ V↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' Caps Caps => Down(null) Up(null)"),
+	getParsedUserHotkey("'' Caps Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
+	getParsedUserHotkey("'' Caps _ => Down(null) Up(null)"),
+});
+
+UserHotKeys capslockUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' Caps C => Down(Ctrl↓ C↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'' Caps Tab => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'' Caps Space => Down(Ctrl↓ Space↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'' Caps Caps => Down(null) Up(null)"),
+	getParsedUserHotkey("'' Caps _ => Down(null) Up(null)"),
+});
+
+UserHotKeys ctrlShiftUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' CtrlShift Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)"),
+	getParsedUserHotkey("'' CtrlShift Shift => Down(Shift↓) Up(Shift↑)"),
+	getParsedUserHotkey("'' CtrlShift _ => Down(_↓) Up(_↑)"),
+});
+
+UserHotKeys ctrlUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' Ctrl Tab => Down(keyDownLCtrlAsLCtrl Tab↕) Up(null)"),
+	getParsedUserHotkey("'' Ctrl Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)"),
+	getParsedUserHotkey("'' Ctrl _ => Down(_↓) Up(_↑)"),
+});
+
 UserHotKeys winAltUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt Win => Down(null) Up(keyDownLAltAsLCtrl)"),
-	getParsedUserHotkey("'' WinAlt Alt => Down(null) Up(keyUpLAlt)"),
+	getParsedUserHotkey("'' WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' WinAlt Win => Down(null) Up(null)"),
+	getParsedUserHotkey("'' WinAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
+	getParsedUserHotkey("'' WinAlt _ => Down(null) Up(null)"),
+});
+
+UserHotKeys winShiftUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' WinShift Win => Down(null) Up(null)"),
+	getParsedUserHotkey("'' WinShift Shift => Down(Shift↓) Up(Shift↑)"),
+	getParsedUserHotkey("'' WinShift _ => Down(null) Up(null)"),
+});
+
+UserHotKeys winUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'SC2_x64.exe' Win 1 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'SC2_x64.exe' Win 2 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'SC2_x64.exe' Win 3 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'SC2_x64.exe' Win 4 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'mintty.exe' Win Back => Down(Ctrl↓ W↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'' Win H => Down(Alt↓ Left↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'' Win L => Down(Alt↓ Right↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'' Win Back => Down(Ctrl↓ Back↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'' Win D => Down(Win↓ D↕ Win↑) Up(null)"),
+	getParsedUserHotkey("'' Win Space => Down(Win↕) Up(null)"),
+	getParsedUserHotkey("'' Win Win => Down(null) Up(null)"),
+	getParsedUserHotkey("'' Win _ => Down(null) Up(null)"),
+});
+
+UserHotKeys altShiftUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' AltShift J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' AltShift K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' AltShift Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)"),
+	getParsedUserHotkey("'' AltShift Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
+	getParsedUserHotkey("'' AltShift Shift => Down(Shift↓) Up(Shift↑)"), // ctrlD - ShiftD - ctrlU altD - tab -
+	getParsedUserHotkey("'' AltShift _ => Down(_↓) Up(_↑)"),
 });
 
 UserHotKeys altUserHotKeys = UserHotKeys({
@@ -544,26 +604,6 @@ UserHotKeys altUserHotKeys = UserHotKeys({
 	getParsedUserHotkey("'' Alt ` => Down(keyDownLAltAsLAlt `↕ keyDownLAltAsLCtrl) Up(null)"),
 	getParsedUserHotkey("'' Alt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
 	getParsedUserHotkey("'' Alt _ => Down(_↓) Up(_↑)"),
-});
-
-UserHotKeys winUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'SC2_x64.exe' Win 1 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 2 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 3 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 4 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Win Back => Down(Ctrl↓ W↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Win H => Down(Alt↓ Left↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'' Win L => Down(Alt↓ Right↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'' Win Back => Down(Ctrl↓ Back↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Win D => Down(Win↓ D↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' Win Space => Down(Win↕) Up(null)"),
-	getParsedUserHotkey("'' Win Win => Down(null) Up(null)"),
-});
-
-UserHotKeys ctrlUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' Ctrl Tab => Down(keyDownLCtrlAsLCtrl Tab↕) Up(null)"),
-	getParsedUserHotkey("'' Ctrl Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)"),
-	getParsedUserHotkey("'' Ctrl _ => Down(_↓) Up(_↑)"),
 });
 
 UserHotKeys keyUserHotKeys = UserHotKeys({
@@ -662,8 +702,8 @@ Keys handleUserHotKey(unsigned short keyCode, bool isKeyDown, UserHotKeys userHo
 			if (program == "" || program == g_activeProcessName) {
 				return getParsedKeyDownUpKeys(
 					isKeyDown,
-					std::get<1>(userHotkey).replaceGeneral(isGeneral, true, keyCode),
-					std::get<2>(userHotkey).replaceGeneral(isGeneral, false, keyCode)
+					std::get<1>(userHotkey).replaceGeneral(isGeneral, keyCode),
+					std::get<2>(userHotkey).replaceGeneral(isGeneral, keyCode)
 				);
 			}
 		}
@@ -677,22 +717,23 @@ Keys handleMouseClick(Key key) {
 	auto keyCode = key.code;
 
 	if (
-		!(g_isLWinKeyDown && keyCode == SC_C) &&
-		!(g_isLWinKeyDown && keyCode == SC_LALT) && // TODO: Win + Alt handle by its own
-		!(g_isLWinKeyDown && keyCode == SC_LSHIFT) && // TODO: Win + Shift handle by its own
-		!g_isMouseClickDown
+		!g_isMouseClickDown &&
+		!(g_isLWinKeyDown && keyCode == SC_C)
+		/*!(g_isLWinKeyDown && keyCode == SC_LALT) &&
+		!(g_isLWinKeyDown && keyCode == SC_LSHIFT)*/
 		) {
 		return {};
 	}
 
-	if (keyCode == SC_LALT) {
+	/*if (keyCode == SC_LALT) {
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
 			TemplateKeys(_keyDownLAltAsLCtrl),
 			TemplateKeys(_keyUpLAlt)
 		);
-	}
+	}*/
 
+	/*
 	if (keyCode == SC_LSHIFT) {
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
@@ -700,6 +741,7 @@ Keys handleMouseClick(Key key) {
 			TemplateKeys({ KeyUp(SC_LSHIFT) })
 		);
 	}
+	*/
 
 	if (keyCode == SC_C) {
 		if (g_isCapslockKeyDown) {
@@ -732,23 +774,13 @@ Keys handleMouseClick(Key key) {
 	return { g_nullKey };
 }
 
-Keys handleCapslockKey(Key key) {
+Keys handleVimMode(Key key) {
 	if (!g_isCapslockKeyDown && key.code != SC_CAPSLOCK) {
 		return {};
 	}
 
 	auto isCurrentKeyDown = isKeyDown(key);
 	auto keyCode = key.code;
-
-	if (isGitBashActiveProcess()) {
-		if (keyCode == SC_C) { // capslock + c : ctrl + c : kill process
-			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
-				TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_C), KeyUp(SC_LCTRL) }),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-	}
 
 	if (keyCode == SC_CAPSLOCK) {
 		if (g_isVimShiftKeyDown) {
@@ -761,7 +793,7 @@ Keys handleCapslockKey(Key key) {
 			);
 		}
 
-		return { g_nullKey };
+		return {};
 	}
 
 	if (keyCode == SC_LSHIFT || keyCode == SC_S) {
@@ -782,15 +814,7 @@ Keys handleCapslockKey(Key key) {
 		);
 	}
 
-	if (keyCode == SC_TAB || keyCode == SC_SPACE) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ KeyDown(SC_LCTRL), { Key(keyCode) }, KeyUp(SC_LCTRL) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_H || keyCode == SC_L || keyCode == SC_J || keyCode == SC_K) {
+	if (keyCode == SC_H || keyCode == SC_J || keyCode == SC_L || keyCode == SC_K) {
 		if (g_isLWinKeyDown) {
 			return getParsedKeyDownUpKeys(
 				isCurrentKeyDown,
@@ -822,25 +846,10 @@ Keys handleCapslockKey(Key key) {
 		);
 	}
 
-	if (keyCode == SC_V) {
-		if (g_isLAltKeyDown) {
-			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
-				TemplateKeys(
-					_keyUpLAlt,
-					{ KeyDown(SC_LWIN), Key(SC_V), KeyUp(SC_LWIN) },
-					_keyDownLAltAsLCtrl
-				),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-		return { g_nullKey };
-	}
-
 	return {};
 }
 
-Keys handleLWinLAltKeys(Key key) {
+Keys handleWinAltKeys(Key key) {
 	if (
 		!(g_isLWinKeyDown && g_isLAltKeyDown) &&
 		!(g_isLWinKeyDown && key.code == SC_LALT) &&
@@ -861,7 +870,30 @@ Keys handleLWinLAltKeys(Key key) {
 	return handleUserHotKey(keyCode, isCurrentKeyDown, winAltUserHotKeys);
 }
 
-Keys handleLCtrlKey(Key key) {
+Keys handleCtrlShiftKeys(Key key) {
+	if (
+		!(g_isLCtrlKeyDown && g_isShiftKeyDown) &&
+		!(g_isLCtrlKeyDown && key.code == SC_LSHIFT) &&
+		!(g_isShiftKeyDown && key.code == SC_LCTRL)
+	) {
+		return {};
+	}
+
+	auto isCurrentKeyDown = isKeyDown(key);
+	auto keyCode = key.code;
+
+	return handleUserHotKey(keyCode, isCurrentKeyDown, ctrlShiftUserHotKeys);
+}
+
+Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
+	if (!g_isCapslockKeyDown && keyCode != SC_CAPSLOCK) {
+		return {};
+	}
+
+	return handleUserHotKey(keyCode, isKeyDown, capslockUserHotKeys);
+}
+
+Keys handleCtrlKey(Key key) {
 	if (!g_isLCtrlKeyDown && key.code != SC_LCTRL) {
 		return {};
 	}
@@ -872,7 +904,19 @@ Keys handleLCtrlKey(Key key) {
 	return handleUserHotKey(keyCode, isCurrentKeyDown, ctrlUserHotKeys);
 }
 
-Keys handleLWinKey(Key key) {
+Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
+	if (
+		!(g_isLWinKeyDown && g_isShiftKeyDown) &&
+		!(g_isLWinKeyDown && keyCode == SC_LSHIFT) &&
+		!(g_isShiftKeyDown && keyCode == SC_LCTRL)
+	) {
+		return {};
+	}
+
+	return handleUserHotKey(keyCode, isKeyDown, winShiftUserHotKeys);
+}
+
+Keys handleWinKey(Key key) {
 	if (!g_isLWinKeyDown && key.code != SC_LWIN) {
 		return {};
 	}
@@ -883,7 +927,27 @@ Keys handleLWinKey(Key key) {
 	return handleUserHotKey(keyCode, isCurrentKeyDown, winUserHotKeys);
 }
 
-Keys handleLAltKey(Key key) {
+Keys handleAltShiftKeys(Key key) {
+	if (
+		!(g_isLAltKeyDown && g_isShiftKeyDown) &&
+		!(g_isLAltKeyDown && key.code == SC_LSHIFT) &&
+		!(g_isShiftKeyDown && key.code == SC_LALT)
+	) {
+		return {};
+	}
+
+	auto isCurrentKeyDown = isKeyDown(key);
+	auto keyCode = key.code;
+
+	// Omit keys when in alt-tab mode
+	if (!g_isLAltAsLCtrl && keyCode != SC_LALT && keyCode != SC_TAB && keyCode != SC_LSHIFT) {
+		return { g_nullKey };
+	}
+
+	return handleUserHotKey(keyCode, isCurrentKeyDown, altShiftUserHotKeys);
+}
+
+Keys handleAltKey(Key key) {
 	if (!g_isLAltKeyDown && key.code != SC_LALT) {
 		return {};
 	}
@@ -917,13 +981,8 @@ Keys handleLAltKey(Key key) {
 		);
 	}
 
-	// Omit keys when in alt-tab mode except Tab/Shift
-	if (
-		keyCode != SC_LSHIFT && // TODO: MAYBE REMOVE THIS WHEN HANDLING ALT+SHIFT
-		keyCode != SC_LALT &&
-		keyCode != SC_TAB &&
-		!g_isLAltAsLCtrl
-	) {
+	// Omit keys when in alt-tab mode
+	if (!g_isLAltAsLCtrl && keyCode != SC_LALT && keyCode != SC_TAB) {
 		return { g_nullKey };
 	}
 
@@ -945,7 +1004,7 @@ Keys getKeyEvents(Keys keys) {
 		Key key = keys[i];
 		bool isCurrentKeyDown = isKeyDown(key);
 		Keys keyEvents;
-		int keyEventsSize = 0;
+		int keysSize = 0;
 		auto keyCode = key.code;
 
 		if (keyCode == SC_CAPSLOCK) {
@@ -960,13 +1019,17 @@ Keys getKeyEvents(Keys keys) {
 			g_isLAltKeyDown = isCurrentKeyDown;
 		}
 
-		if (keyEvents = handleMouseClick(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleLWinLAltKeys(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleCapslockKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleLCtrlKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleLWinKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleLAltKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
-		else if (keyEvents = handleKey(key), keyEventsSize = keyEvents.size(), keyEventsSize != 0) {}
+		if (keyEvents = handleMouseClick(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleVimMode(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCapslockKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCtrlShiftKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleCtrlKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleWinAltKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleWinShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleWinKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleAltShiftKeys(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleAltKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
+		else if (keyEvents = handleKey(key), keysSize = keyEvents.size(), keysSize != 0) {}
 
 		allKeyEvents = concatKeyVectors(allKeyEvents, keyEvents);
 	}

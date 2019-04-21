@@ -930,8 +930,6 @@ TEST_F(KeyEventTest, LALT_LSHIFT_TAB) {
 			KeyDown(SC_LSHIFT),
 			KeyDown(SC_TAB),
 			KeyUp(SC_TAB),
-			KeyDown(SC_TAB),
-			KeyUp(SC_TAB),
 			KeyUp(SC_LSHIFT),
 			KeyUp(SC_LALT)
 		},
@@ -939,8 +937,6 @@ TEST_F(KeyEventTest, LALT_LSHIFT_TAB) {
 			KeyDown(SC_LCTRL),
 			KeyDown(SC_LSHIFT),
 			KeyUp(SC_LCTRL),
-			KeyDown(SC_LALT),
-			Key(SC_TAB),
 			KeyDown(SC_LALT),
 			Key(SC_TAB),
 			KeyUp(SC_LSHIFT),
