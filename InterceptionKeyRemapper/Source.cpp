@@ -75,6 +75,13 @@ void sendKeyEvents(std::vector<Key> keys) {
 				case SC_LWIN:
 					stateDown = 2;
 					stateUp = 3;
+
+					if (state == 0) {
+						state = 2;
+					} else {
+						state = 3;
+					}
+					
 					break;
 			}
 

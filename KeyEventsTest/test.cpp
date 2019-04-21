@@ -1131,9 +1131,9 @@ TEST_F(KeyEventTest, handleLWinKey_LWIN_D) {
 			KeyUp(SC_LWIN)
 		},
 		{
-			KeyDown(SC_LWIN, 2),
+			KeyDown(SC_LWIN),
 			Key(SC_D),
-			KeyUp(SC_LWIN, 3)
+			KeyUp(SC_LWIN)
 		}
 	}));
 }
@@ -1220,24 +1220,6 @@ TEST_F(KeyEventTest, handleLAltKey_LALT_J_OR_K) {
 			KeyDown(SC_LCTRL),
 			KeyUp(SC_LCTRL),
 			Key(SC_NEXT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
-TEST_F(KeyEventTest, handleLAltKey_LALT_FnKey) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("LAlt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_F3),
-			KeyUp(SC_F3),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			Key(SC_F3),
 			KeyDown(SC_LCTRL),
 			KeyUp(SC_LCTRL)
 		}
@@ -1439,7 +1421,7 @@ TEST_F(KeyEventTest, handleKey_F1) {
 			KeyUp(SC_F1)
 		},
 		{
-			KeyDown(SC_BRIGHTNESSDOWN)
+			Key(SC_BRIGHTNESSDOWN)
 		}
 	}));
 }
@@ -1451,7 +1433,7 @@ TEST_F(KeyEventTest, handleKey_F2) {
 			KeyUp(SC_F2)
 		},
 		{
-			KeyDown(SC_BRIGHTNESSUP)
+			Key(SC_BRIGHTNESSUP)
 		}
 	}));
 }
@@ -1464,7 +1446,7 @@ TEST_F(KeyEventTest, handleKey_F10) {
 			KeyUp(SC_F10)
 		},
 		{
-			Key(SC_MUTE, 5)
+			Key(SC_MUTE)
 		}
 	}));
 }
@@ -1477,10 +1459,10 @@ TEST_F(KeyEventTest, handleKey_F11) {
 			KeyUp(SC_F11)
 		},
 		{
-			Key(SC_VOLUMEDOWN, 5),
-			Key(SC_VOLUMEDOWN, 5),
-			Key(SC_VOLUMEDOWN, 5),
-			Key(SC_VOLUMEDOWN, 5)
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN)
 		}
 	}));
 }
@@ -1493,10 +1475,10 @@ TEST_F(KeyEventTest, handleKey_F12) {
 			KeyUp(SC_F12)
 		},
 		{
-			Key(SC_VOLUMEUP, 5),
-			Key(SC_VOLUMEUP, 5),
-			Key(SC_VOLUMEUP, 5),
-			Key(SC_VOLUMEUP, 5)
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP)
 		}
 	}));
 }
