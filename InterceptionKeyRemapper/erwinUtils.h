@@ -9,6 +9,9 @@ template <typename J> struct lul {
 namespace ErwinUtils {
 	double getDifferenceBetweenClocks(double clock1, double clock2);
 
+	std::string ws2utf8(std::wstring input);
+	std::wstring utf82ws(std::string input);
+
 	// Sadly when using templates, you have to define
 	// the methods to use in the header file
 	template <typename F> struct KeyClick {
@@ -62,5 +65,5 @@ namespace ErwinUtils {
 
 	void writeToFile(std::string name, std::string content, bool append = true, bool newLine = true);
 
-	std::wstring getActiveWindowProcessName(HWND hwnd);
+	std::string getActiveWindowProcessName(HWND hwnd);
 }

@@ -9,19 +9,19 @@
 #include <fstream>
 #include <codecvt>
 
-std::string ws2utf8(std::wstring &input) {
- std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
- return utf8conv.to_bytes(input);
-}
-
-std::wstring utf82ws(std::string &input) {
- std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
- return utf8conv.from_bytes(input);
-}
-
 double previousTime = clock();
 
 namespace ErwinUtils {
+	std::string ws2utf8(std::wstring input) {
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+		return utf8conv.to_bytes(input);
+	}
+
+	std::wstring utf82ws(std::string input) {
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+		return utf8conv.from_bytes(input);
+	}
+
 	double getDifferenceBetweenClocks(double clock1, double clock2) {
 		return (clock1 - clock2) / CLOCKS_PER_SEC * 1000;
 	}
@@ -43,22 +43,22 @@ namespace ErwinUtils {
 		soutfile.close();
 	}
 
-	std::wstring getActiveWindowProcessName(HWND hwnd) {
+	std::string getActiveWindowProcessName(HWND hwnd) {
 		if (!hwnd) {
 			return NULL;
 		}
 
-		std::wstring processName;
+		std::string processName;
 		DWORD dwPID;
 		GetWindowThreadProcessId(hwnd, &dwPID);
 		HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwPID);
 
 		if (handle) {
-			TCHAR path[MAX_PATH];
+			CHAR path[MAX_PATH];
 
-			if (GetModuleFileNameEx(handle, 0, path, MAX_PATH)) {
+			if (GetModuleFileNameExA(handle, 0, path, MAX_PATH)) {
 				processName = path;
-				std::string::size_type idx = processName.rfind(L"\\");
+				std::string::size_type idx = processName.rfind("\\");
 
 				if (idx != std::string::npos) {
 					processName = processName.substr(idx + 1);

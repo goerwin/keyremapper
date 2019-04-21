@@ -105,3 +105,4 @@ https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 - caps + (shift) + tab to ctrl + (shift) + tab (FIXED)
 - in chrome, lalt↓ + `↕ + L↕ + tab↕ + lalt(up)  (FIXED)
 - lalt + capslock + v not working (FIXED)
+- lalt ` not working properly when more than 2 windows

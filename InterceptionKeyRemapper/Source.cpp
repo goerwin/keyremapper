@@ -65,15 +65,40 @@ void sendKeyEvents(std::vector<Key> keys) {
 		} else if (keyCode == SC_BRIGHTNESSUP) {
 			BrightnessHandler::Increment(10);
 		} else if (keyCode != SC_NULL) {
-			if (state == 4) {
-				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 0 }), 1);
-				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 1 }), 1);
-			} else if (state == 5) {
-				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 2 }), 1);
-				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, 3 }), 1);
+			unsigned short stateDown = 0;
+			unsigned short stateUp = 1;
+
+			switch (keyCode) {
+				case SC_MUTE:
+				case SC_VOLUMEDOWN:
+				case SC_VOLUMEUP:
+				case SC_LWIN:
+					stateDown = 2;
+					stateUp = 3;
+					break;
 			}
-			else {
-				interception_send(context, device, (InterceptionStroke *)&InterceptionKeyStroke({ keyCode, state }), 1);
+
+			if (state == 4) {
+				interception_send(
+					context,
+					device,
+					(InterceptionStroke *)&InterceptionKeyStroke({ keyCode, stateDown }),
+					1
+				);
+				interception_send(
+					context,
+					device,
+					(InterceptionStroke *)&InterceptionKeyStroke({ keyCode, stateUp }),
+					1
+				);
+
+			} else {
+				interception_send(
+					context,
+					device,
+					(InterceptionStroke *)&InterceptionKeyStroke({ keyCode, state }),
+					1
+				);
 			}
 		}
 	}

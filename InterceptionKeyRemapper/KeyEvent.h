@@ -38,10 +38,10 @@ enum ScanCodes {
 	SC_VOLUMEUP = 0xB0,
 	SC_ESC = 0x01,
 	SC_CAPSLOCK = 0x3A,
-	SC_LEFT = 0xCB, // 0x4B
-	SC_RIGHT = 0xCD, // 0x4D
-	SC_UP = 0xC8, // 0x48
-	SC_DOWN = 0xD0, // 0x50
+	SC_LEFT = 0xCB,
+	SC_RIGHT = 0xCD,
+	SC_UP = 0xC8,
+	SC_DOWN = 0xD0,
 	SC_SPACE = 0x39,
 	SC_LWIN = 0x5B,
 	SC_LALT = 0x38,
@@ -60,9 +60,9 @@ enum ScanCodes {
 	SC_PRIOR = 0x49,
 	SC_NEXT = 0x51,
 	SC_SEMI = 0x27,
-	SC_NP0 = 0x52, // Insert
+	SC_NP0 = 0x52,
 	SC_MINUS = 0x0C,
-	SC_GRAVE = 0x29, // accent `
+	SC_GRAVE = 0x29,
 	SC_F1 = 0x3B,
 	SC_F2 = 0x3C,
 	SC_F3 = 0x3D,
@@ -75,12 +75,11 @@ enum ScanCodes {
 	SC_F10 = 0x44,
 	SC_F11 = 0x57,
 	SC_F12 = 0x58,
-	// Custom ScanCodes. Hope no keyboard ever sends this.
-	SC_NULL = 0xF0,
 	SC_MOUSELEFT = 0xF1,
 	SC_MOUSERIGHT = 0xF2,
 	SC_BRIGHTNESSDOWN = 0xF3,
-	SC_BRIGHTNESSUP = 0xF4
+	SC_BRIGHTNESSUP = 0xF4,
+	SC_NULL = 0xF0
 };
 
 struct Key {
@@ -106,9 +105,13 @@ struct KeyUp : Key {
 	KeyUp(unsigned short cCode, unsigned short cState = 1) : Key(cCode, cState) {}
 };
 
+String getScanCodeSymbol(unsigned short code);
+String getStateSymbol(unsigned short state);
+String getKeySymbols(Keys keys);
+
 Keys getKeyEvents(Keys keys);
 Keys getParsedKeysForEsc();
 
-void setActiveProcessName(std::wstring _activeProcessName);
+void setActiveProcessName(std::string _activeProcessName);
 bool isKeyDown(Key key);
 void setGlobalDefaultValues();

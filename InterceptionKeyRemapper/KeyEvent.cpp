@@ -1,11 +1,15 @@
+#pragma once
+
 #ifndef UNICODE
 #define UNICODE
 #endif
 
 #include <vector>
+#include <tuple>
 #include "KeyEvent.h"
+#include "erwinUtils.h"
 
-std::wstring g_activeProcessName;
+String g_activeProcessName;
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
@@ -19,19 +23,226 @@ bool g_isLAltAsLCtrl;
 bool g_isMouseClickDown;
 bool g_isVimShiftKeyDown;
 
-Key g_nullKey = KeyUp(SC_NULL);
+std::pair<bool, Keys> g_userHotKeyHandler;
 
-bool isChromeActiveProcess() {
-	return g_activeProcessName == L"chrome.exe";
+enum LAltLCtrl {
+	_keyDownLAltAsLCtrl = 1,
+	_keyDownLAltAsLAlt = 2,
+	_keyUpLAlt = 3,
+	_keyDownLCtrlAsLAlt = 4,
+	_keyDownLCtrlAsLCtrl = 5,
+	_keyUpLCtrl = 6,
+	_null = 0
+};
+
+String getScanCodeSymbol(unsigned short code) {
+	if (code == SC_C) { return "C"; }
+	if (code == SC_D) { return "D"; }
+	if (code == SC_E) { return "E"; }
+	if (code == SC_H) { return "H"; }
+	if (code == SC_I) { return "I"; }
+	if (code == SC_J) { return "J"; }
+	if (code == SC_K) { return "K"; }
+	if (code == SC_L) { return "L"; }
+	if (code == SC_M) { return "M"; }
+	if (code == SC_P) { return "P"; }
+	if (code == SC_Q) { return "Q"; }
+	if (code == SC_S) { return "S"; }
+	if (code == SC_T) { return "T"; }
+	if (code == SC_U) { return "U"; }
+	if (code == SC_V) { return "V"; }
+	if (code == SC_W) { return "W"; }
+	if (code == SC_X) { return "X"; }
+	if (code == SC_Y) { return "Y"; }
+	if (code == SC_Z) { return "Z"; }
+	if (code == SC_1) { return "1"; }
+	if (code == SC_2) { return "2"; }
+	if (code == SC_3) { return "3"; }
+	if (code == SC_4) { return "4"; }
+	if (code == SC_5) { return "5"; }
+	if (code == SC_6) { return "6"; }
+	if (code == SC_7) { return "7"; }
+	if (code == SC_8) { return "8"; }
+	if (code == SC_9) { return "9"; }
+	if (code == SC_0) { return "0"; }
+	if (code == SC_MUTE) { return "MUTE"; }
+	if (code == SC_VOLUMEDOWN) { return "VOLUMEDOWN"; }
+	if (code == SC_VOLUMEUP) { return "VOLUMEUP"; }
+	if (code == SC_ESC) { return "Esc"; }
+	if (code == SC_CAPSLOCK) { return "Capslock"; }
+	if (code == SC_LEFT) { return "LEFT"; }
+	if (code == SC_RIGHT) { return "RIGHT"; }
+	if (code == SC_UP) { return "UP"; }
+	if (code == SC_DOWN) { return "DOWN"; }
+	if (code == SC_SPACE) { return "Space"; }
+	if (code == SC_LWIN) { return "Win"; }
+	if (code == SC_LALT) { return "Alt"; }
+	if (code == SC_RALT) { return "Alt"; }
+	if (code == SC_LCTRL) { return "Ctrl"; }
+	if (code == SC_RCTRL) { return "Ctrl"; }
+	if (code == SC_LSHIFT) { return "Shift"; }
+	if (code == SC_RSHIFT) { return "Shift"; }
+	if (code == SC_LBSLASH) { return "LBSLASH"; }
+	if (code == SC_RETURN) { return "⏎"; }
+	if (code == SC_SUPR) { return "Supr"; }
+	if (code == SC_BACK) { return "⌫"; }
+	if (code == SC_TAB) { return "Tab"; }
+	if (code == SC_HOME) { return "Home"; }
+	if (code == SC_END) { return "End"; }
+	if (code == SC_PRIOR) { return "Prior"; }
+	if (code == SC_NEXT) { return "Next"; }
+	if (code == SC_SEMI) { return ";"; }
+	if (code == SC_NP0) { return "NP0"; }
+	if (code == SC_MINUS) { return "-"; }
+	if (code == SC_GRAVE) { return "`"; }
+	if (code == SC_F1) { return "F1"; }
+	if (code == SC_F2) { return "F2"; }
+	if (code == SC_F3) { return "F3"; }
+	if (code == SC_F4) { return "F4"; }
+	if (code == SC_F5) { return "F5"; }
+	if (code == SC_F6) { return "F6"; }
+	if (code == SC_F7) { return "F7"; }
+	if (code == SC_F8) { return "F8"; }
+	if (code == SC_F9) { return "F9"; }
+	if (code == SC_F10) { return "F10"; }
+	if (code == SC_F11) { return "F11"; }
+	if (code == SC_F12) { return "F12"; }
+	if (code == SC_MOUSELEFT) { return "MOUSELEFT"; }
+	if (code == SC_MOUSERIGHT) { return "MOUSERIGHT"; }
+	if (code == SC_BRIGHTNESSDOWN) { return "BRIGHTNESSDOWN"; }
+	if (code == SC_BRIGHTNESSUP) { return "BRIGHTNESSUP"; }
+  if (code == SC_NULL) { return "NULL"; }
+
+	return "KEY_CODE_NOT_FOUND";
 }
-bool isStarcraft2ActiveProcess() {
-	return g_activeProcessName == L"SC2_x64.exe";
+
+String getStateSymbol(unsigned short state) {
+	switch (state) {
+		case 0: case 2:
+			return "↓";
+		case 1: case 3:
+			return "↑";
+		case 4: case 5:
+			return "↕";
+	}
+
+	return "KEY_STATE_NOT_FOUND";
 }
-bool isSlackActiveProcess() {
-	return g_activeProcessName == L"slack.exe";
+
+String getKeySymbols(Keys keys) {
+	int keysSize = keys.size();
+	String result = "";
+
+	for (int i = 0; i < keysSize; i++) {
+		auto code = keys[i].code;
+		String codeSymbol = getScanCodeSymbol(code);
+		String stateSymbol = getStateSymbol(keys[i].state);
+
+		if (i > 0) {
+			if (code == keys[i - 1].code) {
+				codeSymbol = "";
+			} else {
+				result = result.append(" ");
+			}
+		}
+
+		result = result.append(codeSymbol).append(stateSymbol);
+	}
+
+	return result;
 }
-bool isGitBashActiveProcess() {
-	return g_activeProcessName == L"mintty.exe";
+
+ScanCodes getScanCode(std::wstring symbol) {
+	if (symbol == L"C") { return SC_C; }
+	if (symbol == L"D") { return SC_D; }
+	if (symbol == L"E") { return SC_E; }
+	if (symbol == L"H") { return SC_H; }
+	if (symbol == L"I") { return SC_I; }
+	if (symbol == L"J") { return SC_J; }
+	if (symbol == L"K") { return SC_K; }
+	if (symbol == L"L") { return SC_L; }
+	if (symbol == L"M") { return SC_M; }
+	if (symbol == L"P") { return SC_P; }
+	if (symbol == L"Q") { return SC_Q; }
+	if (symbol == L"S") { return SC_S; }
+	if (symbol == L"T") { return SC_T; }
+	if (symbol == L"U") { return SC_U; }
+	if (symbol == L"V") { return SC_V; }
+	if (symbol == L"W") { return SC_W; }
+	if (symbol == L"X") { return SC_X; }
+	if (symbol == L"Y") { return SC_Y; }
+	if (symbol == L"Z") { return SC_Z; }
+	if (symbol == L"1") { return SC_1; }
+	if (symbol == L"2") { return SC_2; }
+	if (symbol == L"3") { return SC_3; }
+	if (symbol == L"4") { return SC_4; }
+	if (symbol == L"5") { return SC_5; }
+	if (symbol == L"6") { return SC_6; }
+	if (symbol == L"7") { return SC_7; }
+	if (symbol == L"8") { return SC_8; }
+	if (symbol == L"9") { return SC_9; }
+	if (symbol == L"0") { return SC_0; }
+	if (symbol == L"MUTE") { return SC_MUTE; }
+	if (symbol == L"VOLUMEDOWN") { return SC_VOLUMEDOWN; }
+	if (symbol == L"VOLUMEUP") { return SC_VOLUMEUP; }
+	if (symbol == L"Esc") { return SC_ESC; }
+	if (symbol == L"Capslock") { return SC_CAPSLOCK; }
+	if (symbol == L"LEFT") { return SC_LEFT; }
+	if (symbol == L"RIGHT") { return SC_RIGHT; }
+	if (symbol == L"UP") { return SC_UP; }
+	if (symbol == L"DOWN") { return SC_DOWN; }
+	if (symbol == L"Space") { return SC_SPACE; }
+	if (symbol == L"Win") { return SC_LWIN; }
+	if (symbol == L"Alt") { return SC_LALT; }
+	if (symbol == L"Alt") { return SC_RALT; }
+	if (symbol == L"Ctrl") { return SC_LCTRL; }
+	if (symbol == L"Ctrl") { return SC_RCTRL; }
+	if (symbol == L"Shift") { return SC_LSHIFT; }
+	if (symbol == L"Shift") { return SC_RSHIFT; }
+	if (symbol == L"LBSLASH") { return SC_LBSLASH; }
+	if (symbol == L"⏎") { return SC_RETURN; }
+	if (symbol == L"Supr") { return SC_SUPR; }
+	if (symbol == L"⌫") { return SC_BACK; }
+	if (symbol == L"Tab") { return SC_TAB; }
+	if (symbol == L"Home") { return SC_HOME; }
+	if (symbol == L"End") { return SC_END; }
+	if (symbol == L"Prior") { return SC_PRIOR; }
+	if (symbol == L"Next") { return SC_NEXT; }
+	if (symbol == L";") { return SC_SEMI; }
+	if (symbol == L"NP0") { return SC_NP0; }
+	if (symbol == L"-") { return SC_MINUS; }
+	if (symbol == L"`") { return SC_GRAVE; }
+	if (symbol == L"F1") { return SC_F1; }
+	if (symbol == L"F2") { return SC_F2; }
+	if (symbol == L"F3") { return SC_F3; }
+	if (symbol == L"F4") { return SC_F4; }
+	if (symbol == L"F5") { return SC_F5; }
+	if (symbol == L"F6") { return SC_F6; }
+	if (symbol == L"F7") { return SC_F7; }
+	if (symbol == L"F8") { return SC_F8; }
+	if (symbol == L"F9") { return SC_F9; }
+	if (symbol == L"F10") { return SC_F10; }
+	if (symbol == L"F11") { return SC_F11; }
+	if (symbol == L"F12") { return SC_F12; }
+	if (symbol == L"MOUSELEFT") { return SC_MOUSELEFT; }
+	if (symbol == L"MOUSERIGHT") { return SC_MOUSERIGHT; }
+	if (symbol == L"BRIGHTNESSDOWN") { return SC_BRIGHTNESSDOWN; }
+	if (symbol == L"BRIGHTNESSUP") { return SC_BRIGHTNESSUP; }
+  if (symbol == L"NULL") { return SC_NULL; }
+
+	return SC_NULL;
+}
+
+LAltLCtrl getLAltLCtrlCode(std::wstring symbol) {
+	if (symbol == L"keyDownLAltAsLCtrl") { return _keyDownLAltAsLCtrl; }
+	if (symbol == L"keyDownLAltAsLAlt") { return _keyDownLAltAsLAlt; }
+	if (symbol == L"keyUpLAlt") { return _keyUpLAlt; }
+	if (symbol == L"keyDownLCtrlAsLAlt") { return _keyDownLCtrlAsLAlt; }
+	if (symbol == L"keyDownLCtrlAsLCtrl") { return _keyDownLCtrlAsLCtrl; }
+	if (symbol == L"keyUpLCtrl") { return _keyUpLCtrl; }
+	if (symbol == L"null") { return _null; }
+
+	return _null;
 }
 
 Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
@@ -40,15 +251,6 @@ Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
 	keys.insert(keys.end(), keys4.begin(), keys4.end());
 	return keys;
 }
-
-bool isKeyDown(Key key) {
-	return key.state == 0 || key.state == 2;
-}
-
-/*std::wstring getStringKeyInfo(InterceptionKeyStroke keyStroke) {
-	std::wstring pressedStatus = isKeyDown(keyStroke) ? L"down" : L"up";
-	return std::to_wstring(keyStroke.code).append(L" ").append(pressedStatus);
-}*/
 
 Keys keyDownLCtrlAsLAlt() {
 	Keys keys;
@@ -120,20 +322,12 @@ Keys keyUpLAlt() {
 	return keys;
 }
 
-enum LAltLCtrl {
-	_keyDownLAltAsLCtrl = 1,
-	_keyDownLAltAsLAlt = 2,
-	_keyUpLAlt = 3,
-	_keyDownLCtrlAsLAlt = 4,
-	_keyDownLCtrlAsLCtrl = 5,
-	_keyUpLCtrl = 6,
-	_null = 0
-};
-
 struct TemplateKeys {
 	LAltLCtrl preLAltLCtrl = _null;
 	LAltLCtrl posLAltLCtrl = _null;
 	Keys keys;
+
+	TemplateKeys() {}
 
 	TemplateKeys(LAltLCtrl _preLAltLCtrl, Keys _keys, LAltLCtrl _posLAltLCtrl = _null) {
 		preLAltLCtrl = _preLAltLCtrl;
@@ -187,6 +381,171 @@ struct TemplateKeys {
 		return parsedKeys;
 	}
 };
+
+struct UserKeyInfo {
+	ScanCodes code;
+	String program;
+
+	UserKeyInfo() {}
+
+	UserKeyInfo(ScanCodes _code, String _program = "") {
+		code = _code;
+		program = _program;
+	}
+};
+
+typedef std::tuple<UserKeyInfo, TemplateKeys, TemplateKeys> UserHotKey;
+typedef std::vector<UserHotKey> UserHotKeys;
+
+Key g_nullKey = KeyUp(SC_NULL);
+
+TemplateKeys getTemplateKeys(std::wstring symbolKeys) {
+	Keys keys;
+	auto stateUpDown = ErwinUtils::utf82ws(String("↕"))[0];
+	auto stateDown = ErwinUtils::utf82ws(String("↓"))[0];
+	auto stateUp = ErwinUtils::utf82ws(String("↑"))[0];
+	auto symbolKeysSize = symbolKeys.size();
+	int keyIteration = -1;
+	size_t pos = -1;
+	LAltLCtrl firstLAltLCtrl = _null;
+	LAltLCtrl lastLAltLCtrl = _null;
+
+	do {
+		keyIteration++;
+		auto pos2 = symbolKeys.find(L" ", pos + 1);
+		auto keySymbolWithStates = symbolKeys.substr(pos + 1, pos2 - pos - 1);
+		pos = pos2;
+
+		auto keySymbolWithStatesSize = keySymbolWithStates.size();
+		std::wstring keySymbol;
+		std::wstring keyStates;
+
+		for (int i = 0; i < keySymbolWithStatesSize; i++) {
+			auto letter = keySymbolWithStates[i];
+
+			if (letter == stateUpDown || letter == stateDown || letter == stateUp) {
+				keyStates = keyStates + letter;
+			} else {
+				keySymbol = keySymbol + letter;
+			}
+		}
+
+		auto laltLCtrlCode = getLAltLCtrlCode(keySymbol);
+		if (laltLCtrlCode != _null) {
+			if (keyIteration == 0) {
+				firstLAltLCtrl = laltLCtrlCode;
+			} else {
+				lastLAltLCtrl = laltLCtrlCode;
+			}
+
+			continue;
+		}
+
+		auto code = getScanCode(keySymbol);
+		if (code == SC_NULL) {
+			continue;
+		}
+
+		auto keyStatesSize = keyStates.size();
+		for (int i = 0; i < keyStatesSize; i++) {
+			auto letter = keyStates[i];
+
+			if (letter == stateUpDown) {
+				keys.insert(keys.end(), Key(code));
+			} else if (letter == stateDown) {
+				keys.insert(keys.end(), KeyDown(code));
+			} else if (letter == stateUp) {
+				keys.insert(keys.end(), KeyUp(code));
+			}
+		}
+	} while (pos < symbolKeysSize);
+
+	return TemplateKeys(firstLAltLCtrl, keys, lastLAltLCtrl);
+}
+
+UserHotKey getParsedUserHotkey(std::string userHotkeySymbol) {
+	auto wuserHotkeySymbol = ErwinUtils::utf82ws(userHotkeySymbol);
+	auto pos = wuserHotkeySymbol.find(L"'");
+	auto pos2 = wuserHotkeySymbol.find(L"'", pos + 1);
+	auto processName = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+
+	pos = wuserHotkeySymbol.find(L" ", pos2);
+	pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
+	// TODO: NOT DOING ANYTHING WITH THIS
+	auto handler = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+
+	pos = wuserHotkeySymbol.find(L" ", pos2);
+	pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
+	auto keyInputSymbol = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+	auto keyInputCode = getScanCode(keyInputSymbol);
+
+	pos = wuserHotkeySymbol.find(L"Down(", pos2);
+	pos2 = wuserHotkeySymbol.find(L")", pos + 1);
+	auto keyDownSymbols = wuserHotkeySymbol.substr(pos + 5, pos2 - pos - 5);
+
+	pos = wuserHotkeySymbol.find(L"Up(", pos2);
+	pos2 = wuserHotkeySymbol.find(L")", pos + 1);
+	auto keyUpSymbols = wuserHotkeySymbol.substr(pos + 3, pos2 - pos - 3);
+
+	auto userKeyInfo = UserKeyInfo(keyInputCode, ErwinUtils::ws2utf8(processName));
+	auto templateKeysDown = getTemplateKeys(keyDownSymbols);
+	auto templateKeysUp = getTemplateKeys(keyUpSymbols);
+
+	return UserHotKey(userKeyInfo, templateKeysDown, templateKeysUp);
+}
+
+UserHotKeys keyUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'chrome.exe' Key F3 => Down(Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'chrome.exe' Key F4 => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null)"),
+	getParsedUserHotkey("'chrome.exe' Key F5 => Down(Alt↓ M↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'chrome.exe' Key F6 => Down(Alt↓ T↕ Alt↑) Up(null)"),
+	getParsedUserHotkey("'' Key F1 => Down(BRIGHTNESSDOWN↕) Up(null)"),
+	getParsedUserHotkey("'' Key F2 => Down(BRIGHTNESSUP↕) Up(null)"),
+	getParsedUserHotkey("'' Key F10 => Down(MUTE↕) Up(null)"),
+  getParsedUserHotkey("'' Key F11 => Down(VOLUMEDOWN↕↕↕↕) Up(null)"),
+  getParsedUserHotkey("'' Key F12 => Down(VOLUMEUP↕↕↕↕) Up(null)")
+});
+auto keyUserHotKeysSize = keyUserHotKeys.size();
+
+UserHotKeys laltUserHotKeys = UserHotKeys({
+	getParsedUserHotkey("'' LAlt Space => Down(F12↕) Up(null)"),
+	getParsedUserHotkey("'' LAlt F1 => Down(keyUpLAlt F1↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt F2 => Down(keyUpLAlt F2↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt F1 => Down(keyUpLAlt F1↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt F10 => Down(keyUpLAlt F10↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt F11 => Down(keyUpLAlt F11↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt F12 => Down(keyUpLAlt F12↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)"),
+	// TODO: Not working
+	getParsedUserHotkey("'' LAlt ⌫ => Down(keyUpLAlt Shift↓ Home↕ Shift↑ ⌫↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)"),
+	getParsedUserHotkey("'' LAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
+	getParsedUserHotkey("'' LAlt ` => Down(keyDownLAltAsLAlt `↕ keyDownLAltAsLCtrl) Up(null)"),
+});
+auto laltUserHotkeysSize = laltUserHotKeys.size();
+
+bool isChromeActiveProcess() {
+	return g_activeProcessName == "chrome.exe";
+}
+bool isStarcraft2ActiveProcess() {
+	return g_activeProcessName == "SC2_x64.exe";
+}
+bool isSlackActiveProcess() {
+	return g_activeProcessName == "slack.exe";
+}
+bool isGitBashActiveProcess() {
+	return g_activeProcessName == "mintty.exe";
+}
+
+bool isKeyDown(Key key) {
+	return key.state == 0 || key.state == 2;
+}
+
+/*std::wstring getStringKeyInfo(InterceptionKeyStroke keyStroke) {
+	std::wstring pressedStatus = isKeyDown(keyStroke) ? L"down" : L"up";
+	return std::to_wstring(keyStroke.code).append(L" ").append(pressedStatus);
+}*/
 
 Keys getParsedKeyDownUpKeys(
 	bool isKeyDown,
@@ -248,6 +607,39 @@ TemplateKeys getTemplateKeysForEsc() {
 
 Keys getParsedKeysForEsc() {
 	return getTemplateKeysForEsc().getParsedKeys();
+}
+
+std::pair<bool, Keys> handleUserHotKey(
+	unsigned short keyCode,
+	bool isKeyDown,
+	UserHotKeys userHotKeys,
+	int userHotkeysSize
+) {
+	if (userHotkeysSize == 0) {
+		return { false, {} };
+	}
+
+	for (int i = 0; i < userHotkeysSize; i++) {
+		auto userHotkey = userHotKeys[i];
+		auto userKeyInfo = std::get<0>(userHotkey);
+
+		if (keyCode == userKeyInfo.code) {
+			auto program = userKeyInfo.program;
+
+			if (program == "" || program == g_activeProcessName) {
+				return {
+					true,
+					getParsedKeyDownUpKeys(
+						isKeyDown,
+						std::get<1>(userHotkey),
+						std::get<2>(userHotkey)
+					)
+				};
+			}
+		}
+	}
+
+	return { false, {} };
 }
 
 Keys handleSimulateMouseClick(Key key) {
@@ -651,23 +1043,8 @@ Keys handleLAltKey(Key key) {
 		}
 	}
 
-	if (keyCode == SC_LALT) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyDownLAltAsLCtrl),
-			TemplateKeys(_keyUpLAlt)
-		);
-	}
-
-	if (keyCode == SC_GRAVE) { // lalt + ` to alt + `
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_GRAVE) }, _keyDownLAltAsLCtrl),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_ESC) { // alt + esc
+	// alt + esc
+	if (keyCode == SC_ESC) {
 		return getParsedKeyDownUpKeys(
 			isCurrentKeyDown,
 			getTemplateKeysForEsc(),
@@ -675,7 +1052,8 @@ Keys handleLAltKey(Key key) {
 		);
 	}
 
-	if (keyCode == SC_Q) { // alt + q
+	// alt + q
+	if (keyCode == SC_Q) {
 		if (!g_isLAltAsLCtrl) { // alt + tabbed + q
 			return getParsedKeyDownUpKeys(
 				isCurrentKeyDown,
@@ -691,57 +1069,24 @@ Keys handleLAltKey(Key key) {
 		);
 	}
 
-	if (keyCode == SC_TAB) { // alt + tab
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_TAB) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_BACK) { // alt + back
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(
-				_keyUpLAlt,
-				{ KeyDown(SC_LSHIFT), Key(SC_HOME), KeyUp(SC_LSHIFT), Key(SC_BACK) },
-				_keyDownLAltAsLCtrl
-			),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_J || keyCode == SC_K) { // alt + j/k
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(
-				_keyUpLAlt,
-				{ Key(keyCode == SC_J ? SC_NEXT : SC_PRIOR) },
-				_keyDownLAltAsLCtrl
-			),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_SPACE) { // alt + espace
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ Key(SC_F12) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (isAFnKeyCode(keyCode)) { // alt + f{n} - NOTE: it's not possible to send ctrl + (shift) + f{n}
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyUpLAlt, { Key(keyCode) }, _keyDownLAltAsLCtrl),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode != SC_LSHIFT && !g_isLAltAsLCtrl) { // alttabbed + letter
+	// Omit keys when in alt-tab mode except Tab/Shift
+	if (
+		keyCode != SC_LSHIFT && 
+		keyCode != SC_LALT && 
+		keyCode != SC_TAB && 
+		!g_isLAltAsLCtrl
+	) {
 		return { g_nullKey };
 	}
+
+	if (g_userHotKeyHandler = handleUserHotKey(
+		keyCode,
+		isCurrentKeyDown,
+		laltUserHotKeys,
+		laltUserHotkeysSize
+	), g_userHotKeyHandler.first) {
+		return g_userHotKeyHandler.second;
+	};
 
 	return {};
 }
@@ -750,63 +1095,14 @@ Keys handleKey(Key key) {
 	auto isCurrentKeyDown = isKeyDown(key);
 	auto keyCode = key.code;
 
-	if (isChromeActiveProcess()) {
-		if (keyCode == SC_F3) { // f3
-			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
-				TemplateKeys({ KeyDown(SC_LCTRL), KeyDown(SC_LSHIFT), Key(SC_TAB), KeyUp(SC_LSHIFT), KeyUp(SC_LCTRL) }),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-
-		if (keyCode == SC_F4) { // f4
-			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
-				TemplateKeys({ KeyDown(SC_LCTRL), Key(SC_TAB), KeyUp(SC_LCTRL) }),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-
-		if (keyCode == SC_F5 || keyCode == SC_F6) { // f5/f6
-			return getParsedKeyDownUpKeys(
-				isCurrentKeyDown,
-				TemplateKeys({ KeyDown(SC_LALT), Key(keyCode == SC_F5 ? SC_M : SC_T), KeyUp(SC_LALT) }),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-	}
-
-	if (keyCode == SC_F1 || keyCode == SC_F2) { // f1/f2
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ KeyDown(keyCode == SC_F1 ? SC_BRIGHTNESSDOWN : SC_BRIGHTNESSUP) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_F10) { // f10
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ Key(SC_MUTE, 5) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_F11) { // f11
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5), Key(SC_VOLUMEDOWN, 5) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	if (keyCode == SC_F12) { // f12
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys({ Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5), Key(SC_VOLUMEUP, 5) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
+	if (g_userHotKeyHandler = handleUserHotKey(
+		keyCode,
+		isCurrentKeyDown,
+		keyUserHotKeys,
+		keyUserHotKeysSize
+	), g_userHotKeyHandler.first) {
+		return g_userHotKeyHandler.second;
+	};
 
 	return getParsedKeyDownUpKeys(
 		isCurrentKeyDown,
@@ -868,9 +1164,9 @@ Keys getKeyEvents(Keys keys) {
 	return allKeyEvents;
 }
 
-void setActiveProcessName(std::wstring _activeProcessName) {
+void setActiveProcessName(std::string _activeProcessName) {
 	g_activeProcessName = _activeProcessName;
-	OutputDebugStringW(g_activeProcessName.c_str());
+	OutputDebugStringA(g_activeProcessName.c_str());
 }
 
 void setGlobalDefaultValues() {
@@ -885,5 +1181,5 @@ void setGlobalDefaultValues() {
 
 	g_isMouseClickDown = false;
 	g_isVimShiftKeyDown = false;
-	g_activeProcessName = L"";
+	g_activeProcessName = "";
 }
