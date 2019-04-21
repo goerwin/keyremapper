@@ -936,6 +936,36 @@ TEST_F(KeyEventTest, VIM_MODE_LALT_SHIFT_ARROWKEYS_JK_REPEAT) {
 	}
 }
 
+// Win + Alt
+
+TEST_F(KeyEventTest, WIN_ALT_ARROWKEYS) {
+	std::vector<ScanCodes> keys = { SC_H, SC_J, SC_K, SC_L };
+	std::vector<ScanCodes> arrowKeys = { SC_LEFT, SC_DOWN, SC_UP, SC_RIGHT };
+
+	int size = keys.size();
+
+	for (int i = 0; i < size; i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Win + Alt", {
+			{
+				KeyDown(SC_LWIN),
+				KeyDown(SC_LALT),
+				KeyDown(keys[i]),
+				KeyUp(keys[i]),
+				KeyUp(SC_LALT),
+				KeyUp(SC_LWIN),
+			},
+			{
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL),
+				KeyDown(SC_LWIN),
+				Key(arrowKeys[i]),
+				KeyUp(SC_LWIN), // can't send Ctrl↓ here cause a bug with Win key
+				KeyUp(SC_LCTRL),
+			}
+		}));
+	}
+}
+
 // Ctrl
 
 TEST_F(KeyEventTest, CTRL_TAB) {

@@ -230,6 +230,14 @@ Caps↓ S↓ Alt↓ K↓↑↓↑ Alt↑ S↑ Caps↑ = Shift↓ Ctrl↓ Home↕
 Caps↓ Shift↓ Alt↓ K↓↑↓↑ Alt↑ Shift↑ Caps↑ = Shift↓ Ctrl↓ Home↕↕ Ctrl↑ Shift↑
 ```
 
+### Win + Alt
+```
+Win↓ Alt↓ H↓↑ Alt↑ Win↑ = Ctrl↓↑ Win↓ Left↕ Win↑ Ctrl↑
+Win↓ Alt↓ J↓↑ Alt↑ Win↑ = Ctrl↓↑ Win↓ Down↕ Win↑ Ctrl↑
+Win↓ Alt↓ K↓↑ Alt↑ Win↑ = Ctrl↓↑ Win↓ Up↕ Win↑ Ctrl↑
+Win↓ Alt↓ L↓↑ Alt↑ Win↑ = Ctrl↓↑ Win↓ Right↕ Win↑ Ctrl↑
+```
+
 ### Ctrl
 ```
 Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑

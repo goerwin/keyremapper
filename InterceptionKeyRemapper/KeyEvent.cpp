@@ -536,11 +536,11 @@ UserHotKeys ctrlUserHotKeys = UserHotKeys({
 });
 
 UserHotKeys winAltUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' WinAlt Win => Down(null) Up(null)"),
+	getParsedUserHotkey("'' WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑) Up(null)"),
+	getParsedUserHotkey("'' WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑) Up(null)"),
+	getParsedUserHotkey("'' WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑) Up(null)"),
+	getParsedUserHotkey("'' WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)"),
+	getParsedUserHotkey("'' WinAlt Win => Down(null) Up(keyDownLAltAsLCtrl)"),
 	getParsedUserHotkey("'' WinAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
 	getParsedUserHotkey("'' WinAlt _ => Down(null) Up(null)"),
 });
