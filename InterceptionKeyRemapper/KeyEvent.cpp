@@ -10,7 +10,7 @@
 #include "erwinUtils.h"
 
 String g_activeProcessName;
-String hotKeysFilePath = "../hotkeys.md";
+String hotKeysFilePath = "../hotKeys.md";
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
