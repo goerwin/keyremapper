@@ -4,6 +4,7 @@
 
 #include <windows.h>
 #include <string>
+#include <vector>
 #include <psapi.h>
 #include <chrono>
 #include <fstream>
@@ -41,6 +42,18 @@ namespace ErwinUtils {
 		std::wostream out(&converter);
 		out << utf82ws(content);
 		soutfile.close();
+	}
+
+	std::vector<std::wstring> getFileByLine(std::string path) {
+		std::ifstream file(path);
+		std::string line;
+		std::vector<std::wstring> result;
+
+		while (std::getline(file, line)) {
+			result.insert(result.end(), utf82ws(line));
+		}
+		
+		return result;
 	}
 
 	std::string getActiveWindowProcessName(HWND hwnd) {

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <chrono>
 
 template <typename J> struct lul {
@@ -11,6 +12,7 @@ namespace ErwinUtils {
 
 	std::string ws2utf8(std::wstring input);
 	std::wstring utf82ws(std::string input);
+	std::vector<std::wstring> getFileByLine(std::string path);
 
 	// Sadly when using templates, you have to define
 	// the methods to use in the header file

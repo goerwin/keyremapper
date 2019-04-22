@@ -10,6 +10,7 @@
 #include "erwinUtils.h"
 
 String g_activeProcessName;
+String hotKeysFilePath = "../hotkeys.md";
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
@@ -477,147 +478,86 @@ TemplateKeys getTemplateKeys(std::wstring symbolKeys) {
 	return TemplateKeys(firstLAltLCtrl, keys, lastLAltLCtrl);
 }
 
-UserHotKey getParsedUserHotkey(std::string userHotkeySymbol) {
-	auto wuserHotkeySymbol = ErwinUtils::utf82ws(userHotkeySymbol);
-	auto pos = wuserHotkeySymbol.find(L"'");
-	auto pos2 = wuserHotkeySymbol.find(L"'", pos + 1);
-	auto processName = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+UserHotKeys capsAltUserHotKeys;
+UserHotKeys capsUserHotKeys;
+UserHotKeys ctrlShiftUserHotKeys;
+UserHotKeys ctrlUserHotKeys;
+UserHotKeys winAltUserHotKeys;
+UserHotKeys winShiftUserHotKeys;
+UserHotKeys winUserHotKeys;
+UserHotKeys altShiftUserHotKeys;
+UserHotKeys altUserHotKeys;
+UserHotKeys keyUserHotKeys;
 
-	pos = wuserHotkeySymbol.find(L" ", pos2);
-	pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
-	// TODO: NOT DOING ANYTHING WITH THIS
-	auto handler = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+int setHotKeysFromFile() {
+	auto fileLines = ErwinUtils::getFileByLine(hotKeysFilePath);
 
-	pos = wuserHotkeySymbol.find(L" ", pos2);
-	pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
-	auto keyInputSymbol = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
-	auto keyInputCode = getScanCode(keyInputSymbol);
+	for (int i = 0; i < fileLines.size(); i++) {
+		auto wuserHotkeySymbol = fileLines[i];
 
-	pos = wuserHotkeySymbol.find(L"Down(", pos2);
-	pos2 = wuserHotkeySymbol.find(L")", pos + 1);
-	auto keyDownSymbols = wuserHotkeySymbol.substr(pos + 5, pos2 - pos - 5);
+		if (wuserHotkeySymbol.find(L"- ") == std::string::npos) {
+			continue;
+		}
 
-	pos = wuserHotkeySymbol.find(L"Up(", pos2);
-	pos2 = wuserHotkeySymbol.find(L")", pos + 1);
-	auto keyUpSymbols = wuserHotkeySymbol.substr(pos + 3, pos2 - pos - 3);
+		size_t pos = 0;
+		size_t pos2 = 0;
+		std::wstring processName;
 
-	auto userKeyInfo = UserKeyInfo(keyInputCode, ErwinUtils::ws2utf8(processName));
-	auto templateKeysDown = getTemplateKeys(keyDownSymbols);
-	auto templateKeysUp = getTemplateKeys(keyUpSymbols);
+		pos = wuserHotkeySymbol.find(L"- ", pos2);
+		pos2 = wuserHotkeySymbol.find(L" ", pos + 2);
+		auto handler = wuserHotkeySymbol.substr(pos + 2, pos2 - pos - 2);
 
-	return UserHotKey(userKeyInfo, templateKeysDown, templateKeysUp);
+		pos = wuserHotkeySymbol.find(L" ", pos2);
+		pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
+		auto keyInputSymbol = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+		auto keyInputCode = getScanCode(keyInputSymbol);
+
+		pos = wuserHotkeySymbol.find(L"Down(", pos2);
+		pos2 = wuserHotkeySymbol.find(L")", pos + 1);
+		auto keyDownSymbols = wuserHotkeySymbol.substr(pos + 5, pos2 - pos - 5);
+
+		pos = wuserHotkeySymbol.find(L"Up(", pos2);
+		pos2 = wuserHotkeySymbol.find(L")", pos + 1);
+		auto keyUpSymbols = wuserHotkeySymbol.substr(pos + 3, pos2 - pos - 3);
+
+		if (wuserHotkeySymbol.find(L'"') != std::string::npos) {
+			pos = wuserHotkeySymbol.find(L'"');
+			pos2 = wuserHotkeySymbol.find(L'"', pos + 1);
+			processName = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+		}
+
+		auto userKeyInfo = UserKeyInfo(keyInputCode, ErwinUtils::ws2utf8(processName));
+		auto templateKeysDown = getTemplateKeys(keyDownSymbols);
+		auto templateKeysUp = getTemplateKeys(keyUpSymbols);
+		auto userHotkey = UserHotKey(userKeyInfo, templateKeysDown, templateKeysUp);
+
+		if (handler == L"CapsAlt") {
+			capsAltUserHotKeys.insert(capsAltUserHotKeys.end(), userHotkey);
+		} else if (handler == L"Caps") {
+			capsUserHotKeys.insert(capsUserHotKeys.end(), userHotkey);
+		} else if (handler == L"CtrlShift") {
+			ctrlShiftUserHotKeys.insert(ctrlShiftUserHotKeys.end(), userHotkey);
+		} else if (handler == L"Ctrl") {
+			ctrlUserHotKeys.insert(ctrlUserHotKeys.end(), userHotkey);
+		} else if (handler == L"WinAlt") {
+			winAltUserHotKeys.insert(winAltUserHotKeys.end(), userHotkey);
+		} else if (handler == L"WinShift") {
+			winShiftUserHotKeys.insert(winShiftUserHotKeys.end(), userHotkey);
+		} else if (handler == L"Win") {
+			winUserHotKeys.insert(winUserHotKeys.end(), userHotkey);
+		} else if (handler == L"AltShift") {
+			altShiftUserHotKeys.insert(altShiftUserHotKeys.end(), userHotkey);
+		} else if (handler == L"Alt") {
+			altUserHotKeys.insert(altUserHotKeys.end(), userHotkey);
+		} else if (handler == L"Key") {
+			keyUserHotKeys.insert(keyUserHotKeys.end(), userHotkey);
+		}
+	}
+
+	return 1;
 }
 
-UserHotKeys capslockAltUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' Caps V => Down(keyUpLAlt Win↓ V↕ Win↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Caps Caps => Down(null) Up(null)"),
-	getParsedUserHotkey("'' Caps Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
-	getParsedUserHotkey("'' Caps _ => Down(null) Up(null)"),
-});
-
-UserHotKeys capslockUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' Caps C => Down(Ctrl↓ C↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Caps Tab => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Caps Space => Down(Ctrl↓ Space↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Caps Caps => Down(null) Up(null)"),
-	getParsedUserHotkey("'' Caps _ => Down(null) Up(null)"),
-});
-
-UserHotKeys ctrlShiftUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' CtrlShift Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)"),
-	getParsedUserHotkey("'' CtrlShift Shift => Down(Shift↓) Up(Shift↑)"),
-	getParsedUserHotkey("'' CtrlShift _ => Down(_↓) Up(_↑)"),
-});
-
-UserHotKeys ctrlUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' Ctrl Tab => Down(keyDownLCtrlAsLCtrl Tab↕) Up(null)"),
-	getParsedUserHotkey("'' Ctrl Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)"),
-	getParsedUserHotkey("'' Ctrl _ => Down(_↓) Up(_↑)"),
-});
-
-UserHotKeys winAltUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' WinAlt Win => Down(null) Up(keyDownLAltAsLCtrl)"),
-	getParsedUserHotkey("'' WinAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
-	getParsedUserHotkey("'' WinAlt _ => Down(null) Up(null)"),
-});
-
-UserHotKeys winShiftUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' WinShift Win => Down(null) Up(null)"),
-	getParsedUserHotkey("'' WinShift Shift => Down(Shift↓) Up(Shift↑)"),
-	getParsedUserHotkey("'' WinShift _ => Down(null) Up(null)"),
-});
-
-UserHotKeys winUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'SC2_x64.exe' Win 1 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 2 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 3 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Win 4 => Down(Alt↓ 1↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Win Back => Down(Ctrl↓ W↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Win H => Down(Alt↓ Left↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'' Win L => Down(Alt↓ Right↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'' Win Back => Down(Ctrl↓ Back↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'' Win D => Down(Win↓ D↕ Win↑) Up(null)"),
-	getParsedUserHotkey("'' Win Space => Down(Win↕) Up(null)"),
-	getParsedUserHotkey("'' Win Win => Down(null) Up(null)"),
-	getParsedUserHotkey("'' Win _ => Down(null) Up(null)"),
-});
-
-UserHotKeys altShiftUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'' AltShift J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' AltShift K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' AltShift Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)"),
-	getParsedUserHotkey("'' AltShift Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
-	getParsedUserHotkey("'' AltShift Shift => Down(Shift↓) Up(Shift↑)"),
-	getParsedUserHotkey("'' AltShift _ => Down(_↓) Up(_↑)"),
-});
-
-UserHotKeys altUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'chrome.exe' Alt Enter => Down(keyDownLAltAsLAlt Enter↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Alt H => Down(Shift↓ Tab↕ Shift↑) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Alt L => Down(Tab↕) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Alt ; => Down(L↕) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Alt F1 => Down(keyDownLAltAsLCtrl F1↕) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Alt F2 => Down(keyDownLAltAsLCtrl F2↕) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Alt F3 => Down(keyDownLAltAsLCtrl F3↕) Up(null)"),
-	getParsedUserHotkey("'SC2_x64.exe' Alt F4 => Down(keyDownLAltAsLCtrl F4↕) Up(null)"),
-	getParsedUserHotkey("'slack.exe' Alt P => Down(K↕) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Alt Back => Down(U↕) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Alt Z => Down(Shift↓ -↕ Shift↑) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Alt I => Down(L↕) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Alt C => Down(NP0↕) Up(null)"),
-	getParsedUserHotkey("'mintty.exe' Alt V => Down(keyUpLAlt Shift↓ NP0↕ Shift↑ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt Space => Down(F12↕) Up(null)"),
-	getParsedUserHotkey("'' Alt F1 => Down(keyUpLAlt F1↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt F2 => Down(keyUpLAlt F2↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt F1 => Down(keyUpLAlt F1↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt F10 => Down(keyUpLAlt F10↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt F11 => Down(keyUpLAlt F11↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt F12 => Down(keyUpLAlt F12↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)"),
-	getParsedUserHotkey("'' Alt Back => Down(keyUpLAlt Shift↓ Home↕ Shift↑ Back↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt ` => Down(keyDownLAltAsLAlt `↕ keyDownLAltAsLCtrl) Up(null)"),
-	getParsedUserHotkey("'' Alt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)"),
-	getParsedUserHotkey("'' Alt _ => Down(_↓) Up(_↑)"),
-});
-
-UserHotKeys keyUserHotKeys = UserHotKeys({
-	getParsedUserHotkey("'chrome.exe' Key F3 => Down(Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Key F4 => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Key F5 => Down(Alt↓ M↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'chrome.exe' Key F6 => Down(Alt↓ T↕ Alt↑) Up(null)"),
-	getParsedUserHotkey("'' Key F1 => Down(BRIGHTNESSDOWN↕) Up(null)"),
-	getParsedUserHotkey("'' Key F2 => Down(BRIGHTNESSUP↕) Up(null)"),
-	getParsedUserHotkey("'' Key F10 => Down(MUTE↕) Up(null)"),
-  getParsedUserHotkey("'' Key F11 => Down(VOLUMEDOWN↕↕↕↕) Up(null)"),
-  getParsedUserHotkey("'' Key F12 => Down(VOLUMEUP↕↕↕↕) Up(null)"),
-	getParsedUserHotkey("'' Key _ => Down(_↓) Up(_↑)"),
-});
+auto noice = setHotKeysFromFile();
 
 bool isChromeActiveProcess() {
 	return g_activeProcessName == "chrome.exe";
@@ -635,11 +575,6 @@ bool isGitBashActiveProcess() {
 bool isKeyDown(Key key) {
 	return key.state == 0 || key.state == 2;
 }
-
-/*std::wstring getStringKeyInfo(InterceptionKeyStroke keyStroke) {
-	std::wstring pressedStatus = isKeyDown(keyStroke) ? L"down" : L"up";
-	return std::to_wstring(keyStroke.code).append(L" ").append(pressedStatus);
-}*/
 
 Keys getParsedKeyDownUpKeys(
 	bool isKeyDown,
@@ -780,14 +715,6 @@ Keys handleVimMode(unsigned short keyCode, bool isKeyDown) {
 		);
 	}
 
-	/*if (keyCode == SC_LALT) {
-		return getParsedKeyDownUpKeys(
-			isCurrentKeyDown,
-			TemplateKeys(_keyDownLAltAsLCtrl),
-			TemplateKeys(_keyUpLAlt)
-		);
-	}*/
-
 	if (keyCode == SC_H || keyCode == SC_J || keyCode == SC_L || keyCode == SC_K) {
 		if (g_isWinKeyDown) {
 			return getParsedKeyDownUpKeys(
@@ -862,7 +789,7 @@ Keys handleCapslockAltKeys(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, capslockAltUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, capsAltUserHotKeys);
 }
 
 Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
@@ -870,7 +797,7 @@ Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, capslockUserHotKeys);
+	return handleUserHotKey(keyCode, isKeyDown, capsUserHotKeys);
 }
 
 Keys handleCtrlKey(unsigned short keyCode, bool isKeyDown) {
@@ -962,45 +889,45 @@ Keys handleKey(unsigned short keyCode, bool isKeyDown) {
 }
 
 Keys getKeyEvents(Keys keys) {
-	int keysSize = keys.size();
-	Keys allKeyEvents;
+	Keys allKeys;
+	int size = keys.size();
 
-	for (int i = 0; i < keysSize; i++) {
+	for (int i = 0; i < size; i++) {
 		Key key = keys[i];
-		bool isCurrentKeyDown = isKeyDown(key);
-		Keys keyEvents;
-		int keysSize = 0;
+		bool _isKeyDown = isKeyDown(key);
+		Keys keys;
+		int size = 0;
 		auto keyCode = key.code;
 
 		if (keyCode == SC_CAPSLOCK) {
-			g_isCapslockKeyDown = isCurrentKeyDown;
+			g_isCapslockKeyDown = _isKeyDown;
 		} else if (keyCode == SC_LSHIFT) {
-			g_isShiftKeyDown = isCurrentKeyDown;
+			g_isShiftKeyDown = _isKeyDown;
 		} else if (keyCode == SC_LCTRL) {
-			g_isCtrlKeyDown = isCurrentKeyDown;
+			g_isCtrlKeyDown = _isKeyDown;
 		} else if (keyCode == SC_LWIN) {
-			g_isWinKeyDown = isCurrentKeyDown;
+			g_isWinKeyDown = _isKeyDown;
 		} else if (keyCode == SC_LALT) {
-			g_isAltKeyDown = isCurrentKeyDown;
+			g_isAltKeyDown = _isKeyDown;
 		}
 
-		if (keyEvents = handleMouseClick(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleVimMode(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCapslockAltKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCapslockKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCtrlShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleCtrlKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleWinAltKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleWinShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleWinKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleAltShiftKeys(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleAltKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
-		else if (keyEvents = handleKey(keyCode, isCurrentKeyDown), keysSize = keyEvents.size(), keysSize != 0) {}
+		if (keys = handleMouseClick(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleVimMode(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleCapslockAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleCapslockKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleCtrlShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleCtrlKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleWinAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleWinShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleWinKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleAltShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleAltKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+		else if (keys = handleKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
 
-		allKeyEvents = concatKeyVectors(allKeyEvents, keyEvents);
+		allKeys = concatKeyVectors(allKeys, keys);
 	}
 
-	return allKeyEvents;
+	return allKeys;
 }
 
 void setActiveProcessName(std::string _activeProcessName) {
