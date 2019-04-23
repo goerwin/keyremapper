@@ -248,26 +248,13 @@ Ctrl↓ Tab↓↑ Ctrl↑ = Alt↓↑ Ctrl↓ Tab↕ Ctrl↑
 ```
 Alt↓ Esc↓↑ Alt↑ = Ctrl↓↑
 Alt↓ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ F4↕ Alt↑ Ctrl↓↑
-Alt↓ Back↓↑ Alt↑ = Ctrl↓↑ Shift↓ Home↕ Shift↑ Back↕ Ctrl↓↑
 Alt↓ J↓↑ Alt↑ = Ctrl↓↑ Next↕ Ctrl↓↑
+Alt↓ K↓↑ Alt↑ = Ctrl↓↑ Prior↕ Ctrl↓↑
+Alt↓ Shift↓ J↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Next↕ Ctrl↓ Shift↑ Ctrl↑
+Alt↓ Shift↓ K↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Prior↕ Ctrl↓ Shift↑ Ctrl↑
 Alt↓ Tab↓↑ = Ctrl↓↑ Alt↓ Tab↕
 Alt↓ Shift↓ Tab↓↑ Shift↑ Alt↑ = Ctrl↓ Shift↓ Ctrl↑ Alt↓ Tab↕ Shift↑ Alt↑
 Alt↓ Tab↓↑ C↓↑ = Ctrl↓↑ Alt↓ Tab↕
 Alt↓ Tab↓↑ Esc↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Esc↕ Alt↑ Ctrl↓↑
 Alt↓ Tab↓↑ Q↓↑ Alt↑ = Ctrl↓↑ Alt↓ Tab↕ Supr↕ Alt↑
-Alt↓ `↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑
-Alt↓ `↓↑ Tab↓↑ Alt↑ = Ctrl↓↑ Alt↓ `↕ Alt↑ Ctrl↓↑ Alt↓ Tab↕ Alt↑
-```
-
-### Custom
-```
-F3↓↑ = Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑ // chrome.exe
-F4↓↑ = Ctrl↓ Tab↕ Ctrl↑ // chrome.exe
-F5↓↑ = Alt↓ M↕ Alt↑ // chrome.exe
-F6↓↑ = Alt↓ T↕ Alt↑ // chrome.exe
-F1↓↑ = BRIGHTNESSDOWN↕
-F2↓↑ = BRIGHTNESSUP↕
-F10↓↑ = MUTE↕
-F11↓↑ = VOLUMEDOWN↕↕↕↕
-F12↓↑ = VOLUMEUP↕↕↕↕
 ```

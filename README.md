@@ -6,7 +6,7 @@ Powerful Key Remapper for windows using (interception)[https://github.com/oblitu
 - Remove ctrl + shift shortcut to change keyboard layouts: Settings -> Language -> Spelling, typing & keyboard settings -> Advanced keyboard settings -> Language bar options -> Advanced Key Settings -> Action: Between Input Languages -> Change Key Secuence -> Not Asigned
 
 ## Notes
-- [HotKeys](./hotKeys.md)
+- [CustomHotKeys](./customHotKeys.md)
 - [TestCases](./testCases.md)
 - https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 

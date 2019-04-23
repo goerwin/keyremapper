@@ -19,6 +19,7 @@ InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
 
 HHOOK hHook = 0;
+HWND g_hwnd;
 HWINEVENTHOOK windowHook = 0;
 const auto appTitle = L"Windows KeyRemapper";
 DWORD globalDelayMSBetweenKeyEvents = 5;
@@ -26,7 +27,7 @@ DWORD globalDelayMSBetweenKeyEvents = 5;
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
 
-void commonKeyRemaps(InterceptionKeyStroke &keyStroke) {
+void defaultKeyRemaps(InterceptionKeyStroke &keyStroke) {
 	DWORD keyCode = keyStroke.code;
 	if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT) {
 		keyStroke.code = SC_LSHIFT;
@@ -116,12 +117,44 @@ void sendKeyEvents(std::vector<Key> keys) {
 }
 
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {
-	setActiveProcessName(ErwinUtils::getActiveWindowProcessName(hwnd));
+	KeyEvent::setActiveProcessName(ErwinUtils::getActiveWindowProcessName(hwnd));
+}
+
+void openHotKeysFile() {
+	OPENFILENAMEA ofn;       // common dialog box structure
+	char szFile[260];       // buffer for file name
+	//LPWSTR szFile;       // buffer for file name
+
+	HANDLE hf;              // file handle
+
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = g_hwnd;
+	ofn.lpstrFile = szFile;
+	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not
+	// use the contents of szFile to initialize itself.
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+	//ofn.lpstrFilter = "All\0*.*\0MD\0*.md\0";
+	ofn.lpstrFilter = "MarkDown Files (*.md)\0*.md\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	// Display the Open dialog box.
+
+	if (GetOpenFileNameA(&ofn) == TRUE) {
+		KeyEvent::setHotKeysFromFile(ofn.lpstrFile);
+	}
 }
 
 bool isAppEnabled = true;
 NOTIFYICONDATA nid;
 const auto ctxMenuEnabled = L"Disable";
+const auto ctxLoadHotKeysFile = L"Load HotKeys file";
 const auto ctxMenuNotEnabled = L"Enable";
 auto ctxMenuEnabledMsg = ctxMenuEnabled;
 auto globalIconImage = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, 0));
@@ -138,6 +171,7 @@ void toggleAppEnabled() {
 #define WM_MYMESSAGE (WM_USER + 1)
 const int IDM_EXIT = 5;
 const int IDM_ENABLE = 6;
+const int IDM_LOAD_HK_FILE = 7;
 const auto ctxMenuExitMsg = L"Exit";
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
@@ -155,6 +189,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				SetForegroundWindow(hWnd);
 
 				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, ctxMenuExitMsg);
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_LOAD_HK_FILE, ctxLoadHotKeysFile);
 				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, ctxMenuEnabledMsg);
 				TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
 				return 0;
@@ -163,6 +198,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			switch (LOWORD(wParam)) {
 				case IDM_EXIT:
 					exit(0);
+					return 0;
+				case IDM_LOAD_HK_FILE:
+					openHotKeysFile();
 					return 0;
 				case IDM_ENABLE:
 					toggleAppEnabled();
@@ -237,6 +275,12 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 	context = interception_create_context();
 	interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
 
+	auto escClick = ErwinUtils::KeyClick<void(int)>(SC_ESC, [](int consecutiveClicks) {
+		if (consecutiveClicks > 1) {
+			toggleAppEnabled();
+		}
+	});
+
 	auto shiftClick = ErwinUtils::KeyClick<void(int)>(SC_LSHIFT, [](int consecutiveClicks) {
 		if (consecutiveClicks > 1) {
 			if ((GetKeyState(VK_CAPITAL) & 0x0001) == 0) { // Capslock OFF
@@ -250,7 +294,7 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 	});
 
 	auto capslockClick = ErwinUtils::KeyClick<void(int)>(SC_CAPSLOCK, [](int consecutiveClicks) {
-		sendKeyEvents(getParsedKeysForEsc());
+		sendKeyEvents(KeyEvent::getParsedKeysForEsc());
 	});
 
 	auto lAltClick = ErwinUtils::KeyClick<void(int)>(SC_LALT, [](int consecutiveClicks) {
@@ -265,6 +309,11 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 		(InterceptionStroke *)&keyStroke,
 		1
 	) > 0) {
+		auto key = getKeyFromKeyStroke(keyStroke);
+		auto keyCode = key.code;
+		bool isKeyDown = KeyEvent::isKeyDown(key);
+		escClick.handleKeyStroke(keyCode, isKeyDown);
+
 		if (!isAppEnabled) {
 			interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
 			continue;
@@ -275,17 +324,14 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 		interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
 		continue;
 		*/
-		commonKeyRemaps(keyStroke);
+		defaultKeyRemaps(keyStroke);
+		key = getKeyFromKeyStroke(keyStroke);
+		keyCode = key.code;
+		shiftClick.handleKeyStroke(keyCode, isKeyDown);
+		capslockClick.handleKeyStroke(keyCode, isKeyDown);
+		lAltClick.handleKeyStroke(keyCode, isKeyDown);
 
-		auto key = getKeyFromKeyStroke(keyStroke);
-		auto keyCode = key.code;
-
-		bool isCurrentKeyDown = isKeyDown(key);
-		shiftClick.handleKeyStroke(keyCode, isCurrentKeyDown);
-		capslockClick.handleKeyStroke(keyCode, isCurrentKeyDown);
-		lAltClick.handleKeyStroke(keyCode, isCurrentKeyDown);
-
-		sendKeyEvents(getKeyEvents({ key }));
+		sendKeyEvents(KeyEvent::getKeyEvents({ key }));
 	}
 
 	interception_destroy_context(context);
@@ -298,13 +344,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 
 	// SYSTEM TRAY ICON
 
-	HWND hWnd = createWindow(hInstance);
+	g_hwnd = createWindow(hInstance);
 
-	if (!hWnd) {
+	if (!g_hwnd) {
 		return 0;
 	}
 
-	handleSystemTrayIcon(hInstance, hWnd);
+	handleSystemTrayIcon(hInstance, g_hwnd);
 
 	// WINDOW CHANGE EVENT
 
@@ -316,6 +362,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 		0, 0,
 		WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
 	);
+
+	// OPEN HOTKEYS FILE
+	KeyEvent::initialize();
+	openHotKeysFile();
 
 	// KEYBOARD
 

@@ -74,11 +74,11 @@ class KeyEventTest : public ::testing::Test {
 		std::pair<Keys, Keys> keys,
 		String program = ""
 	) {
-		setGlobalDefaultValues();
-		setActiveProcessName(program);
+		KeyEvent::initialize();
+		KeyEvent::setActiveProcessName(program);
 
 		auto inputKeys = keys.first;
-		auto convertedInputKeys = removeNullKeyEvents(getKeyEvents(inputKeys));
+		auto convertedInputKeys = removeNullKeyEvents(KeyEvent::getKeyEvents(inputKeys));
 		auto expectedKeys = removeNullKeyEvents(keys.second);
 		auto result = compareKeyEvents(convertedInputKeys, expectedKeys);
 
@@ -456,7 +456,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER) {
 	int size = keys.size();
 
 	// Get in AppSwitcher
-	getKeyEvents({
+	KeyEvent::getKeyEvents({
 		KeyDown(SC_LALT),
 		KeyDown(SC_TAB),
 		KeyUp(SC_TAB)
@@ -483,7 +483,7 @@ TEST_F(KeyEventTest, VIM_MODE_ARROWKEYS_IN_APP_SWITCHER_REPEAT) {
 	int size = keys.size();
 
 	// Get in AppSwitcher (getKeyEvents modifies state)
-	getKeyEvents({
+	KeyEvent::getKeyEvents({
 		KeyDown(SC_LALT),
 		KeyDown(SC_TAB),
 		KeyUp(SC_TAB)
@@ -1041,43 +1041,54 @@ TEST_F(KeyEventTest, ALT_Q) {
 	}));
 }
 
-TEST_F(KeyEventTest, ALT_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_BACK),
-			KeyUp(SC_BACK),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			Key(SC_HOME),
-			KeyUp(SC_LSHIFT),
-			Key(SC_BACK),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
+TEST_F(KeyEventTest, ALT_J_OR_K) {
+	std::vector<ScanCodes> codes = { SC_J, SC_K };
+	std::vector<ScanCodes> expectedCodes = { SC_NEXT, SC_PRIOR };
+
+	for (int i = 0; i < codes.size(); i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+			{
+				KeyDown(SC_LALT),
+				KeyDown(codes[i]),
+				KeyUp(codes[i]),
+				KeyUp(SC_LALT)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL),
+				Key(expectedCodes[i]),
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
 }
 
-TEST_F(KeyEventTest, ALT_J_OR_K) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_J),
-			KeyUp(SC_J),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			Key(SC_NEXT),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
+TEST_F(KeyEventTest, ALT_SHIFT_J_OR_K) {
+	std::vector<ScanCodes> codes = { SC_J, SC_K };
+	std::vector<ScanCodes> expectedCodes = { SC_NEXT, SC_PRIOR };
+
+	for (int i = 0; i < codes.size(); i++) {
+		EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+			{
+				KeyDown(SC_LALT),
+				KeyDown(SC_LSHIFT),
+				KeyDown(codes[i]),
+				KeyUp(codes[i]),
+				KeyUp(SC_LSHIFT),
+				KeyUp(SC_LALT)
+			},
+			{
+				KeyDown(SC_LCTRL),
+				KeyDown(SC_LSHIFT),
+				KeyUp(SC_LCTRL),
+				Key(expectedCodes[i]),
+				KeyDown(SC_LCTRL),
+				KeyUp(SC_LSHIFT),
+				KeyUp(SC_LCTRL)
+			}
+		}));
+	}
 }
 
 TEST_F(KeyEventTest, ALT_TAB) {
@@ -1180,7 +1191,34 @@ TEST_F(KeyEventTest, ALT_TAB_THEN_Q) {
 	}));
 }
 
-TEST_F(KeyEventTest, ALT_GRAVE) {
+/*
+// TODO: MAYBE ALLOW USER TO RUN ITS OWN TESTS
+// AND RUN THEM IN CONJUNTION WITH THE DEFAULT ONES
+
+// CUSTOM
+
+TEST_F(KeyEventTest, CUSTOM_ALT_BACK) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			Key(SC_HOME),
+			KeyUp(SC_LSHIFT),
+			Key(SC_BACK),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, CUSTOM_ALT_GRAVE) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
 		{
 			KeyDown(SC_LALT),
@@ -1200,7 +1238,7 @@ TEST_F(KeyEventTest, ALT_GRAVE) {
 	}));
 }
 
-TEST_F(KeyEventTest, ALT_GRAVE_THEN_TAB) {
+TEST_F(KeyEventTest, CUSTOM_ALT_GRAVE_THEN_TAB) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
 		{
 			KeyDown(SC_LALT),
@@ -1224,8 +1262,6 @@ TEST_F(KeyEventTest, ALT_GRAVE_THEN_TAB) {
 		}
 	}));
 }
-
-// CUSTOM - NOT SO IMPORTANT
 
 TEST_F(KeyEventTest, CUSTOM_F3) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
@@ -1353,3 +1389,4 @@ TEST_F(KeyEventTest, CUSTOM_F12) {
 		}
 	}));
 }
+*/

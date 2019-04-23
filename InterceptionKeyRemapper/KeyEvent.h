@@ -106,13 +106,14 @@ struct KeyUp : Key {
 	KeyUp(unsigned short cCode, unsigned short cState = 1) : Key(cCode, cState) {}
 };
 
-String getScanCodeSymbol(unsigned short code);
-String getStateSymbol(unsigned short state);
-String getKeySymbols(Keys keys);
-
-Keys getKeyEvents(Keys keys);
-Keys getParsedKeysForEsc();
-
-void setActiveProcessName(std::string _activeProcessName);
-bool isKeyDown(Key key);
-void setGlobalDefaultValues();
+namespace KeyEvent {
+	Keys getKeyEvents(Keys keys);
+	void setActiveProcessName(std::string _activeProcessName);
+	void setHotKeysFromFile(String hotKeysFilePath);
+	String getScanCodeSymbol(unsigned short code);
+	String getStateSymbol(unsigned short state);
+	String getKeySymbols(Keys keys);
+	bool isKeyDown(Key key);
+	Keys getParsedKeysForEsc();
+	void initialize();
+}

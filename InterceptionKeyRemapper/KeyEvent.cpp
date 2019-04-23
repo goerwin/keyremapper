@@ -10,7 +10,6 @@
 #include "erwinUtils.h"
 
 String g_activeProcessName;
-String hotKeysFilePath = "../hotKeys.md";
 
 bool g_isCapslockKeyDown;
 bool g_isShiftKeyDown;
@@ -396,20 +395,20 @@ struct TemplateKeys {
 	}
 };
 
-struct UserKeyInfo {
+struct KeyInfo {
 	ScanCodes code;
 	String program;
 
-	UserKeyInfo() {}
+	KeyInfo() {}
 
-	UserKeyInfo(ScanCodes _code, String _program = "") {
+	KeyInfo(ScanCodes _code, String _program = "") {
 		code = _code;
 		program = _program;
 	}
 };
 
-typedef std::tuple<UserKeyInfo, TemplateKeys, TemplateKeys> UserHotKey;
-typedef std::vector<UserHotKey> UserHotKeys;
+typedef std::tuple<KeyInfo, TemplateKeys, TemplateKeys> HotKey;
+typedef std::vector<HotKey> HotKeys;
 
 Key g_nullKey = KeyUp(SC_NULL);
 
@@ -478,86 +477,143 @@ TemplateKeys getTemplateKeys(std::wstring symbolKeys) {
 	return TemplateKeys(firstLAltLCtrl, keys, lastLAltLCtrl);
 }
 
-UserHotKeys capsAltUserHotKeys;
-UserHotKeys capsUserHotKeys;
-UserHotKeys ctrlShiftUserHotKeys;
-UserHotKeys ctrlUserHotKeys;
-UserHotKeys winAltUserHotKeys;
-UserHotKeys winShiftUserHotKeys;
-UserHotKeys winUserHotKeys;
-UserHotKeys altShiftUserHotKeys;
-UserHotKeys altUserHotKeys;
-UserHotKeys keyUserHotKeys;
+HotKeys g_capsAltHotKeys;
+HotKeys g_capsHotKeys;
+HotKeys g_ctrlShiftHotKeys;
+HotKeys g_ctrlHotKeys;
+HotKeys g_winAltHotKeys;
+HotKeys g_winShiftHotKeys;
+HotKeys g_winHotKeys;
+HotKeys g_altShiftHotKeys;
+HotKeys g_altHotKeys;
+HotKeys g_keyHotKeys;
 
-int setHotKeysFromFile() {
-	auto fileLines = ErwinUtils::getFileByLine(hotKeysFilePath);
+std::pair<std::wstring, HotKey> getParsedHotKey(std::wstring hotkeySymbol) {
+	size_t pos = 0;
+	size_t pos2 = 0;
+	std::wstring processName;
 
-	for (int i = 0; i < fileLines.size(); i++) {
-		auto wuserHotkeySymbol = fileLines[i];
+	pos = hotkeySymbol.find(L"- ", pos2);
+	pos2 = hotkeySymbol.find(L" ", pos + 2);
+	auto handler = hotkeySymbol.substr(pos + 2, pos2 - pos - 2);
 
-		if (wuserHotkeySymbol.find(L"- ") == std::string::npos) {
-			continue;
-		}
+	pos = hotkeySymbol.find(L" ", pos2);
+	pos2 = hotkeySymbol.find(L" ", pos + 1);
+	auto keyInputSymbol = hotkeySymbol.substr(pos + 1, pos2 - pos - 1);
+	auto keyInputCode = getScanCode(keyInputSymbol);
 
-		size_t pos = 0;
-		size_t pos2 = 0;
-		std::wstring processName;
+	pos = hotkeySymbol.find(L"Down(", pos2);
+	pos2 = hotkeySymbol.find(L")", pos + 1);
+	auto keyDownSymbols = hotkeySymbol.substr(pos + 5, pos2 - pos - 5);
 
-		pos = wuserHotkeySymbol.find(L"- ", pos2);
-		pos2 = wuserHotkeySymbol.find(L" ", pos + 2);
-		auto handler = wuserHotkeySymbol.substr(pos + 2, pos2 - pos - 2);
+	pos = hotkeySymbol.find(L"Up(", pos2);
+	pos2 = hotkeySymbol.find(L")", pos + 1);
+	auto keyUpSymbols = hotkeySymbol.substr(pos + 3, pos2 - pos - 3);
 
-		pos = wuserHotkeySymbol.find(L" ", pos2);
-		pos2 = wuserHotkeySymbol.find(L" ", pos + 1);
-		auto keyInputSymbol = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
-		auto keyInputCode = getScanCode(keyInputSymbol);
-
-		pos = wuserHotkeySymbol.find(L"Down(", pos2);
-		pos2 = wuserHotkeySymbol.find(L")", pos + 1);
-		auto keyDownSymbols = wuserHotkeySymbol.substr(pos + 5, pos2 - pos - 5);
-
-		pos = wuserHotkeySymbol.find(L"Up(", pos2);
-		pos2 = wuserHotkeySymbol.find(L")", pos + 1);
-		auto keyUpSymbols = wuserHotkeySymbol.substr(pos + 3, pos2 - pos - 3);
-
-		if (wuserHotkeySymbol.find(L'"') != std::string::npos) {
-			pos = wuserHotkeySymbol.find(L'"');
-			pos2 = wuserHotkeySymbol.find(L'"', pos + 1);
-			processName = wuserHotkeySymbol.substr(pos + 1, pos2 - pos - 1);
-		}
-
-		auto userKeyInfo = UserKeyInfo(keyInputCode, ErwinUtils::ws2utf8(processName));
-		auto templateKeysDown = getTemplateKeys(keyDownSymbols);
-		auto templateKeysUp = getTemplateKeys(keyUpSymbols);
-		auto userHotkey = UserHotKey(userKeyInfo, templateKeysDown, templateKeysUp);
-
-		if (handler == L"CapsAlt") {
-			capsAltUserHotKeys.insert(capsAltUserHotKeys.end(), userHotkey);
-		} else if (handler == L"Caps") {
-			capsUserHotKeys.insert(capsUserHotKeys.end(), userHotkey);
-		} else if (handler == L"CtrlShift") {
-			ctrlShiftUserHotKeys.insert(ctrlShiftUserHotKeys.end(), userHotkey);
-		} else if (handler == L"Ctrl") {
-			ctrlUserHotKeys.insert(ctrlUserHotKeys.end(), userHotkey);
-		} else if (handler == L"WinAlt") {
-			winAltUserHotKeys.insert(winAltUserHotKeys.end(), userHotkey);
-		} else if (handler == L"WinShift") {
-			winShiftUserHotKeys.insert(winShiftUserHotKeys.end(), userHotkey);
-		} else if (handler == L"Win") {
-			winUserHotKeys.insert(winUserHotKeys.end(), userHotkey);
-		} else if (handler == L"AltShift") {
-			altShiftUserHotKeys.insert(altShiftUserHotKeys.end(), userHotkey);
-		} else if (handler == L"Alt") {
-			altUserHotKeys.insert(altUserHotKeys.end(), userHotkey);
-		} else if (handler == L"Key") {
-			keyUserHotKeys.insert(keyUserHotKeys.end(), userHotkey);
-		}
+	if (hotkeySymbol.find(L'"') != std::string::npos) {
+		pos = hotkeySymbol.find(L'"');
+		pos2 = hotkeySymbol.find(L'"', pos + 1);
+		processName = hotkeySymbol.substr(pos + 1, pos2 - pos - 1);
 	}
 
-	return 1;
+	auto keyInfo = KeyInfo(keyInputCode, ErwinUtils::ws2utf8(processName));
+	auto templateKeysDown = getTemplateKeys(keyDownSymbols);
+	auto templateKeysUp = getTemplateKeys(keyUpSymbols);
+	auto hotKey = HotKey(keyInfo, templateKeysDown, templateKeysUp);
+
+	return { handler, hotKey };
 }
 
-auto noice = setHotKeysFromFile();
+void updateHotKeys(std::pair<std::wstring, HotKey> parsedHotKey) {
+	auto handler = parsedHotKey.first;
+	auto hotKey = parsedHotKey.second;
+
+	if (handler == L"CapsAlt") {
+		g_capsAltHotKeys.insert(g_capsAltHotKeys.end(), hotKey);
+	} else if (handler == L"Caps") {
+		g_capsHotKeys.insert(g_capsHotKeys.end(), hotKey);
+	} else if (handler == L"CtrlShift") {
+		g_ctrlShiftHotKeys.insert(g_ctrlShiftHotKeys.end(), hotKey);
+	} else if (handler == L"Ctrl") {
+		g_ctrlHotKeys.insert(g_ctrlHotKeys.end(), hotKey);
+	} else if (handler == L"WinAlt") {
+		g_winAltHotKeys.insert(g_winAltHotKeys.end(), hotKey);
+	} else if (handler == L"WinShift") {
+		g_winShiftHotKeys.insert(g_winShiftHotKeys.end(), hotKey);
+	} else if (handler == L"Win") {
+		g_winHotKeys.insert(g_winHotKeys.end(), hotKey);
+	} else if (handler == L"AltShift") {
+		g_altShiftHotKeys.insert(g_altShiftHotKeys.end(), hotKey);
+	} else if (handler == L"Alt") {
+		g_altHotKeys.insert(g_altHotKeys.end(), hotKey);
+	} else if (handler == L"Key") {
+		g_keyHotKeys.insert(g_keyHotKeys.end(), hotKey);
+	}
+}
+
+void setDefaultHotKeys() {
+	std::vector<std::string> defaultHotKeys = {
+		"- CapsAlt Caps => Down(null) Up(null)",
+		"- CapsAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)",
+		"- CapsAlt _ => Down(null) Up(null)",
+		"- Caps Tab => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null)",
+		"- Caps Space => Down(Ctrl↓ Space↕ Ctrl↑) Up(null)",
+		"- Caps Caps => Down(null) Up(null)",
+		"- Caps _ => Down(null) Up(null)",
+		"- CtrlShift Tab => Down(keyDownLCtrlAsLCtrl Tab↕) Up(null)",
+		"- CtrlShift Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)",
+		"- CtrlShift Shift => Down(Shift↓) Up(Shift↑)",
+		"- CtrlShift _ => Down(_↓) Up(_↑)",
+		"- Ctrl Tab => Down(keyDownLCtrlAsLCtrl Tab↕) Up(null)",
+		"- Ctrl Ctrl => Down(keyDownLCtrlAsLAlt) Up(keyUpLCtrl)",
+		"- Ctrl _ => Down(_↓) Up(_↑)",
+		"- WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑) Up(null)",
+		"- WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑) Up(null)",
+		"- WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑) Up(null)",
+		"- WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)",
+		"- WinAlt Win => Down(null) Up(keyDownLAltAsLCtrl)",
+		"- WinAlt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)",
+		"- WinAlt _ => Down(null) Up(null)",
+		"- WinShift Win => Down(null) Up(null)",
+		"- WinShift Shift => Down(Shift↓) Up(Shift↑)",
+		"- WinShift _ => Down(null) Up(null)",
+		"- Win D => Down(Win↓ D↕ Win↑) Up(null)",
+		"- Win Back => Down(Ctrl↓ Back↕ Ctrl↑) Up(null)",
+		"- Win Space => Down(Win↕) Up(null)",
+		"- Win Win => Down(null) Up(null)",
+		"- Win _ => Down(null) Up(null)",
+		"- AltShift J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)",
+		"- AltShift K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)",
+		"- AltShift Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)",
+		"- AltShift Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)",
+		"- AltShift Shift => Down(Shift↓) Up(Shift↑)",
+		"- AltShift _ => Down(_↓) Up(_↑)",
+		"- Alt J => Down(keyUpLAlt Next↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt K => Down(keyUpLAlt Prior↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt F1 => Down(keyUpLAlt F1↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt F2 => Down(keyUpLAlt F2↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt F10 => Down(keyUpLAlt F10↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt F11 => Down(keyUpLAlt F11↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt F12 => Down(keyUpLAlt F12↕ keyDownLAltAsLCtrl) Up(null)",
+		"- Alt Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)",
+		"- Alt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)",
+		"- Alt _ => Down(_↓) Up(_↑)",
+		"- Key F1 => Down(BRIGHTNESSDOWN↕) Up(null)",
+		"- Key F2 => Down(BRIGHTNESSUP↕) Up(null)",
+		"- Key F10 => Down(MUTE↕) Up(null)",
+		"- Key F11 => Down(VOLUMEDOWN↕↕↕↕) Up(null)",
+		"- Key F12 => Down(VOLUMEUP↕↕↕↕) Up(null)",
+		"- Key _ => Down(_↓) Up(_↑)"
+	};
+
+	for (int i = 0; i < defaultHotKeys.size(); i++) {
+		auto hotKeySymbol = ErwinUtils::utf82ws(defaultHotKeys[i]);
+
+		if (hotKeySymbol.find(L"- ") != std::string::npos) {
+			updateHotKeys(getParsedHotKey(hotKeySymbol));
+		}
+	}
+}
 
 bool isChromeActiveProcess() {
 	return g_activeProcessName == "chrome.exe";
@@ -570,10 +626,6 @@ bool isSlackActiveProcess() {
 }
 bool isGitBashActiveProcess() {
 	return g_activeProcessName == "mintty.exe";
-}
-
-bool isKeyDown(Key key) {
-	return key.state == 0 || key.state == 2;
 }
 
 Keys getParsedKeyDownUpKeys(
@@ -619,26 +671,22 @@ TemplateKeys getTemplateKeysForEsc() {
 	return TemplateKeys({ g_nullKey });
 }
 
-Keys getParsedKeysForEsc() {
-	return getTemplateKeysForEsc().getParsedKeys();
-}
+Keys handleHotKeys(unsigned short keyCode, bool isKeyDown, HotKeys hotKeys) {
+	auto hotKeysSize = hotKeys.size();
 
-Keys handleUserHotKey(unsigned short keyCode, bool isKeyDown, UserHotKeys userHotKeys) {
-	auto userHotKeysSize = userHotKeys.size();
+	for (int i = 0; i < hotKeysSize; i++) {
+		auto hotKey = hotKeys[i];
+		auto keyInfo = std::get<0>(hotKey);
+		auto isGeneral = keyInfo.code == SC_GENERAL;
 
-	for (int i = 0; i < userHotKeysSize; i++) {
-		auto userHotkey = userHotKeys[i];
-		auto userKeyInfo = std::get<0>(userHotkey);
-		auto isGeneral = userKeyInfo.code == SC_GENERAL;
-
-		if (keyCode == userKeyInfo.code || isGeneral) {
-			auto program = userKeyInfo.program;
+		if (keyCode == keyInfo.code || isGeneral) {
+			auto program = keyInfo.program;
 
 			if (program == "" || program == g_activeProcessName) {
 				return getParsedKeyDownUpKeys(
 					isKeyDown,
-					std::get<1>(userHotkey).replaceGeneral(isGeneral, keyCode),
-					std::get<2>(userHotkey).replaceGeneral(isGeneral, keyCode)
+					std::get<1>(hotKey).replaceGeneral(isGeneral, keyCode),
+					std::get<2>(hotKey).replaceGeneral(isGeneral, keyCode)
 				);
 			}
 		}
@@ -765,7 +813,7 @@ Keys handleWinAltKeys(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, winAltUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_winAltHotKeys);
 }
 
 Keys handleCtrlShiftKeys(unsigned short keyCode, bool isKeyDown) {
@@ -777,7 +825,7 @@ Keys handleCtrlShiftKeys(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, ctrlShiftUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_ctrlShiftHotKeys);
 }
 
 Keys handleCapslockAltKeys(unsigned short keyCode, bool isKeyDown) {
@@ -789,7 +837,7 @@ Keys handleCapslockAltKeys(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, capsAltUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_capsAltHotKeys);
 }
 
 Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
@@ -797,7 +845,7 @@ Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, capsUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_capsHotKeys);
 }
 
 Keys handleCtrlKey(unsigned short keyCode, bool isKeyDown) {
@@ -805,7 +853,7 @@ Keys handleCtrlKey(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, ctrlUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_ctrlHotKeys);
 }
 
 Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
@@ -817,7 +865,7 @@ Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, winShiftUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_winShiftHotKeys);
 }
 
 Keys handleWinKey(unsigned short keyCode, bool isKeyDown) {
@@ -825,7 +873,7 @@ Keys handleWinKey(unsigned short keyCode, bool isKeyDown) {
 		return {};
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, winUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_winHotKeys);
 }
 
 Keys handleAltShiftKeys(unsigned short keyCode, bool isKeyDown) {
@@ -842,7 +890,7 @@ Keys handleAltShiftKeys(unsigned short keyCode, bool isKeyDown) {
 		return { g_nullKey };
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, altShiftUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_altShiftHotKeys);
 }
 
 Keys handleAltKey(unsigned short keyCode, bool isKeyDown) {
@@ -881,71 +929,111 @@ Keys handleAltKey(unsigned short keyCode, bool isKeyDown) {
 		return { g_nullKey };
 	}
 
-	return handleUserHotKey(keyCode, isKeyDown, altUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_altHotKeys);
 }
 
 Keys handleKey(unsigned short keyCode, bool isKeyDown) {
-	return handleUserHotKey(keyCode, isKeyDown, keyUserHotKeys);
+	return handleHotKeys(keyCode, isKeyDown, g_keyHotKeys);
 }
 
-Keys getKeyEvents(Keys keys) {
-	Keys allKeys;
-	int size = keys.size();
+void resetHotKeys() {
+	g_capsAltHotKeys = {};
+	g_capsHotKeys = {};
+	g_ctrlShiftHotKeys = {};
+	g_ctrlHotKeys = {};
+	g_winAltHotKeys = {};
+	g_winShiftHotKeys = {};
+	g_winHotKeys = {};
+	g_altShiftHotKeys = {};
+	g_altHotKeys = {};
+	g_keyHotKeys = {};
+}
 
-	for (int i = 0; i < size; i++) {
-		Key key = keys[i];
-		bool _isKeyDown = isKeyDown(key);
-		Keys keys;
-		int size = 0;
-		auto keyCode = key.code;
-
-		if (keyCode == SC_CAPSLOCK) {
-			g_isCapslockKeyDown = _isKeyDown;
-		} else if (keyCode == SC_LSHIFT) {
-			g_isShiftKeyDown = _isKeyDown;
-		} else if (keyCode == SC_LCTRL) {
-			g_isCtrlKeyDown = _isKeyDown;
-		} else if (keyCode == SC_LWIN) {
-			g_isWinKeyDown = _isKeyDown;
-		} else if (keyCode == SC_LALT) {
-			g_isAltKeyDown = _isKeyDown;
-		}
-
-		if (keys = handleMouseClick(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleVimMode(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleCapslockAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleCapslockKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleCtrlShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleCtrlKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleWinAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleWinShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleWinKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleAltShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleAltKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-		else if (keys = handleKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
-
-		allKeys = concatKeyVectors(allKeys, keys);
+namespace KeyEvent {
+	bool isKeyDown(Key key) {
+		return key.state == 0 || key.state == 2;
 	}
 
-	return allKeys;
-}
+	Keys getParsedKeysForEsc() {
+		return getTemplateKeysForEsc().getParsedKeys();
+	}
 
-void setActiveProcessName(std::string _activeProcessName) {
-	g_activeProcessName = _activeProcessName;
-	OutputDebugStringA(g_activeProcessName.c_str());
-}
+	Keys getKeyEvents(Keys keys) {
+		Keys allKeys;
+		int size = keys.size();
 
-void setGlobalDefaultValues() {
-	g_isCapslockKeyDown = false;
-	g_isShiftKeyDown = false;
-	g_isCtrlKeyDown = false;
-	g_isWinKeyDown = false;
-	g_isAltKeyDown = false;
+		for (int i = 0; i < size; i++) {
+			Key key = keys[i];
+			bool _isKeyDown = isKeyDown(key);
+			Keys keys;
+			int size = 0;
+			auto keyCode = key.code;
 
-	g_isCtrlAsAlt = true;
-	g_isAltAsCtrl = true;
+			if (keyCode == SC_CAPSLOCK) {
+				g_isCapslockKeyDown = _isKeyDown;
+			} else if (keyCode == SC_LSHIFT) {
+				g_isShiftKeyDown = _isKeyDown;
+			} else if (keyCode == SC_LCTRL) {
+				g_isCtrlKeyDown = _isKeyDown;
+			} else if (keyCode == SC_LWIN) {
+				g_isWinKeyDown = _isKeyDown;
+			} else if (keyCode == SC_LALT) {
+				g_isAltKeyDown = _isKeyDown;
+			}
 
-	g_isMouseClickDown = false;
-	g_isVimShiftKeyDown = false;
-	g_activeProcessName = "";
+			if (keys = handleMouseClick(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleVimMode(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleCapslockAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleCapslockKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleCtrlShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleCtrlKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleWinAltKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleWinShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleWinKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleAltShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleAltKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+
+			allKeys = concatKeyVectors(allKeys, keys);
+		}
+
+		return allKeys;
+	}
+
+	void setActiveProcessName(std::string _activeProcessName) {
+		g_activeProcessName = _activeProcessName;
+		OutputDebugStringA(g_activeProcessName.c_str());
+	}
+
+	void setHotKeysFromFile(String hotKeysFilePath) {
+		initialize();
+		resetHotKeys();
+
+		auto fileLines = ErwinUtils::getFileByLine(hotKeysFilePath);
+		for (int i = 0; i < fileLines.size(); i++) {
+			if (fileLines[i].find(L"- ") != std::string::npos) {
+				updateHotKeys(getParsedHotKey(fileLines[i]));
+			}
+		}
+
+		setDefaultHotKeys();
+	}
+
+	void initialize() {
+		g_isCapslockKeyDown = false;
+		g_isShiftKeyDown = false;
+		g_isCtrlKeyDown = false;
+		g_isWinKeyDown = false;
+		g_isAltKeyDown = false;
+
+		g_isCtrlAsAlt = true;
+		g_isAltAsCtrl = true;
+
+		g_isMouseClickDown = false;
+		g_isVimShiftKeyDown = false;
+		g_activeProcessName = "";
+
+		resetHotKeys();
+		setDefaultHotKeys();
+	}
 }
