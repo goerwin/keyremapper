@@ -120,7 +120,7 @@ void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWN
 	KeyEvent::setActiveProcessName(ErwinUtils::getActiveWindowProcessName(hwnd));
 }
 
-void openHotKeysFile() {
+void openCustomHotKeysFile() {
 	OPENFILENAMEA ofn;       // common dialog box structure
 	char szFile[260];       // buffer for file name
 	//LPWSTR szFile;       // buffer for file name
@@ -147,7 +147,7 @@ void openHotKeysFile() {
 	// Display the Open dialog box.
 
 	if (GetOpenFileNameA(&ofn) == TRUE) {
-		KeyEvent::setHotKeysFromFile(ofn.lpstrFile);
+		KeyEvent::setCustomHotKeysFromFile(ofn.lpstrFile);
 	}
 }
 
@@ -200,7 +200,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					exit(0);
 					return 0;
 				case IDM_LOAD_HK_FILE:
-					openHotKeysFile();
+					openCustomHotKeysFile();
 					return 0;
 				case IDM_ENABLE:
 					toggleAppEnabled();
@@ -365,7 +365,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 
 	// OPEN HOTKEYS FILE
 	KeyEvent::initialize();
-	openHotKeysFile();
+	openCustomHotKeysFile();
 
 	// KEYBOARD
 

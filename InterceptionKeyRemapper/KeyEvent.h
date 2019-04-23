@@ -109,11 +109,11 @@ struct KeyUp : Key {
 namespace KeyEvent {
 	Keys getKeyEvents(Keys keys);
 	void setActiveProcessName(std::string _activeProcessName);
-	void setHotKeysFromFile(String hotKeysFilePath);
+	void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath = "./coreHotKeys.md");
 	String getScanCodeSymbol(unsigned short code);
 	String getStateSymbol(unsigned short state);
 	String getKeySymbols(Keys keys);
 	bool isKeyDown(Key key);
 	Keys getParsedKeysForEsc();
-	void initialize();
+	void initialize(String coreHotKeysFilepath = "./coreHotKeys.md");
 }

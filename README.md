@@ -1,13 +1,14 @@
 # Interception KeyRemapper
-Powerful Key Remapper for windows using (interception)[https://github.com/oblitum/Interception] library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
+Powerful Key Remapper for windows using [Interception](https://github.com/oblitum/Interception) library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
 
 ## Requirements
 - For this snapping windows function you have to disable the option "When I Snap a window, show what I can snap next to it", under "Multitasking" settings in control panel
 - Remove ctrl + shift shortcut to change keyboard layouts: Settings -> Language -> Spelling, typing & keyboard settings -> Advanced keyboard settings -> Language bar options -> Advanced Key Settings -> Action: Between Input Languages -> Change Key Secuence -> Not Asigned
 
 ## Notes
-- [CustomHotKeys](./customHotKeys.md)
-- [TestCases](./testCases.md)
+- [coreHotKeys](./InterceptionKeyRemapper/coreHotKeys.md)
+- [customHotKeys](./InterceptionKeyRemapper/customHotKeys.md)
+- [testCases](./KeyEventsTest/testCases.md)
 - https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 
 ## Issues

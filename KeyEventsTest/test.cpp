@@ -11,7 +11,7 @@
 #include "../InterceptionKeyRemapper/KeyEvent.cpp"
 #include "../InterceptionKeyRemapper/erwinUtils.cpp"
 
-String filepath = "../testCases.md";
+String filepath = "./testCases.md";
 
 class KeyEventTest : public ::testing::Test {
  protected:
@@ -74,7 +74,7 @@ class KeyEventTest : public ::testing::Test {
 		std::pair<Keys, Keys> keys,
 		String program = ""
 	) {
-		KeyEvent::initialize();
+		KeyEvent::initialize("../InterceptionKeyRemapper/coreHotKeys.md");
 		KeyEvent::setActiveProcessName(program);
 
 		auto inputKeys = keys.first;
