@@ -561,19 +561,6 @@ void setHotKeysFromFile(String filepath) {
 	}
 }
 
-bool isChromeActiveProcess() {
-	return g_activeProcessName == "chrome.exe";
-}
-bool isStarcraft2ActiveProcess() {
-	return g_activeProcessName == "SC2_x64.exe";
-}
-bool isSlackActiveProcess() {
-	return g_activeProcessName == "slack.exe";
-}
-bool isGitBashActiveProcess() {
-	return g_activeProcessName == "mintty.exe";
-}
-
 Keys getParsedKeyDownUpKeys(
 	bool isKeyDown,
 	TemplateKeys keyDownTemplateKeys,
@@ -596,12 +583,6 @@ unsigned short getVimArrowKeyCode(unsigned short keyCode) {
 unsigned short getVimHomeEndKeyCode(unsigned short keyCode) {
 	return (keyCode == SC_K || keyCode == SC_H) ? SC_HOME :
 		(keyCode == SC_J || keyCode == SC_L) ? SC_END :
-		SC_NULL;
-}
-
-unsigned short getVimPriorNextKeyCode(unsigned short keyCode) {
-	return (keyCode == SC_K || keyCode == SC_H) ? SC_PRIOR :
-		(keyCode == SC_J || keyCode == SC_L) ? SC_NEXT :
 		SC_NULL;
 }
 
@@ -948,7 +929,8 @@ namespace KeyEvent {
 
 	void setActiveProcessName(std::string _activeProcessName) {
 		g_activeProcessName = _activeProcessName;
-		OutputDebugStringA(g_activeProcessName.c_str());
+
+		OutputDebugStringA(String(g_activeProcessName + "\n").c_str());
 	}
 
 	void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath) {

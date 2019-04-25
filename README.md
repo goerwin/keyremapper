@@ -30,3 +30,4 @@ Powerful Key Remapper for windows using [Interception](https://github.com/oblitu
 - in chrome, lalt↓ + `↕ + L↕ + tab↕ + lalt(up)  (FIXED)
 - lalt + capslock + v not working (FIXED)
 - lalt ` not working properly when more than 2 windows (NOT RELATED THOUGH)
+- lalt + click a http link in this file, press f3/f4 in chrome to switch tab
