@@ -74,6 +74,7 @@
 - Alt F10 => Down(keyUpLAlt F10↕ keyDownLAltAsLCtrl) Up(null)
 - Alt F11 => Down(keyUpLAlt F11↕ keyDownLAltAsLCtrl) Up(null)
 - Alt F12 => Down(keyUpLAlt F12↕ keyDownLAltAsLCtrl) Up(null)
+- Alt Back => Down(keyUpLAlt Shift↓ Home↕ Shift↑ Back↕ keyDownLAltAsLCtrl) Up(null)
 - Alt Tab => Down(keyDownLAltAsLAlt Tab↕) Up(null)
 - Alt Alt => Down(keyDownLAltAsLCtrl) Up(keyUpLAlt)
 - Alt _ => Down(_↓) Up(_↑)

@@ -16,6 +16,7 @@ bool g_isShiftKeyDown;
 bool g_isCtrlKeyDown;
 bool g_isWinKeyDown;
 bool g_isAltKeyDown;
+bool g_isEscKeyDown;
 
 bool g_isCtrlAsAlt;
 bool g_isAltAsCtrl;
@@ -622,6 +623,30 @@ Keys handleHotKeys(unsigned short keyCode, bool isKeyDown, HotKeys hotKeys) {
 	return { g_nullKey };
 }
 
+
+Keys handleEscKey(unsigned short keyCode, bool isKeyDown) {
+	if (!g_isEscKeyDown && keyCode != SC_ESC) {
+		return {};
+	}
+
+	if (keyCode == SC_ESC) {
+		return { g_nullKey };
+	}
+
+	if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) {
+		auto mode = keyCode == SC_1 ? SC_MODE1 : keyCode == SC_2 ? SC_MODE2 :
+			keyCode == SC_3 ? SC_MODE3 : SC_MODE4;
+
+		return getParsedKeyDownUpKeys(
+			isKeyDown,
+			TemplateKeys({ KeyUp(mode) }),
+			TemplateKeys({ g_nullKey })
+		);
+	}
+
+	return {};
+}
+
 Keys handleMouseClick(unsigned short keyCode, bool isKeyDown) {
 	if (
 		!g_isMouseClickDown &&
@@ -906,6 +931,8 @@ namespace KeyEvent {
 				g_isWinKeyDown = _isKeyDown;
 			} else if (keyCode == SC_LALT) {
 				g_isAltKeyDown = _isKeyDown;
+			} else if (keyCode == SC_ESC) {
+				g_isEscKeyDown = _isKeyDown;
 			}
 
 			if (keys = handleMouseClick(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
@@ -919,6 +946,7 @@ namespace KeyEvent {
 			else if (keys = handleWinKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
 			else if (keys = handleAltShiftKeys(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
 			else if (keys = handleAltKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
+			else if (keys = handleEscKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
 			else if (keys = handleKey(keyCode, _isKeyDown), size = keys.size(), size != 0) {}
 
 			allKeys = concatKeyVectors(allKeys, keys);
@@ -946,13 +974,13 @@ namespace KeyEvent {
 		g_isCtrlKeyDown = false;
 		g_isWinKeyDown = false;
 		g_isAltKeyDown = false;
+		g_isEscKeyDown = false;
 
 		g_isCtrlAsAlt = true;
 		g_isAltAsCtrl = true;
 
 		g_isMouseClickDown = false;
 		g_isVimShiftKeyDown = false;
-		g_activeProcessName = "";
 
 		resetHotKeys();
 		setHotKeysFromFile(coreHotKeysFilepath);

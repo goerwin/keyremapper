@@ -74,7 +74,7 @@ class KeyEventTest : public ::testing::Test {
 		std::pair<Keys, Keys> keys,
 		String program = ""
 	) {
-		KeyEvent::initialize("../InterceptionKeyRemapper/coreHotKeys.md");
+		KeyEvent::initialize("../InterceptionKeyRemapper/hotKeys/_core.md");
 		KeyEvent::setActiveProcessName(program);
 
 		auto inputKeys = keys.first;
@@ -403,6 +403,72 @@ TEST_F(KeyEventTest, KEY) {
 			KeyUp(SC_K),
 			KeyUp(SC_H),
 			KeyUp(SC_J)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, KEY_F1) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+		{
+			KeyDown(SC_F1),
+			KeyUp(SC_F1)
+		},
+		{
+			Key(SC_BRIGHTNESSDOWN)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, KEY_F2) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+		{
+			KeyDown(SC_F2),
+			KeyUp(SC_F2)
+		},
+		{
+			Key(SC_BRIGHTNESSUP)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, KEY_F10) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+		{
+			KeyDown(SC_F10),
+			KeyUp(SC_F10)
+		},
+		{
+			Key(SC_MUTE)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, KEY_F11) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+		{
+			KeyDown(SC_F11),
+			KeyUp(SC_F11)
+		},
+		{
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN),
+			Key(SC_VOLUMEDOWN)
+		}
+	}));
+}
+
+TEST_F(KeyEventTest, KEY_F12) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Key", {
+		{
+			KeyDown(SC_F12),
+			KeyUp(SC_F12)
+		},
+		{
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP),
+			Key(SC_VOLUMEUP)
 		}
 	}));
 }
@@ -1064,6 +1130,27 @@ TEST_F(KeyEventTest, ALT_J_OR_K) {
 	}
 }
 
+TEST_F(KeyEventTest, ALT_BACK) {
+	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
+		{
+			KeyDown(SC_LALT),
+			KeyDown(SC_BACK),
+			KeyUp(SC_BACK),
+			KeyUp(SC_LALT)
+		},
+		{
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL),
+			KeyDown(SC_LSHIFT),
+			Key(SC_HOME),
+			KeyUp(SC_LSHIFT),
+			Key(SC_BACK),
+			KeyDown(SC_LCTRL),
+			KeyUp(SC_LCTRL)
+		}
+	}));
+}
+
 TEST_F(KeyEventTest, ALT_SHIFT_J_OR_K) {
 	std::vector<ScanCodes> codes = { SC_J, SC_K };
 	std::vector<ScanCodes> expectedCodes = { SC_NEXT, SC_PRIOR };
@@ -1197,27 +1284,6 @@ TEST_F(KeyEventTest, ALT_TAB_THEN_Q) {
 
 // CUSTOM
 
-TEST_F(KeyEventTest, CUSTOM_ALT_BACK) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
-		{
-			KeyDown(SC_LALT),
-			KeyDown(SC_BACK),
-			KeyUp(SC_BACK),
-			KeyUp(SC_LALT)
-		},
-		{
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL),
-			KeyDown(SC_LSHIFT),
-			Key(SC_HOME),
-			KeyUp(SC_LSHIFT),
-			Key(SC_BACK),
-			KeyDown(SC_LCTRL),
-			KeyUp(SC_LCTRL)
-		}
-	}));
-}
-
 TEST_F(KeyEventTest, CUSTOM_ALT_GRAVE) {
 	EXPECT_TRUE(validateKeyMapsAndOutputThem("Alt", {
 		{
@@ -1321,72 +1387,5 @@ TEST_F(KeyEventTest, CUSTOM_F6) {
 	}, "chrome.exe"));
 }
 
-TEST_F(KeyEventTest, CUSTOM_F1) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
-		{
-			KeyDown(SC_F1),
-			KeyUp(SC_F1)
-		},
-		{
-			Key(SC_BRIGHTNESSDOWN)
-		}
-	}));
-}
 
-TEST_F(KeyEventTest, CUSTOM_F2) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
-		{
-			KeyDown(SC_F2),
-			KeyUp(SC_F2)
-		},
-		{
-			Key(SC_BRIGHTNESSUP)
-		}
-	}));
-}
-
-// F10↕ = MUTE↕
-TEST_F(KeyEventTest, CUSTOM_F10) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
-		{
-			KeyDown(SC_F10),
-			KeyUp(SC_F10)
-		},
-		{
-			Key(SC_MUTE)
-		}
-	}));
-}
-
-// F11↕ = VOLUMEDOWN↕
-TEST_F(KeyEventTest, CUSTOM_F11) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
-		{
-			KeyDown(SC_F11),
-			KeyUp(SC_F11)
-		},
-		{
-			Key(SC_VOLUMEDOWN),
-			Key(SC_VOLUMEDOWN),
-			Key(SC_VOLUMEDOWN),
-			Key(SC_VOLUMEDOWN)
-		}
-	}));
-}
-
-// F12↕ = VOLUMEUP↕
-TEST_F(KeyEventTest, CUSTOM_F12) {
-	EXPECT_TRUE(validateKeyMapsAndOutputThem("Custom", {
-		{
-			KeyDown(SC_F12),
-			KeyUp(SC_F12)
-		},
-		{
-			Key(SC_VOLUMEUP),
-			Key(SC_VOLUMEUP),
-			Key(SC_VOLUMEUP),
-			Key(SC_VOLUMEUP)
-		}
-	}));
-}
 */

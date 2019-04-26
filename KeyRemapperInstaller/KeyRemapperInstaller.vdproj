@@ -21,13 +21,25 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_501CA85EA944477484171CD0BFFA339C"
+        "MsmKey" = "8:_167939BA91CA43068657DA57C36992E7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_BFB06804196749F5B52154330DC91CBC"
+        "MsmKey" = "8:_33D1E63F5EF341F5B88BFA16469F0E56"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_74A0ADCB18614F1F933B274FD4AD85AB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7BA5FEB6B5D94C7C8632B7CE2221916C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -61,6 +73,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -77,6 +97,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -118,12 +154,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_501CA85EA944477484171CD0BFFA339C"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_167939BA91CA43068657DA57C36992E7"
             {
-            "SourcePath" = "8:..\\InterceptionKeyRemapper\\customHotKeys.md"
-            "TargetName" = "8:customHotKeys.md"
+            "SourcePath" = "8:..\\InterceptionKeyRemapper\\hotKeys\\_mode1Active"
+            "TargetName" = "8:_mode1Active"
             "Tag" = "8:"
-            "Folder" = "8:_A0734EA9580A4566B5A260C86438971B"
+            "Folder" = "8:_782746D05270461EBBE44C37EF0336D5"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -138,12 +174,52 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BFB06804196749F5B52154330DC91CBC"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_33D1E63F5EF341F5B88BFA16469F0E56"
             {
-            "SourcePath" = "8:..\\InterceptionKeyRemapper\\coreHotKeys.md"
-            "TargetName" = "8:coreHotKeys.md"
+            "SourcePath" = "8:..\\InterceptionKeyRemapper\\hotKeys\\mode2.md"
+            "TargetName" = "8:mode2.md"
             "Tag" = "8:"
-            "Folder" = "8:_A0734EA9580A4566B5A260C86438971B"
+            "Folder" = "8:_782746D05270461EBBE44C37EF0336D5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_74A0ADCB18614F1F933B274FD4AD85AB"
+            {
+            "SourcePath" = "8:..\\InterceptionKeyRemapper\\hotKeys\\mode1.md"
+            "TargetName" = "8:mode1.md"
+            "Tag" = "8:"
+            "Folder" = "8:_782746D05270461EBBE44C37EF0336D5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7BA5FEB6B5D94C7C8632B7CE2221916C"
+            {
+            "SourcePath" = "8:..\\InterceptionKeyRemapper\\hotKeys\\_core.md"
+            "TargetName" = "8:_core.md"
+            "Tag" = "8:"
+            "Folder" = "8:_782746D05270461EBBE44C37EF0336D5"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -216,6 +292,17 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_782746D05270461EBBE44C37EF0336D5"
+                    {
+                    "Name" = "8:hotKeys"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_9A244F904EC54BECB170D7AC7EA906AB"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
         }
@@ -235,7 +322,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:KeyRemapper"
         "ProductCode" = "8:{0B84F37F-7D0B-4D7A-AE6C-3828880788C4}"
-        "PackageCode" = "8:{9DF2A0CC-4864-4016-9F1C-262634CCC584}"
+        "PackageCode" = "8:{A578D184-4D48-4B2C-8D45-736EF7B4A9C0}"
         "UpgradeCode" = "8:{3AFE2CE8-310E-4C14-9022-398DBB35403B}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"

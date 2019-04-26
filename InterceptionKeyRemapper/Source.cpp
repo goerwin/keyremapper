@@ -27,6 +27,68 @@ DWORD globalDelayMSBetweenKeyEvents = 5;
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
 
+bool fileExists(String path) {
+	DWORD dwAttrib = GetFileAttributesA(path.c_str());
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+void deleteActiveModeFiles() {
+	remove("./hotKeys/_mode1Active");
+	remove("./hotKeys/_mode2Active");
+	remove("./hotKeys/_mode3Active");
+	remove("./hotKeys/_mode4Active");
+}
+
+int getActiveMode() {
+	if (fileExists("./hotKeys/_mode1Active")) return SC_MODE1;
+	if (fileExists("./hotKeys/_mode2Active")) return SC_MODE2;
+	if (fileExists("./hotKeys/_mode3Active")) return SC_MODE3;
+	if (fileExists("./hotKeys/_mode4Active")) return SC_MODE4;
+	return 0;
+}
+
+unsigned short g_activeMode;
+LPWSTR getModeMenuText(unsigned short mode) {
+	std::wstring modeText;
+
+	switch (mode) {
+	case SC_MODE1:
+		return g_activeMode == mode ? LPWSTR(L"# Mode 1") : LPWSTR(L"Mode 1");
+	case SC_MODE2:
+		return g_activeMode == mode ? LPWSTR(L"# Mode 2") : LPWSTR(L"Mode 2");
+	case SC_MODE3:
+		return g_activeMode == mode ? LPWSTR(L"# Mode 3") : LPWSTR(L"Mode 3");
+	case SC_MODE4:
+		return g_activeMode == mode ? LPWSTR(L"# Mode 4") : LPWSTR(L"Mode 4");
+	}
+
+	return LPWSTR("No mode");
+}
+
+void setActiveMode(unsigned short mode) {
+	deleteActiveModeFiles();
+	g_activeMode = mode;
+
+	switch (mode) {
+	case SC_MODE1:
+		KeyEvent::setCustomHotKeysFromFile("./hotKeys/mode1.md");
+		ErwinUtils::writeToFile("./hotKeys/_mode1Active", "");
+		break;
+	case SC_MODE2:
+		KeyEvent::setCustomHotKeysFromFile("./hotKeys/mode2.md");
+		ErwinUtils::writeToFile("./hotKeys/_mode2Active", "");
+		break;
+	case SC_MODE3:
+		KeyEvent::setCustomHotKeysFromFile("./hotKeys/mode3.md");
+		ErwinUtils::writeToFile("./hotKeys/_mode3Active", "");
+		break;
+	case SC_MODE4:
+		KeyEvent::setCustomHotKeysFromFile("./hotKeys/mode4.md");
+		ErwinUtils::writeToFile("./hotKeys/_mode4Active", "");
+		break;
+	}
+}
+
 void defaultKeyRemaps(InterceptionKeyStroke &keyStroke) {
 	DWORD keyCode = keyStroke.code;
 	if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT) {
@@ -49,9 +111,9 @@ void sendKeyEvents(std::vector<Key> keys) {
 		auto keyCode = keys[i].code;
 		auto state = keys[i].state;
 
-		 if (keyCode == SC_NULL) {
-			 continue;
-		 }
+		if (keyCode == SC_NULL) {
+			continue;
+		}
 
 		if (keyCode == SC_MOUSELEFT) {
 			if (state == 0) {
@@ -69,6 +131,8 @@ void sendKeyEvents(std::vector<Key> keys) {
 			BrightnessHandler::Increment(-10);
 		} else if (keyCode == SC_BRIGHTNESSUP) {
 			BrightnessHandler::Increment(10);
+		} else if (keyCode == SC_MODE1 || keyCode == SC_MODE2 || keyCode == SC_MODE3 || keyCode == SC_MODE4) {
+			setActiveMode(keyCode);
 		} else {
 			unsigned short stateDown = 0;
 			unsigned short stateUp = 1;
@@ -78,6 +142,10 @@ void sendKeyEvents(std::vector<Key> keys) {
 				case SC_VOLUMEDOWN:
 				case SC_VOLUMEUP:
 				case SC_LWIN:
+				case SC_LEFT:
+				case SC_RIGHT:
+				case SC_UP:
+				case SC_DOWN:
 					stateDown = 2;
 					stateUp = 3;
 
@@ -142,7 +210,7 @@ void openCustomHotKeysFile() {
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 	// Display the Open dialog box.
 
@@ -171,7 +239,11 @@ void toggleAppEnabled() {
 #define WM_MYMESSAGE (WM_USER + 1)
 const int IDM_EXIT = 5;
 const int IDM_ENABLE = 6;
-const int IDM_LOAD_HK_FILE = 7;
+const int IDM_HOTKEYS_FOLDER = 8;
+const int IDM_MODE_1 = 11;
+const int IDM_MODE_2 = 12;
+const int IDM_MODE_3 = 13;
+const int IDM_MODE_4 = 14;
 const auto ctxMenuExitMsg = L"Exit";
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
@@ -189,7 +261,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				SetForegroundWindow(hWnd);
 
 				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, ctxMenuExitMsg);
-				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_LOAD_HK_FILE, ctxLoadHotKeysFile);
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4, getModeMenuText(SC_MODE4));
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3, getModeMenuText(SC_MODE3));
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2, getModeMenuText(SC_MODE2));
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1, getModeMenuText(SC_MODE1));
+				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_HOTKEYS_FOLDER, L"Open HotKeys Folder");
 				InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, ctxMenuEnabledMsg);
 				TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
 				return 0;
@@ -199,11 +275,28 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				case IDM_EXIT:
 					exit(0);
 					return 0;
-				case IDM_LOAD_HK_FILE:
-					openCustomHotKeysFile();
-					return 0;
 				case IDM_ENABLE:
 					toggleAppEnabled();
+					return 0;
+				case IDM_MODE_1:
+					setActiveMode(SC_MODE1);
+					return 0;
+				case IDM_MODE_2:
+					setActiveMode(SC_MODE2);
+					return 0;
+				case IDM_MODE_3:
+					setActiveMode(SC_MODE3);
+					return 0;
+				case IDM_MODE_4:
+					setActiveMode(SC_MODE4);
+					return 0;
+				case IDM_HOTKEYS_FOLDER:
+					char moduleFilepath[MAX_PATH];
+					GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
+					auto strModuleFilepath = String(moduleFilepath);
+					auto pos = strModuleFilepath.find_last_of("\\");
+
+					ShellExecuteA(NULL, "open", strModuleFilepath.substr(0, pos).c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return 0;
 			}
 			return 0;
@@ -365,7 +458,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 
 	// OPEN HOTKEYS FILE
 	KeyEvent::initialize();
-	openCustomHotKeysFile();
+	setActiveMode(getActiveMode());
 
 	// KEYBOARD
 

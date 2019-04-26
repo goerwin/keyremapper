@@ -57,7 +57,6 @@
 - Alt V => Down(keyUpLAlt Shift↓ NP0↕ Shift↑ keyDownLAltAsLCtrl) Up(null) "mintty.exe"
 - Alt Space => Down(F12↕) Up(null)
 - Alt Back => Down(U↕) Up(null) "mintty.exe"
-- Alt Back => Down(keyUpLAlt Shift↓ Home↕ Shift↑ Back↕ keyDownLAltAsLCtrl) Up(null)
 - Alt ` => Down(`↕) Up(null) "SC2_x64.exe"
 - Alt ` => Down(keyDownLAltAsLAlt `↕ keyDownLAltAsLCtrl) Up(null)
 ```

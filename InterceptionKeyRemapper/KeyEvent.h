@@ -38,10 +38,10 @@ enum ScanCodes {
 	SC_VOLUMEUP = 0xB0,
 	SC_ESC = 0x01,
 	SC_CAPSLOCK = 0x3A,
-	SC_LEFT = 0xCB,
-	SC_RIGHT = 0xCD,
-	SC_UP = 0xC8,
-	SC_DOWN = 0xD0,
+	SC_LEFT = 0x4B,
+	SC_RIGHT = 0x4D,
+	SC_UP = 0x48,
+	SC_DOWN = 0x50,
 	SC_SPACE = 0x39,
 	SC_LWIN = 0x5B,
 	SC_LALT = 0x38,
@@ -80,7 +80,11 @@ enum ScanCodes {
 	SC_BRIGHTNESSDOWN = 0xF3,
 	SC_BRIGHTNESSUP = 0xF4,
 	SC_GENERAL = 0xFF,
-	SC_NULL = 0xF0
+	SC_NULL = 0xF0,
+	SC_MODE1 = 0xF5,
+	SC_MODE2 = 0xF6,
+	SC_MODE3 = 0xF7,
+	SC_MODE4 = 0xF8,
 };
 
 struct Key {
@@ -109,11 +113,11 @@ struct KeyUp : Key {
 namespace KeyEvent {
 	Keys getKeyEvents(Keys keys);
 	void setActiveProcessName(std::string _activeProcessName);
-	void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath = "./coreHotKeys.md");
+	void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath = "./hotKeys/_core.md");
 	String getScanCodeSymbol(unsigned short code);
 	String getStateSymbol(unsigned short state);
 	String getKeySymbols(Keys keys);
 	bool isKeyDown(Key key);
 	Keys getParsedKeysForEsc();
-	void initialize(String coreHotKeysFilepath = "./coreHotKeys.md");
+	void initialize(String coreHotKeysFilepath = "./hotKeys/_core.md");
 }
