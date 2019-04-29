@@ -35,17 +35,23 @@ enum LAltLCtrl {
 };
 
 String getScanCodeSymbol(unsigned short code) {
+	if (code == SC_A) { return "A"; }
+	if (code == SC_B) { return "B"; }
 	if (code == SC_C) { return "C"; }
 	if (code == SC_D) { return "D"; }
 	if (code == SC_E) { return "E"; }
+	if (code == SC_F) { return "F"; }
+	if (code == SC_G) { return "G"; }
 	if (code == SC_H) { return "H"; }
 	if (code == SC_I) { return "I"; }
 	if (code == SC_J) { return "J"; }
 	if (code == SC_K) { return "K"; }
 	if (code == SC_L) { return "L"; }
 	if (code == SC_M) { return "M"; }
+	if (code == SC_O) { return "O"; }
 	if (code == SC_P) { return "P"; }
 	if (code == SC_Q) { return "Q"; }
+	if (code == SC_R) { return "R"; }
 	if (code == SC_S) { return "S"; }
 	if (code == SC_T) { return "T"; }
 	if (code == SC_U) { return "U"; }
@@ -153,17 +159,24 @@ String getKeySymbols(Keys keys) {
 }
 
 ScanCodes getScanCode(std::wstring symbol) {
+	if (symbol == L"A") { return SC_A; }
+	if (symbol == L"B") { return SC_B; }
 	if (symbol == L"C") { return SC_C; }
 	if (symbol == L"D") { return SC_D; }
 	if (symbol == L"E") { return SC_E; }
+	if (symbol == L"F") { return SC_F; }
+	if (symbol == L"G") { return SC_G; }
 	if (symbol == L"H") { return SC_H; }
 	if (symbol == L"I") { return SC_I; }
 	if (symbol == L"J") { return SC_J; }
 	if (symbol == L"K") { return SC_K; }
 	if (symbol == L"L") { return SC_L; }
 	if (symbol == L"M") { return SC_M; }
+	if (symbol == L"N") { return SC_N; }
+	if (symbol == L"O") { return SC_O; }
 	if (symbol == L"P") { return SC_P; }
 	if (symbol == L"Q") { return SC_Q; }
+	if (symbol == L"R") { return SC_R; }
 	if (symbol == L"S") { return SC_S; }
 	if (symbol == L"T") { return SC_T; }
 	if (symbol == L"U") { return SC_U; }

@@ -18,6 +18,7 @@
 
 ### Win + Alt
 ```
+- WinAlt F => Down(keyUpLAlt F11↕ keyDownLAltAsLCtrl) Up(null) "chrome.exe"
 ```
 
 ### Win + Shift
