@@ -61,6 +61,7 @@ enum ScanCodes {
 	SC_DOWN = 0xD0,
 	SC_SPACE = 0x39,
 	SC_LWIN = 0x5B,
+	SC_RWIN = 0x5C,
 	SC_LALT = 0x38,
 	SC_RALT = 0xB8,
 	SC_LCTRL = 0x1D,

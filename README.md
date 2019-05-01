@@ -2,15 +2,13 @@
 Powerful Key Remapper for windows using [Interception](https://github.com/oblitum/Interception) library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
 
 ## Requirements
-- Remap RCTRL/RALT to LCTRL/LALT
 - Install [Interception](https://github.com/oblitum/Interception) (requires restart)
-- You need to have numpad enabled on laptop keyboards for accented letters to work properly (win + (shift) + a/e/i/o/u)
+- You need to have numlock on on laptop keyboards for accented letters to work properly (win + (shift) + a/e/i/o/u/n) and also home/end/pgup/pgdown keys
 - For the snapping windows function you have to disable the option "When I Snap a window, show what I can snap next to it", under "Multitasking" settings in control panel
 - Remove ctrl + shift shortcut to change keyboard layouts: Settings -> Language -> Spelling, typing & keyboard settings -> Advanced keyboard settings -> Language bar options -> Advanced Key Settings -> Action: Between Input Languages -> Change Key Secuence -> Not Asigned
 
 ## Notes
-- [coreHotKeys](./InterceptionKeyRemapper/coreHotKeys.md)
-- [customHotKeys](./InterceptionKeyRemapper/customHotKeys.md)
+- [hotKeys](./InterceptionKeyRemapper/hotKeys)
 - [testCases](./KeyEventsTest/testCases.md)
 - https://www.key-shortcut.com/en/writing-systems/35-symbols/arrows/
 
@@ -34,3 +32,7 @@ Powerful Key Remapper for windows using [Interception](https://github.com/oblitu
 - lalt + capslock + v not working (FIXED)
 - lalt ` not working properly when more than 2 windows (NOT RELATED THOUGH)
 - lalt + click a http link in this file, press f3/f4 in chrome to switch tab
+
+## Considerations
+- The Modifiers layout after modified is: |alt|win|ctrl|-- space --|ctrl|win|
+- Can't make LWIN work as LALT since LALT has a special behavior on Windows, so I have to work with the 3 modifiers (LCTRL, LWIN, LALT). Things like emulating click with LALT + C to simulate click does not work reliably.

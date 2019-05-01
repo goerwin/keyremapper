@@ -91,6 +91,7 @@ String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_DOWN) { return "Down"; }
 	if (code == SC_SPACE) { return "Space"; }
 	if (code == SC_LWIN) { return "Win"; }
+	if (code == SC_RWIN) { return "Win"; }
 	if (code == SC_LALT) { return "Alt"; }
 	if (code == SC_RALT) { return "Alt"; }
 	if (code == SC_LCTRL) { return "Ctrl"; }
@@ -225,6 +226,7 @@ ScanCodes getScanCode(std::wstring symbol) {
 	if (symbol == L"Down") { return SC_DOWN; }
 	if (symbol == L"Space") { return SC_SPACE; }
 	if (symbol == L"Win") { return SC_LWIN; }
+	if (symbol == L"Win") { return SC_RWIN; }
 	if (symbol == L"Alt") { return SC_LALT; }
 	if (symbol == L"Alt") { return SC_RALT; }
 	if (symbol == L"Ctrl") { return SC_LCTRL; }

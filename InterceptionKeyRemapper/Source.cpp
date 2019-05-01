@@ -22,13 +22,12 @@ HHOOK hHook = 0;
 HWND g_hwnd;
 HWINEVENTHOOK windowHook = 0;
 const auto appTitle = L"Windows KeyRemapper";
-DWORD globalDelayMSBetweenKeyEvents = 5;
 
 bool isKeyForClickCurrentKeyCode;
 int EVENT_HANDLED = 70;
 
 bool fileExists(String path) {
-	DWORD dwAttrib = GetFileAttributesA(path.c_str());
+	auto dwAttrib = GetFileAttributesA(path.c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
@@ -90,13 +89,15 @@ void setActiveMode(unsigned short mode) {
 }
 
 void defaultKeyRemaps(InterceptionKeyStroke &keyStroke) {
-	DWORD keyCode = keyStroke.code;
+	auto keyCode = keyStroke.code;
+	auto keyState = keyStroke.state;
+
 	if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT) {
 		keyStroke.code = SC_LSHIFT;
-	} else if (keyCode == SC_RALT) {
-		keyStroke.code = SC_LALT;
-	} else if (keyCode == SC_RCTRL) {
-		keyStroke.code = SC_LCTRL;
+	} else if (keyCode == SC_RWIN) {
+		keyStroke.code = SC_LWIN;
+	} else if (keyCode == SC_LCTRL && (keyState == 2 || keyState == 3)) {
+		keyStroke.code = SC_LWIN;
 	}
 }
 
