@@ -1,3 +1,5 @@
+# CORE
+
 ### Caps + Alt
 ```
 - CapsAlt Caps => Down(null) Up(null)

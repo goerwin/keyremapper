@@ -70,6 +70,16 @@ String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_8) { return "8"; }
 	if (code == SC_9) { return "9"; }
 	if (code == SC_0) { return "0"; }
+	if (code == SC_NP1) { return "NP1"; }
+	if (code == SC_NP2) { return "NP2"; }
+	if (code == SC_NP3) { return "NP3"; }
+	if (code == SC_NP4) { return "NP4"; }
+	if (code == SC_NP5) { return "NP5"; }
+	if (code == SC_NP6) { return "NP6"; }
+	if (code == SC_NP7) { return "NP7"; }
+	if (code == SC_NP8) { return "NP8"; }
+	if (code == SC_NP9) { return "NP9"; }
+	if (code == SC_NP0) { return "NP0"; }
 	if (code == SC_MUTE) { return "MUTE"; }
 	if (code == SC_VOLUMEDOWN) { return "VOLUMEDOWN"; }
 	if (code == SC_VOLUMEUP) { return "VOLUMEUP"; }
@@ -97,7 +107,6 @@ String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_PRIOR) { return "Prior"; }
 	if (code == SC_NEXT) { return "Next"; }
 	if (code == SC_SEMI) { return ";"; }
-	if (code == SC_NP0) { return "NP0"; }
 	if (code == SC_MINUS) { return "-"; }
 	if (code == SC_GRAVE) { return "`"; }
 	if (code == SC_F1) { return "F1"; }
@@ -195,6 +204,16 @@ ScanCodes getScanCode(std::wstring symbol) {
 	if (symbol == L"8") { return SC_8; }
 	if (symbol == L"9") { return SC_9; }
 	if (symbol == L"0") { return SC_0; }
+	if (symbol == L"NP1") { return SC_NP1; }
+	if (symbol == L"NP2") { return SC_NP2; }
+	if (symbol == L"NP3") { return SC_NP3; }
+	if (symbol == L"NP4") { return SC_NP4; }
+	if (symbol == L"NP5") { return SC_NP5; }
+	if (symbol == L"NP6") { return SC_NP6; }
+	if (symbol == L"NP7") { return SC_NP7; }
+	if (symbol == L"NP8") { return SC_NP8; }
+	if (symbol == L"NP9") { return SC_NP9; }
+	if (symbol == L"NP0") { return SC_NP0; }
 	if (symbol == L"MUTE") { return SC_MUTE; }
 	if (symbol == L"VOLUMEDOWN") { return SC_VOLUMEDOWN; }
 	if (symbol == L"VOLUMEUP") { return SC_VOLUMEUP; }
@@ -222,7 +241,6 @@ ScanCodes getScanCode(std::wstring symbol) {
 	if (symbol == L"Prior") { return SC_PRIOR; }
 	if (symbol == L"Next") { return SC_NEXT; }
 	if (symbol == L";") { return SC_SEMI; }
-	if (symbol == L"NP0") { return SC_NP0; }
 	if (symbol == L"-") { return SC_MINUS; }
 	if (symbol == L"`") { return SC_GRAVE; }
 	if (symbol == L"F1") { return SC_F1; }

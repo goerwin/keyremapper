@@ -2,7 +2,10 @@
 Powerful Key Remapper for windows using [Interception](https://github.com/oblitum/Interception) library underneath. This is even better than my previous one since this one works at the Driver level which is even lower level than the LowLevelKeyboardWindowHook, avoiding annoying issues presented by the latter.
 
 ## Requirements
-- For this snapping windows function you have to disable the option "When I Snap a window, show what I can snap next to it", under "Multitasking" settings in control panel
+- Remap RCTRL/RALT to LCTRL/LALT
+- Install [Interception](https://github.com/oblitum/Interception) (requires restart)
+- You need to have numpad enabled on laptop keyboards for accented letters to work properly (win + (shift) + a/e/i/o/u)
+- For the snapping windows function you have to disable the option "When I Snap a window, show what I can snap next to it", under "Multitasking" settings in control panel
 - Remove ctrl + shift shortcut to change keyboard layouts: Settings -> Language -> Spelling, typing & keyboard settings -> Advanced keyboard settings -> Language bar options -> Advanced Key Settings -> Action: Between Input Languages -> Change Key Secuence -> Not Asigned
 
 ## Notes

@@ -146,6 +146,10 @@ void sendKeyEvents(std::vector<Key> keys) {
 				case SC_RIGHT:
 				case SC_UP:
 				case SC_DOWN:
+				case SC_PRIOR:
+				case SC_NEXT:
+				case SC_HOME:
+				case SC_END:
 					stateDown = 2;
 					stateUp = 3;
 
@@ -408,15 +412,14 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 		escClick.handleKeyStroke(keyCode, isKeyDown);
 
 		if (!isAppEnabled) {
+			OutputDebugStringA("\n");
+			OutputDebugStringA(std::to_string(key.code).c_str());
+			OutputDebugStringA(" ");
+			OutputDebugStringA(std::to_string(key.state).c_str());
 			interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
 			continue;
 		}
 
-		/*
-		OutputDebugString(getStringKeyInfo(keyStroke).append(L"\n").c_str());
-		interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
-		continue;
-		*/
 		defaultKeyRemaps(keyStroke);
 		key = getKeyFromKeyStroke(keyStroke);
 		keyCode = key.code;
