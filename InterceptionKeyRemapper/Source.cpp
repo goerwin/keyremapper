@@ -14,6 +14,9 @@
 #include "erwinUtils.h"
 #include "KeyEvent.h"
 
+void forceNumLockStatusOn();
+void updateNumLockStatusInTrayIcon();
+
 InterceptionContext context;
 InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
@@ -151,6 +154,8 @@ void sendKeyEvents(std::vector<Key> keys) {
 				case SC_NEXT:
 				case SC_HOME:
 				case SC_END:
+				case SC_INSERT:
+				case SC_DELETE:
 					stateDown = 2;
 					stateUp = 3;
 
@@ -158,6 +163,12 @@ void sendKeyEvents(std::vector<Key> keys) {
 						state = 2;
 					} else if (state == 1) {
 						state = 3;
+					}
+
+					break;
+				case SC_NUMLOCK:
+					if (state == stateUp) {
+						updateNumLockStatusInTrayIcon();
 					}
 
 					break;
@@ -230,16 +241,38 @@ const auto ctxMenuEnabled = L"Disable";
 const auto ctxLoadHotKeysFile = L"Load HotKeys file";
 const auto ctxMenuNotEnabled = L"Enable";
 auto ctxMenuEnabledMsg = ctxMenuEnabled;
-auto globalIconImage = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, 0));
+auto globalIconImage = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON_DEFAULT), IMAGE_ICON, 0, 0, 0));
 //auto globalIconImageDisabled = HICON(LoadImage(NULL, TEXT("images/letter-e-red.ico"), IMAGE_ICON, 0, 0, LR_LOADFROMFILE));
-auto globalIconImageDisabled = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 0, 0, 0));
+auto globalIconImageDisabled = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON_RED), IMAGE_ICON, 0, 0, 0));
+auto globalIconImageWarning = HICON(LoadImage(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ICON_WARNING), IMAGE_ICON, 0, 0, 0));
 
 void toggleAppEnabled() {
 	isAppEnabled = !isAppEnabled;
 	ctxMenuEnabledMsg = isAppEnabled ? ctxMenuEnabled : ctxMenuNotEnabled;
 	nid.hIcon = isAppEnabled ? globalIconImage : globalIconImageDisabled;
+	if (isAppEnabled) forceNumLockStatusOn();
 	Shell_NotifyIcon(NIM_MODIFY, &nid);
 }
+
+void updateNumLockStatusInTrayIcon() {
+	Sleep(100);
+	if ((GetKeyState(VK_NUMLOCK) & 0x0001) == 0) { // NumLock OFF
+		nid.hIcon = globalIconImageWarning;
+		Shell_NotifyIcon(NIM_MODIFY, &nid);
+	} else {
+		nid.hIcon = isAppEnabled ? globalIconImage : globalIconImageDisabled;
+		Shell_NotifyIcon(NIM_MODIFY, &nid);
+	}
+}
+
+void forceNumLockStatusOn() {
+	if ((GetKeyState(VK_NUMLOCK) & 0x0001) == 0) { // NumLock OFF
+		sendKeyEvents({ KeyDown(SC_NUMLOCK), KeyUp(SC_NUMLOCK) });
+	} else {
+		updateNumLockStatusInTrayIcon();
+	}
+}
+
 
 #define WM_MYMESSAGE (WM_USER + 1)
 const int IDM_EXIT = 5;
@@ -355,7 +388,7 @@ void handleSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
 
 // You have to phisically press a key to trigger
 // the correct clean up
-void handleAppCleanUp() {
+void handleAppRestart() {
 	sendKeyEvents({
 		KeyDown(SC_LALT),
 		KeyUp(SC_LALT),
@@ -366,6 +399,8 @@ void handleAppCleanUp() {
 		KeyDown(SC_LSHIFT),
 		KeyUp(SC_LSHIFT)
 	});
+
+	forceNumLockStatusOn();
 }
 
 DWORD WINAPI keyboardThreadFunc(void* data) {
@@ -397,7 +432,7 @@ DWORD WINAPI keyboardThreadFunc(void* data) {
 
 	auto lAltClick = ErwinUtils::KeyClick<void(int)>(SC_LALT, [](int consecutiveClicks) {
 		if (consecutiveClicks == 2) {
-			handleAppCleanUp();
+			handleAppRestart();
 		}
 	});
 
@@ -460,9 +495,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgum
 		WINEVENT_OUTOFCONTEXT
 	);
 
-	// OPEN HOTKEYS FILE
+	// INITIALIZATIONS
+
 	KeyEvent::initialize();
 	setActiveMode(getActiveMode());
+	forceNumLockStatusOn(); // Not working properly 
 
 	// KEYBOARD
 

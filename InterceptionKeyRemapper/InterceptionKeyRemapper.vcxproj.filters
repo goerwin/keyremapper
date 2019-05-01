@@ -60,5 +60,11 @@
     <Image Include="images\letter-e-red.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="images\letter-e-warning.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="images\letter-e-yellow.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

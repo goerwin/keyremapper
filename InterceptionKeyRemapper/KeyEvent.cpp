@@ -110,6 +110,9 @@ String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_SEMI) { return ";"; }
 	if (code == SC_MINUS) { return "-"; }
 	if (code == SC_GRAVE) { return "`"; }
+	if (code == SC_NUMLOCK) { return "NumLock"; }
+	if (code == SC_INSERT) { return "Insert"; }
+	if (code == SC_DELETE) { return "Del"; }
 	if (code == SC_F1) { return "F1"; }
 	if (code == SC_F2) { return "F2"; }
 	if (code == SC_F3) { return "F3"; }
@@ -245,6 +248,9 @@ ScanCodes getScanCode(std::wstring symbol) {
 	if (symbol == L";") { return SC_SEMI; }
 	if (symbol == L"-") { return SC_MINUS; }
 	if (symbol == L"`") { return SC_GRAVE; }
+	if (symbol == L"NumLock") { return SC_NUMLOCK; }
+	if (symbol == L"Insert") { return SC_INSERT; }
+	if (symbol == L"Del") { return SC_DELETE; }
 	if (symbol == L"F1") { return SC_F1; }
 	if (symbol == L"F2") { return SC_F2; }
 	if (symbol == L"F3") { return SC_F3; }
@@ -897,7 +903,7 @@ Keys handleAltKey(unsigned short keyCode, bool isKeyDown) {
 		if (!g_isAltAsCtrl) { // alt + tabbed + q
 			return getParsedKeyDownUpKeys(
 				isKeyDown,
-				TemplateKeys({ Key(SC_SUPR) }),
+				TemplateKeys({ Key(SC_DELETE) }),
 				TemplateKeys({ g_nullKey })
 			);
 		}

@@ -68,8 +68,8 @@
 - Alt P => Down(K↕) Up(null) "slack.exe"
 - Alt Z => Down(Shift↓ -↕ Shift↑) Up(null) "mintty.exe"
 - Alt I => Down(L↕) Up(null) "mintty.exe"
-- Alt C => Down(NP0↕) Up(null) "mintty.exe"
-- Alt V => Down(keyUpLAlt Shift↓ NP0↕ Shift↑ keyDownLAltAsLCtrl) Up(null) "mintty.exe"
+- Alt C => Down(Insert↕) Up(null) "mintty.exe"
+- Alt V => Down(keyUpLAlt Shift↓ Insert↕ Shift↑ keyDownLAltAsLCtrl) Up(null) "mintty.exe"
 - Alt Space => Down(F12↕) Up(null)
 - Alt Back => Down(U↕) Up(null) "mintty.exe"
 - Alt ` => Down(`↕) Up(null) "SC2_x64.exe"
