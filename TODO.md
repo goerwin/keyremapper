@@ -1,7 +1,7 @@
 - add builds for both x86 and x64 archs
 - move all files to src (no dirs allowed to avoid issues when importing header files)
 - rethink alghoritm to be more general so it can be used in any OS
-
+- provide a doublePress modifier (eg. for the capslock with double shift press)
 <!--
 Key: string | string[] - matches currentKey, it can be an [] for ORs
 Condition: { [key]: [value] } - multiple keys will represent ANDs
@@ -11,7 +11,7 @@ Fire: [string | null, string | null];
 Rule {
   oneOfOrBoth [Key, Condition]
   (rules: Rule[] | fire: Fire)
-}
+} | { fire: Fire }
 
 KeyBinding {
   modifier: 'Caps' | 'CapsAlt', 'CtrlShift', 'etc';

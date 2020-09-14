@@ -27,6 +27,8 @@ bool g_isAltAsCtrl;
 bool g_isMouseClickDown;
 bool g_isVimShiftKeyDown;
 
+json g_keyDownStatus = {};
+
 void print(std::string string)
 {
   OutputDebugStringA("\n");
@@ -319,145 +321,6 @@ Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
 	keys.insert(keys.end(), keys3.begin(), keys3.end());
 	keys.insert(keys.end(), keys4.begin(), keys4.end());
 	return keys;
-}
-
-
-bool isKeyMatches(json ruleKey, std::string key)
-{
-  if (ruleKey.is_null())
-  {
-    return true;
-  }
-  else if (ruleKey.is_string())
-  {
-    return ruleKey == key;
-  }
-  else if (ruleKey.is_array())
-  {
-    for (auto k = ruleKey.begin(); k != ruleKey.end(); ++k)
-    {
-      if (k.value() == key)
-      {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-auto getGlobalVarValue(std::string name)
-{
-  if ("g_isVimShiftKeyDown" == name)
-    return g_isVimShiftKeyDown;
-  if ("g_isKeyDown" == name)
-    return g_isKeyDown;
-  if ("g_isWinKeyDown" == name)
-    return g_isWinKeyDown;
-  if ("g_isAltKeyDown" == name)
-    return g_isAltKeyDown;
-  if ("g_isAltAsCtrl" == name)
-    return g_isAltAsCtrl;
-}
-
-void setGlobalVarValue(std::string name, json value)
-{
-  auto parsedValue = value.is_string() ? getGlobalVarValue(value) : bool(value);
-  if ("g_isVimShiftKeyDown" == name)
-    g_isVimShiftKeyDown = parsedValue;
-  if ("g_isKeyDown" == name)
-    g_isKeyDown = parsedValue;
-  if ("g_isWinKeyDown" == name)
-    g_isWinKeyDown = parsedValue;
-  if ("g_isAltKeyDown" == name)
-    g_isAltKeyDown = parsedValue;
-  if ("g_isAltAsCtrl" == name)
-    g_isAltAsCtrl = parsedValue;
-}
-
-bool isConditionMatches(json condition)
-{
-  if (condition.is_null())
-  {
-    return true;
-  }
-  else if (condition.is_object())
-  {
-    for (json::iterator i = condition.begin(); i != condition.end(); ++i)
-    {
-      auto objKey = i.key();
-      auto objVal = i.value();
-
-      auto globalVarValue = getGlobalVarValue(objKey);
-
-      if (!objVal.is_string())
-      {
-        return globalVarValue == objVal;
-      }
-
-      return globalVarValue == getGlobalVarValue(objVal);
-    }
-  }
-
-  return true;
-}
-
-json getFireKeysFromRule(json rule, std::string key = NULL)
-{
-  auto ruleKey = rule["key"];
-  auto condition = rule["condition"];
-  auto fire = rule["fire"];
-  auto rules = rule["rules"];
-
-  bool keyMatches = isKeyMatches(ruleKey, key);
-  bool conditionMatches = isConditionMatches(condition);
-
-  if (!keyMatches || !conditionMatches)
-  {
-    return NULL;
-  }
-
-  if (rules.is_array())
-  {
-    for (auto r = rules.begin(); r != rules.end(); ++r)
-    {
-      auto res = getFireKeysFromRule(r.value(), key);
-      if (res != NULL)
-      {
-        return res;
-      }
-    }
-
-    return NULL;
-  }
-
-  auto set = rule["set"];
-  if (set.is_object()) {
-    for (json::iterator i = set.begin(); i != set.end(); ++i) {
-      setGlobalVarValue(i.key(), i.value());
-    }
-  }
-
-  return fire;
-}
-
-json getFireKeys(json keybindings, std::string modifier = NULL, std::string key = NULL)
-{
-  for (auto kb = keybindings.begin(); kb != keybindings.end(); ++kb)
-  {
-    auto kbValue = kb.value();
-    auto kbModifier = kbValue["modifier"];
-
-    if (kbModifier != modifier)
-    {
-      continue;
-    }
-
-    //kbValue.erase("modifier");
-    return getFireKeysFromRule(kbValue, key);
-  }
-
-  return nullptr;
 }
 
 Keys keyDownLCtrlAsLAlt() {
@@ -1040,45 +903,213 @@ namespace KeyEvent {
 		return getTemplateKeysForEsc().getParsedKeys();
 	}
 
+
+
+  bool isKeyMatches(json ruleKey, std::string key)
+  {
+    if (ruleKey.is_null())
+    {
+      return true;
+    }
+    else if (ruleKey.is_string())
+    {
+      return ruleKey == key;
+    }
+    else if (ruleKey.is_array())
+    {
+      for (auto k = ruleKey.begin(); k != ruleKey.end(); ++k)
+      {
+        if (k.value() == key)
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  auto getGlobalVarValue(std::string name)
+  {
+    if ("g_isVimShiftKeyDown" == name)
+      return g_isVimShiftKeyDown;
+    if ("g_isKeyDown" == name)
+      return g_isKeyDown;
+    if ("g_isWinKeyDown" == name)
+      return g_isWinKeyDown;
+    if ("g_isAltKeyDown" == name)
+      return g_isAltKeyDown;
+    if ("g_isAltAsCtrl" == name)
+      return g_isAltAsCtrl;
+  }
+
+  void setGlobalVarValue(std::string name, json value)
+  {
+    auto parsedValue = value.is_string() ? getGlobalVarValue(value) : bool(value);
+    if ("g_isVimShiftKeyDown" == name)
+      g_isVimShiftKeyDown = parsedValue;
+    if ("g_isKeyDown" == name)
+      g_isKeyDown = parsedValue;
+    if ("g_isWinKeyDown" == name)
+      g_isWinKeyDown = parsedValue;
+    if ("g_isAltKeyDown" == name)
+      g_isAltKeyDown = parsedValue;
+    if ("g_isAltAsCtrl" == name)
+      g_isAltAsCtrl = parsedValue;
+  }
+
+  bool isConditionMatches(json condition)
+  {
+    if (condition.is_null())
+    {
+      return true;
+    }
+    else if (condition.is_object())
+    {
+      for (json::iterator i = condition.begin(); i != condition.end(); ++i)
+      {
+        auto objKey = i.key();
+        auto objVal = i.value();
+
+        auto globalVarValue = getGlobalVarValue(objKey);
+
+        if (!objVal.is_string())
+        {
+          return globalVarValue == objVal;
+        }
+
+        return globalVarValue == getGlobalVarValue(objVal);
+      }
+    }
+
+    return true;
+  }
+
+  bool isWhenMatches(json when) {
+    if (when.is_object()) {
+      for (json::iterator i = when.begin(); i != when.end(); ++i) {
+        auto key = i.key();
+        auto value = i.value();
+
+        if (value == "isDown") {
+          if (g_keyDownStatus[key] == false) {
+            return false;
+          }
+        }
+        else if (value == "isUp") {
+          if (g_keyDownStatus[key] == true) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  json getFireKeysFromRule(json rule, std::string key = NULL)
+  {
+    auto ruleKey = rule["key"];
+    auto when = rule["when"];
+    auto fire = rule["fire"];
+    auto rules = rule["rules"];
+
+    bool keyMatches = isKeyMatches(ruleKey, key);
+    //bool conditionMatches = isConditionMatches(condition);
+    bool whenMatches = isWhenMatches(when);
+
+    if (!keyMatches || !whenMatches)
+    {
+      return NULL;
+    }
+
+    if (rules.is_array())
+    {
+      for (auto r = rules.begin(); r != rules.end(); ++r)
+      {
+        auto res = getFireKeysFromRule(r.value(), key);
+        if (res != NULL)
+        {
+          return res;
+        }
+      }
+
+      return NULL;
+    }
+
+    auto set = rule["set"];
+    if (set.is_object()) {
+      for (json::iterator i = set.begin(); i != set.end(); ++i) {
+        setGlobalVarValue(i.key(), i.value());
+      }
+    }
+
+    return fire;
+  }
+
+  json getFireKeys(json keybindings, std::string key = NULL)
+  {
+    for (auto kb = keybindings.begin(); kb != keybindings.end(); ++kb)
+    {
+      auto kbValue = kb.value();
+      auto kbModifier = kbValue["modifier"];
+
+      // verify all modifiers are pressed down
+      if (kbModifier.is_array())
+      {
+        auto skipKeybinding = false;
+        for (auto m = kbModifier.begin(); m != kbModifier.end(); ++m) {
+          auto mod = std::string(m.value());
+
+          if (g_keyDownStatus[mod] == false && mod != key) {
+            skipKeybinding = true;
+            break;
+          }
+        }
+        if (skipKeybinding) {
+          continue;
+        }
+      }
+
+      //kbValue.erase("modifier");
+      return getFireKeysFromRule(kbValue, key);
+    }
+
+    return nullptr;
+  }
+
+  std::string getTemplateKeysNEW(json descriptionKeys) {
+    if (descriptionKeys.is_null()) {
+
+    }
+
+    return descriptionKeys;
+  }
+
+
 	Keys getKeyEvents(Keys keys) {
 		Keys allKeys;
 		int size = keys.size();
 
     for (int i = 0; i < size; i++) {
       Key key = keys[i];
-      // bool _isKeyDown = isKeyDown(key);
-      g_isKeyDown = isKeyDown(key);
       Keys keys;
-      //int size = 0; // TODO: WHAT ???
       auto keyCode = key.code;
 
-      if (keyCode == SC_CAPSLOCK) {
-        g_isCapslockKeyDown = g_isKeyDown;
-      }
-      else if (keyCode == SC_LSHIFT) {
-        g_isShiftKeyDown = g_isKeyDown;
-      }
-      else if (keyCode == SC_LCTRL) {
-        g_isCtrlKeyDown = g_isKeyDown;
-      }
-      else if (keyCode == SC_LWIN) {
-        g_isWinKeyDown = g_isKeyDown;
-      }
-      else if (keyCode == SC_LALT) {
-        g_isAltKeyDown = g_isKeyDown;
-      }
-      else if (keyCode == SC_ESC) {
-        g_isEscKeyDown = g_isKeyDown;
-      }
-
-      std::string modifier;
-      if (g_isCapslockKeyDown) {
-        modifier = "Caps";
-      }
+      g_keyDownStatus[getScanCodeSymbol(keyCode)] = isKeyDown(key);
 
       auto file = getJsonFile();
-      auto fireKeys = getFireKeys(file, modifier, getScanCodeSymbol(keyCode));
-      print(fireKeys.dump());
+      auto fireKeys = getFireKeys(file, getScanCodeSymbol(keyCode));
+      print(getScanCodeSymbol(keyCode) + ":" + (isKeyDown(key) ? "down:": "up:") + fireKeys.dump());
+      //TemplateKeys({ Key(SC_ESC) }, _keyDownLAltAsLCtrl);
+
+
+      if (fireKeys.is_array()) {
+        //auto templateKeysDown = getTemplateKeysNEW(fireKeys[0]);
+        //auto templateKeysUp = getTemplateKeysNEW(fireKeys[1]);
+        //auto hotKey = HotKey(keyInfo, templateKeysDown, templateKeysUp);
+      }
+      
     }
 
 		return allKeys;
