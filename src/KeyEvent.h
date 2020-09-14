@@ -141,9 +141,6 @@ namespace KeyEvent
   Keys getKeyEvents(Keys keys);
   void setActiveProcessName(std::string _activeProcessName);
   void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath = "./hotKeys/_core.md");
-  String getScanCodeSymbol(unsigned short code);
-  String getStateSymbol(unsigned short state);
-  String getKeySymbols(Keys keys);
   bool isKeyDown(Key key);
   Keys getParsedKeysForEsc();
   void initialize(String coreHotKeysFilepath = "./hotKeys/_core.md");

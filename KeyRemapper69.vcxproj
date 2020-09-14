@@ -142,14 +142,15 @@
   <ItemGroup>
     <ClInclude Include="src/libraries/Interception/interception.h" />
     <ClInclude Include="src/libraries/Interception/utils2.h" />
-    <ClInclude Include="src/helpers/utils.h" />
-    <ClInclude Include="src/helpers/KeyEvent.h" />
+    <ClInclude Include="src/utils.h" />
+    <ClInclude Include="src/KeyEvent.h" />
     <ClInclude Include="src/helpers/brightness.h" />
+    <ClInclude Include="src/json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src/index.cpp" />
-    <ClCompile Include="src/helpers/utils.cpp" />
-    <ClCompile Include="src/helpers/KeyEvent.cpp" />
+    <ClCompile Include="src/utils.cpp" />
+    <ClCompile Include="src/KeyEvent.cpp" />
     <ClCompile Include="src/libraries/Interception/utils2.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

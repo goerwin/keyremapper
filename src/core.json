@@ -1,0 +1,50 @@
+[
+  {
+    "modifier": "Caps",
+    "rules": [
+      {
+        "key": "Caps",
+        "rules": [
+          {
+            "condition": { "g_isVimShiftKeyDown": false },
+            "set": { "g_isVimShiftKeyDown": false },
+            "fire": [null, "Shift↑"]
+          }
+        ]
+      },
+      {
+        "key": ["Shift", "S"],
+        "set": {"g_isVimShiftKeyDown": "g_isKeyDown" },
+        "fire": ["Shift↓", "Shift↑"]
+      },
+      {
+        "key": ["H", "J", "L", "K"],
+        "rules": [
+          {
+            "condition": { "g_isWinKeyDown": true },
+            "fire": ["Ctrl↓ vimArrowKey↕ Ctrl↑", null]
+          },
+          {
+            "key": ["H", "L"],
+            "rules": [
+              {
+                "condition": {
+                  "g_isAltKeyDown": true,
+                  "g_isAltAsCtrl": true
+                },
+                "fire": ["_keyUpLAlt vimHomeEndKey↕ _keyDownLAltAsLCtrl", null]
+              }
+            ]
+          },
+          {
+            "condition": { "g_isAltKeyDown": true, "g_isAltAsCtrl": true },
+            "fire": ["vimHomeEndKey↕", null]
+          },
+          {
+            "fire": ["vimArrowKey↕", null]
+          }
+        ]
+      }
+    ]
+  }
+]
