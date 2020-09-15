@@ -1,6 +1,7 @@
 [
   {
     "modifier": ["Caps"],
+    "interceptAll": true,
     "rules": [
       {
         "key": "Caps",
@@ -13,14 +14,24 @@
       },
       {
         "key": ["Shift", "S"],
-        "fire": ["Shift_d", "Shift_u"]
+        "fire": [["Shift_d"], ["Shift_u"]]
+      },
+      {
+        "key": ["Alt"],
+        "when": { "Alt": "isDown" },
+        "fire": [null, null]
+      },
+      {
+        "key": ["Alt"],
+        "when": { "Alt": "isUp" },
+        "fire": [null, ["keyUpAlt"]]
       },
       {
         "key": ["H", "J", "L", "K"],
         "rules": [
           {
             "when": { "Win": "isDown" },
-            "fire": ["Ctrl_d vimArrowKey_du Ctrl_u", null]
+            "fire": [["Ctrl_d", "vimArrowKey", "Ctrl_u"], null]
           },
           {
             "key": ["H", "L"],
@@ -28,7 +39,7 @@
               {
                 "when": { "Alt": "isDown", "isAltAsCtrl": true },
                 "fire": [
-                  "_keyUpLAlt vimHomeEndKey_du _keyDownLAltAsLCtrl",
+                  ["keyUpAlt", "vimHomeEndKey", "keyDownAltAsCtrl"],
                   null
                 ]
               }
@@ -36,13 +47,37 @@
           },
           {
             "when": { "Alt": "isDown", "isAltAsCtrl": true },
-            "fire": ["vimHomeEndKey_du", null]
+            "fire": [["vimHomeEndKey"], null]
           },
           {
-            "fire": ["vimArrowKey_du", null]
+            "fire": [["vimArrowKey"], null]
           }
         ]
+      },
+      {
+        "fire": [null, null]
       }
     ]
+  },
+  {
+    "modifier": ["Ctrl", "Tab"],
+    "fire": [["keyDownCtrlAsCtrl", "Tab"], null]
+  },
+  {
+    "modifier": ["Ctrl"],
+    "fire": [["keyDownCtrlAsAlt"], ["keyUpCtrl"]]
+  },
+  {
+    "modifier": ["Alt", "Tab"],
+    "fire": [["keyDownAltAsAlt", "Tab"], null]
+  },
+  {
+    "modifier": ["Alt"],
+    "fire": [["keyDownAltAsCtrl"], ["keyUpAlt"]]
+  },
+  {
+    "key": "Esc",
+    "when": { "isAltAsAlt": true },
+    "fire": [["Esc"], ["keyDownAltAsCtrl"], null]
   }
 ]

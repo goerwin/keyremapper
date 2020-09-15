@@ -3,6 +3,8 @@
 - rethink alghoritm to be more general so it can be used in any OS
 - provide a doublePress modifier (eg. for the capslock with double shift press)
 <!--
+altdown capsdown altup capsup is leaving the ctrl click pressed
+
 Key: string | string[] - matches currentKey, it can be an [] for ORs
 Condition: { [key]: [value] } - multiple keys will represent ANDs
 Fire: [string | null, string | null];
@@ -21,6 +23,7 @@ KeyBinding {
 // This is a keybinding only for modifiers, and you enter it when the "key":
 // - "was just pressed/released, it is still pressed down
 // Once a rule is met, the Keybinding will fire it, stop looking and subsequent keybindings will be skipped
+// If no fire was returned, let the key go through
 // "fire" is a tuple representing the keys to fire for when the key is pressed or released
 
 KeyBinding[]

@@ -13,28 +13,15 @@ using json = nlohmann::json;
 
 String g_activeProcessName;
 
-bool g_isKeyDown;
-bool g_isCapslockKeyDown;
-bool g_isShiftKeyDown;
-bool g_isCtrlKeyDown;
-bool g_isWinKeyDown;
-bool g_isAltKeyDown;
-bool g_isEscKeyDown;
-
 bool g_isCtrlAsAlt;
 bool g_isAltAsCtrl;
 
-bool g_isMouseClickDown;
-bool g_isVimShiftKeyDown;
-
 json g_keyDownStatus = {};
 
-void print(std::string string)
+void print(std::string string, std::string string2 = "\n")
 {
-  OutputDebugStringA("\n");
-  auto bbb = string.c_str();
-  OutputDebugStringA(string.c_str());
-  OutputDebugStringA("\n");
+  auto str = string + string2;
+  OutputDebugStringA(str.c_str());
 }
 
 json coreJson;
@@ -53,17 +40,6 @@ auto getJsonFile() {
   coreJson = json::parse(coreStr);
   return coreJson;
 }
-
-enum LAltLCtrl
-{
-  _keyDownLAltAsLCtrl = 1,
-  _keyDownLAltAsLAlt = 2,
-  _keyUpLAlt = 3,
-  _keyDownLCtrlAsLAlt = 4,
-  _keyDownLCtrlAsLCtrl = 5,
-  _keyUpLCtrl = 6,
-  _null = 0
-};
 
 String getScanCodeSymbol(unsigned short code) {
 	if (code == SC_A) { return "A"; }
@@ -179,141 +155,106 @@ String getStateSymbol(unsigned short state) {
 	return "KEY_STATE_NOT_FOUND";
 }
 
-String getKeySymbols(Keys keys) {
-	int keysSize = keys.size();
-	String result = "";
-
-	for (int i = 0; i < keysSize; i++) {
-		auto code = keys[i].code;
-		String codeSymbol = getScanCodeSymbol(code);
-		String stateSymbol = getStateSymbol(keys[i].state);
-
-		if (i > 0) {
-			if (code == keys[i - 1].code) {
-				codeSymbol = "";
-			} else {
-				result = result.append(" ");
-			}
-		}
-
-		result = result.append(codeSymbol).append(stateSymbol);
-	}
-
-	return result;
-}
-
-ScanCodes getScanCode(std::wstring symbol) {
-	if (symbol == L"A") { return SC_A; }
-	if (symbol == L"B") { return SC_B; }
-	if (symbol == L"C") { return SC_C; }
-	if (symbol == L"D") { return SC_D; }
-	if (symbol == L"E") { return SC_E; }
-	if (symbol == L"F") { return SC_F; }
-	if (symbol == L"G") { return SC_G; }
-	if (symbol == L"H") { return SC_H; }
-	if (symbol == L"I") { return SC_I; }
-	if (symbol == L"J") { return SC_J; }
-	if (symbol == L"K") { return SC_K; }
-	if (symbol == L"L") { return SC_L; }
-	if (symbol == L"M") { return SC_M; }
-	if (symbol == L"N") { return SC_N; }
-	if (symbol == L"O") { return SC_O; }
-	if (symbol == L"P") { return SC_P; }
-	if (symbol == L"Q") { return SC_Q; }
-	if (symbol == L"R") { return SC_R; }
-	if (symbol == L"S") { return SC_S; }
-	if (symbol == L"T") { return SC_T; }
-	if (symbol == L"U") { return SC_U; }
-	if (symbol == L"V") { return SC_V; }
-	if (symbol == L"W") { return SC_W; }
-	if (symbol == L"X") { return SC_X; }
-	if (symbol == L"Y") { return SC_Y; }
-	if (symbol == L"Z") { return SC_Z; }
-	if (symbol == L"1") { return SC_1; }
-	if (symbol == L"2") { return SC_2; }
-	if (symbol == L"3") { return SC_3; }
-	if (symbol == L"4") { return SC_4; }
-	if (symbol == L"5") { return SC_5; }
-	if (symbol == L"6") { return SC_6; }
-	if (symbol == L"7") { return SC_7; }
-	if (symbol == L"8") { return SC_8; }
-	if (symbol == L"9") { return SC_9; }
-	if (symbol == L"0") { return SC_0; }
-	if (symbol == L"NP1") { return SC_NP1; }
-	if (symbol == L"NP2") { return SC_NP2; }
-	if (symbol == L"NP3") { return SC_NP3; }
-	if (symbol == L"NP4") { return SC_NP4; }
-	if (symbol == L"NP5") { return SC_NP5; }
-	if (symbol == L"NP6") { return SC_NP6; }
-	if (symbol == L"NP7") { return SC_NP7; }
-	if (symbol == L"NP8") { return SC_NP8; }
-	if (symbol == L"NP9") { return SC_NP9; }
-	if (symbol == L"NP0") { return SC_NP0; }
-	if (symbol == L"MUTE") { return SC_MUTE; }
-	if (symbol == L"VOLUMEDOWN") { return SC_VOLUMEDOWN; }
-	if (symbol == L"VOLUMEUP") { return SC_VOLUMEUP; }
-	if (symbol == L"Esc") { return SC_ESC; }
-	if (symbol == L"Caps") { return SC_CAPSLOCK; }
-	if (symbol == L"Left") { return SC_LEFT; }
-	if (symbol == L"Right") { return SC_RIGHT; }
-	if (symbol == L"Up") { return SC_UP; }
-	if (symbol == L"Down") { return SC_DOWN; }
-	if (symbol == L"Space") { return SC_SPACE; }
-	if (symbol == L"Win") { return SC_LWIN; }
-	if (symbol == L"Win") { return SC_RWIN; }
-	if (symbol == L"Alt") { return SC_LALT; }
-	if (symbol == L"Alt") { return SC_RALT; }
-	if (symbol == L"Ctrl") { return SC_LCTRL; }
-	if (symbol == L"Ctrl") { return SC_RCTRL; }
-	if (symbol == L"Shift") { return SC_LSHIFT; }
-	if (symbol == L"Shift") { return SC_RSHIFT; }
-	if (symbol == L"LBSLASH") { return SC_LBSLASH; }
-	if (symbol == L"Enter") { return SC_RETURN; }
-	if (symbol == L"Supr") { return SC_SUPR; }
-	if (symbol == L"Back") { return SC_BACK; }
-	if (symbol == L"Tab") { return SC_TAB; }
-	if (symbol == L"Home") { return SC_HOME; }
-	if (symbol == L"End") { return SC_END; }
-	if (symbol == L"Prior") { return SC_PRIOR; }
-	if (symbol == L"Next") { return SC_NEXT; }
-	if (symbol == L";") { return SC_SEMI; }
-	if (symbol == L"-") { return SC_MINUS; }
-	if (symbol == L"`") { return SC_GRAVE; }
-	if (symbol == L"NumLock") { return SC_NUMLOCK; }
-	if (symbol == L"Insert") { return SC_INSERT; }
-	if (symbol == L"Del") { return SC_DELETE; }
-	if (symbol == L"F1") { return SC_F1; }
-	if (symbol == L"F2") { return SC_F2; }
-	if (symbol == L"F3") { return SC_F3; }
-	if (symbol == L"F4") { return SC_F4; }
-	if (symbol == L"F5") { return SC_F5; }
-	if (symbol == L"F6") { return SC_F6; }
-	if (symbol == L"F7") { return SC_F7; }
-	if (symbol == L"F8") { return SC_F8; }
-	if (symbol == L"F9") { return SC_F9; }
-	if (symbol == L"F10") { return SC_F10; }
-	if (symbol == L"F11") { return SC_F11; }
-	if (symbol == L"F12") { return SC_F12; }
-	if (symbol == L"MOUSELEFT") { return SC_MOUSELEFT; }
-	if (symbol == L"MOUSERIGHT") { return SC_MOUSERIGHT; }
-	if (symbol == L"BRIGHTNESSDOWN") { return SC_BRIGHTNESSDOWN; }
-	if (symbol == L"BRIGHTNESSUP") { return SC_BRIGHTNESSUP; }
-	if (symbol == L"_") { return SC_GENERAL; }
-  if (symbol == L"NULL") { return SC_NULL; }
+ScanCodes getScanCode(std::string symbol) {
+	if (symbol == "A") { return SC_A; }
+	if (symbol == "B") { return SC_B; }
+	if (symbol == "C") { return SC_C; }
+	if (symbol == "D") { return SC_D; }
+	if (symbol == "E") { return SC_E; }
+	if (symbol == "F") { return SC_F; }
+	if (symbol == "G") { return SC_G; }
+	if (symbol == "H") { return SC_H; }
+	if (symbol == "I") { return SC_I; }
+	if (symbol == "J") { return SC_J; }
+	if (symbol == "K") { return SC_K; }
+	if (symbol == "L") { return SC_L; }
+	if (symbol == "M") { return SC_M; }
+	if (symbol == "N") { return SC_N; }
+	if (symbol == "O") { return SC_O; }
+	if (symbol == "P") { return SC_P; }
+	if (symbol == "Q") { return SC_Q; }
+	if (symbol == "R") { return SC_R; }
+	if (symbol == "S") { return SC_S; }
+	if (symbol == "T") { return SC_T; }
+	if (symbol == "U") { return SC_U; }
+	if (symbol == "V") { return SC_V; }
+	if (symbol == "W") { return SC_W; }
+	if (symbol == "X") { return SC_X; }
+	if (symbol == "Y") { return SC_Y; }
+	if (symbol == "Z") { return SC_Z; }
+	if (symbol == "1") { return SC_1; }
+	if (symbol == "2") { return SC_2; }
+	if (symbol == "3") { return SC_3; }
+	if (symbol == "4") { return SC_4; }
+	if (symbol == "5") { return SC_5; }
+	if (symbol == "6") { return SC_6; }
+	if (symbol == "7") { return SC_7; }
+	if (symbol == "8") { return SC_8; }
+	if (symbol == "9") { return SC_9; }
+	if (symbol == "0") { return SC_0; }
+	if (symbol == "NP1") { return SC_NP1; }
+	if (symbol == "NP2") { return SC_NP2; }
+	if (symbol == "NP3") { return SC_NP3; }
+	if (symbol == "NP4") { return SC_NP4; }
+	if (symbol == "NP5") { return SC_NP5; }
+	if (symbol == "NP6") { return SC_NP6; }
+	if (symbol == "NP7") { return SC_NP7; }
+	if (symbol == "NP8") { return SC_NP8; }
+	if (symbol == "NP9") { return SC_NP9; }
+	if (symbol == "NP0") { return SC_NP0; }
+	if (symbol == "MUTE") { return SC_MUTE; }
+	if (symbol == "VOLUMEDOWN") { return SC_VOLUMEDOWN; }
+	if (symbol == "VOLUMEUP") { return SC_VOLUMEUP; }
+	if (symbol == "Esc") { return SC_ESC; }
+	if (symbol == "Caps") { return SC_CAPSLOCK; }
+	if (symbol == "Left") { return SC_LEFT; }
+	if (symbol == "Right") { return SC_RIGHT; }
+	if (symbol == "Up") { return SC_UP; }
+	if (symbol == "Down") { return SC_DOWN; }
+	if (symbol == "Space") { return SC_SPACE; }
+	if (symbol == "Win") { return SC_LWIN; }
+	if (symbol == "Win") { return SC_RWIN; }
+	if (symbol == "Alt") { return SC_LALT; }
+	if (symbol == "Alt") { return SC_RALT; }
+	if (symbol == "Ctrl") { return SC_LCTRL; }
+	if (symbol == "Ctrl") { return SC_RCTRL; }
+	if (symbol == "Shift") { return SC_LSHIFT; }
+	if (symbol == "Shift") { return SC_RSHIFT; }
+	if (symbol == "LBSLASH") { return SC_LBSLASH; }
+	if (symbol == "Enter") { return SC_RETURN; }
+	if (symbol == "Supr") { return SC_SUPR; }
+	if (symbol == "Back") { return SC_BACK; }
+	if (symbol == "Tab") { return SC_TAB; }
+	if (symbol == "Home") { return SC_HOME; }
+	if (symbol == "End") { return SC_END; }
+	if (symbol == "Prior") { return SC_PRIOR; }
+	if (symbol == "Next") { return SC_NEXT; }
+	if (symbol == ";") { return SC_SEMI; }
+	if (symbol == "-") { return SC_MINUS; }
+	if (symbol == "`") { return SC_GRAVE; }
+	if (symbol == "NumLock") { return SC_NUMLOCK; }
+	if (symbol == "Insert") { return SC_INSERT; }
+	if (symbol == "Del") { return SC_DELETE; }
+	if (symbol == "F1") { return SC_F1; }
+	if (symbol == "F2") { return SC_F2; }
+	if (symbol == "F3") { return SC_F3; }
+	if (symbol == "F4") { return SC_F4; }
+	if (symbol == "F5") { return SC_F5; }
+	if (symbol == "F6") { return SC_F6; }
+	if (symbol == "F7") { return SC_F7; }
+	if (symbol == "F8") { return SC_F8; }
+	if (symbol == "F9") { return SC_F9; }
+	if (symbol == "F10") { return SC_F10; }
+	if (symbol == "F11") { return SC_F11; }
+	if (symbol == "F12") { return SC_F12; }
+	if (symbol == "MOUSELEFT") { return SC_MOUSELEFT; }
+	if (symbol == "MOUSERIGHT") { return SC_MOUSERIGHT; }
+	if (symbol == "BRIGHTNESSDOWN") { return SC_BRIGHTNESSDOWN; }
+	if (symbol == "BRIGHTNESSUP") { return SC_BRIGHTNESSUP; }
+	if (symbol == "_") { return SC_GENERAL; }
+  if (symbol == "NULL") { return SC_NULL; }
 
 	return SC_NULL;
-}
-
-LAltLCtrl getLAltLCtrlCode(std::wstring symbol) {
-	if (symbol == L"keyDownLAltAsLCtrl") { return _keyDownLAltAsLCtrl; }
-	if (symbol == L"keyDownLAltAsLAlt") { return _keyDownLAltAsLAlt; }
-	if (symbol == L"keyUpLAlt") { return _keyUpLAlt; }
-	if (symbol == L"keyDownLCtrlAsLAlt") { return _keyDownLCtrlAsLAlt; }
-	if (symbol == L"keyDownLCtrlAsLCtrl") { return _keyDownLCtrlAsLCtrl; }
-	if (symbol == L"keyUpLCtrl") { return _keyUpLCtrl; }
-	if (symbol == L"null") { return _null; }
-
-	return _null;
 }
 
 Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
@@ -323,10 +264,10 @@ Keys concatKeyVectors(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {}) {
 	return keys;
 }
 
-Keys keyDownLCtrlAsLAlt() {
+Keys keyDownCtrlAsAlt() {
 	Keys keys;
 
-	if (!g_isCtrlAsAlt && g_isCtrlKeyDown) {
+	if (!g_isCtrlAsAlt && g_keyDownStatus["Ctrl"]) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
@@ -334,10 +275,10 @@ Keys keyDownLCtrlAsLAlt() {
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
-Keys keyDownLCtrlAsLCtrl() {
+Keys keyDownCtrlAsCtrl() {
 	Keys keys;
 
-	if (g_isCtrlAsAlt && g_isCtrlKeyDown) {
+	if (g_isCtrlAsAlt && g_keyDownStatus["Ctrl"]) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
@@ -345,7 +286,7 @@ Keys keyDownLCtrlAsLCtrl() {
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
-Keys keyUpLCtrl() {
+Keys keyUpCtrl() {
 	Keys keys;
 
 	if (g_isCtrlAsAlt) {
@@ -358,10 +299,10 @@ Keys keyUpLCtrl() {
 	return keys;
 }
 
-Keys keyDownLAltAsLCtrl() {
+Keys keyDownAltAsCtrl() {
 	Keys keys;
 
-	if (!g_isAltAsCtrl && g_isAltKeyDown) {
+	if (!g_isAltAsCtrl && g_keyDownStatus["Alt"]) {
 		keys.insert(keys.begin(), { KeyUp(SC_LALT) });
 	}
 
@@ -369,10 +310,10 @@ Keys keyDownLAltAsLCtrl() {
 	keys.insert(keys.end(), { KeyDown(SC_LCTRL) });
 	return keys;
 }
-Keys keyDownLAltAsLAlt() {
+Keys keyDownAltAsAlt() {
 	Keys keys;
 
-	if (g_isAltAsCtrl && g_isAltKeyDown) {
+	if (g_isAltAsCtrl && g_keyDownStatus["Alt"]) {
 		keys.insert(keys.begin(), { KeyUp(SC_LCTRL) });
 	}
 
@@ -380,7 +321,7 @@ Keys keyDownLAltAsLAlt() {
 	keys.insert(keys.end(), { KeyDown(SC_LALT) });
 	return keys;
 }
-Keys keyUpLAlt() {
+Keys keyUpAlt() {
 	Keys keys;
 
 	if (g_isAltAsCtrl) {
@@ -392,79 +333,6 @@ Keys keyUpLAlt() {
 	g_isAltAsCtrl = true;
 	return keys;
 }
-
-struct TemplateKeys {
-	LAltLCtrl preLAltLCtrl = _null;
-	LAltLCtrl posLAltLCtrl = _null;
-	Keys keys;
-
-	TemplateKeys() {}
-
-	TemplateKeys(LAltLCtrl _preLAltLCtrl, Keys _keys, LAltLCtrl _posLAltLCtrl = _null) {
-		preLAltLCtrl = _preLAltLCtrl;
-		keys = _keys;
-		posLAltLCtrl = _posLAltLCtrl;
-	}
-
-	TemplateKeys(Keys _keys, LAltLCtrl _posLAltLCtrl = _null) {
-		posLAltLCtrl = _posLAltLCtrl;
-		keys = _keys;
-	}
-
-	TemplateKeys(LAltLCtrl _preLAltLCtrl) {
-		preLAltLCtrl = _preLAltLCtrl;
-	}
-
-	TemplateKeys replaceGeneral(bool replace, unsigned short code) {
-		if (replace) {
-			auto keysSize = keys.size();
-
-			for (int i = 0; i < keysSize; i++) {
-				if (keys[i].code == SC_GENERAL) {
-					keys[i].code = code;
-				}
-			}
-		}
-		return *this;
-	}
-
-	Keys getParsedKeys() {
-		Keys parsedKeys = keys;
-
-		if (preLAltLCtrl == _null) {}
-		if (preLAltLCtrl == _keyDownLAltAsLCtrl) {
-			parsedKeys = concatKeyVectors(keyDownLAltAsLCtrl(), parsedKeys);
-		} else if (preLAltLCtrl == _keyDownLAltAsLAlt) {
-			parsedKeys = concatKeyVectors(keyDownLAltAsLAlt(), parsedKeys);
-		} else if (preLAltLCtrl == _keyUpLAlt) {
-			parsedKeys = concatKeyVectors(keyUpLAlt() , parsedKeys);
-		} else if (preLAltLCtrl == _keyDownLCtrlAsLAlt) {
-			parsedKeys = concatKeyVectors(keyDownLCtrlAsLAlt(), parsedKeys);
-		} else if (preLAltLCtrl == _keyDownLCtrlAsLCtrl) {
-			parsedKeys = concatKeyVectors(keyDownLCtrlAsLCtrl(), parsedKeys);
-		} else if (preLAltLCtrl == _keyUpLCtrl) {
-			parsedKeys = concatKeyVectors(keyUpLCtrl() , parsedKeys);
-		}
-
-		if (posLAltLCtrl == _null) {
-			return parsedKeys;
-		} else if (posLAltLCtrl == _keyDownLAltAsLCtrl) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyDownLAltAsLCtrl());
-		} else if (posLAltLCtrl == _keyDownLAltAsLAlt) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyDownLAltAsLAlt());
-		} else if (posLAltLCtrl == _keyUpLAlt) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyUpLAlt());
-		} else if (posLAltLCtrl == _keyDownLCtrlAsLAlt) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyDownLCtrlAsLAlt());
-		} else if (posLAltLCtrl == _keyDownLCtrlAsLCtrl) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyDownLCtrlAsLCtrl());
-		} else if (posLAltLCtrl == _keyUpLCtrl) {
-			parsedKeys = concatKeyVectors(parsedKeys, keyUpLCtrl());
-		}
-
-		return parsedKeys;
-	}
-};
 
 struct KeyInfo {
 	ScanCodes code;
@@ -478,170 +346,7 @@ struct KeyInfo {
 	}
 };
 
-typedef std::tuple<KeyInfo, TemplateKeys, TemplateKeys> HotKey;
-typedef std::vector<HotKey> HotKeys;
-
 Key g_nullKey = KeyUp(SC_NULL);
-
-TemplateKeys getTemplateKeys(std::wstring symbolKeys) {
-	Keys keys;
-	auto stateUpDown = Utils::utf82ws(String("↕"))[0];
-	auto stateDown = Utils::utf82ws(String("↓"))[0];
-	auto stateUp = Utils::utf82ws(String("↑"))[0];
-	auto symbolKeysSize = symbolKeys.size();
-	int keyIteration = -1;
-	size_t pos = -1;
-	LAltLCtrl firstLAltLCtrl = _null;
-	LAltLCtrl lastLAltLCtrl = _null;
-
-	do {
-		keyIteration++;
-		auto pos2 = symbolKeys.find(L" ", pos + 1);
-		auto keySymbolWithStates = symbolKeys.substr(pos + 1, pos2 - pos - 1);
-		pos = pos2;
-
-		auto keySymbolWithStatesSize = keySymbolWithStates.size();
-		std::wstring keySymbol;
-		std::wstring keyStates;
-
-		for (int i = 0; i < keySymbolWithStatesSize; i++) {
-			auto letter = keySymbolWithStates[i];
-
-			if (letter == stateUpDown || letter == stateDown || letter == stateUp) {
-				keyStates = keyStates + letter;
-			} else {
-				keySymbol = keySymbol + letter;
-			}
-		}
-
-		auto laltLCtrlCode = getLAltLCtrlCode(keySymbol);
-		if (laltLCtrlCode != _null) {
-			if (keyIteration == 0) {
-				firstLAltLCtrl = laltLCtrlCode;
-			} else {
-				lastLAltLCtrl = laltLCtrlCode;
-			}
-
-			continue;
-		}
-
-		auto code = getScanCode(keySymbol);
-		if (code == SC_NULL) {
-			keys.insert(keys.end(), { g_nullKey });
-			continue;
-		}
-
-		auto keyStatesSize = keyStates.size();
-		for (int i = 0; i < keyStatesSize; i++) {
-			auto letter = keyStates[i];
-
-			if (letter == stateUpDown) {
-				keys.insert(keys.end(), Key(code));
-			} else if (letter == stateDown) {
-				keys.insert(keys.end(), KeyDown(code));
-			} else if (letter == stateUp) {
-				keys.insert(keys.end(), KeyUp(code));
-			}
-		}
-	} while (pos < symbolKeysSize);
-
-	return TemplateKeys(firstLAltLCtrl, keys, lastLAltLCtrl);
-}
-
-HotKeys g_capsAltHotKeys;
-HotKeys g_capsHotKeys;
-HotKeys g_ctrlShiftHotKeys;
-HotKeys g_ctrlHotKeys;
-HotKeys g_winAltHotKeys;
-HotKeys g_winShiftHotKeys;
-HotKeys g_winHotKeys;
-HotKeys g_altShiftHotKeys;
-HotKeys g_altHotKeys;
-HotKeys g_keyHotKeys;
-
-std::pair<std::wstring, HotKey> getParsedHotKey(std::wstring hotkeySymbol) {
-	size_t pos = 0;
-	size_t pos2 = 0;
-	std::wstring processName;
-
-	pos = hotkeySymbol.find(L"- ", pos2);
-	pos2 = hotkeySymbol.find(L" ", pos + 2);
-	auto handler = hotkeySymbol.substr(pos + 2, pos2 - pos - 2);
-
-	pos = hotkeySymbol.find(L" ", pos2);
-	pos2 = hotkeySymbol.find(L" ", pos + 1);
-	auto keyInputSymbol = hotkeySymbol.substr(pos + 1, pos2 - pos - 1);
-	auto keyInputCode = getScanCode(keyInputSymbol);
-
-	pos = hotkeySymbol.find(L"Down(", pos2);
-	pos2 = hotkeySymbol.find(L")", pos + 1);
-	auto keyDownSymbols = hotkeySymbol.substr(pos + 5, pos2 - pos - 5);
-
-	pos = hotkeySymbol.find(L"Up(", pos2);
-	pos2 = hotkeySymbol.find(L")", pos + 1);
-	auto keyUpSymbols = hotkeySymbol.substr(pos + 3, pos2 - pos - 3);
-
-	if (hotkeySymbol.find(L'"') != std::string::npos) {
-		pos = hotkeySymbol.find(L'"');
-		pos2 = hotkeySymbol.find(L'"', pos + 1);
-		processName = hotkeySymbol.substr(pos + 1, pos2 - pos - 1);
-	}
-
-	auto keyInfo = KeyInfo(keyInputCode, Utils::ws2utf8(processName));
-	auto templateKeysDown = getTemplateKeys(keyDownSymbols);
-	auto templateKeysUp = getTemplateKeys(keyUpSymbols);
-	auto hotKey = HotKey(keyInfo, templateKeysDown, templateKeysUp);
-
-	return { handler, hotKey };
-}
-
-void updateHotKeys(std::pair<std::wstring, HotKey> parsedHotKey) {
-	auto handler = parsedHotKey.first;
-	auto hotKey = parsedHotKey.second;
-
-	if (handler == L"CapsAlt") {
-		g_capsAltHotKeys.insert(g_capsAltHotKeys.end(), hotKey);
-	} else if (handler == L"Caps") {
-		g_capsHotKeys.insert(g_capsHotKeys.end(), hotKey);
-	} else if (handler == L"CtrlShift") {
-		g_ctrlShiftHotKeys.insert(g_ctrlShiftHotKeys.end(), hotKey);
-	} else if (handler == L"Ctrl") {
-		g_ctrlHotKeys.insert(g_ctrlHotKeys.end(), hotKey);
-	} else if (handler == L"WinAlt") {
-		g_winAltHotKeys.insert(g_winAltHotKeys.end(), hotKey);
-	} else if (handler == L"WinShift") {
-		g_winShiftHotKeys.insert(g_winShiftHotKeys.end(), hotKey);
-	} else if (handler == L"Win") {
-		g_winHotKeys.insert(g_winHotKeys.end(), hotKey);
-	} else if (handler == L"AltShift") {
-		g_altShiftHotKeys.insert(g_altShiftHotKeys.end(), hotKey);
-	} else if (handler == L"Alt") {
-		g_altHotKeys.insert(g_altHotKeys.end(), hotKey);
-	} else if (handler == L"Key") {
-		g_keyHotKeys.insert(g_keyHotKeys.end(), hotKey);
-	}
-}
-
-void setHotKeysFromFile(String filepath) {
-	auto fileLines = Utils::getFileByLine(filepath);
-
-	for (int i = 0; i < fileLines.size(); i++) {
-		if (fileLines[i].find(L"- ") != std::string::npos) {
-			updateHotKeys(getParsedHotKey(fileLines[i]));
-		}
-	}
-}
-
-Keys getParsedKeyDownUpKeys(
-	bool isKeyDown,
-	TemplateKeys keyDownTemplateKeys,
-	TemplateKeys keyUpTemplateKeys
-) {
-	if (isKeyDown) {
-		return keyDownTemplateKeys.getParsedKeys();
-	}
-	return keyUpTemplateKeys.getParsedKeys();
-}
 
 unsigned short getVimArrowKeyCode(unsigned short keyCode) {
 	return keyCode == SC_K ? SC_UP :
@@ -657,253 +362,10 @@ unsigned short getVimHomeEndKeyCode(unsigned short keyCode) {
 		SC_NULL;
 }
 
-TemplateKeys getTemplateKeysForEsc() {
-	if (!g_isAltAsCtrl) {
-		return TemplateKeys({ Key(SC_ESC) }, _keyDownLAltAsLCtrl);
-	}
-
-	if (!g_isAltKeyDown) {
-		return TemplateKeys({ Key(SC_ESC) });
-	}
-
-	return TemplateKeys({ g_nullKey });
-}
-
-Keys handleHotKeys(unsigned short keyCode, bool isKeyDown, HotKeys hotKeys) {
-	auto hotKeysSize = hotKeys.size();
-
-	for (int i = 0; i < hotKeysSize; i++) {
-		auto hotKey = hotKeys[i];
-		auto keyInfo = std::get<0>(hotKey);
-		auto isGeneral = keyInfo.code == SC_GENERAL;
-
-		if (keyCode == keyInfo.code || isGeneral) {
-			auto program = keyInfo.program;
-
-			if (program == "" || program == g_activeProcessName) {
-				return getParsedKeyDownUpKeys(
-					isKeyDown,
-					std::get<1>(hotKey).replaceGeneral(isGeneral, keyCode),
-					std::get<2>(hotKey).replaceGeneral(isGeneral, keyCode)
-				);
-			}
-		}
-	}
-
-	return { g_nullKey };
-}
-
-
-Keys handleEscKey(unsigned short keyCode, bool isKeyDown) {
-	if (!g_isEscKeyDown && keyCode != SC_ESC) {
-		return {};
-	}
-
-	if (keyCode == SC_ESC) {
-		return { g_nullKey };
-	}
-
-	if (keyCode == SC_1 || keyCode == SC_2 || keyCode == SC_3 || keyCode == SC_4) {
-		auto mode = keyCode == SC_1 ? SC_MODE1 : keyCode == SC_2 ? SC_MODE2 :
-			keyCode == SC_3 ? SC_MODE3 : SC_MODE4;
-
-		return getParsedKeyDownUpKeys(
-			isKeyDown,
-			TemplateKeys({ KeyUp(mode) }),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	return {};
-}
-
-Keys handleMouseClick(unsigned short keyCode, bool isKeyDown) {
-	if (
-		!g_isMouseClickDown &&
-		!(g_isWinKeyDown && keyCode == SC_C)
-	) {
-		return {};
-	}
-
-	if (keyCode == SC_C) {
-		if (g_isCapslockKeyDown) {
-			if (isKeyDown && !g_isMouseClickDown) {
-				g_isMouseClickDown = true;
-				return { KeyDown(SC_MOUSERIGHT) };
-			}
-
-			if (!isKeyDown && g_isMouseClickDown) {
-				g_isMouseClickDown = false;
-				return { KeyUp(SC_MOUSERIGHT) };
-			}
-
-			return { g_nullKey };
-		}
-
-		if (isKeyDown && !g_isMouseClickDown) {
-			g_isMouseClickDown = true;
-			return { KeyDown(SC_MOUSELEFT) };
-		}
-
-		if (!isKeyDown && g_isMouseClickDown) {
-			g_isMouseClickDown = false;
-			return { KeyUp(SC_MOUSELEFT) };
-		}
-
-		return { g_nullKey };
-	}
-
-	return { g_nullKey };
-}
-
-Keys handleWinAltKeys(unsigned short keyCode, bool isKeyDown) {
-	if (
-		!(g_isWinKeyDown && g_isAltKeyDown) &&
-		!(g_isWinKeyDown && keyCode == SC_LALT) &&
-		!(g_isAltKeyDown && keyCode == SC_LWIN)
-
-		// NOTE: For triple keys
-		/*!(g_isWinKeyDown && g_isAltKeyDown && g_isShiftKeyDown) &&
-		!(g_isWinKeyDown && g_isAltKeyDown && key.code == SC_LSHIFT) &&
-		!(g_isWinKeyDown && g_isShiftKeyDown && key.code == SC_LALT) &&
-		!(g_isAltKeyDown && g_isShiftKeyDown && key.code == SC_LWIN)*/
-	) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_winAltHotKeys);
-}
-
-Keys handleCtrlShiftKeys(unsigned short keyCode, bool isKeyDown) {
-	if (
-		!(g_isCtrlKeyDown && g_isShiftKeyDown) &&
-		!(g_isCtrlKeyDown && keyCode == SC_LSHIFT) &&
-		!(g_isShiftKeyDown && keyCode == SC_LCTRL)
-	) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_ctrlShiftHotKeys);
-}
-
-Keys handleCapslockAltKeys(unsigned short keyCode, bool isKeyDown) {
-	if (
-		!((g_isCapslockKeyDown && g_isAltKeyDown) ||
-		(g_isCapslockKeyDown && keyCode == SC_LALT) ||
-		(g_isAltKeyDown && keyCode == SC_CAPSLOCK))
-	) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_capsAltHotKeys);
-}
-
-Keys handleCapslockKey(unsigned short keyCode, bool isKeyDown) {
-	if (!g_isCapslockKeyDown && keyCode != SC_CAPSLOCK) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_capsHotKeys);
-}
-
-Keys handleCtrlKey(unsigned short keyCode, bool isKeyDown) {
-	if (!g_isCtrlKeyDown && keyCode != SC_LCTRL) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_ctrlHotKeys);
-}
-
-Keys handleWinShiftKeys(unsigned short keyCode, bool isKeyDown) {
-	if (
-		!(g_isWinKeyDown && g_isShiftKeyDown) &&
-		!(g_isWinKeyDown && keyCode == SC_LSHIFT) &&
-		!(g_isShiftKeyDown && keyCode == SC_LCTRL)
-	) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_winShiftHotKeys);
-}
-
-Keys handleWinKey(unsigned short keyCode, bool isKeyDown) {
-	if (!(g_isWinKeyDown || keyCode == SC_LWIN)) {
-		return {};
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_winHotKeys);
-}
-
-Keys handleAltShiftKeys(unsigned short keyCode, bool isKeyDown) {
-	if (!(
-		(g_isAltKeyDown && g_isShiftKeyDown) ||
-		(g_isAltKeyDown && keyCode == SC_LSHIFT) ||
-		(g_isShiftKeyDown && keyCode == SC_LALT)
-	)) {
-		return {};
-	}
-
-	// Omit keys when in alt-tab mode
-	if (!g_isAltAsCtrl && keyCode != SC_LALT && keyCode != SC_TAB && keyCode != SC_LSHIFT) {
-		return { g_nullKey };
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_altShiftHotKeys);
-}
-
-Keys handleAltKey(unsigned short keyCode, bool isKeyDown) {
-	if (!(g_isAltKeyDown || keyCode == SC_LALT)) {
-		return {};
-	}
-
-	// alt + esc
-	if (keyCode == SC_ESC) {
-		return getParsedKeyDownUpKeys(
-			isKeyDown,
-			getTemplateKeysForEsc(),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	// alt + q
-	if (keyCode == SC_Q) {
-		if (!g_isAltAsCtrl) { // alt + tabbed + q
-			return getParsedKeyDownUpKeys(
-				isKeyDown,
-				TemplateKeys({ Key(SC_DELETE) }),
-				TemplateKeys({ g_nullKey })
-			);
-		}
-
-		return getParsedKeyDownUpKeys(
-			isKeyDown,
-			TemplateKeys(_keyDownLAltAsLAlt, { Key(SC_F4) }, _keyDownLAltAsLCtrl),
-			TemplateKeys({ g_nullKey })
-		);
-	}
-
-	// Omit keys when in alt-tab mode
-	if (!g_isAltAsCtrl && keyCode != SC_LALT && keyCode != SC_TAB) {
-		return { g_nullKey };
-	}
-
-	return handleHotKeys(keyCode, isKeyDown, g_altHotKeys);
-}
-
-Keys handleKey(unsigned short keyCode, bool isKeyDown) {
-	return handleHotKeys(keyCode, isKeyDown, g_keyHotKeys);
-}
-
 namespace KeyEvent {
 	bool isKeyDown(Key key) {
 		return key.state == 0 || key.state == 2;
 	}
-
-	Keys getParsedKeysForEsc() {
-		return getTemplateKeysForEsc().getParsedKeys();
-	}
-
-
 
   bool isKeyMatches(json ruleKey, std::string key)
   {
@@ -929,75 +391,20 @@ namespace KeyEvent {
     return false;
   }
 
-  auto getGlobalVarValue(std::string name)
-  {
-    if ("g_isVimShiftKeyDown" == name)
-      return g_isVimShiftKeyDown;
-    if ("g_isKeyDown" == name)
-      return g_isKeyDown;
-    if ("g_isWinKeyDown" == name)
-      return g_isWinKeyDown;
-    if ("g_isAltKeyDown" == name)
-      return g_isAltKeyDown;
-    if ("g_isAltAsCtrl" == name)
-      return g_isAltAsCtrl;
-  }
-
-  void setGlobalVarValue(std::string name, json value)
-  {
-    auto parsedValue = value.is_string() ? getGlobalVarValue(value) : bool(value);
-    if ("g_isVimShiftKeyDown" == name)
-      g_isVimShiftKeyDown = parsedValue;
-    if ("g_isKeyDown" == name)
-      g_isKeyDown = parsedValue;
-    if ("g_isWinKeyDown" == name)
-      g_isWinKeyDown = parsedValue;
-    if ("g_isAltKeyDown" == name)
-      g_isAltKeyDown = parsedValue;
-    if ("g_isAltAsCtrl" == name)
-      g_isAltAsCtrl = parsedValue;
-  }
-
-  bool isConditionMatches(json condition)
-  {
-    if (condition.is_null())
-    {
-      return true;
-    }
-    else if (condition.is_object())
-    {
-      for (json::iterator i = condition.begin(); i != condition.end(); ++i)
-      {
-        auto objKey = i.key();
-        auto objVal = i.value();
-
-        auto globalVarValue = getGlobalVarValue(objKey);
-
-        if (!objVal.is_string())
-        {
-          return globalVarValue == objVal;
-        }
-
-        return globalVarValue == getGlobalVarValue(objVal);
-      }
-    }
-
-    return true;
-  }
-
   bool isWhenMatches(json when) {
     if (when.is_object()) {
       for (json::iterator i = when.begin(); i != when.end(); ++i) {
         auto key = i.key();
         auto value = i.value();
+        auto keyStatus = g_keyDownStatus[key];
 
         if (value == "isDown") {
-          if (g_keyDownStatus[key] == false) {
+          if (keyStatus.is_null() || keyStatus == false) {
             return false;
           }
         }
         else if (value == "isUp") {
-          if (g_keyDownStatus[key] == true) {
+          if (keyStatus == true) {
             return false;
           }
         }
@@ -1037,55 +444,160 @@ namespace KeyEvent {
       return NULL;
     }
 
-    auto set = rule["set"];
-    if (set.is_object()) {
-      for (json::iterator i = set.begin(); i != set.end(); ++i) {
-        setGlobalVarValue(i.key(), i.value());
-      }
-    }
+    //auto set = rule["set"];
+    //if (set.is_object()) {
+      //for (json::iterator i = set.begin(); i != set.end(); ++i) {
+      //  setGlobalVarValue(i.key(), i.value());
+    //  }
+    //}
 
     return fire;
   }
 
-  json getFireKeys(json keybindings, std::string key = NULL)
+  json getFireKeys(json keybindings)
   {
     for (auto kb = keybindings.begin(); kb != keybindings.end(); ++kb)
     {
       auto kbValue = kb.value();
       auto kbModifier = kbValue["modifier"];
 
-      // verify all modifiers are pressed down
-      if (kbModifier.is_array())
-      {
-        auto skipKeybinding = false;
-        for (auto m = kbModifier.begin(); m != kbModifier.end(); ++m) {
-          auto mod = std::string(m.value());
+      if (!kbModifier.is_array()) {
+        return nullptr;
+      }
 
-          if (g_keyDownStatus[mod] == false && mod != key) {
+      // verify all modifiers are pressed down
+        auto currentKey = g_keyDownStatus["currentKey"];
+        auto interceptAll = kbValue["interceptAll"];
+        bool interceptAllValue = !interceptAll.is_null() && interceptAll == true;
+        auto skipKeybinding = false;
+        auto isCurrentKeyInModifier = false;
+
+        for (auto m = 0; m < kbModifier.size(); m++) {
+          auto mod = std::string(kbModifier[m]);
+          auto modKeyDownStatus = g_keyDownStatus[mod];
+          isCurrentKeyInModifier = false;
+
+          if (currentKey == mod) {
+            isCurrentKeyInModifier = true;
+          }
+
+          if ((modKeyDownStatus.is_null() || modKeyDownStatus == false) && !isCurrentKeyInModifier) {
+            skipKeybinding = true;
+            break;
+          }
+
+          if (m == kbModifier.size() - 1 && !isCurrentKeyInModifier && !interceptAllValue) {
             skipKeybinding = true;
             break;
           }
         }
+
         if (skipKeybinding) {
           continue;
         }
+
+        return {
+          { "fireKeys", getFireKeysFromRule(kbValue, currentKey) },
+          { "interceptAll", interceptAllValue },
+          { "isCurrentKeyInModifier", isCurrentKeyInModifier }
+        };
+      }
+  }
+
+  Keys concatKeys(Keys keys, Key key) {
+    keys.insert(keys.end(), key);
+
+    return keys;
+  }
+
+  Keys getKeysFromDescription(json keysDescription, short currentKeyCode) {
+    if (keysDescription.is_null() || !keysDescription.is_array()) {
+      return {};
+    }
+
+      Keys allKeys;
+
+      for (auto i = keysDescription.begin(); i != keysDescription.end(); ++i) {
+        auto keyDesc = i.value();
+
+        if (keyDesc.is_null()) {
+          return allKeys;
+        }
+
+        std::string keyDescStr = keyDesc;
+        std::string keyValue = keyDescStr;
+        std::string keyStatus;
+
+        json keyStatuses = { "_d", "_u", "_du" };
+        for (auto i = keyStatuses.begin(); i < keyStatuses.end(); ++i) {
+          std::string keyStatusLc = i.value();
+          size_t upDownIdx = keyDescStr.find(keyStatusLc);
+
+          if (upDownIdx != std::string::npos) {
+            keyStatus = keyStatusLc;
+            keyValue = keyDescStr.substr(0, upDownIdx);
+            break;
+          }
+        }
+
+        if (keyValue == "keyDownAltAsCtrl") {
+          allKeys = concatKeyVectors(allKeys, keyDownAltAsCtrl());
+          continue;
+        }
+        else if (keyValue == "keyDownAltAsAlt") {
+          allKeys = concatKeyVectors(allKeys, keyDownAltAsAlt());
+          continue;
+        }
+        else if (keyValue == "keyUpAlt") {
+          allKeys = concatKeyVectors(allKeys, keyUpAlt());
+          continue;
+        }
+        else if (keyValue == "keyDownCtrlAsCtrl") {
+          allKeys = concatKeyVectors(allKeys, keyDownCtrlAsCtrl());
+          continue;
+        }
+        else if (keyValue == "keyDownCtrlAsAlt") {
+          allKeys = concatKeyVectors(allKeys, keyDownCtrlAsAlt());
+          continue;
+        }
+        else if (keyValue == "keyUpCtrl") {
+          allKeys = concatKeyVectors(allKeys, keyUpCtrl());
+          continue;
+        }
+
+        short keyCode;
+        if (keyValue == "vimArrowKey") {
+          keyCode = getVimArrowKeyCode(currentKeyCode);
+        }
+        else if (keyValue == "vimHomeEndKey") {
+          keyCode = getVimHomeEndKeyCode(currentKeyCode);
+        }
+        else {
+          keyCode = getScanCode(keyValue);
+        }
+
+        if (keyStatus == "_d") {
+          allKeys = concatKeys(allKeys, KeyDown(keyCode));
+        }
+        else if (keyStatus == "_u") {
+          allKeys = concatKeys(allKeys, KeyUp(keyCode));
+        }
+        else {
+          allKeys = concatKeys(allKeys, KeyDown(keyCode));
+          allKeys = concatKeys(allKeys, KeyUp(keyCode));
+        }
       }
 
-      //kbValue.erase("modifier");
-      return getFireKeysFromRule(kbValue, key);
-    }
-
-    return nullptr;
+      return allKeys;
   }
 
-  std::string getTemplateKeysNEW(json descriptionKeys) {
-    if (descriptionKeys.is_null()) {
-
+  // PRINTING
+  void printKeys(Keys keys) {
+    for (auto i = 0; i < keys.size(); i++) {
+      auto key = keys[i];
+      print(getScanCodeSymbol(key.code) + (KeyEvent::isKeyDown(key) ? ":down" : ":up "));
     }
-
-    return descriptionKeys;
   }
-
 
 	Keys getKeyEvents(Keys keys) {
 		Keys allKeys;
@@ -1096,22 +608,53 @@ namespace KeyEvent {
       Keys keys;
       auto keyCode = key.code;
 
-      g_keyDownStatus[getScanCodeSymbol(keyCode)] = isKeyDown(key);
+      bool isKeyDownEl = isKeyDown(key);
+      auto keyValue = getScanCodeSymbol(keyCode);
+      g_keyDownStatus["currentKey"] = keyValue;
+      g_keyDownStatus["currentKeyDown"] = isKeyDownEl;
+      g_keyDownStatus[keyValue] = isKeyDownEl;
 
       auto file = getJsonFile();
-      auto fireKeys = getFireKeys(file, getScanCodeSymbol(keyCode));
-      print(getScanCodeSymbol(keyCode) + ":" + (isKeyDown(key) ? "down:": "up:") + fireKeys.dump());
-      //TemplateKeys({ Key(SC_ESC) }, _keyDownLAltAsLCtrl);
+      auto fireKeysRes = getFireKeys(file);
 
+      if (!fireKeysRes.is_null()) {
+        auto fireKeys = fireKeysRes["fireKeys"];
+        auto interceptAll = fireKeysRes["interceptAll"];
+        auto isCurrentKeyInModifier = fireKeysRes["isCurrentKeyInModifier"];
 
-      if (fireKeys.is_array()) {
-        //auto templateKeysDown = getTemplateKeysNEW(fireKeys[0]);
-        //auto templateKeysUp = getTemplateKeysNEW(fireKeys[1]);
-        //auto hotKey = HotKey(keyInfo, templateKeysDown, templateKeysUp);
+        //print(keyValue + ":" + (isKeyDownEl ? "down:" : "up:") + fireKeys.dump());
+
+        if (isKeyDownEl) {
+          allKeys = concatKeyVectors(allKeys, getKeysFromDescription(fireKeys[0], keyCode));
+        }
+        else {
+          allKeys = concatKeyVectors(allKeys, getKeysFromDescription(fireKeys[1], keyCode));
+        }
+
+        if (!interceptAll && !isCurrentKeyInModifier) {
+          //print(keyValue + ":" + (isKeyDownEl ? "down:" : "up:") + keyValue);
+
+          if (isKeyDownEl) {
+            allKeys = concatKeys(allKeys, KeyDown(keyCode));
+          }
+          else {
+            allKeys = concatKeys(allKeys, KeyUp(keyCode));
+          }
+        }
       }
-      
+      else {
+        //print(keyValue + ":" + (isKeyDownEl ? "down:" : "up:") + keyValue);
+        if (isKeyDownEl) {
+          allKeys = concatKeys(allKeys, KeyDown(keyCode));
+        }
+        else {
+          allKeys = concatKeys(allKeys, KeyUp(keyCode));
+        }
+      }
     }
 
+    printKeys(allKeys);
+    //return {};
 		return allKeys;
 	}
 
@@ -1119,10 +662,5 @@ namespace KeyEvent {
 		g_activeProcessName = _activeProcessName;
 
 		OutputDebugStringA(String(g_activeProcessName + "\n").c_str());
-	}
-
-	void setCustomHotKeysFromFile(String customHotKeysFilePath, String coreHotKeysFilepath) {
-		setHotKeysFromFile(customHotKeysFilePath);
-		setHotKeysFromFile(coreHotKeysFilepath);
 	}
 }
