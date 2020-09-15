@@ -142,10 +142,11 @@
   <ItemGroup>
     <ClInclude Include="src/libraries/Interception/interception.h" />
     <ClInclude Include="src/libraries/Interception/utils2.h" />
+    <ClInclude Include="src/json.hpp" />
+    <ClInclude Include="src/symbols.hpp" />
     <ClInclude Include="src/utils.h" />
     <ClInclude Include="src/KeyEvent.h" />
     <ClInclude Include="src/helpers/brightness.h" />
-    <ClInclude Include="src/json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src/index.cpp" />

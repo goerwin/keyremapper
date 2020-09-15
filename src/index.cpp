@@ -7,164 +7,35 @@
 #include <chrono>
 #include <shellapi.h>
 #include <vector>
+#include <fstream>
 #include "images/index.h"
 #include "helpers/brightness.h"
+#include "json.hpp"
 #include "KeyEvent.h"
 #include "utils.h"
 #include "libraries/Interception/utils2.h"
 #include "libraries/Interception/interception.h"
 
+using json = nlohmann::json;
+
 InterceptionContext context;
 InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
 
-void defaultKeyRemaps(InterceptionKeyStroke &keyStroke)
+json getJsonFile()
 {
-  auto keyCode = keyStroke.code;
-  auto keyState = keyStroke.state;
+  std::ifstream i("./src/core.json");
+  std::string jsonValue;
+  i >> jsonValue;
 
-  if (keyCode == SC_LBSLASH || keyCode == SC_RSHIFT)
-  {
-    keyStroke.code = SC_LSHIFT;
-  }
-  else if (keyCode == SC_RWIN)
-  {
-    keyStroke.code = SC_LWIN;
-  }
-  else if (keyCode == SC_LCTRL && (keyState == 2 || keyState == 3))
-  {
-    keyStroke.code = SC_LWIN;
-  }
+  std::ifstream coreFile("./src/core.json");
+  std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
+                      std::istreambuf_iterator<char>());
+
+  return json::parse(coreStr);
 }
-
-void sendKeyEvents(std::vector<Key> keys)
-{
-  auto keysSize = keys.size();
-
-  for (int i = 0; i < keysSize; i++)
-  {
-    auto keyCode = keys[i].code;
-    auto state = keys[i].state;
-
-    if (keyCode == SC_NULL)
-    {
-      continue;
-    }
-
-    if (keyCode == SC_MOUSELEFT)
-    {
-      if (state == 0)
-      {
-        mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-      }
-      else
-      {
-        mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-      }
-    }
-    else if (keyCode == SC_MOUSERIGHT)
-    {
-      if (state == 0)
-      {
-        mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-      }
-      else
-      {
-        mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-      }
-    }
-    else if (keyCode == SC_BRIGHTNESSDOWN)
-    {
-      BrightnessHandler::Increment(-10);
-    }
-    else if (keyCode == SC_BRIGHTNESSUP)
-    {
-      BrightnessHandler::Increment(10);
-    }
-    else
-    {
-      unsigned short stateDown = 0;
-      unsigned short stateUp = 1;
-
-      switch (keyCode)
-      {
-      case SC_MUTE:
-      case SC_VOLUMEDOWN:
-      case SC_VOLUMEUP:
-      case SC_LWIN:
-      case SC_LEFT:
-      case SC_RIGHT:
-      case SC_UP:
-      case SC_DOWN:
-      case SC_PRIOR:
-      case SC_NEXT:
-      case SC_HOME:
-      case SC_END:
-      case SC_INSERT:
-      case SC_DELETE:
-        stateDown = 2;
-        stateUp = 3;
-
-        if (state == 0)
-        {
-          state = stateDown;
-        }
-        else if (state == 1)
-        {
-          state = stateUp;
-        }
-
-        break;
-      case SC_NUMLOCK:
-        break;
-      case SC_NP2:
-      case SC_NP4:
-      case SC_NP6:
-      case SC_NP8:
-        if (state == 0 || state == 1)
-        {
-          if (keyCode != SC_NP4)
-          {
-            if (state == 0)
-              state = 2;
-            else
-              state = 3;
-            keyCode = SC_LEFT;
-          }
-        }
-        break;
-      }
-
-      if (state == 4)
-      {
-        interception_send(
-            context,
-            device,
-            (InterceptionStroke *)&InterceptionKeyStroke({keyCode, stateDown}),
-            1);
-        interception_send(
-            context,
-            device,
-            (InterceptionStroke *)&InterceptionKeyStroke({keyCode, stateUp}),
-            1);
-      }
-      else
-      {
-        if (keyCode == SC_LSHIFT && (state == 0 || state == 1))
-        {
-          keyCode = keyCode;
-          //continue;
-        }
-
-        interception_send(
-            context,
-            device,
-            (InterceptionStroke *)&InterceptionKeyStroke({keyCode, state}),
-            1);
-      }
-    }
-  }
-}
+auto jsonSchema = getJsonFile();
+auto keyEventEl = new KeyEvent::Class(jsonSchema);
 
 DWORD WINAPI keyboardThreadFunc(void *data)
 {
@@ -178,10 +49,22 @@ DWORD WINAPI keyboardThreadFunc(void *data)
              (InterceptionStroke *)&keyStroke,
              1) > 0)
   {
-    defaultKeyRemaps(keyStroke);
-    auto key = Key(keyStroke.code, keyStroke.state);
-    Keys newKeys = KeyEvent::getKeyEvents({key});
-    sendKeyEvents(newKeys);
+    auto key = KeyEvent::Key(keyStroke.code, keyStroke.state);
+    auto newKeys = keyEventEl->getKeyEvents({key});
+
+    auto keysSize = newKeys.size();
+
+    for (int i = 0; i < keysSize; i++)
+    {
+      auto keyCode = newKeys[i].code;
+      auto state = newKeys[i].state;
+
+      interception_send(
+          context,
+          device,
+          (InterceptionStroke *)&InterceptionKeyStroke({keyCode, state}),
+          1);
+    }
   }
 
   interception_destroy_context(context);

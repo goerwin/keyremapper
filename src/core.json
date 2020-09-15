@@ -7,7 +7,7 @@
         "key": "Caps",
         "rules": [
           {
-            "when": { "S": "isDown" },
+            "conditions": { "S": "isDown" },
             "fire": [null, "Shift_u"]
           }
         ]
@@ -18,26 +18,26 @@
       },
       {
         "key": ["Alt"],
-        "when": { "Alt": "isDown" },
+        "conditions": { "Alt": "isDown" },
         "fire": [null, null]
       },
       {
         "key": ["Alt"],
-        "when": { "Alt": "isUp" },
+        "conditions": { "Alt": "isUp" },
         "fire": [null, ["keyUpAlt"]]
       },
       {
         "key": ["H", "J", "L", "K"],
         "rules": [
           {
-            "when": { "Win": "isDown" },
+            "conditions": { "Win": "isDown" },
             "fire": [["Ctrl_d", "vimArrowKey", "Ctrl_u"], null]
           },
           {
             "key": ["H", "L"],
             "rules": [
               {
-                "when": { "Alt": "isDown", "isAltAsCtrl": true },
+                "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
                 "fire": [
                   ["keyUpAlt", "vimHomeEndKey", "keyDownAltAsCtrl"],
                   null
@@ -46,7 +46,7 @@
             ]
           },
           {
-            "when": { "Alt": "isDown", "isAltAsCtrl": true },
+            "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
             "fire": [["vimHomeEndKey"], null]
           },
           {
@@ -77,7 +77,7 @@
   },
   {
     "key": "Esc",
-    "when": { "isAltAsAlt": true },
+    "conditions": { "isAltAsAlt": true },
     "fire": [["Esc"], ["keyDownAltAsCtrl"], null]
   }
 ]
