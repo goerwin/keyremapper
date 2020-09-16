@@ -15,19 +15,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\index.cpp">
+    <ClCompile Include="src/index.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils.c">
+    <ClCompile Include="src/libraries/Interception/utils2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\interception.h">
+    <ClInclude Include="src/libraries/Interception/interception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils.h">
+    <ClInclude Include="src/libraries/Interception/utils2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\images\index.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\images\letter-e-red.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\images\letter-e-warning.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\images\letter-e-yellow.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\images\letter-e.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@
 #include "images/index.h"
 #include "helpers/brightness.h"
 #include "json.hpp"
-#include "KeyEvent.h"
+#include "KeyDispatcher.hpp"
 #include "utils.h"
 #include "libraries/Interception/utils2.h"
 #include "libraries/Interception/interception.h"
@@ -35,7 +35,7 @@ json getJsonFile()
   return json::parse(coreStr);
 }
 auto jsonSchema = getJsonFile();
-auto keyEventEl = new KeyEvent::Class(jsonSchema);
+auto keyDispatcherEl = new KeyDispatcher(jsonSchema);
 
 DWORD WINAPI keyboardThreadFunc(void *data)
 {
@@ -49,8 +49,8 @@ DWORD WINAPI keyboardThreadFunc(void *data)
              (InterceptionStroke *)&keyStroke,
              1) > 0)
   {
-    auto key = KeyEvent::Key(keyStroke.code, keyStroke.state);
-    auto newKeys = keyEventEl->getKeyEvents({key});
+    auto key = KeyDispatcher::Key(keyStroke.code, keyStroke.state);
+    auto newKeys = keyDispatcherEl->getKeyEvents({key});
 
     auto keysSize = newKeys.size();
 

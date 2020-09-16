@@ -8,13 +8,13 @@
         "rules": [
           {
             "conditions": { "S": "isDown" },
-            "fire": [null, "Shift_u"]
+            "fire": [null, "Shift:up"]
           }
         ]
       },
       {
         "key": ["Shift", "S"],
-        "fire": [["Shift_d"], ["Shift_u"]]
+        "fire": ["Shift:down", "Shift:up"]
       },
       {
         "key": ["Alt"],
@@ -24,33 +24,30 @@
       {
         "key": ["Alt"],
         "conditions": { "Alt": "isUp" },
-        "fire": [null, ["keyUpAlt"]]
+        "fire": [null, "keyUpAlt"]
       },
       {
         "key": ["H", "J", "L", "K"],
         "rules": [
           {
             "conditions": { "Win": "isDown" },
-            "fire": [["Ctrl_d", "vimArrowKey", "Ctrl_u"], null]
+            "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
           },
           {
             "key": ["H", "L"],
             "rules": [
               {
                 "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
-                "fire": [
-                  ["keyUpAlt", "vimHomeEndKey", "keyDownAltAsCtrl"],
-                  null
-                ]
+                "fire": ["keyUpAlt vimHomeEndKey keyDownAltAsCtrl", null]
               }
             ]
           },
           {
             "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
-            "fire": [["vimHomeEndKey"], null]
+            "fire": ["vimHomeEndKey", null]
           },
           {
-            "fire": [["vimArrowKey"], null]
+            "fire": ["vimArrowKey", null]
           }
         ]
       },
@@ -61,23 +58,23 @@
   },
   {
     "modifier": ["Ctrl", "Tab"],
-    "fire": [["keyDownCtrlAsCtrl", "Tab"], null]
+    "fire": ["keyDownCtrlAsCtrl Tab", null]
   },
   {
     "modifier": ["Ctrl"],
-    "fire": [["keyDownCtrlAsAlt"], ["keyUpCtrl"]]
+    "fire": ["keyDownCtrlAsAlt", "keyUpCtrl"]
   },
   {
     "modifier": ["Alt", "Tab"],
-    "fire": [["keyDownAltAsAlt", "Tab"], null]
+    "fire": ["keyDownAltAsAlt Tab", null]
   },
   {
     "modifier": ["Alt"],
-    "fire": [["keyDownAltAsCtrl"], ["keyUpAlt"]]
+    "fire": ["keyDownAltAsCtrl", "keyUpAlt"]
   },
   {
     "key": "Esc",
     "conditions": { "isAltAsAlt": true },
-    "fire": [["Esc"], ["keyDownAltAsCtrl"], null]
+    "fire": ["Esc keyDownAltAsCtrl", null]
   }
 ]
