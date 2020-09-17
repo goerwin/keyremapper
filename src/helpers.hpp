@@ -1,3 +1,6 @@
+#pragma once
+
+#include <windows.h>
 #include <iostream>
 #include <string>
 
@@ -30,4 +33,9 @@ namespace Helpers
     return result;
   }
 
+  void print(string str, string str2 = "\n")
+  {
+    auto res = str + str2;
+    OutputDebugStringA(res.c_str());
+  }
 } // namespace Helpers

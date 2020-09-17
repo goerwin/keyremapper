@@ -1,6 +1,5 @@
 #pragma once
 
-#include <windows.h>
 #include <vector>
 #include <string>
 #include "json.hpp"
@@ -55,13 +54,17 @@ private:
 
   bool isCtrlAsAlt;
   bool isAltAsCtrl;
-  json keyDownStatus = {};
+  json keyDownStatuses = {};
   json jsonSchema;
+  json modifiers;
+  json tests;
 
 public:
   KeyDispatcher(json jsonSchemaEl)
   {
     jsonSchema = jsonSchemaEl;
+    modifiers = jsonSchemaEl["modifiers"];
+    tests = jsonSchemaEl["tests"];
   }
 
   Keys getKeyEvents(Keys keys)
@@ -77,9 +80,9 @@ public:
 
       bool isKeyDownEl = isKeyDown(key);
       auto keyValue = Symbols::getSymbolByScanCode(keyCode);
-      keyDownStatus["currentKey"] = keyValue;
-      keyDownStatus["currentKeyDown"] = isKeyDownEl;
-      keyDownStatus[keyValue] = isKeyDownEl;
+      keyDownStatuses["currentKey"] = keyValue;
+      keyDownStatuses["currentKeyDown"] = isKeyDownEl;
+      keyDownStatuses[keyValue] = isKeyDownEl;
 
       auto fireKeysRes = getFireKeys();
 
@@ -91,11 +94,11 @@ public:
 
         if (isKeyDownEl)
         {
-          keys = concatKeys(keys, parseKeys(fireKeys[0], keyCode));
+          keys = fireKeys[0].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[0], keyCode));
         }
         else
         {
-          keys = concatKeys(keys, parseKeys(fireKeys[1], keyCode));
+          keys = fireKeys[1].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[1], keyCode));
         }
 
         if (!interceptAll && !isCurrentKeyInModifier)
@@ -122,15 +125,14 @@ public:
         }
       }
 
-      print(stringifyKeys({ key }) + " ==> " + stringifyKeys(keys));
+      Helpers::print(stringifyKeys({ key }) + " ==> " + stringifyKeys(keys));
       allKeys = concatKeys(allKeys, keys);
     }
 
-    return {};
     return allKeys;
   }
 
-  String stringifyKeys(Keys keys)
+  static String stringifyKeys(Keys keys)
   {
     String result = "";
     auto keysSize = keys.size();
@@ -146,10 +148,9 @@ public:
     return result;
   }
 
-  Keys parseKeys(json str, short currentKeyCode)
+  Keys parseKeys(String str, short currentKeyCode = 0)
   {
-    if (str.is_null() || !str.is_string())
-    {
+    if (str.empty()) {
       return {};
     }
 
@@ -230,13 +231,28 @@ public:
     return keys;
   }
 
-private:
-  void print(String string, String string2 = "\n")
-  {
-    auto str = string + string2;
-    OutputDebugStringA(str.c_str());
+  String runTests() {
+    if (tests.is_null()) {
+      return "NO TESTS FOUND";
+    }
+
+    for (int i = 0; i < tests.size(); i++) {
+      keyDownStatuses = {};
+
+      auto test = tests[i];
+      auto inputKeys = parseKeys(test[0]);
+      String expectedKeys = test[1];
+      auto resultKeys = stringifyKeys(getKeyEvents(inputKeys));
+
+      if (resultKeys != expectedKeys) {
+        return "TEST FAILED: expected \"" + expectedKeys + "\" but got \"" + resultKeys + "\"";
+      }
+    }
+
+    return "ALL TESTS PASSED! Number of tests: " + std::to_string(tests.size());
   }
 
+private:
   Keys concatKeys(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {})
   {
     keys.insert(keys.end(), keys2.begin(), keys2.end());
@@ -249,7 +265,7 @@ private:
   {
     Keys keys;
 
-    if (!isCtrlAsAlt && keyDownStatus["Ctrl"])
+    if (!isCtrlAsAlt && keyDownStatuses["Ctrl"])
     {
       keys.insert(keys.begin(), {KeyUp(SC_Ctrl)});
     }
@@ -262,7 +278,7 @@ private:
   {
     Keys keys;
 
-    if (isCtrlAsAlt && keyDownStatus["Ctrl"])
+    if (isCtrlAsAlt && keyDownStatuses["Ctrl"])
     {
       keys.insert(keys.begin(), {KeyUp(SC_Alt)});
     }
@@ -292,7 +308,7 @@ private:
   {
     Keys keys;
 
-    if (!isAltAsCtrl && keyDownStatus["Alt"])
+    if (!isAltAsCtrl && keyDownStatuses["Alt"])
     {
       keys.insert(keys.begin(), {KeyUp(SC_Alt)});
     }
@@ -305,7 +321,7 @@ private:
   {
     Keys keys;
 
-    if (isAltAsCtrl && keyDownStatus["Alt"])
+    if (isAltAsCtrl && keyDownStatuses["Alt"])
     {
       keys.insert(keys.begin(), {KeyUp(SC_Ctrl)});
     }
@@ -341,12 +357,12 @@ private:
     return (keyCode == SC_K || keyCode == SC_H) ? SC_Home : (keyCode == SC_J || keyCode == SC_L) ? SC_End : 0;
   }
 
-  bool isKeyDown(Key key)
+  static bool isKeyDown(Key key)
   {
     return key.state == 0 || key.state == 2;
   }
 
-  bool isKeyMatches(json ruleKey, std::string key)
+  static bool isKeyMatches(json ruleKey, std::string key)
   {
     if (ruleKey.is_null())
     {
@@ -378,7 +394,7 @@ private:
       {
         auto key = i.key();
         auto value = i.value();
-        auto keyStatus = keyDownStatus[key];
+        auto keyStatus = keyDownStatuses[key];
 
         if (value == "isDown")
         {
@@ -441,27 +457,22 @@ private:
 
   json getFireKeys()
   {
-    for (auto kb = jsonSchema.begin(); kb != jsonSchema.end(); ++kb)
+    for (auto i = 0; i < modifiers.size(); i++)
     {
-      auto kbValue = kb.value();
-      auto kbModifier = kbValue["modifier"];
-
-      if (!kbModifier.is_array())
-      {
-        return nullptr;
-      }
+      auto modifierValue = modifiers[i];
+      auto modifier = modifierValue["modifier"];
 
       // verify all modifiers are pressed down
-      auto currentKey = keyDownStatus["currentKey"];
-      auto interceptAll = kbValue["interceptAll"];
+      auto currentKey = keyDownStatuses["currentKey"];
+      auto interceptAll = modifierValue["interceptAll"];
       bool interceptAllValue = !interceptAll.is_null() && interceptAll == true;
       auto skipKeybinding = false;
       auto isCurrentKeyInModifier = false;
 
-      for (auto m = 0; m < kbModifier.size(); m++)
+      for (auto m = 0; m < modifier.size(); m++)
       {
-        auto mod = std::string(kbModifier[m]);
-        auto modKeyDownStatus = keyDownStatus[mod];
+        auto mod = std::string(modifier[m]);
+        auto modKeyDownStatus = keyDownStatuses[mod];
         isCurrentKeyInModifier = false;
 
         if (currentKey == mod)
@@ -475,7 +486,7 @@ private:
           break;
         }
 
-        if (m == kbModifier.size() - 1 && !isCurrentKeyInModifier && !interceptAllValue)
+        if (m == modifier.size() - 1 && !isCurrentKeyInModifier && !interceptAllValue)
         {
           skipKeybinding = true;
           break;
@@ -488,9 +499,11 @@ private:
       }
 
       return {
-          {"fireKeys", getFireKeysFromRule(kbValue, currentKey)},
+          {"fireKeys", getFireKeysFromRule(modifierValue, currentKey)},
           {"interceptAll", interceptAllValue},
           {"isCurrentKeyInModifier", isCurrentKeyInModifier}};
     }
+
+    return {};
   }
 };

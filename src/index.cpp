@@ -12,6 +12,7 @@
 #include "helpers/brightness.h"
 #include "json.hpp"
 #include "KeyDispatcher.hpp"
+#include "helpers.hpp"
 #include "utils.h"
 #include "libraries/Interception/utils2.h"
 #include "libraries/Interception/interception.h"
@@ -22,26 +23,21 @@ InterceptionContext context;
 InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
 
-json getJsonFile()
-{
-  std::ifstream i("./src/core.json");
-  std::string jsonValue;
-  i >> jsonValue;
-
-  std::ifstream coreFile("./src/core.json");
-  std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
-                      std::istreambuf_iterator<char>());
-
-  return json::parse(coreStr);
-}
-auto jsonSchema = getJsonFile();
-auto keyDispatcherEl = new KeyDispatcher(jsonSchema);
-
 DWORD WINAPI keyboardThreadFunc(void *data)
 {
   raise_process_priority();
   context = interception_create_context();
   interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
+
+  std::ifstream coreFile("./src/core.json");
+  std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
+  std::istreambuf_iterator<char>());
+  
+  auto jsonSchema = json::parse(coreStr, nullptr, false, true);
+  auto keyDispatcher = new KeyDispatcher(jsonSchema);
+  auto testResults = keyDispatcher->runTests();
+
+  Helpers::print(testResults);
 
   while (interception_receive(
              context,
@@ -50,7 +46,7 @@ DWORD WINAPI keyboardThreadFunc(void *data)
              1) > 0)
   {
     auto key = KeyDispatcher::Key(keyStroke.code, keyStroke.state);
-    auto newKeys = keyDispatcherEl->getKeyEvents({key});
+    auto newKeys = keyDispatcher->getKeyEvents({key});
 
     auto keysSize = newKeys.size();
 
