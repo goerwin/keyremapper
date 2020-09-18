@@ -94,22 +94,22 @@ public:
 
         if (isKeyDownEl)
         {
-          keys = fireKeys[0].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[0], keyCode));
+          keys = fireKeys[0].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[0]));
         }
         else
         {
-          keys = fireKeys[1].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[1], keyCode));
+          keys = fireKeys[1].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[1]));
         }
 
         if (!interceptAll && !isCurrentKeyInModifier)
         {
           if (isKeyDownEl)
           {
-            keys = concatKeys(keys, { KeyDown(keyCode) });
+            keys = concatKeys(keys, {KeyDown(keyCode)});
           }
           else
           {
-            keys = concatKeys(keys, { KeyUp(keyCode) });
+            keys = concatKeys(keys, {KeyUp(keyCode)});
           }
         }
       }
@@ -117,15 +117,15 @@ public:
       {
         if (isKeyDownEl)
         {
-          keys = concatKeys(keys, { KeyDown(keyCode) });
+          keys = concatKeys(keys, {KeyDown(keyCode)});
         }
         else
         {
-          keys = concatKeys(keys, { KeyUp(keyCode) });
+          keys = concatKeys(keys, {KeyUp(keyCode)});
         }
       }
 
-      Helpers::print(stringifyKeys({ key }) + " ==> " + stringifyKeys(keys));
+      Helpers::print(stringifyKeys({key}) + " ==> " + stringifyKeys(keys));
       allKeys = concatKeys(allKeys, keys);
     }
 
@@ -148,14 +148,16 @@ public:
     return result;
   }
 
-  Keys parseKeys(String str, short currentKeyCode = 0)
+  Keys parseKeys(String str)
   {
-    if (str.empty()) {
+    if (str.empty())
+    {
       return {};
     }
 
     auto strKeys = Helpers::split(Helpers::trim(str), ' ');
     auto strKeysSize = strKeys.size();
+    auto currentKeyCode = keyDownStatuses["currentKey"];
     Keys keys = {};
 
     for (auto i = 0; i < strKeysSize; i++)
@@ -164,6 +166,7 @@ public:
       auto keyDesc = Helpers::split(strKey, ':');
       auto keySymbol = keyDesc[0];
       String keyStatusStr;
+      short keyCode;
 
       if (keyDesc.size() == 2)
         keyStatusStr = keyDesc[1];
@@ -198,9 +201,11 @@ public:
         keys = concatKeys(keys, keyUpCtrl());
         continue;
       }
-
-      short keyCode;
-      if (keySymbol == "vimArrowKey")
+      else if (keySymbol == "currentKey")
+      {
+        keyCode = Symbols::getSymbolScanCode(currentKeyCode);
+      }
+      else if (keySymbol == "vimArrowKey")
       {
         keyCode = getVimArrowKeyCode(currentKeyCode);
       }
@@ -215,37 +220,42 @@ public:
 
       if (keyStatusStr == "down")
       {
-        keys = concatKeys(keys, { KeyDown(keyCode) });
+        keys = concatKeys(keys, {KeyDown(keyCode)});
       }
       else if (keyStatusStr == "up")
       {
-        keys = concatKeys(keys, { KeyUp(keyCode) });
+        keys = concatKeys(keys, {KeyUp(keyCode)});
       }
       else
       {
-        keys = concatKeys(keys, { KeyDown(keyCode) });
-        keys = concatKeys(keys, { KeyUp(keyCode) });
+        keys = concatKeys(keys, {KeyDown(keyCode)});
+        keys = concatKeys(keys, {KeyUp(keyCode)});
       }
     }
 
     return keys;
   }
 
-  String runTests() {
-    if (tests.is_null()) {
+  String runTests()
+  {
+    if (tests.is_null())
+    {
       return "NO TESTS FOUND";
     }
 
-    for (int i = 0; i < tests.size(); i++) {
+    for (int i = 0; i < tests.size(); i++)
+    {
       keyDownStatuses = {};
 
       auto test = tests[i];
       auto inputKeys = parseKeys(test[0]);
-      String expectedKeys = test[1];
-      auto resultKeys = stringifyKeys(getKeyEvents(inputKeys));
+      String expectedKeysStr = test[1];
+      auto expectedKeys = parseKeys(expectedKeysStr);
+      auto resultKeysStr = stringifyKeys(getKeyEvents(inputKeys));
 
-      if (resultKeys != expectedKeys) {
-        return "TEST FAILED: expected \"" + expectedKeys + "\" but got \"" + resultKeys + "\"";
+      if (resultKeysStr != stringifyKeys(expectedKeys))
+      {
+        return "TEST FAILED: expected \"" + expectedKeysStr + "\" but got \"" + resultKeysStr + "\"";
       }
     }
 
@@ -347,13 +357,15 @@ private:
     return keys;
   }
 
-  short getVimArrowKeyCode(short keyCode)
+  short getVimArrowKeyCode(String key)
   {
+    auto keyCode = key.empty() ? 0 : Symbols::getSymbolScanCode(key);
     return keyCode == SC_K ? SC_Up : keyCode == SC_J ? SC_Down : keyCode == SC_L ? SC_Right : keyCode == SC_H ? SC_Left : 0;
   }
 
-  short getVimHomeEndKeyCode(short keyCode)
+  short getVimHomeEndKeyCode(String key)
   {
+    auto keyCode = key.empty() ? 0 : Symbols::getSymbolScanCode(key);
     return (keyCode == SC_K || keyCode == SC_H) ? SC_Home : (keyCode == SC_J || keyCode == SC_L) ? SC_End : 0;
   }
 
@@ -416,43 +428,33 @@ private:
     return true;
   }
 
-  json getFireKeysFromRule(json rule, std::string key = NULL)
+  json getFireKeysFromRules(json rules)
   {
-    auto ruleKey = rule["key"];
-    auto conditions = rule["conditions"];
-    auto fire = rule["fire"];
-    auto rules = rule["rules"];
-
-    bool keyMatches = isKeyMatches(ruleKey, key);
-    bool conditionMatches = isConditionMatches(conditions);
-
-    if (!keyMatches || !conditionMatches)
+    for (auto i = 0; i < rules.size(); i++)
     {
-      return NULL;
-    }
+      auto rule = rules[i];
+      auto ruleKey = rule["key"];
+      auto conditions = rule["conditions"];
+      auto fire = rule["fire"];
+      auto currentKey = keyDownStatuses["currentKey"];
 
-    if (rules.is_array())
-    {
-      for (auto r = rules.begin(); r != rules.end(); ++r)
+      bool keyMatches = isKeyMatches(ruleKey, currentKey);
+      bool conditionMatches = isConditionMatches(conditions);
+
+      if (!keyMatches || !conditionMatches)
       {
-        auto res = getFireKeysFromRule(r.value(), key);
-        if (res != NULL)
-        {
-          return res;
-        }
+        continue;
       }
 
-      return NULL;
+      if (!fire.is_null())
+      {
+        return fire;
+      }
+
+      return getFireKeysFromRules(rule["rules"]);
     }
 
-    //auto set = rule["set"];
-    //if (set.is_object()) {
-    //for (json::iterator i = set.begin(); i != set.end(); ++i) {
-    //  setGlobalVarValue(i.key(), i.value());
-    //  }
-    //}
-
-    return fire;
+    return {};
   }
 
   json getFireKeys()
@@ -461,14 +463,16 @@ private:
     {
       auto modifierValue = modifiers[i];
       auto modifier = modifierValue["modifier"];
+      auto fire = modifierValue["fire"];
+      auto rules = modifierValue["rules"];
 
-      // verify all modifiers are pressed down
       auto currentKey = keyDownStatuses["currentKey"];
       auto interceptAll = modifierValue["interceptAll"];
       bool interceptAllValue = !interceptAll.is_null() && interceptAll == true;
       auto skipKeybinding = false;
       auto isCurrentKeyInModifier = false;
 
+      // verify all modifiers are pressed down
       for (auto m = 0; m < modifier.size(); m++)
       {
         auto mod = std::string(modifier[m]);
@@ -499,7 +503,7 @@ private:
       }
 
       return {
-          {"fireKeys", getFireKeysFromRule(modifierValue, currentKey)},
+          {"fireKeys", fire.is_null() ? getFireKeysFromRules(rules) : fire},
           {"interceptAll", interceptAllValue},
           {"isCurrentKeyInModifier", isCurrentKeyInModifier}};
     }

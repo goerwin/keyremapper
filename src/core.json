@@ -10,22 +10,20 @@
             {
               "conditions": { "S": "isDown" },
               "fire": [null, "Shift:up"]
+            },
+            {
+              "conditions": { "Alt": "isDown" },
+              "fire": ["keyUpAlt", "keyDownAltAsCtrl"]
             }
           ]
         },
         {
-          "key": ["Shift", "S"],
-          "fire": ["Shift:down", "Shift:up"]
-        },
-        {
-          "key": ["Alt"],
-          "conditions": { "Alt": "isDown" },
+          "key": ["Alt", "Ctrl", "Win"],
           "fire": [null, null]
         },
         {
-          "key": ["Alt"],
-          "conditions": { "Alt": "isUp" },
-          "fire": [null, "keyUpAlt"]
+          "key": ["S"],
+          "fire": ["Shift:down", "Shift:up"]
         },
         {
           "key": ["H", "J", "L", "K"],
@@ -38,13 +36,16 @@
               "key": ["H", "L"],
               "rules": [
                 {
-                  "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
-                  "fire": ["keyUpAlt vimHomeEndKey keyDownAltAsCtrl", null]
+                  "conditions": { "Alt": "isDown" },
+                  "fire": ["vimHomeEndKey", null]
+                },
+                {
+                  "fire": ["vimArrowKey", null]
                 }
               ]
             },
             {
-              "conditions": { "Alt": "isDown", "isAltAsCtrl": true },
+              "conditions": { "Alt": "isDown" },
               "fire": ["vimHomeEndKey", null]
             },
             {
@@ -53,7 +54,7 @@
           ]
         },
         {
-          "fire": [null, null]
+          "fire": ["currentKey:down", "currentKey:up"]
         }
       ]
     },
@@ -84,12 +85,11 @@
       "Alt:down Tab Alt:up",
       "Ctrl:down Ctrl:up Alt:down Tab:down Tab:up Alt:up"
     ],
-    ["Caps", ""],
     ["Ctrl", "Alt:down Alt:up"],
     ["Ctrl:down C Ctrl:up", "Alt:down C:down C:up Alt:up"],
 
     // Key - DownUp
-    ["A", "A:down A:up"],
+    ["A", "A"],
 
     // Key - Down
     ["H:down H:down H:down", "H:down H:down H:down"],
@@ -110,267 +110,18 @@
     ["H:down J:down K H:up J:up", "H:down J:down K:down K:up H:up J:up"],
 
     // VIM MODE
-    ["Caps:down H Caps:up", "Left:down Left:up"],
-    ["Caps:down L Caps:up", "Right:down Right:up"],
-    ["Caps:down J Caps:up", "Down:down Down:up"],
+    ["Caps", ""],
+    ["Caps:down A:down A:up Caps:up", "A"],
+    ["Caps:down H Caps:up", "Left"],
+    ["Caps:down L Caps:up", "Right"],
+    ["Caps:down J Caps:up", "Down"],
     ["Caps:down K Caps:up", "Up:down Up:up"],
-    ["Caps:down H H Caps:up", "Left:down Left:up Left:down Left:up"],
-    ["Caps:down L L Caps:up", "Right:down Right:up Right:down Right:up"],
-    ["Caps:down J J Caps:up", "Down:down Down:up Down:down Down:up"],
-    ["Caps:down K K Caps:up", "Up:down Up:up Up:down Up:up"],
-    // TODO: VIM MODE (AppSwitcher)
-    [
-      "Caps:down S:down H S:up Caps:up",
-      "Shift:down Left:down Left:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down H Shift:up Caps:up",
-      "Shift:down Left:down Left:up Shift:up"
-    ],
-    [
-      "Caps:down S:down L S:up Caps:up",
-      "Shift:down Right:down Right:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down L Shift:up Caps:up",
-      "Shift:down Right:down Right:up Shift:up"
-    ],
-    [
-      "Caps:down S:down J S:up Caps:up",
-      "Shift:down Down:down Down:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down J Shift:up Caps:up",
-      "Shift:down Down:down Down:up Shift:up"
-    ],
-    ["Caps:down S:down K S:up Caps:up", "Shift:down Up:down Up:up Shift:up"],
-    [
-      "Caps:down Shift:down K Shift:up Caps:up",
-      "Shift:down Up:down Up:up Shift:up"
-    ],
-    [
-      "Caps:down S:down H H S:up Caps:up",
-      "Shift:down Left:down Left:up Left:down Left:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down H H Shift:up Caps:up",
-      "Shift:down Left:down Left:up Left:down Left:up Shift:up"
-    ],
-    [
-      "Caps:down S:down L L S:up Caps:up",
-      "Shift:down Right:down Right:up Right:down Right:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down L L Shift:up Caps:up",
-      "Shift:down Right:down Right:up Right:down Right:up Shift:up"
-    ],
-    [
-      "Caps:down S:down J J S:up Caps:up",
-      "Shift:down Down:down Down:up Down:down Down:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down J J Shift:up Caps:up",
-      "Shift:down Down:down Down:up Down:down Down:up Shift:up"
-    ],
-    [
-      "Caps:down S:down K K S:up Caps:up",
-      "Shift:down Up:down Up:up Up:down Up:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down K K Shift:up Caps:up",
-      "Shift:down Up:down Up:up Up:down Up:up Shift:up"
-    ],
-    [
-      "Caps:down Win:down H Win:up Caps:up",
-      "Ctrl:down Left:down Left:up Ctrl:up"
-    ],
-    [
-      "Caps:down Win:down L Win:up Caps:up",
-      "Ctrl:down Right:down Right:up Ctrl:up"
-    ],
-    [
-      "Caps:down Win:down J Win:up Caps:up",
-      "Ctrl:down Down:down Down:up Ctrl:up"
-    ],
-    ["Caps:down Win:down K Win:up Caps:up", "Ctrl:down Up:down Up:up Ctrl:up"],
-    [
-      "Caps:down Win:down H H Win:up Caps:up",
-      "Ctrl:down Left:down Left:up Ctrl:up Ctrl:down Left:down Left:up Ctrl:up"
-    ],
-    [
-      "Caps:down Win:down L L Win:up Caps:up",
-      "Ctrl:down Right:down Right:up Ctrl:up Ctrl:down Right:down Right:up Ctrl:up"
-    ],
-    [
-      "Caps:down Win:down J J Win:up Caps:up",
-      "Ctrl:down Down:down Down:up Ctrl:up Ctrl:down Down:down Down:up Ctrl:up"
-    ],
-    [
-      "Caps:down Win:down K K Win:up Caps:up",
-      "Ctrl:down Up:down Up:up Ctrl:up Ctrl:down Up:down Up:up Ctrl:up"
-    ],
-    [
-      "Caps:down S:down Win:down H Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Left:down Left:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down H Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Left:down Left:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down L Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Right:down Right:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down L Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Right:down Right:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down J Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Down:down Down:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down J Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Down:down Down:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down K Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Up:down Up:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down K Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Up:down Up:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down H H Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Left:down Left:up Ctrl:up Ctrl:down Left:down Left:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down H H Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Left:down Left:up Ctrl:up Ctrl:down Left:down Left:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down L L Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Right:down Right:up Ctrl:up Ctrl:down Right:down Right:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down L L Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Right:down Right:up Ctrl:up Ctrl:down Right:down Right:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down J J Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Down:down Down:up Ctrl:up Ctrl:down Down:down Down:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down J J Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Down:down Down:up Ctrl:up Ctrl:down Down:down Down:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Win:down K K Win:up S:up Caps:up",
-      "Shift:down Ctrl:down Up:down Up:up Ctrl:up Ctrl:down Up:down Up:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Win:down K K Win:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Up:down Up:up Ctrl:up Ctrl:down Up:down Up:up Ctrl:up Shift:up"
-    ],
-    // [
-    //   "Caps:down Alt:down H Alt:up Caps:up",
-    //   "Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up",
-    //   "TODO: It should only trigger Home:down Home:up",
-    //   "TODO: If alt and then caps then it is expected the ctrl down/up"
-    // ],
-    // SAME FOR THIS
-    // [
-    //   "Caps:down Alt:down L Alt:up Caps:up",
-    //   "Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up"
-    // ],
-    // [
-    //   "Caps:down Alt:down H H Alt:up Caps:up",
-    //   "Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up"
-    // ],
-    // [
-    //   "Caps:down Alt:down L L Alt:up Caps:up",
-    //   "Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up"
-    // ]
-    [
-      "Caps:down S:down Alt:down H Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down H Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down L Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down L Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down H Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down H H Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Home:down Home:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down L L Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down L L Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up End:down End:up Ctrl:down Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Alt:down J Alt:up Caps:up",
-      "Ctrl:down End:down End:up Ctrl:up"
-    ],
-    [
-      "Caps:down Alt:down K Alt:up Caps:up",
-      "Ctrl:down Home:down Home:up Ctrl:up"
-    ],
-    [
-      "Caps:down Alt:down J J Alt:up Caps:up",
-      "Ctrl:down End:down End:up End:down End:up Ctrl:up"
-    ],
-    [
-      "Caps:down Alt:down K K Alt:up Caps:up",
-      "Ctrl:down Home:down Home:up Home:down Home:up Ctrl:up"
-    ],
-    [
-      "Caps:down S:down Alt:down J Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down End:down End:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down J Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down End:down End:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down K Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Home↕ Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down K Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Home↕ Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down J J Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down End:down End:up End:down End:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down J J Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down End:down End:up End:down End:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down S:down Alt:down K K Alt:up S:up Caps:up",
-      "Shift:down Ctrl:down Home:down End:up Home:down End:up Ctrl:up Shift:up"
-    ],
-    [
-      "Caps:down Shift:down Alt:down K K Alt:up Shift:up Caps:up",
-      "Shift:down Ctrl:down Home:down End:up Home:down End:up Ctrl:up Shift:up"
-    ]
+    ["Caps:down Alt:down H Alt:up Caps:up", "Home"],
+    ["Caps:down Alt:down L Alt:up Caps:up", "End"],
+
+    // VIM MODE: When Caps is not the first pressed key
+    ["C:down Caps:down C:up Caps:up", "C"],
+    ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
+    ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"]
   ]
 }

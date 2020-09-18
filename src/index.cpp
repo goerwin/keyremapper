@@ -54,11 +54,12 @@ DWORD WINAPI keyboardThreadFunc(void *data)
     {
       auto keyCode = newKeys[i].code;
       auto state = newKeys[i].state;
+      auto newKeyStroke = InterceptionKeyStroke({ keyCode, state });
 
       interception_send(
           context,
           device,
-          (InterceptionStroke *)&InterceptionKeyStroke({keyCode, state}),
+          (InterceptionStroke *)&newKeyStroke,
           1);
     }
   }

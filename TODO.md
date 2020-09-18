@@ -1,10 +1,10 @@
+- you should only test key cases, not entire flows (like vim mode)
 - add builds for both x86 and x64 archs
 - move all files to src (no dirs allowed to avoid issues when importing header files)
 - rethink alghoritm to be more general so it can be used in any OS
 - provide a doublePress modifier (eg. for the capslock with double shift press)
-<!--
-altdown capsdown altup capsup is leaving the ctrl click pressed
 
+<!--
 Key: string | string[] - matches currentKey, it can be an [] for ORs
 Condition: { [key]: [value] } - multiple keys will represent ANDs
 Fire: [string | null, string | null];
@@ -16,7 +16,7 @@ Rule {
 } | { fire: Fire }
 
 KeyBinding {
-  modifier: 'Caps' | 'CapsAlt', 'CtrlShift', 'etc';
+  modifier: string[];
   ...Rule
 }
 
