@@ -1,0 +1,31 @@
+{
+  "description": [
+    "Only return the first fire found",
+    "If no fire is returned, let the key event go through",
+    "Key:down Key:up is the same as Key"
+  ],
+  "modifiers": [
+    {
+      "modifier": ["F"],
+      "fire": ["X:down", "X:up"]
+    },
+    {
+      "modifier": ["F"],
+      "fire": ["Z:down", "Z:up"]
+    },
+    {
+      "modifier": ["Alt"],
+      "fire": ["Ctrl:down", "Ctrl:up"]
+    }
+  ],
+  "tests": [
+    ["F", "X"],
+
+    ["A", "A"],
+    ["A:down A:up", "A"],
+    ["A:down A:up", "A:down A:up"],
+    ["Alt:down C Alt:up", "Ctrl:down C Ctrl:up"],
+    ["C Alt", "C Ctrl"],
+    ["C:down Alt:down C:up Alt:up", "C:down Ctrl:down C:up Ctrl:up"]
+  ]
+}

@@ -10,7 +10,7 @@
 #include <fstream>
 #include "images/index.h"
 #include "helpers/brightness.h"
-#include "json.hpp"
+#include "libraries/json.hpp"
 #include "KeyDispatcher.hpp"
 #include "helpers.hpp"
 #include "utils.h"
@@ -32,12 +32,12 @@ DWORD WINAPI keyboardThreadFunc(void *data)
   std::ifstream coreFile("./src/core.json");
   std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
   std::istreambuf_iterator<char>());
-  
+
   auto jsonSchema = json::parse(coreStr, nullptr, false, true);
   auto keyDispatcher = new KeyDispatcher(jsonSchema);
   auto testResults = keyDispatcher->runTests();
 
-  Helpers::print(testResults);
+  Helpers::print(!testResults.is_null() ? testResults["message"] : "");
 
   while (interception_receive(
              context,

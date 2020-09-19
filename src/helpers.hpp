@@ -2,11 +2,15 @@
 
 #include <windows.h>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <string>
+#include "libraries/json.hpp"
 
 namespace Helpers
 {
   using namespace std;
+  using json = nlohmann::json;
 
   string trim(string str)
   {
@@ -37,5 +41,15 @@ namespace Helpers
   {
     auto res = str + str2;
     OutputDebugStringA(res.c_str());
+  }
+
+  json getJsonSchema(std::string filepath) {
+    std::ifstream coreFile(filepath);
+    std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
+      std::istreambuf_iterator<char>());
+
+    auto jsonSchema = json::parse(coreStr, nullptr, false, true);
+
+    return jsonSchema;
   }
 } // namespace Helpers

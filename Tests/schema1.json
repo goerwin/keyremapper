@@ -1,0 +1,39 @@
+{
+  "description": [
+    "Basic remaps",
+    "fire[0] is for keydown, fire[1] is for keyup",
+    "modifier matched if all their keys but last one are down and last key is down or currentKey"
+  ],
+  "modifiers": [
+    {
+      "modifier": ["Alt"],
+      "fire": ["Ctrl:down", "Ctrl:up"]
+    },
+    {
+      "modifier": ["B"],
+      "fire": ["C", "D"]
+    },
+    {
+      "modifier": ["F", "G"],
+      "fire": ["H:down", "H:up"]
+    },
+    {
+      "modifier": ["Ctrl", "Caps", "H"],
+      "fire": ["Left", null]
+    }
+  ],
+  "tests": [
+    ["Alt", "Ctrl"],
+
+    ["B:down B:up", "C:down C:up D:down D:up"],
+
+    ["F:down G:down G:up F:up", "F:down H F:up"],
+    ["G:down F:down F:up G:up", "G:down F G:up"],
+    ["F:down G:down F:up G:up", "F:down H:down F:up G:up"],
+
+    [
+      "Ctrl:down Caps:down H Caps:up Ctrl:up",
+      "Ctrl:down Caps:down Left Caps:up Ctrl:up"
+    ]
+  ]
+}

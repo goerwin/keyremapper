@@ -11,7 +11,7 @@ Fire: [string | null, string | null];
 
 
 Rule {
-  oneOfOrBoth [Key, Condition]
+  oneOfOrBoth [Key, Conditions]
   (rules: Rule[] | fire: Fire)
 } | { fire: Fire }
 
