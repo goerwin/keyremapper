@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "required": ["modifiers"],
+  "type": "object",
+  "properties": {
+    "modifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["modifier"],
+        "oneOf": [{ "required": ["fire"] }, { "required": ["rules"] }],
+        "properties": {
+          "modifier": { "type": "array", "items": { "type": "string" } },
+          "fire": { "$ref": "#/definitions/ruleFire" },
+          "rules": { "$ref": "#/definitions/rules" }
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "ruleKey": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
+    "ruleConditions": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "patternProperties": { "": { "type": "boolean" } }
+    },
+    "ruleFire": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": ["string", "null"] }
+    },
+    "rule": {
+      "type": "object",
+      "oneOf": [{ "required": ["fire"] }, { "required": ["rules"] }],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "$ref": "#/definitions/ruleKey" },
+        "conditions": { "$ref": "#/definitions/ruleConditions" },
+        "rules": { "$ref": "#/definitions/rules" },
+        "fire": { "$ref": "#/definitions/ruleFire" },
+        "set": {
+          "type": "object",
+          "propertyNames": { "type": "string" },
+          "patternProperties": { "": { "type": "boolean" } }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/rule" }
+    }
+  }
+}
