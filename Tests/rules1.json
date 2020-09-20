@@ -2,24 +2,29 @@
   "description": [
     "Basic remaps",
     "fire[0] is for keydown, fire[1] is for keyup",
-    "modifier matched if all their keys but last one are down and last key is down or currentKey"
+    "keybinding triggered if one of its hotkeys matches",
+    "hotkey matches if their keys but last one are down and last key is currentKey"
   ],
-  "modifiers": [
+  "keybindings": [
     {
-      "modifier": ["Alt"],
+      "hotkeys": ["Alt"],
       "fire": ["Ctrl:down", "Ctrl:up"]
     },
     {
-      "modifier": ["B"],
+      "hotkeys": ["B"],
       "fire": ["C", "D"]
     },
     {
-      "modifier": ["F", "G"],
+      "hotkeys": ["F G"],
       "fire": ["H:down", "H:up"]
     },
     {
-      "modifier": ["Ctrl", "Caps", "H"],
+      "hotkeys": ["Ctrl Caps H"],
       "fire": ["Left", null]
+    },
+    {
+      "hotkeys": ["X", "Y"],
+      "fire": ["Z:down", "Z:up"]
     }
   ],
   "tests": [
@@ -27,13 +32,16 @@
 
     ["B:down B:up", "C:down C:up D:down D:up"],
 
-    ["F:down G:down G:up F:up", "F:down H F:up"],
-    ["G:down F:down F:up G:up", "G:down F G:up"],
+    ["F:down G F:up", "F:down H F:up"],
+    ["G:down F G:up", "G:down F G:up"],
     ["F:down G:down F:up G:up", "F:down H:down F:up G:up"],
 
     [
       "Ctrl:down Caps:down H Caps:up Ctrl:up",
       "Ctrl:down Caps:down Left Caps:up Ctrl:up"
-    ]
+    ],
+
+    ["X", "Z"],
+    ["Y", "Z"]
   ]
 }

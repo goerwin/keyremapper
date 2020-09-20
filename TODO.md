@@ -3,6 +3,7 @@
 - move all files to src (no dirs allowed to avoid issues when importing header files)
 - rethink alghoritm to be more general so it can be used in any OS
 - provide a doublePress modifier (eg. for the capslock with double shift press)
+- validate if keycode doesnt exist
 
 g_isKeyDown => to reference if the non modifier key is down
 g_isSKeyDown => for vimmode, also can be anothermodifierkey

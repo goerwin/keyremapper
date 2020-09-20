@@ -43,13 +43,14 @@ namespace Helpers
     OutputDebugStringA(res.c_str());
   }
 
-  json getJsonSchema(std::string filepath) {
-    std::ifstream coreFile(filepath);
-    std::string coreStr((std::istreambuf_iterator<char>(coreFile)),
-      std::istreambuf_iterator<char>());
+  json getJsonFile(std::string filepath)
+  {
+    std::ifstream file(filepath);
+    std::string fileStr((std::istreambuf_iterator<char>(file)),
+                        std::istreambuf_iterator<char>());
 
-    auto jsonSchema = json::parse(coreStr, nullptr, false, true);
+    auto jsonFile = json::parse(fileStr, nullptr, false, true);
 
-    return jsonSchema;
+    return jsonFile;
   }
 } // namespace Helpers

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <windows.h>
 
-#include "utils2.h"
+#include "utils.h"
 
 void raise_process_priority(void)
 {

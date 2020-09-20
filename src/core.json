@@ -1,88 +1,103 @@
 {
-  "modifiers": [
+  "remaps": {
+    "CtrlR": "Win"
+  },
+  "keybindings": [
     {
-      "modifier": ["Caps"],
-      "rules": [
-        {
-          "key": "Caps",
-          "rules": [
-            {
-              "conditions": { "S": true },
-              "fire": [null, "Shift:up"]
-            },
-            {
-              "fire": [null, null]
-            }
-          ]
-        },
-        {
-          "key": ["S"],
-          "fire": ["Shift:down", "Shift:up"]
-        },
-        {
-          "key": ["H", "J", "L", "K"],
-          "rules": [
-            {
-              "conditions": { "Win": true },
-              "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
-            },
-            {
-              "key": ["H", "L"],
-              "rules": [
-                {
-                  "conditions": { "Alt": true },
-                  "fire": ["Ctrl:up vimHomeEndKey Ctrl:down", null]
-                },
-                {
-                  "fire": ["vimArrowKey", null]
-                }
-              ]
-            },
-            {
-              "conditions": { "Alt": true },
-              "fire": ["vimHomeEndKey", null]
-            },
-            {
-              "fire": ["vimArrowKey", null]
-            }
-          ]
-        }
-      ]
+      "hotkeys": ["Alt Tab"],
+      "when": { "isAltTabMode": false },
+      "set": { "isAltTabMode": true },
+      "fire": ["Ctrl:up Alt:down Tab", null]
     },
     {
-      "modifier": ["Alt"],
-      "rules": [
-        {
-          "key": "Alt",
-          "rules": [
-            {
-              "conditions": { "isAltTabMode": true, "Alt": false },
-              "fire": [null, "Alt:up"],
-              "set": { "isAltTabMode": false }
-            },
-            {
-              "fire": ["Ctrl:down", "Ctrl:up"]
-            }
-          ]
-        },
-        {
-          "key": "Tab",
-          "rules": [
-            {
-              "conditions": { "isAltTabMode": true },
-              "fire": ["Tab:down", "Tab:up"]
-            },
-            {
-              "fire": ["Ctrl:up Alt:down Tab:down", "Tab:up"],
-              "set": { "isAltTabMode": true }
-            }
-          ]
-        }
-      ]
+      "hotkeys": ["Alt Tab"],
+      "when": { "isAltTabMode": true },
+      "fire": ["Tab", null]
+    },
+    {
+      "hotkeys": ["Alt"],
+      "when": { "isAltTabMode": false },
+      "fire": ["Ctrl:down", "Ctrl:up"]
+    },
+    {
+      "hotkeys": ["Alt"],
+      "when": { "isAltTabMode": true },
+      "set": { "isAltTabMode": false },
+      "fire": [null, "Alt:up"]
+    },
+    {
+      "hotkeys": ["Ctrl"],
+      "fire": ["Alt:down", "Alt:up"]
+    },
+    {
+      "hotkeys": ["H", "L"],
+      "when": { "Caps": true, "Alt": true, "isAltTabMode": false },
+      "fire": ["Ctrl:up vimHomeEndKey Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["J", "K"],
+      "when": { "Caps": true, "Alt": true, "isAltTabMode": false },
+      "fire": ["vimHomeEndKey", null]
+    },
+    {
+      "hotkeys": ["H", "J", "K", "L"],
+      "when": { "Caps": true, "Alt": true, "isAltTabMode": true },
+      "fire": ["vimArrowKey", null]
+    },
+    {
+      "hotkeys": ["H", "J", "K", "L"],
+      "when": { "Caps": true, "Ctrl": true },
+      "fire": ["Alt:up vimArrowKey", null]
+    },
+    {
+      "hotkeys": ["H", "J", "K", "L"],
+      "when": { "Caps": true },
+      "fire": ["vimArrowKey", null]
+    },
+    {
+      "hotkeys": ["Caps"],
+      "fire": [null, null]
     }
+
+    // {
+    //   "modifier": ["H", "J", "K", "L"],
+    //   "conditions": { "Caps": true, "Alt": true },
+    //   "fire": ["Ctrl:up vimArrowKey Ctrl:down", null]
+    // }
+    // {
+    //   "modifier": ["Alt"],
+    //   "rules": [
+    //     {
+    //       "key": "Alt",
+    //       "rules": [
+    //         {
+    //           "conditions": { "isAltTabMode": true, "Alt": false },
+    //           "fire": [null, "Alt:up"],
+    //           "set": { "isAltTabMode": false }
+    //         },
+    //         {
+    //           "fire": ["Ctrl:down", "Ctrl:up"]
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "key": "Tab",
+    //       "rules": [
+    //         {
+    //           "conditions": { "isAltTabMode": true },
+    //           "fire": ["Tab:down", "Tab:up"]
+    //         },
+    //         {
+    //           "fire": ["Ctrl:up Alt:down Tab:down", "Tab:up"],
+    //           "set": { "isAltTabMode": true }
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }
   ],
   "tests": [
-    // Alt Tab Mode
+    //Alt Tab Mode
     ["Alt:down Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Alt:up"],
     ["Alt:down Tab Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Tab Alt:up"],
     [
@@ -93,31 +108,24 @@
       "Alt:down Shift:down Tab Tab Shift:up Alt:up",
       "Ctrl:down Shift:down Ctrl:up Alt:down Tab Tab Shift:up Alt:up"
     ],
-
     // Key
     ["A", "A"],
-
     // Key - Down
     ["H:down H:down H:down", "H:down H:down H:down"],
-
     // Key - Down then Up
     ["H:down H:down H:up", "H:down H:down H:up"],
-
     // Key - 2 Keys In Order
     ["H:down J H:up", "H:down J:down J:up H:up"],
-
     // Key - 2 Keys In No Order
     ["H:down J:down H:up J:up", "H:down J:down H:up J:up"],
-
     // Key - 3 Keys In Order
     ["H:down J:down K J:up H:up", "H:down J:down K:down K:up J:up H:up"],
-
     // Key - 3 Keys No Order
     ["H:down J:down K H:up J:up", "H:down J:down K:down K:up H:up J:up"],
 
     ["Alt", "Ctrl"],
 
-    // VIM MODE
+    // // VIM MODE
     ["Caps", ""],
     ["Caps:down A Caps:up", "A"],
     ["Caps:down H Caps:up", "Left"],
@@ -127,7 +135,7 @@
     ["Caps:down Alt:down H Alt:up Caps:up", "Ctrl Home Ctrl"],
     ["Caps:down Alt:down L Alt:up Caps:up", "Ctrl End Ctrl"],
 
-    // VIM MODE: When Caps is not the first pressed key
+    // // VIM MODE: When Caps is not the first pressed key
     ["C:down Caps:down C:up Caps:up", "C"],
     ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
     ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"]

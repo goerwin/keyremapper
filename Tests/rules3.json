@@ -1,0 +1,34 @@
+{
+  "description": ["currentKey", "set", "when"],
+  "keybindings": [
+    {
+      "hotkeys": ["A"],
+      "fire": ["B currentKey", null]
+    },
+    {
+      "hotkeys": ["C"],
+      "when": { "C": true },
+      "set": { "RANDOM_STR": true }
+    },
+    {
+      "hotkeys": ["C"],
+      "when": { "C": false },
+      "set": { "RANDOM_STR": false }
+    },
+    {
+      "hotkeys": ["D"],
+      "when": { "RANDOM_STR": true },
+      "fire": ["X", null]
+    },
+    {
+      "hotkeys": ["D"],
+      "when": { "RANDOM_STR": false },
+      "fire": ["Y", null]
+    }
+  ],
+  "tests": [
+    ["A", "B A"],
+    ["C:down D C:up", "C:down X C:up"],
+    ["C D C:down D C:up", "C Y C:down X C:up"]
+  ]
+}

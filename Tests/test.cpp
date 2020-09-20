@@ -7,16 +7,17 @@ using json = nlohmann::json;
 
 TEST(KeyDispatcher_test, find_correct_fireKeys)
 {
-  json schemas = json::array({
-    Helpers::getJsonSchema("./schema1.json"),
-    Helpers::getJsonSchema("./schema2.json"),
-    Helpers::getJsonSchema("./schema3.json"),
-    Helpers::getJsonSchema("./schema4.json")
+  auto symbols = Helpers::getJsonFile("./symbols.json");
+
+  json ruleFiles = json::array({
+      Helpers::getJsonFile("./rules1.json"),
+      Helpers::getJsonFile("./rules2.json"),
+      Helpers::getJsonFile("./rules3.json"),
   });
 
-  for (auto i = 0; i < schemas.size(); i++)
+  for (auto i = 0; i < ruleFiles.size(); i++)
   {
-    auto keyDispatcher = new KeyDispatcher(schemas[i]);
+    auto keyDispatcher = new KeyDispatcher(ruleFiles[i], symbols);
     auto results = keyDispatcher->runTests();
     int testsSize = results["testsSize"];
 

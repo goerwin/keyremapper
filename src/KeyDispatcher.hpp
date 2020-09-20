@@ -3,190 +3,191 @@
 #include <vector>
 #include <string>
 #include "libraries/json.hpp"
-#include "symbols.hpp"
 #include "helpers.hpp"
 
 class KeyDispatcher
 {
   using json = nlohmann::json;
-  using String = std::string;
-
-public:
-  static struct Key
-  {
-    unsigned short code;
-    unsigned short state;
-
-    Key() {}
-
-    Key(unsigned short cCode, unsigned short cState = 4)
-    {
-      code = cCode;
-      state = cState;
-    }
-  };
-
-  static struct KeyDown : Key
-  {
-    KeyDown(unsigned short cCode, unsigned short cState = 0) : Key(cCode, cState) {}
-  };
-
-  static struct KeyUp : Key
-  {
-    KeyUp(unsigned short cCode, unsigned short cState = 1) : Key(cCode, cState) {}
-  };
-
-  typedef std::vector<Key> Keys;
+  typedef std::string String;
+  typedef std::vector<String> Strings;
 
 private:
-  const short SC_H = Symbols::getSymbolScanCode("H");
-  const short SC_J = Symbols::getSymbolScanCode("J");
-  const short SC_K = Symbols::getSymbolScanCode("K");
-  const short SC_L = Symbols::getSymbolScanCode("L");
-  const short SC_Up = Symbols::getSymbolScanCode("Up");
-  const short SC_Down = Symbols::getSymbolScanCode("Down");
-  const short SC_Right = Symbols::getSymbolScanCode("Right");
-  const short SC_Left = Symbols::getSymbolScanCode("Left");
-  const short SC_Home = Symbols::getSymbolScanCode("Home");
-  const short SC_End = Symbols::getSymbolScanCode("End");
-  const short SC_Ctrl = Symbols::getSymbolScanCode("Ctrl");
-  const short SC_Alt = Symbols::getSymbolScanCode("Alt");
+  short SC_H;
+  short SC_J;
+  short SC_K;
+  short SC_L;
+  short SC_Up;
+  short SC_Down;
+  short SC_Right;
+  short SC_Left;
+  short SC_Home;
+  short SC_End;
 
   json globals = {};
-  json jsonSchema;
-  json modifiers;
+  json symbols;
+  json rules;
+  json keybindings;
+  std::map<int, int> remaps = {};
   json tests;
 
 public:
-  KeyDispatcher(json jsonSchemaEl)
+  KeyDispatcher(json rulesEl, json symbolsEl)
   {
-    jsonSchema = jsonSchemaEl;
-    modifiers = jsonSchemaEl["modifiers"];
-    tests = jsonSchemaEl["tests"];
+    rules = rulesEl;
+    symbols = symbolsEl;
+    keybindings = rulesEl["keybindings"];
+    tests = rulesEl["tests"];
+
+    /*auto remapsEl = rulesEl["remaps"];
+    if (!remapsEl.is_null())
+    {
+      for (auto &[key, value] : remapsEl.items())
+      {
+        int remap1 = symbols[key];
+        int remap2 = symbols[String(value)];
+        remaps[remap1] = remap2;
+      }
+    }
+
+    
+    SC_H = getSymbolScanCode("H");
+    SC_J = getSymbolScanCode("J");
+    SC_K = getSymbolScanCode("K");
+    SC_L = getSymbolScanCode("L");
+    SC_Up = getSymbolScanCode("Up");
+    SC_Down = getSymbolScanCode("Down");
+    SC_Right = getSymbolScanCode("Right");
+    SC_Left = getSymbolScanCode("Left");
+    SC_Home = getSymbolScanCode("Home");
+    SC_End = getSymbolScanCode("End");*/
   }
 
-  Keys getKeyEvents(Keys keys)
+  // [30, 0, 1]
+  typedef std::tuple<int, int, int> Key;
+  typedef std::vector<Key> Keys;
+
+  // [30, 0]
+  typedef std::pair<unsigned short, unsigned short> KeyEvent;
+  typedef std::vector<KeyEvent> KeyEvents;
+
+  String stringifyKeyEvents(KeyEvents keyEvents) {
+    String result = "";
+
+    for (auto i = 0; i < keyEvents.size(); i++) {
+      if (i != 0)
+        result += " ";
+
+      auto [code, state] = keyEvents[i];
+      auto keyName = getKeyName(code, state);
+      result += keyName + (isKeyDown(state) ? ":down" : ":up");  
+    }
+
+    return result;
+  }
+  
+  KeyEvents getKeyEvents(KeyEvents keyEvents)
   {
-    Keys allKeys;
-    int size = keys.size();
+    KeyEvents allKeyEvents = {};
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < keyEvents.size(); i++)
     {
-      Key key = keys[i];
-      Keys keys = {};
-      auto keyCode = key.code;
+      KeyEvents localKeyEvents = {};
+      auto keyEvent = keyEvents[i];
+      auto [code, state] = keyEvent;
 
-      bool isKeyDownEl = isKeyDown(key);
-      auto keyValue = Symbols::getSymbolByScanCode(keyCode);
-      globals["currentKey"] = keyValue;
+      // TODO: 
+      // key.code = remapKeyCode(key.code);
+
+      bool isKeyDownEl = isKeyDown(state);
+      auto keyName = getKeyName(code, state);
+      globals["currentKey"] = keyName;
       globals["currentKeyDown"] = isKeyDownEl;
-      globals[keyValue] = isKeyDownEl;
+      globals[keyName] = isKeyDownEl;
 
-      auto fireKeysRes = getFireKeysFromModifiers();
+      auto fireKeysRes = getFireFromKeybindings();
       auto fireKeys = fireKeysRes["fireKeys"];
 
       if (!fireKeys.is_null())
       {
         if (isKeyDownEl)
         {
-          keys = fireKeys[0].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[0]));
+          localKeyEvents = concatKeyEvents(localKeyEvents, getKeyEventsFromString(fireKeys[0]));
         }
         else
         {
-          keys = fireKeys[1].is_null() ? keys : concatKeys(keys, parseKeys(fireKeys[1]));
+          localKeyEvents = concatKeyEvents(localKeyEvents, getKeyEventsFromString(fireKeys[1]));
         }
       }
       else
       {
-        if (isKeyDownEl)
-        {
-          keys = concatKeys(keys, {KeyDown(keyCode)});
-        }
-        else
-        {
-          keys = concatKeys(keys, {KeyUp(keyCode)});
-        }
+        localKeyEvents = concatKeyEvents(localKeyEvents, { {code, state} });
       }
 
-      Helpers::print(stringifyKeys({key}) + " ==> " + stringifyKeys(keys));
-      allKeys = concatKeys(allKeys, keys);
+      Helpers::print(stringifyKeyEvents({ keyEvent }) + " ==> " +
+        stringifyKeyEvents(localKeyEvents));
+
+      allKeyEvents = concatKeyEvents(allKeyEvents, localKeyEvents);
     }
 
-    return allKeys;
+    return allKeyEvents;
   }
 
-  static String stringifyKeys(Keys keys)
+  KeyEvents getKeyEventsFromString(json str)
   {
-    String result = "";
-    auto keysSize = keys.size();
-    for (auto i = 0; i < keysSize; i++)
-    {
-      if (i != 0)
-        result += " ";
+    if (str.is_null()) return {};
 
-      auto key = keys[i];
-      result += Symbols::getSymbolByScanCode(key.code) + (isKeyDown(key) ? ":down" : ":up");
-    }
-
-    return result;
-  }
-
-  Keys parseKeys(String str)
-  {
-    if (str.empty())
-    {
-      return {};
-    }
-
-    auto strKeys = Helpers::split(Helpers::trim(str), ' ');
+    Strings strKeys = Helpers::split(str, ' ');
     auto strKeysSize = strKeys.size();
     auto currentKey = globals["currentKey"];
-    Keys keys = {};
+    KeyEvents keyEvents = {};
 
     for (auto i = 0; i < strKeysSize; i++)
     {
-      auto strKey = strKeys[i];
-      auto keyDesc = Helpers::split(strKey, ':');
-      auto keySymbol = keyDesc[0];
-      String keyStatusStr;
-      short keyCode;
+      String keyStateStr;
+      Key key;
+      String strKey = strKeys[i];
+      Strings keyDesc = Helpers::split(strKey, ':');
+      String keyName = keyDesc[0];
 
       if (keyDesc.size() == 2)
-        keyStatusStr = keyDesc[1];
+        keyStateStr = keyDesc[1];
 
-      if (keySymbol == "currentKey")
+      if (keyName == "vimArrowKey")
       {
-        keyCode = Symbols::getSymbolScanCode(currentKey);
+        key = getVimArrowKey(currentKey);
       }
-      else if (keySymbol == "vimArrowKey")
+      else if (keyName == "vimHomeEndKey")
       {
-        keyCode = getVimArrowKeyCode(currentKey);
+        key = getVimHomeEndKey(currentKey);
       }
-      else if (keySymbol == "vimHomeEndKey")
+      else if (keyName == "currentKey")
       {
-        keyCode = getVimHomeEndKeyCode(currentKey);
+        key = getKey(currentKey);
+      
       }
       else
       {
-        keyCode = Symbols::getSymbolScanCode(keySymbol);
+        key = getKey(keyName);
       }
 
-      if (keyStatusStr == "down")
+      auto [code, downState, upState] = key;
+
+      if (keyStateStr == "down")
       {
-        keys = concatKeys(keys, {KeyDown(keyCode)});
+        keyEvents = concatKeyEvents(keyEvents, { {code, downState} });
       }
-      else if (keyStatusStr == "up")
+      else if (keyStateStr == "up")
       {
-        keys = concatKeys(keys, {KeyUp(keyCode)});
+        keyEvents = concatKeyEvents(keyEvents, { {code, upState} });
       }
       else
       {
-        keys = concatKeys(keys, {KeyDown(keyCode)});
-        keys = concatKeys(keys, {KeyUp(keyCode)});
+        keyEvents = concatKeyEvents(keyEvents, { {code, downState} });
+        keyEvents = concatKeyEvents(keyEvents, { {code, upState} });
       }
     }
 
-    return keys;
+    return keyEvents;
   }
 
   json runTests()
@@ -204,13 +205,13 @@ public:
     {
       globals = {};
 
-      auto test = tests[i];
-      auto inputKeys = parseKeys(test[0]);
+      Strings test = tests[i];
+      auto inputKeys = getKeyEventsFromString(test[0]);
       String expectedKeysStr = test[1];
-      auto expectedKeys = parseKeys(expectedKeysStr);
-      auto resultKeysStr = stringifyKeys(getKeyEvents(inputKeys));
+      auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
+      auto resultKeysStr = stringifyKeyEvents(getKeyEvents(inputKeys));
 
-      if (resultKeysStr != stringifyKeys(expectedKeys))
+      if (resultKeysStr != stringifyKeyEvents(expectedKeys))
       {
         ok = false;
         message = "TEST FAILED: expected \"" + expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
@@ -219,60 +220,66 @@ public:
     }
 
     return {
-      { "ok", ok },
-      { "testsSize", testsSize },
-      { "message", message }
-    };
+        {"ok", ok},
+        {"testsSize", testsSize},
+        {"message", message}};
   }
 
 private:
-  Keys concatKeys(Keys keys, Keys keys2, Keys keys3 = {}, Keys keys4 = {})
+  KeyEvents concatKeyEvents(KeyEvents keys, KeyEvents keys2)
   {
     keys.insert(keys.end(), keys2.begin(), keys2.end());
-    keys.insert(keys.end(), keys3.begin(), keys3.end());
-    keys.insert(keys.end(), keys4.begin(), keys4.end());
     return keys;
   }
 
-  short getVimArrowKeyCode(String key)
+  Key getVimArrowKey(String keyName)
   {
-    auto keyCode = key.empty() ? 0 : Symbols::getSymbolScanCode(key);
-    return keyCode == SC_K ? SC_Up : keyCode == SC_J ? SC_Down : keyCode == SC_L ? SC_Right : keyCode == SC_H ? SC_Left : 0;
-  }
-
-  short getVimHomeEndKeyCode(String key)
-  {
-    auto keyCode = key.empty() ? 0 : Symbols::getSymbolScanCode(key);
-    return (keyCode == SC_K || keyCode == SC_H) ? SC_Home : (keyCode == SC_J || keyCode == SC_L) ? SC_End : 0;
-  }
-
-  static bool isKeyDown(Key key)
-  {
-    return key.state == 0 || key.state == 2;
-  }
-
-  static bool isKeyMatches(json ruleKey, std::string currentKey)
-  {
-    if (ruleKey.is_null())
-      return true;
-    if (ruleKey.is_string())
-      return ruleKey == currentKey;
-
-    for (auto i = 0; i < ruleKey.size(); i++)
-    {
-      if (ruleKey[i] == currentKey)
-        return true;
+    if (keyName == "H") {
+      return getKey("Left");
+    }
+    else if (keyName == "J") {
+      return getKey("Down");
+    }
+    else if (keyName == "K") {
+      return getKey("Up");
+    }
+    else if (keyName == "L") {
+      return getKey("Right");
     }
 
-    return false;
+    return getKey(keyName);
   }
 
-  bool isConditions(json conditions)
+  Key getVimHomeEndKey(String keyName)
   {
-    if (conditions.is_null())
+    if (keyName == "H" || keyName == "K") {
+      return getKey("Home");
+    }
+    else if (keyName == "J" || keyName == "L") {
+      return getKey("End");
+    }
+
+    return getKey(keyName);
+  }
+
+  static bool isKeyDown(int state)
+  {
+    return state == 0 || state == 2;
+  }
+
+  int remapKeyCode(int key) {
+    auto value = remaps[key];
+
+    if (value != 0) return value;
+    return key;
+  }
+
+  bool isWhen(json when)
+  {
+    if (when.is_null())
       return true;
 
-    for (auto &[key, value] : conditions.items())
+    for (auto &[key, value] : when.items())
     {
       auto globalValue = globals[key];
 
@@ -303,92 +310,73 @@ private:
     }
   }
 
-  json getFireKeysFromRules(json rules)
+  json getFireFromKeybindings()
   {
-    for (auto i = 0; i < rules.size(); i++)
+    auto currentKey = globals["currentKey"];
+
+    for (auto i = 0; i < keybindings.size(); i++)
     {
-      auto rule = rules[i];
-      auto ruleKey = rule["key"];
-      auto conditions = rule["conditions"];
-      auto fire = rule["fire"];
-      auto currentKey = globals["currentKey"];
+      auto keybinding = keybindings[i];
+      auto hotkeys = keybinding["hotkeys"];
 
-      bool keyMatches = isKeyMatches(ruleKey, currentKey);
-      bool isConditionsEl = isConditions(conditions);
-
-      if (!keyMatches || !isConditionsEl)
+      if (!isWhen(keybinding["when"]))
       {
         continue;
       }
 
-      setValues(rule["set"]);
-
-      if (!fire.is_null())
+      for (auto j = 0; j < hotkeys.size(); j++)
       {
-        return fire;
-      }
+        String hotkey = hotkeys[j];
+        auto hotkeyKeys = Helpers::split(hotkey, ' ');
+        auto hotkeyKeysSize = hotkeyKeys.size();
+        auto skipHotkey = false;
 
-      return getFireKeysFromRules(rule["rules"]);
+        for (auto k = 0; k < hotkeyKeysSize; k++)
+        {
+          auto hotkeyKey = std::string(hotkeyKeys[k]);
+          auto hotkeyKeyDownState = globals[hotkeyKey];
+
+          if (k < hotkeyKeysSize - 1 && (hotkeyKeyDownState.is_null() || hotkeyKeyDownState == false))
+          {
+            skipHotkey = true;
+            break;
+          }
+
+          if (k == hotkeyKeysSize - 1 && currentKey != hotkeyKey)
+          {
+            skipHotkey = true;
+            break;
+          }
+        }
+
+        if (skipHotkey)
+        {
+          continue;
+        }
+
+        setValues(keybinding["set"]);
+
+        return {{"fireKeys", keybinding["fire"]}};
+      }
     }
 
     return {};
   }
 
-  json getFireKeysFromModifiers()
+  String getKeyName(short scanCode, short keyState)
   {
-    auto currentKey = globals["currentKey"];
-
-    for (auto i = 0; i < modifiers.size(); i++)
+    for (auto &[key, value] : symbols.items())
     {
-      auto modifierValue = modifiers[i];
-      auto modifier = modifierValue["modifier"];
-      auto skipModifier = false;
-      auto modifierSize = modifier.size();
-
-      for (auto j = 0; modifierSize >= 2 && j <= modifierSize - 2; j++)
-      {
-        auto mod = std::string(modifier[j]);
-        auto modKeyDownStatus = globals[mod];
-
-        if (modKeyDownStatus.is_null() || modKeyDownStatus == false)
-        {
-          skipModifier = true;
-          break;
-        }
-      }
-
-      std::string lastMod = modifier[modifierSize - 1];
-      bool lastModIsCurrentKey = lastMod == currentKey;
-
-      if (!skipModifier) {
-        if (!lastModIsCurrentKey && globals[lastMod] != true) {
-          skipModifier = true;
-        }
-      }
-
-      if (skipModifier)
-      {
-        continue;
-      }
-
-      auto fire = modifierValue["fire"];
-
-      if (!fire.is_null() && lastModIsCurrentKey) {
-        return { { "fireKeys", fire } };
-      }
-
-      auto rules = modifierValue["rules"];
-      json response;
-
-      if (!rules.is_null()) {
-        response = getFireKeysFromRules(rules);
-      }
-
-      if (!response.is_null()) {
-        return {{ "fireKeys", response }};
-      }
+      if (value[0] == scanCode &&
+         (value[1] == keyState || value[2] == keyState))
+        return key;
     }
 
     return {};
+  }
+
+  Key getKey(String symbol)
+  {
+    return symbols[symbol];
   }
 };

@@ -143,13 +143,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src/libraries/Interception/interception.h" />
-    <ClInclude Include="src/libraries/Interception/utils2.h" />
-    <!-- <ClInclude Include="src/helpers/brightness.h" /> -->
+    <ClInclude Include="src/libraries/Interception/utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src/index.cpp" />
-    <!-- <ClCompile Include="src/utils.cpp" /> -->
-    <ClCompile Include="src/libraries/Interception/utils2.c">
+    <ClCompile Include="src/libraries/Interception/utils.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>

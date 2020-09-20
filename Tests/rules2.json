@@ -4,17 +4,17 @@
     "If no fire is returned, let the key event go through",
     "Key:down Key:up is the same as Key"
   ],
-  "modifiers": [
+  "keybindings": [
     {
-      "modifier": ["F"],
+      "hotkeys": ["F"],
       "fire": ["X:down", "X:up"]
     },
     {
-      "modifier": ["F"],
+      "hotkeys": ["F"],
       "fire": ["Z:down", "Z:up"]
     },
     {
-      "modifier": ["Alt"],
+      "hotkeys": ["Alt"],
       "fire": ["Ctrl:down", "Ctrl:up"]
     }
   ],
