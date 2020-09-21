@@ -1,28 +1,22 @@
 # TODO
-- CLICKS
-- handle remaps
+- fix issue with numpad and arrows (VERSION 1 is working properly!)
 - keybindings per app
-- handle double press modifiers
-- validate if keycode doesnt exist
+- CLICKS
+- double press modifiers (eg. for the capslock with double shift press)
 - add builds for both x86 and x64 archs
-- provide a doublePress modifier (eg. for the capslock with double shift press)
+- UI to debug events
 
 # DONE
+- remaps
 - move all files to src (no dirs allowed to avoid issues when importing header files)
 - you should only test key cases, not entire flows (like vim mode)
 - rethink alghoritm to be more general so it can be used in any OS
+- validate if keycode doesnt exist
 
-g_isKeyDown => to reference if the non modifier key is down
-g_isSKeyDown => for vimmode, also can be anothermodifierkey
-
-g_isMouseClickDown
-g_isCtrlAsAlt
-g_isAltAsCtrl
-
-g_isCapslockKeyDown = false;
-g_isShiftKeyDown = false;
-g_isCtrlKeyDown = false;
-g_isWinKeyDown = false;
-g_isAltKeyDown = false;
-g_isEscKeyDown = false;
-
+# NOTES
+- Use Virtual Keys when there is an action which spans more than one key (e.g. Right and NumpadRight) or there is a missing key action (e.g. RWin, AppsKey, F17).
+- Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock position. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
+- For unicode (accents, tildes, etc)
+  - http://www.fileformat.info/tip/microsoft/enter_unicode.htm
+- Numlock
+  - https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event

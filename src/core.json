@@ -1,6 +1,7 @@
 {
   "remaps": {
-    "CtrlR": "Win"
+    "CtrlR": "Win",
+    "AltR": "Alt"
   },
   "keybindings": [
     {
@@ -65,7 +66,7 @@
     {
       "hotkeys": ["H", "J", "K", "L"],
       "when": { "Caps": true },
-      "fire": ["vimArrowKey", null]
+      "fire": ["SPECIAL:down vimArrowKey SPECIAL:up", null]
     },
     {
       "hotkeys": ["S"],
@@ -86,6 +87,20 @@
       "fire": [null, null]
     }
   ],
+  "apps": {
+    "chrome.exe": {
+      "keybindings": [
+        {
+          "hotkeys": ["Alt H"],
+          "fire": ["Shift:down Tab Shift:up", null]
+        },
+        {
+          "hotkeys": ["Alt L"],
+          "fire": ["Tab", null]
+        }
+      ]
+    }
+  },
   "tests": [
     //Alt Tab Mode
     ["Alt:down Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Alt:up"],

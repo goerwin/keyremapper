@@ -3,13 +3,10 @@
 // #include <shellapi.h>
 #include "images/index.h"
 #include "helpers/brightness.h"
-#include "libraries/json.hpp"
 #include "KeyDispatcher.hpp"
 #include "helpers.hpp"
 #include "libraries/Interception/utils.h"
 #include "libraries/Interception/interception.h"
-
-using json = nlohmann::json;
 
 InterceptionContext context;
 InterceptionDevice device;
@@ -38,7 +35,7 @@ DWORD WINAPI keyboardThreadFunc(void *data)
     auto code = keyStroke.code;
     auto state = keyStroke.state;
     
-    auto newKeys = keyDispatcher->getKeyEvents({ {code, state} });
+    auto newKeys = keyDispatcher->apply({ {code, state} });
 
     for (int i = 0; i < newKeys.size(); i++)
     {

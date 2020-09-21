@@ -2,8 +2,13 @@
   "description": [
     "Only return the first fire found",
     "If no fire is returned, let the key event go through",
-    "Key:down Key:up is the same as Key"
+    "Key:down Key:up is the same as Key",
+    "remaps"
   ],
+  "remaps": {
+    "N": "P",
+    "O": "F"
+  },
   "keybindings": [
     {
       "hotkeys": ["F"],
@@ -26,6 +31,9 @@
     ["A:down A:up", "A:down A:up"],
     ["Alt:down C Alt:up", "Ctrl:down C Ctrl:up"],
     ["C Alt", "C Ctrl"],
-    ["C:down Alt:down C:up Alt:up", "C:down Ctrl:down C:up Ctrl:up"]
+    ["C:down Alt:down C:up Alt:up", "C:down Ctrl:down C:up Ctrl:up"],
+
+    ["N", "P"],
+    ["O", "X"]
   ]
 }
