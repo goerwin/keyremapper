@@ -65,37 +65,4 @@ namespace Utils
 
     return result;
   }
-
-  std::string getActiveWindowProcessName(HWND hwnd)
-  {
-    if (!hwnd)
-    {
-      return NULL;
-    }
-
-    std::string processName;
-    DWORD dwPID;
-    GetWindowThreadProcessId(hwnd, &dwPID);
-    HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwPID);
-
-    if (handle)
-    {
-      CHAR path[MAX_PATH];
-
-      if (GetModuleFileNameExA(handle, 0, path, MAX_PATH))
-      {
-        processName = path;
-        std::string::size_type idx = processName.rfind("\\");
-
-        if (idx != std::string::npos)
-        {
-          processName = processName.substr(idx + 1);
-        }
-      }
-
-      CloseHandle(handle);
-    }
-
-    return processName;
-  }
 } // namespace Utils

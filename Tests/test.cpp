@@ -13,6 +13,7 @@ TEST(KeyDispatcher_test, find_correct_fireKeys)
       Helpers::getJsonFile("./rules1.json"),
       Helpers::getJsonFile("./rules2.json"),
       Helpers::getJsonFile("./rules3.json"),
+      Helpers::getJsonFile("./rules4.json"),
   });
 
   for (auto i = 0; i < ruleFiles.size(); i++)

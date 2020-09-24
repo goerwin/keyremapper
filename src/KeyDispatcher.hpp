@@ -11,6 +11,7 @@ class KeyDispatcher
   typedef std::string String;
   typedef std::vector<String> Strings;
   typedef unsigned short ushort;
+  typedef std::vector<json> JsonArray;
 
   struct Key
   {
@@ -33,8 +34,11 @@ private:
   json symbols;
   json rules;
   json keybindings;
+  json appsDefinitions;
   json remaps;
   json tests;
+  String appName;
+  json keyPresses;
 
 public:
   KeyDispatcher(json rulesEl, json symbolsEl)
@@ -44,28 +48,20 @@ public:
     keybindings = rulesEl["keybindings"];
     tests = rulesEl["tests"];
     remaps = rulesEl["remaps"];
+    appsDefinitions = rulesEl["apps"];
   }
 
-  String stringifyKeyEvents(KeyEvents keyEvents)
-  {
-    String result = "";
+  Helpers::KeyMultiplePress rClick = Helpers::KeyMultiplePress(19);
 
-    for (auto i = 0; i < keyEvents.size(); i++)
-    {
-      if (i != 0)
-        result += " ";
-
-      auto [code, state] = keyEvents[i];
-      auto keyName = getKeyName(code, state);
-      result += keyName + (isKeyDown(state) ? ":down" : ":up");
-    }
-
-    return result;
-  }
-
-  KeyEvents apply(KeyEvents keyEvents)
+  KeyEvents applyKeys(KeyEvents keyEvents)
   {
     KeyEvents allKeyEvents = {};
+
+    // multiple presses
+    // listen for the first keyEvent, then if it matches
+    //append it to the array at the beginning
+
+    //keyEvents[0]
 
     for (int i = 0; i < keyEvents.size(); i++)
     {
@@ -84,22 +80,34 @@ public:
       globals["currentKeyDown"] = isKeyDownEl;
       globals[newKeyName] = isKeyDownEl;
 
+      // Ignore FakeShiftL coming from special keys
+      // like NumPadRight when NumLock is on
+      if (newKeyName == "FakeShiftL")
+      {
+        continue;
+      }
+
+      auto noice = rClick.getConsecutivePresses(newCode, isKeyDownEl);
+      if (noice > 0) {
+        Helpers::print(std::to_string(noice) + " CLICKS!");
+      }
+
       auto fireKeys = getFireFromKeybindings();
 
       if (!fireKeys.is_null())
       {
         if (isKeyDownEl)
         {
-          localKeyEvents = concatKeyEvents(localKeyEvents, getKeyEventsFromString(fireKeys[0]));
+          localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[0]));
         }
         else
         {
-          localKeyEvents = concatKeyEvents(localKeyEvents, getKeyEventsFromString(fireKeys[1]));
+          localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[1]));
         }
       }
       else
       {
-        localKeyEvents = concatKeyEvents(localKeyEvents, {{newCode, newState}});
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
       }
 
       Helpers::print(
@@ -108,10 +116,31 @@ public:
           stringifyKeyEvents({newKeyEvent}) + " ==> " +
           stringifyKeyEvents(localKeyEvents));
 
-      allKeyEvents = concatKeyEvents(allKeyEvents, localKeyEvents);
+      allKeyEvents = Helpers::concatArrays(allKeyEvents, localKeyEvents);
     }
 
     return allKeyEvents;
+  }
+
+  void setAppName(String _appName) {
+    appName = _appName;
+  }
+
+  String stringifyKeyEvents(KeyEvents keyEvents)
+  {
+    String result = "";
+
+    for (auto i = 0; i < keyEvents.size(); i++)
+    {
+      if (i != 0)
+        result += " ";
+
+      auto [code, state] = keyEvents[i];
+      auto keyName = getKeyName(code, state);
+      result += keyName + (isKeyDown(state) ? ":down" : ":up");
+    }
+
+    return result;
   }
 
   KeyEvents getKeyEventsFromString(json str)
@@ -149,13 +178,13 @@ public:
       auto upState = key.upState;
 
       if (keyStateStr == "down")
-        keyEvents = concatKeyEvents(keyEvents, {{code, downState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
       else if (keyStateStr == "up")
-        keyEvents = concatKeyEvents(keyEvents, {{code, upState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
       else
       {
-        keyEvents = concatKeyEvents(keyEvents, {{code, downState}});
-        keyEvents = concatKeyEvents(keyEvents, {{code, upState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
       }
     }
 
@@ -178,10 +207,20 @@ public:
       globals = {};
 
       Strings test = tests[i];
-      auto inputKeys = getKeyEventsFromString(test[0]);
-      String expectedKeysStr = test[1];
+      auto inputKeys = getKeyEventsFromString(test.at(0));
+      String expectedKeysStr = test.at(1);
+
+      String appName;
+      try
+      {
+        appName = test.at(2);
+      }
+      catch (...)
+      {
+      }
+
       auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
-      auto resultKeysStr = stringifyKeyEvents(apply(inputKeys));
+      auto resultKeysStr = stringifyKeyEvents(applyKeys(inputKeys));
 
       if (resultKeysStr != stringifyKeyEvents(expectedKeys))
       {
@@ -198,12 +237,6 @@ public:
   }
 
 private:
-  KeyEvents concatKeyEvents(KeyEvents keys, KeyEvents keys2)
-  {
-    keys.insert(keys.end(), keys2.begin(), keys2.end());
-    return keys;
-  }
-
   Key getVimArrowKey(String keyName)
   {
     if (keyName == "H")
@@ -285,10 +318,17 @@ private:
   json getFireFromKeybindings()
   {
     auto currentKey = globals["currentKey"];
+    auto appKeybindings = appsDefinitions[appName]["keybindings"];
+    auto allKeybindings = keybindings.get<JsonArray>();
 
-    for (auto i = 0; i < keybindings.size(); i++)
+    if (!appKeybindings.is_null())
     {
-      auto keybinding = keybindings[i];
+      allKeybindings = Helpers::concatArrays(allKeybindings, appKeybindings.get<JsonArray>(), "start");
+    }
+
+    for (auto i = 0; i < allKeybindings.size(); i++)
+    {
+      auto keybinding = allKeybindings[i];
       auto hotkeys = keybinding["hotkeys"];
 
       if (!isWhen(keybinding["when"]))

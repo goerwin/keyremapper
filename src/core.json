@@ -1,9 +1,14 @@
 {
   "remaps": {
     "CtrlR": "Win",
-    "AltR": "Alt"
+    "AltR": "Alt",
+    "NextToShiftL": "Shift"
   },
+  "keyPresses": [
+    [1, "Caps", "Esc:down Esc:up"]
+  ],
   "keybindings": [
+    // Alt tab Mode For Windows Like MacOS
     {
       "hotkeys": ["Alt Tab"],
       "when": { "isAltTabMode": false },
@@ -27,9 +32,13 @@
       "fire": [null, "Alt:up"]
     },
     {
-      "hotkeys": ["Ctrl"],
-      "fire": ["Alt:down", "Alt:up"]
+      "hotkeys": ["Esc"],
+      "when": { "isAltTabMode": true, "Alt": true },
+      "set": { "isAltTabMode": false },
+      "fire": ["Esc Alt:up Ctrl:down", null]
     },
+
+    // Vim Mode With Caps
     {
       "hotkeys": ["H", "L"],
       "when": { "Caps": true, "Alt": true, "isAltTabMode": false },
@@ -46,14 +55,6 @@
       "fire": ["vimHomeEndKey", null]
     },
     {
-      "hotkeys": ["Alt J"],
-      "fire": ["Ctrl:up Next Ctrl:down", null]
-    },
-    {
-      "hotkeys": ["Alt K"],
-      "fire": ["Ctrl:up Prior Ctrl:down", null]
-    },
-    {
       "hotkeys": ["H", "L"],
       "when": { "Caps": true, "Win": true, "Alt": false },
       "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
@@ -66,7 +67,7 @@
     {
       "hotkeys": ["H", "J", "K", "L"],
       "when": { "Caps": true },
-      "fire": ["SPECIAL:down vimArrowKey SPECIAL:up", null]
+      "fire": ["vimArrowKey", null]
     },
     {
       "hotkeys": ["S"],
@@ -77,6 +78,62 @@
       "hotkeys": ["Caps"],
       "when": { "S": true },
       "fire": [null, "Shift:up"]
+    },
+
+    // Right/Left clicks
+    {
+      "hotkeys": ["Win Caps C"],
+      "when": { "C": true, "isClickDown": false },
+      "fire": ["RightClick:down", null],
+      "set": { "isClickDown": true }
+    },
+    {
+      "hotkeys": ["Win Caps C"],
+      "when": { "C": true, "isClickDown": true },
+      "fire": [null, null]
+    },
+    {
+      "hotkeys": ["Win Caps C"],
+      "when": { "C": false, "isClickDown": true },
+      "fire": [null, "RightClick:up"],
+      "set": { "isClickDown": false }
+    },
+    {
+      "hotkeys": ["Win C"],
+      "when": { "C": true, "isClickDown": false },
+      "fire": ["LeftClick:down", null],
+      "set": { "isClickDown": true }
+    },
+    {
+      "hotkeys": ["Win C"],
+      "when": { "C": true, "isClickDown": true },
+      "fire": [null, null]
+    },
+    {
+      "hotkeys": ["Win C"],
+      "when": { "C": false, "isClickDown": true },
+      "fire": [null, "LeftClick:up"],
+      "set": { "isClickDown": false }
+    },
+    {
+      "hotkeys": ["Win"],
+      "when": { "Win": false, "isClickDown": true },
+      "fire": [null, "LeftClick:up"],
+      "set": { "isClickDown": false }
+    },
+
+    // General
+    {
+      "hotkeys": ["Alt J"],
+      "fire": ["Ctrl:up Next Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Alt K"],
+      "fire": ["Ctrl:up Prior Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Ctrl"],
+      "fire": ["Alt:down", "Alt:up"]
     },
     {
       "hotkeys": ["Caps"],
@@ -113,6 +170,11 @@
       "Alt:down Shift:down Tab Tab Shift:up Alt:up",
       "Ctrl:down Shift:down Ctrl:up Alt:down Tab Tab Shift:up Alt:up"
     ],
+    [
+      "Alt:down Tab Esc Alt:up",
+      // TODO: dont like the second to last Esc:up
+      "Ctrl:down Ctrl:up Alt:down Tab Esc Alt:up Ctrl:down Esc:up Ctrl:up"
+    ],
     // Key
     ["A", "A"],
     // Key - Down
@@ -130,7 +192,7 @@
 
     ["Alt", "Ctrl"],
 
-    // // VIM MODE
+    // VIM MODE
     ["Caps", ""],
     ["Caps:down A Caps:up", "A"],
     ["Caps:down H Caps:up", "Left"],
@@ -141,9 +203,16 @@
     ["Caps:down Alt:down L Alt:up Caps:up", "Ctrl End Ctrl"],
     ["Caps:down S:down H S:up Caps:up", "Shift:down Left Shift:up"],
 
-    // // VIM MODE: When Caps is not the first pressed key
+    // VIM MODE: When Caps is not the first pressed key
     ["C:down Caps:down C:up Caps:up", "C"],
     ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
-    ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"]
+    ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"],
+
+    // Clicks
+    ["Win:down C Win:up", "LeftClick"],
+    ["Win:down C:down C:down C Win:up", "LeftClick"],
+    ["Win:down C:down Win:up C:up", "LeftClick C:up"],
+    ["Win:down Caps:down C Caps:up Win:up", "RightClick"],
+    ["Win:down Caps:down C:down C:down C Caps:up Win:up", "RightClick"]
   ]
 }

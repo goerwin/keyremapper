@@ -1,0 +1,23 @@
+{
+  "description": ["app keybindings"],
+  "keybindings": [
+    {
+      "hotkeys": ["A"],
+      "fire": ["B", null]
+    }
+  ],
+  "apps": {
+    "chrome.exe": {
+      "keybindings": [
+        {
+          "hotkeys": ["A"],
+          "fire": ["C", null]
+        }
+      ]
+    }
+  },
+  "tests": [
+    ["A", "B"],
+    ["A", "C", "chrome.exe"]
+  ]
+}

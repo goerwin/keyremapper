@@ -12,18 +12,18 @@ InterceptionContext context;
 InterceptionDevice device;
 InterceptionKeyStroke keyStroke;
 
+auto rules = Helpers::getJsonFile("./src/core.json");
+auto symbols = Helpers::getJsonFile("./src/symbols.json");
+auto keyDispatcher = new KeyDispatcher(rules, symbols);
+
 DWORD WINAPI keyboardThreadFunc(void *data)
 {
   raise_process_priority();
   context = interception_create_context();
   interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
 
-  auto rules = Helpers::getJsonFile("./src/core.json");
-  auto symbols = Helpers::getJsonFile("./src/symbols.json");
-  auto keyDispatcher = new KeyDispatcher(rules, symbols);
   auto testResults = keyDispatcher->runTests();
-
-  Helpers::print(!testResults.is_null() ? testResults["message"] : "");
+  Helpers::print(!testResults.is_null() ? testResults["message"] : "NO TESTS RUN");
 
   while (interception_receive(
              context,
@@ -34,19 +34,35 @@ DWORD WINAPI keyboardThreadFunc(void *data)
 
     auto code = keyStroke.code;
     auto state = keyStroke.state;
-    
-    auto newKeys = keyDispatcher->apply({ {code, state} });
+    auto newKeys = keyDispatcher->applyKeys({{code, state}});
 
     for (int i = 0; i < newKeys.size(); i++)
     {
-      auto [keyCode, state] = newKeys[i];
-      auto newKeyStroke = InterceptionKeyStroke({ keyCode, state });
+      auto [code, state] = newKeys[i];
+      auto newKeyStroke = InterceptionKeyStroke({code, state});
 
-      interception_send(
-          context,
-          device,
-          (InterceptionStroke *)&newKeyStroke,
-          1);
+      if (code == 241)
+      {
+        if (state == 0)
+          mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+        else
+          mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+      }
+      else if (code == 242)
+      {
+        if (state == 0)
+          mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+        else
+          mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+      }
+      else
+      {
+        interception_send(
+            context,
+            device,
+            (InterceptionStroke *)&newKeyStroke,
+            1);
+      }
     }
   }
 
@@ -55,8 +71,25 @@ DWORD WINAPI keyboardThreadFunc(void *data)
   return 0;
 }
 
+HWINEVENTHOOK windowHook = 0;
+
+void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
+{
+  keyDispatcher->setAppName(Helpers::getActiveWindowProcessName(hwnd));
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
 {
+  // WINDOW CHANGE EVENT
+
+  windowHook = SetWinEventHook(
+      EVENT_SYSTEM_FOREGROUND,
+      EVENT_SYSTEM_FOREGROUND,
+      NULL,
+      handleWindowChange,
+      0, 0,
+      WINEVENT_OUTOFCONTEXT);
+
   CreateThread(NULL, 0, keyboardThreadFunc, NULL, 0, NULL);
 
   MSG messages;
