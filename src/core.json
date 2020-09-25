@@ -5,7 +5,7 @@
     "NextToShiftL": "Shift"
   },
   "keyPresses": [
-    [1, "Caps", "Esc:down Esc:up"]
+    [1, "Caps", "Esc"]
   ],
   "keybindings": [
     // Alt tab Mode For Windows Like MacOS

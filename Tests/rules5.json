@@ -1,0 +1,18 @@
+{
+  "keyPressesDelay": 10,
+  "description": ["KeyPresses"],
+  "keyPresses": [
+    [1, "Caps", "Esc"],
+    [2, "Win", "Shift"]
+  ],
+  "keybindings": [
+    {
+      "hotkeys": ["A"],
+      "fire": ["B:down", "B:up"]
+    },
+    {
+      "hotkeys": ["Win"],
+      "fire": [null, null]
+    }
+  ]
+}

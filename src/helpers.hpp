@@ -41,17 +41,16 @@ namespace Helpers
   }
 
   template <typename T>
-  vector<T> concatArrays(vector<T> arr1, vector<T> arr2, String pos = "end")
+  vector<T> concatArrays(vector<T> arr1, vector<T> arr2, int pos = -1)
   {
-    if (pos == "start")
-    {
-      arr1.insert(arr1.begin(), arr2.begin(), arr2.end());
-    }
-    else
-    {
-      arr1.insert(arr1.end(), arr2.begin(), arr2.end());
-    }
+    typename vector<T>::iterator insertPos;
 
+    if (pos == -1)
+      insertPos = arr1.end();
+    else
+      insertPos = arr1.begin() + pos;
+  
+    arr1.insert(insertPos, arr2.begin(), arr2.end());
     return arr1;
   }
 

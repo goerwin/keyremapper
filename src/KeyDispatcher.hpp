@@ -12,6 +12,8 @@ class KeyDispatcher
   typedef std::vector<String> Strings;
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
+  typedef std::tuple<int, String, String> KeyPress;
+  typedef std::vector<KeyPress> KeyPresses;
 
   struct Key
   {
@@ -37,8 +39,8 @@ private:
   json appsDefinitions;
   json remaps;
   json tests;
-  String appName;
   json keyPresses;
+  int REPEAT_TIME;
 
 public:
   KeyDispatcher(json rulesEl, json symbolsEl)
@@ -46,8 +48,10 @@ public:
     rules = rulesEl;
     symbols = symbolsEl;
     keybindings = rulesEl["keybindings"];
+    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null() ? 200 : rulesEl["keyPressesDelay"].get<int>();
     tests = rulesEl["tests"];
     remaps = rulesEl["remaps"];
+    keyPresses = rulesEl["keyPresses"];
     appsDefinitions = rulesEl["apps"];
   }
 
@@ -56,63 +60,83 @@ public:
     return (time1 - time2) / CLOCKS_PER_SEC * 1000;
   }
 
-  ushort lastCode;
+  String lastKeyName;
   int multiplePressesCount = 0;
   double keyDownTime = 0;
   double keyUpTime = 0;
 
-  void handleMultiplePresses(ushort code, bool isKeyDown)
+  String getMultiplePressesFireItem(String keyName, bool isKeyDown)
   {
-    if (multiplePressesCount == 0) {
-      lastCode = code;
-    }
+    if (keyPresses.is_null())
+      return {};
 
-    if (lastCode != code) {
+    if (multiplePressesCount == 0)
+      lastKeyName = keyName;
+
+    if (lastKeyName != keyName)
+    {
       multiplePressesCount = 0;
+      keyDownTime = 0;
+      keyUpTime = 0;
     }
 
     if (isKeyDown)
     {
-      if (!keyDownTime) {
+      if (!keyDownTime)
+      {
         keyDownTime = clock();
       }
 
-      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) > 200)
+      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
       {
         multiplePressesCount = 0;
       }
 
       keyUpTime = 0;
-      return;
+      return {};
     }
     else
     {
       keyUpTime = clock();
 
-      if (getTimeDifference(keyUpTime, keyDownTime) < 200)
+      if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME)
       {
         keyDownTime = 0;
-        multiplePressesCount = lastCode == code ? multiplePressesCount + 1 : 1;
+        multiplePressesCount = lastKeyName == keyName ? multiplePressesCount + 1 : 1;
       }
       else
       {
         multiplePressesCount = 0;
         keyDownTime = 0;
         keyUpTime = 0;
-        return;
+        return {};
       }
     }
 
-    Helpers::print(std::to_string(multiplePressesCount) + " CLICKS!");
+    auto keyPressesParsed = keyPresses.get<KeyPresses>();
+
+    for (auto i = 0; i < keyPressesParsed.size(); i++)
+    {
+      auto keyPress = keyPressesParsed[i];
+      auto numberOfPresses = std::get<0>(keyPress);
+      auto keyPressKeyName = std::get<1>(keyPress);
+      auto ruleItem = std::get<2>(keyPress);
+
+      if (numberOfPresses == multiplePressesCount && keyPressKeyName == keyName)
+      {
+        return ruleItem;
+      }
+    }
+
+    return {};
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents)
   {
-    KeyEvents allKeyEvents = {};
+    KeyEvents newKeyEvents = {};
 
     for (int i = 0; i < keyEvents.size(); i++)
     {
-      KeyEvents localKeyEvents = {};
       auto keyEvent = keyEvents[i];
       auto [code, state] = keyEvent;
       auto keyName = getKeyName(code, state);
@@ -124,8 +148,8 @@ public:
       bool newIsKeyDownEl = isKeyDown(newState);
 
       globals["currentKey"] = newKeyName;
-      globals["currentKeyDown"] = isKeyDownEl;
-      globals[newKeyName] = isKeyDownEl;
+      globals["currentKeyDown"] = newIsKeyDownEl;
+      globals[newKeyName] = newIsKeyDownEl;
 
       // Ignore FakeShiftL coming from special keys
       // like NumPadRight when NumLock is on
@@ -134,8 +158,13 @@ public:
         continue;
       }
 
-      handleMultiplePresses(newCode, isKeyDownEl);
+      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+      if (!multiplePressesFireItem.empty())
+      {
+        keyEvents = Helpers::concatArrays(keyEvents, getKeyEventsFromString(multiplePressesFireItem), i + 1);
+      }
 
+      KeyEvents localKeyEvents = {};
       auto fireKeys = getFireFromKeybindings();
 
       if (!fireKeys.is_null())
@@ -160,15 +189,15 @@ public:
           stringifyKeyEvents({newKeyEvent}) + " ==> " +
           stringifyKeyEvents(localKeyEvents));
 
-      allKeyEvents = Helpers::concatArrays(allKeyEvents, localKeyEvents);
+      newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
 
-    return allKeyEvents;
+    return newKeyEvents;
   }
 
-  void setAppName(String _appName)
+  void setAppName(String appName)
   {
-    appName = _appName;
+    globals["appName"] = appName;
   }
 
   String stringifyKeyEvents(KeyEvents keyEvents)
@@ -236,6 +265,15 @@ public:
     return keyEvents;
   }
 
+  void reset()
+  {
+    globals = {};
+    lastKeyName = "";
+    multiplePressesCount = 0;
+    keyDownTime = 0;
+    keyUpTime = 0;
+  }
+
   json runTests()
   {
     if (tests.is_null())
@@ -249,16 +287,14 @@ public:
 
     for (auto i = 0; i < testsSize; i++)
     {
-      globals = {};
-
       Strings test = tests[i];
       auto inputKeys = getKeyEventsFromString(test.at(0));
       String expectedKeysStr = test.at(1);
 
-      String appName;
+      reset();
       try
       {
-        appName = test.at(2);
+        globals["appName"] = test.at(2);
       }
       catch (...)
       {
@@ -363,12 +399,13 @@ private:
   json getFireFromKeybindings()
   {
     auto currentKey = globals["currentKey"];
+    String appName = globals["appName"].is_null() ? "" : globals["appName"];
     auto appKeybindings = appsDefinitions[appName]["keybindings"];
     auto allKeybindings = keybindings.get<JsonArray>();
 
     if (!appKeybindings.is_null())
     {
-      allKeybindings = Helpers::concatArrays(allKeybindings, appKeybindings.get<JsonArray>(), "start");
+      allKeybindings = Helpers::concatArrays(allKeybindings, appKeybindings.get<JsonArray>(), 0);
     }
 
     for (auto i = 0; i < allKeybindings.size(); i++)
