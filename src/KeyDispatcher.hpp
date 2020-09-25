@@ -51,17 +51,64 @@ public:
     appsDefinitions = rulesEl["apps"];
   }
 
-  Helpers::KeyMultiplePress rClick = Helpers::KeyMultiplePress(19);
+  double getTimeDifference(double time1, double time2)
+  {
+    return (time1 - time2) / CLOCKS_PER_SEC * 1000;
+  }
+
+  ushort lastCode;
+  int multiplePressesCount = 0;
+  double keyDownTime = 0;
+  double keyUpTime = 0;
+
+  void handleMultiplePresses(ushort code, bool isKeyDown)
+  {
+    if (multiplePressesCount == 0) {
+      lastCode = code;
+    }
+
+    if (lastCode != code) {
+      multiplePressesCount = 0;
+    }
+
+    if (isKeyDown)
+    {
+      if (!keyDownTime) {
+        keyDownTime = clock();
+      }
+
+      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) > 200)
+      {
+        multiplePressesCount = 0;
+      }
+
+      keyUpTime = 0;
+      return;
+    }
+    else
+    {
+      keyUpTime = clock();
+
+      if (getTimeDifference(keyUpTime, keyDownTime) < 200)
+      {
+        keyDownTime = 0;
+        multiplePressesCount = lastCode == code ? multiplePressesCount + 1 : 1;
+      }
+      else
+      {
+        multiplePressesCount = 0;
+        keyDownTime = 0;
+        keyUpTime = 0;
+        return;
+      }
+    }
+
+    Helpers::print(std::to_string(multiplePressesCount) + " CLICKS!");
+  }
 
   KeyEvents applyKeys(KeyEvents keyEvents)
   {
     KeyEvents allKeyEvents = {};
-
-    // multiple presses
-    // listen for the first keyEvent, then if it matches
-    //append it to the array at the beginning
-
-    //keyEvents[0]
 
     for (int i = 0; i < keyEvents.size(); i++)
     {
@@ -87,10 +134,7 @@ public:
         continue;
       }
 
-      auto noice = rClick.getConsecutivePresses(newCode, isKeyDownEl);
-      if (noice > 0) {
-        Helpers::print(std::to_string(noice) + " CLICKS!");
-      }
+      handleMultiplePresses(newCode, isKeyDownEl);
 
       auto fireKeys = getFireFromKeybindings();
 
@@ -122,7 +166,8 @@ public:
     return allKeyEvents;
   }
 
-  void setAppName(String _appName) {
+  void setAppName(String _appName)
+  {
     appName = _appName;
   }
 

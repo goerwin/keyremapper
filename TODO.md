@@ -1,6 +1,6 @@
 # TODO
-- use setOnDown, setOnUp, instead of set
 - double press modifiers (eg. for the capslock with double shift press)
+- use setOnDown, setOnUp, instead of set
 - add builds for both x86 and x64 archs
 - UI to debug events
 
