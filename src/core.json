@@ -86,7 +86,8 @@
       "when": { "S": true },
       "fire": [null, "Shift:up"]
     },
-    { // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
+    {
+      // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
       "hotkeys": ["F7", "Y", "BracketR"],
       "when": { "Caps": true },
       "fire": [null, null]
@@ -118,12 +119,12 @@
     },
     {
       "hotkeys": ["Win C"],
-      "when": { "C": true, "isClickDown": true },
+      "when": { "isClickDown": true, "C": true },
       "fire": [null, null]
     },
     {
       "hotkeys": ["Win C"],
-      "when": { "C": false, "isClickDown": true },
+      "when": { "isClickDown": true },
       "fire": [null, "LeftClick:up"],
       "set": { "isClickDown": false }
     },
@@ -134,12 +135,49 @@
       "set": { "isClickDown": false }
     },
 
+    // Google Chrome
+
+    {
+      "hotkeys": ["Win Alt F"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Ctrl:up F11 Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Alt Enter"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Ctrl:up Alt:down Enter Alt:up Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Alt H"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Shift:down Tab Shift:up", null]
+    },
+    {
+      "hotkeys": ["Alt L"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Tab", null]
+    },
+    {
+      "hotkeys": ["Alt Colon"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["L", null]
+    },
+
+
     // General
 
     { "hotkeys": ["Ctrl"], "fire": ["Alt:down", "Alt:up"] },
     { "hotkeys": ["Caps"], "fire": [null, null] },
     { "hotkeys": ["Win"], "fire": [null, null] },
 
+    {
+      "hotkeys": ["Caps Alt V"],
+      "fire": ["Ctrl:up Win:down V Win:up Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Caps C"],
+      "fire": ["Ctrl:down C Ctrl:up", null]
+    },
     {
       "hotkeys": ["Caps Tab"],
       "fire": ["Ctrl:down Tab Ctrl:up", null]
@@ -160,15 +198,31 @@
     // - WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)
     //{ "hotkeys": ["Win Alt H"], "fire": ["Alt:down F Alt:up", null] },
 
+    { "hotkeys": ["Win A"], "fire": ["Alt:down NP0 NP2 NP2 NP5 Alt:up", null] },
+//     - Win A => Down(Alt↓ NP0↕ NP2↕ NP2↕ NP5↕ Alt↑) Up(null)
+// - Win E => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP3↕ Alt↑) Up(null)
+// - Win I => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP7↕ Alt↑) Up(null)
+// - Win O => Down(Alt↓ NP0↕ NP2↕ NP4↕ NP3↕ Alt↑) Up(null)
+// - Win U => Down(Alt↓ NP0↕ NP2↕ NP5↕ NP0↕ Alt↑) Up(null)
+// - Win N => Down(Alt↓ NP1↕ NP6↕ NP4↕ Alt↑) Up(null)
+
     { "hotkeys": ["Win F"], "fire": ["Alt:down F Alt:up", null] },
 
     { "hotkeys": ["Win D"], "fire": ["Win:down D Win:up", null] },
     { "hotkeys": ["Win Back"], "fire": ["Ctrl:down Back Ctrl:up", null] },
     { "hotkeys": ["Win Space"], "fire": ["Win", null] },
 
+    { "hotkeys": ["Win H"], "fire": ["Alt:down Left Alt:up", null] },
+    { "hotkeys": ["Win L"], "fire": ["Alt:down Right Alt:up", null] },
+
     {
       "hotkeys": ["Alt Back"],
       "fire": ["Ctrl:up Shift:down Home Shift:up Back Ctrl:down", null]
+    },
+    {
+      "hotkeys": ["Alt Esc"],
+      "when": { "isAltTabMode": false },
+      "fire": [null, null]
     },
     { "hotkeys": ["Alt J"], "fire": ["Ctrl:up Next Ctrl:down", null] },
     { "hotkeys": ["Alt K"], "fire": ["Ctrl:up Prior Ctrl:down", null] },
@@ -182,6 +236,7 @@
     { "hotkeys": ["F1"], "fire": ["BrightnessDown", null] },
     { "hotkeys": ["F2"], "fire": ["BrightnessUp", null] },
     { "hotkeys": ["F10"], "fire": ["Mute", null] },
+
     {
       "hotkeys": ["F11"],
       "fire": ["VolumeDown VolumeDown VolumeDown VolumeDown", null]
@@ -191,14 +246,6 @@
       "fire": ["VolumeUp VolumeUp VolumeUp VolumeUp", null]
     }
   ],
-  "apps": {
-    "chrome.exe": {
-      "keybindings": [
-        { "hotkeys": ["Alt H"], "fire": ["Shift:down Tab Shift:up", null] },
-        { "hotkeys": ["Alt L"], "fire": ["Tab", null] }
-      ]
-    }
-  },
   "tests": [
     //Alt Tab Mode
     ["Alt:down Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Alt:up"],
@@ -213,8 +260,7 @@
     ],
     [
       "Alt:down Tab Esc Alt:up",
-      // TODO: dont like the second to last Esc:up
-      "Ctrl:down Ctrl:up Alt:down Tab Esc Alt:up Ctrl:down Esc:up Ctrl:up"
+      "Ctrl:down Ctrl:up Alt:down Tab Esc Alt:up Ctrl:down Ctrl:up"
     ],
     // Key
     ["A", "A"],
@@ -245,7 +291,7 @@
     ["Caps:down S:down H S:up Caps:up", "Shift:down Left Shift:up"],
 
     // VIM MODE: When Caps is not the first pressed key
-    ["C:down Caps:down C:up Caps:up", "C"],
+    ["T:down Caps:down T:up Caps:up", "T"],
     ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
     ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"],
 

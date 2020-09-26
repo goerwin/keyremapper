@@ -81,14 +81,10 @@ public:
     if (isKeyDown)
     {
       if (!keyDownTime)
-      {
         keyDownTime = clock();
-      }
 
       if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
-      {
         multiplePressesCount = 0;
-      }
 
       keyUpTime = 0;
       return {};
@@ -153,9 +149,7 @@ public:
       // Ignore FakeShiftL coming from special keys
       // like NumPadRight when NumLock is on
       if (newKeyName == "FakeShiftL")
-      {
         continue;
-      }
 
       KeyEvents localKeyEvents = {};
       auto fireKeys = getFireFromKeybindings();
@@ -163,18 +157,12 @@ public:
       if (!fireKeys.is_null())
       {
         if (isKeyDownEl)
-        {
           localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[0]));
-        }
         else
-        {
           localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[1]));
-        }
       }
       else
-      {
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
-      }
 
       auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
       if (!multiplePressesFireItem.is_null())
@@ -283,9 +271,7 @@ public:
   json runTests()
   {
     if (tests.is_null())
-    {
       return {};
-    }
 
     bool ok = true;
     auto testsSize = tests.size();
@@ -397,22 +383,13 @@ private:
       return;
 
     for (auto &[key, value] : values.items())
-    {
       globals[key] = value;
-    }
   }
 
   json getFireFromKeybindings()
   {
     auto currentKey = globals["currentKey"];
-    String appName = globals["appName"].is_null() ? "" : globals["appName"];
-    auto appKeybindings = appsDefinitions[appName]["keybindings"];
     auto allKeybindings = keybindings.get<JsonArray>();
-
-    if (!appKeybindings.is_null())
-    {
-      allKeybindings = Helpers::concatArrays(allKeybindings, appKeybindings.get<JsonArray>(), 0);
-    }
 
     for (auto i = 0; i < allKeybindings.size(); i++)
     {
@@ -420,9 +397,7 @@ private:
       auto hotkeys = keybinding["hotkeys"];
 
       if (!isWhen(keybinding["when"]))
-      {
         continue;
-      }
 
       for (auto j = 0; j < hotkeys.size(); j++)
       {
@@ -450,9 +425,7 @@ private:
         }
 
         if (skipHotkey)
-        {
           continue;
-        }
 
         setValues(keybinding["set"]);
 
