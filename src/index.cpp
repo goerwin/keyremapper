@@ -55,6 +55,10 @@ DWORD WINAPI keyboardThreadFunc(void *data)
         else
           mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
       }
+      else if (code == 245)
+      {
+
+      }
       else
       {
         interception_send(

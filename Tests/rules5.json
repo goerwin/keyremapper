@@ -1,11 +1,11 @@
 {
   "description": ["KeyPresses"],
-  "keyPressesDelay": 10,
+  "keyPressesDelay": 20,
   "keyPresses": [
     { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
     { "repeat": 2, "inputKey": "Win", "fire": "Shift" },
     { "repeat": 1, "inputKey": "R", "fire": "A" },
-    { "repeat": 1, "inputKey": "S", "fire": "A", "byPassKeyBindings": true }
+    { "repeat": 1, "inputKey": "S", "fire": "A", "skipKeyBindings": true }
   ],
   "keybindings": [
     {

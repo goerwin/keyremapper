@@ -45,9 +45,9 @@
   "NP8": [72, 0, 1],
   "NP9": [73, 0, 1],
   "NP0": [82, 0, 1],
-  "MUTE": [160, 0, 1],
-  "VOLUMEDOWN": [174, 0, 1],
-  "VOLUMEUP": [176, 0, 1],
+  "Mute": [32, 2, 3],
+  "VolumeDown": [46, 2, 3],
+  "VolumeUp": [48, 2, 3],
   "Esc": [1, 0, 1],
   "Caps": [58, 0, 1],
   "Left": [75, 2, 3],
@@ -76,6 +76,8 @@
   "Colon": [39, 0, 1],
   "Dash": [12, 0, 1],
   "Backtick": [41, 0, 1],
+  "BracketL": [26, 0, 1],
+  "BracketR": [27, 0, 1],
   "NumLock": [69, 0, 1],
   "Insert": [210, 0, 1],
   "Del": [211, 0, 1],
@@ -93,6 +95,9 @@
   "F12": [88, 0, 1],
   "LeftClick": [241, 0, 1],
   "RightClick": [242, 0, 1],
-  "BRIGHTNESSDOWN": [243, 0, 1],
-  "BRIGHTNESSUP": [244, 0, 1]
+  "BrightnessDown": [243, 0, 1],
+  "BrightnessUp": [244, 0, 1],
+  "CapslockOff": [245, 0, 1],
+  "CapslockOn": [246, 0, 1],
+  "CapslockToggle": [247, 0, 1]
 }

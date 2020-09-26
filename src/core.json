@@ -2,10 +2,17 @@
   "remaps": {
     "CtrlR": "Win",
     "AltR": "Alt",
+    "ShiftR": "Shift",
     "NextToShiftL": "Shift"
   },
   "keyPresses": [
-    [1, "Caps", "Esc"]
+    { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    {
+      "repeat": 2,
+      "inputKey": "Shift",
+      "fire": "Caps",
+      "skipKeyBindings": true
+    }
   ],
   "keybindings": [
     // Alt tab Mode For Windows Like MacOS
@@ -56,7 +63,7 @@
     },
     {
       "hotkeys": ["H", "L"],
-      "when": { "Caps": true, "Win": true, "Alt": false },
+      "when": { "Caps": true, "Win": true },
       "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
     },
     {
@@ -78,6 +85,11 @@
       "hotkeys": ["Caps"],
       "when": { "S": true },
       "fire": [null, "Shift:up"]
+    },
+    { // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
+      "hotkeys": ["F7", "Y", "BracketR"],
+      "when": { "Caps": true },
+      "fire": [null, null]
     },
 
     // Right/Left clicks
@@ -123,38 +135,67 @@
     },
 
     // General
+
+    { "hotkeys": ["Ctrl"], "fire": ["Alt:down", "Alt:up"] },
+    { "hotkeys": ["Caps"], "fire": [null, null] },
+    { "hotkeys": ["Win"], "fire": [null, null] },
+
     {
-      "hotkeys": ["Alt J"],
-      "fire": ["Ctrl:up Next Ctrl:down", null]
+      "hotkeys": ["Caps Tab"],
+      "fire": ["Ctrl:down Tab Ctrl:up", null]
     },
     {
-      "hotkeys": ["Alt K"],
-      "fire": ["Ctrl:up Prior Ctrl:down", null]
+      "hotkeys": ["Caps Space"],
+      "fire": ["Ctrl:down Space Ctrl:up", null]
+    },
+
+    {
+      "hotkeys": ["Ctrl Tab"],
+      "fire": ["Alt:up Ctrl:down Tab Ctrl:up Alt:down", null]
+    },
+
+    //     - WinAlt H => Down(keyUpLAlt Win↓ Left↕ Win↑) Up(null)
+    // - WinAlt J => Down(keyUpLAlt Win↓ Down↕ Win↑) Up(null)
+    // - WinAlt K => Down(keyUpLAlt Win↓ Up↕ Win↑) Up(null)
+    // - WinAlt L => Down(keyUpLAlt Win↓ Right↕ Win↑) Up(null)
+    //{ "hotkeys": ["Win Alt H"], "fire": ["Alt:down F Alt:up", null] },
+
+    { "hotkeys": ["Win F"], "fire": ["Alt:down F Alt:up", null] },
+
+    { "hotkeys": ["Win D"], "fire": ["Win:down D Win:up", null] },
+    { "hotkeys": ["Win Back"], "fire": ["Ctrl:down Back Ctrl:up", null] },
+    { "hotkeys": ["Win Space"], "fire": ["Win", null] },
+
+    {
+      "hotkeys": ["Alt Back"],
+      "fire": ["Ctrl:up Shift:down Home Shift:up Back Ctrl:down", null]
+    },
+    { "hotkeys": ["Alt J"], "fire": ["Ctrl:up Next Ctrl:down", null] },
+    { "hotkeys": ["Alt K"], "fire": ["Ctrl:up Prior Ctrl:down", null] },
+
+    { "hotkeys": ["Alt F1"], "fire": ["Ctrl:up F1 Ctrl:down", null] },
+    { "hotkeys": ["Alt F2"], "fire": ["Ctrl:up F2 Ctrl:down", null] },
+    { "hotkeys": ["Alt F10"], "fire": ["Ctrl:up F10 Ctrl:down", null] },
+    { "hotkeys": ["Alt F11"], "fire": ["Ctrl:up F11 Ctrl:down", null] },
+    { "hotkeys": ["Alt F12"], "fire": ["Ctrl:up F12 Ctrl:down", null] },
+
+    { "hotkeys": ["F1"], "fire": ["BrightnessDown", null] },
+    { "hotkeys": ["F2"], "fire": ["BrightnessUp", null] },
+    { "hotkeys": ["F10"], "fire": ["Mute", null] },
+    {
+      "hotkeys": ["F11"],
+      "fire": ["VolumeDown VolumeDown VolumeDown VolumeDown", null]
     },
     {
-      "hotkeys": ["Ctrl"],
-      "fire": ["Alt:down", "Alt:up"]
-    },
-    {
-      "hotkeys": ["Caps"],
-      "fire": [null, null]
-    },
-    {
-      "hotkeys": ["Win"],
-      "fire": [null, null]
+      "hotkeys": ["F12"],
+      "fire": ["VolumeUp VolumeUp VolumeUp VolumeUp", null]
     }
   ],
   "apps": {
     "chrome.exe": {
       "keybindings": [
-        {
-          "hotkeys": ["Alt H"],
-          "fire": ["Shift:down Tab Shift:up", null]
-        },
-        {
-          "hotkeys": ["Alt L"],
-          "fire": ["Tab", null]
-        }
+        { "hotkeys": ["Alt H"], "fire": ["Shift:down Tab Shift:up", null] },
+        { "hotkeys": ["Alt L"], "fire": ["Tab", null] }
       ]
     }
   },
@@ -193,7 +234,7 @@
     ["Alt", "Ctrl"],
 
     // VIM MODE
-    ["Caps", ""],
+    ["Caps", "Esc"],
     ["Caps:down A Caps:up", "A"],
     ["Caps:down H Caps:up", "Left"],
     ["Caps:down L Caps:up", "Right"],

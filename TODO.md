@@ -1,10 +1,11 @@
 # TODO
-- double press modifiers (eg. for the capslock with double shift press)
 - use setOnDown, setOnUp, instead of set
-- add builds for both x86 and x64 archs
 - UI to debug events
+- add builds for both x86 and x64 archs
+- general Key
 
 # DONE
+- double press modifiers (eg. for the capslock with double shift press)
 - CLICKS
 - keybindings per app
 - fix issue with numpad and arrows (VERSION 1 is working properly!)

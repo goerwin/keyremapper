@@ -87,7 +87,7 @@ TEST(KeyDispatcher_test, keyPresses)
   resultKeysStr = keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
   EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
 
-  // WITHOUT/WITH byPassKeyBindings
+  // WITHOUT/WITH skipKeyBindings
 
   keyDispatcher->reset();
   inputKeys = keyDispatcher->getKeyEventsFromString("R");
@@ -116,7 +116,7 @@ TEST(KeyDispatcher_test, keyPresses)
   inputKeys = keyDispatcher->getKeyEventsFromString("A Caps:down");
   partialKeyEvents = keyDispatcher->applyKeys(inputKeys);
   inputKeys = keyDispatcher->getKeyEventsFromString("Caps:up");
-  std::this_thread::sleep_for(std::chrono::milliseconds(11));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   partialKeyEvents = Helpers::concatArrays(partialKeyEvents, keyDispatcher->applyKeys(inputKeys));
   resultKeysStr = keyDispatcher->stringifyKeyEvents(partialKeyEvents);
   expectedKeys = keyDispatcher->getKeyEventsFromString("B Caps");

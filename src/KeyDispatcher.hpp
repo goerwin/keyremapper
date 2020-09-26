@@ -117,15 +117,13 @@ public:
       int repeat = keyPress["repeat"];
       String inputKey = keyPress["inputKey"];
       String ruleItem = keyPress["fire"];
-      auto byPassKeyBindings = keyPress["byPassKeyBindings"];
+      auto skipKeyBindings = keyPress["skipKeyBindings"];
 
       if (repeat == multiplePressesCount && inputKey == keyName)
       {
         return {
-          ruleItem,
-          byPassKeyBindings.is_null() ?
-            false : byPassKeyBindings.get<bool>()
-        };
+            ruleItem,
+            skipKeyBindings.is_null() ? false : skipKeyBindings.get<bool>()};
       }
     }
 
@@ -182,14 +180,13 @@ public:
       if (!multiplePressesFireItem.is_null())
       {
         auto fire = multiplePressesFireItem[0].get<String>();
-        auto byPassKeyBindings = multiplePressesFireItem[1].get<bool>();
+        auto skipKeyBindings = multiplePressesFireItem[1].get<bool>();
         auto keyPressKeyEvents = getKeyEventsFromString(fire);
 
-        if (byPassKeyBindings) {
+        if (skipKeyBindings)
           localKeyEvents = Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
-        } else {
+        else
           keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
-        }
       }
 
       Helpers::print(
@@ -315,7 +312,7 @@ public:
       if (resultKeysStr != stringifyKeyEvents(expectedKeys))
       {
         ok = false;
-        message = "TEST FAILED: expected \"" + expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
+        message = "TEST " + std::to_string(i) + " FAILED: expected \"" + expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
         break;
       }
     }
