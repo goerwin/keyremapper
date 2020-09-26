@@ -12,8 +12,6 @@ class KeyDispatcher
   typedef std::vector<String> Strings;
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
-  typedef std::tuple<int, String, String> KeyPress;
-  typedef std::vector<KeyPress> KeyPresses;
 
   struct Key
   {
@@ -65,7 +63,7 @@ public:
   double keyDownTime = 0;
   double keyUpTime = 0;
 
-  String getMultiplePressesFireItem(String keyName, bool isKeyDown)
+  json getMultiplePressesFireItem(String keyName, bool isKeyDown)
   {
     if (keyPresses.is_null())
       return {};
@@ -113,18 +111,21 @@ public:
       }
     }
 
-    auto keyPressesParsed = keyPresses.get<KeyPresses>();
-
-    for (auto i = 0; i < keyPressesParsed.size(); i++)
+    for (auto i = 0; i < keyPresses.size(); i++)
     {
-      auto keyPress = keyPressesParsed[i];
-      auto numberOfPresses = std::get<0>(keyPress);
-      auto keyPressKeyName = std::get<1>(keyPress);
-      auto ruleItem = std::get<2>(keyPress);
+      auto keyPress = keyPresses[i];
+      int repeat = keyPress["repeat"];
+      String inputKey = keyPress["inputKey"];
+      String ruleItem = keyPress["fire"];
+      auto byPassKeyBindings = keyPress["byPassKeyBindings"];
 
-      if (numberOfPresses == multiplePressesCount && keyPressKeyName == keyName)
+      if (repeat == multiplePressesCount && inputKey == keyName)
       {
-        return ruleItem;
+        return {
+          ruleItem,
+          byPassKeyBindings.is_null() ?
+            false : byPassKeyBindings.get<bool>()
+        };
       }
     }
 
@@ -158,12 +159,6 @@ public:
         continue;
       }
 
-      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
-      if (!multiplePressesFireItem.empty())
-      {
-        keyEvents = Helpers::concatArrays(keyEvents, getKeyEventsFromString(multiplePressesFireItem), i + 1);
-      }
-
       KeyEvents localKeyEvents = {};
       auto fireKeys = getFireFromKeybindings();
 
@@ -181,6 +176,20 @@ public:
       else
       {
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
+      }
+
+      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+      if (!multiplePressesFireItem.is_null())
+      {
+        auto fire = multiplePressesFireItem[0].get<String>();
+        auto byPassKeyBindings = multiplePressesFireItem[1].get<bool>();
+        auto keyPressKeyEvents = getKeyEventsFromString(fire);
+
+        if (byPassKeyBindings) {
+          localKeyEvents = Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
+        } else {
+          keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
+        }
       }
 
       Helpers::print(

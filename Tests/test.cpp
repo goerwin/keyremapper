@@ -6,7 +6,6 @@
 #include "../src/helpers.hpp"
 
 using json = nlohmann::json;
-
 TEST(KeyDispatcher_test, find_correct_fireKeys)
 {
   auto symbols = Helpers::getJsonFile("./symbols.json");
@@ -87,6 +86,22 @@ TEST(KeyDispatcher_test, keyPresses)
   expectedKeys = keyDispatcher->getKeyEventsFromString("Alt:down Caps Esc Alt:up");
   resultKeysStr = keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
   EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
+
+  // WITHOUT/WITH byPassKeyBindings
+
+  keyDispatcher->reset();
+  inputKeys = keyDispatcher->getKeyEventsFromString("R");
+  expectedKeys = keyDispatcher->getKeyEventsFromString("R B");
+  resultKeysStr = keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
+  EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
+
+  keyDispatcher->reset();
+  inputKeys = keyDispatcher->getKeyEventsFromString("S");
+  expectedKeys = keyDispatcher->getKeyEventsFromString("S A");
+  resultKeysStr = keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
+  EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
+
+  // WITHOUT/WITH DELAY
 
   keyDispatcher->reset();
   inputKeys = keyDispatcher->getKeyEventsFromString("A Caps:down");
