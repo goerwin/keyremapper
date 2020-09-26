@@ -97,7 +97,5 @@
   "RightClick": [242, 0, 1],
   "BrightnessDown": [243, 0, 1],
   "BrightnessUp": [244, 0, 1],
-  "CapslockOff": [245, 0, 1],
-  "CapslockOn": [246, 0, 1],
-  "CapslockToggle": [247, 0, 1]
+  "ToggleAppEnabled": [245, 0, 1]
 }

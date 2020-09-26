@@ -1,9 +1,13 @@
 # TODO
-- use setOnDown, setOnUp, instead of set
-- UI to debug events
 - add builds for both x86 and x64 archs
+- modes
+- multiple configs with json inheritance
+- UI to debug events
 
 # DONE
+- enable/disable with double esc
+- logo
+- brightness
 - double press modifiers (eg. for the capslock with double shift press)
 - CLICKS
 - keybindings per app

@@ -7,6 +7,7 @@
   },
   "keyPresses": [
     { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    { "repeat": 2, "inputKey": "Esc", "fire": "ToggleAppEnabled" },
     {
       "repeat": 2,
       "inputKey": "Shift",
@@ -15,6 +16,11 @@
     }
   ],
   "keybindings": [
+    //"%OBJECT './object.json' %",
+    //"%SPREAD_OBJECT './object.json' %",
+    //"%ARRAY './array.json' %",
+    //"%SPREAD_ARRAY './array.json' %",
+
     // Alt tab Mode For Windows Like MacOS
     {
       "keys": ["Tab"],
@@ -28,9 +34,15 @@
       "fire": ["Tab", null]
     },
     {
-      "keys": ["Alt"],
-      "when": { "isAltTabMode": false },
-      "fire": ["Ctrl:down", "Ctrl:up"]
+      "keys": ["Esc"],
+      "when": { "Alt": true, "isAltTabMode": true },
+      "set": { "isAltTabMode": false },
+      "fire": ["Esc Alt:up Ctrl:down", null]
+    },
+    {
+      "keys": ["Q"],
+      "when": { "Alt": true, "isAltTabMode": true },
+      "fire": ["Supr", null]
     },
     {
       "keys": ["Alt"],
@@ -39,10 +51,8 @@
       "fire": [null, "Alt:up"]
     },
     {
-      "keys": ["Esc"],
-      "when": { "isAltTabMode": true, "Alt": true },
-      "set": { "isAltTabMode": false },
-      "fire": ["Esc Alt:up Ctrl:down", null]
+      "keys": ["Alt"],
+      "fire": ["Ctrl:down", "Ctrl:up"]
     },
 
     // Vim Mode With Caps
@@ -245,7 +255,6 @@
       "when": { "Win": true },
       "fire": ["Alt:down currentKey Alt:up", null]
     },
-
     {
       "keys": ["D"],
       "when": { "Win": true },
@@ -256,20 +265,22 @@
       "when": { "Win": true },
       "fire": ["Ctrl:down Back Ctrl:up", null]
     },
-    { "keys": ["Space"], "when": { "Win": true }, "fire": ["Win", null] },
-
     {
-      "keys": ["H"],
+      "keys": ["Space"],
       "when": { "Win": true },
-      "fire": ["Alt:down Left Alt:up", null]
+      "fire": ["Win", null]
     },
     {
-      "keys": ["L"],
+      "keys": ["H", "L"],
       "when": { "Win": true },
-      "fire": ["Alt:down Right Alt:up", null]
+      "fire": ["Alt:down vimArrowKey Alt:up", null]
     },
 
-    { "keys": ["Space"], "when": { "Alt": true }, "fire": ["F12", null] },
+    {
+      "keys": ["Space"],
+      "when": { "Alt": true },
+      "fire": ["F12", null]
+    },
     {
       "keys": ["Back"],
       "when": { "Alt": true },
@@ -279,6 +290,11 @@
       "keys": ["Esc"],
       "when": { "Alt": true, "isAltTabMode": false },
       "fire": [null, null]
+    },
+    {
+      "keys": ["Q"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up Alt:down F4 Alt:up Ctrl:down", null]
     },
     {
       "keys": ["J"],

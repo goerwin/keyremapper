@@ -49,7 +49,7 @@ namespace Helpers
       insertPos = arr1.end();
     else
       insertPos = arr1.begin() + pos;
-  
+
     arr1.insert(insertPos, arr2.begin(), arr2.end());
     return arr1;
   }
@@ -60,9 +60,19 @@ namespace Helpers
     OutputDebugStringA(res.c_str());
   }
 
+  String getAbsPath(String filepath)
+  {
+    char moduleFilepath[MAX_PATH];
+    GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
+    auto strModuleFilepath = std::string(moduleFilepath);
+
+    auto dir = strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
+    return dir + "\\" + filepath;
+  }
+
   json getJsonFile(String filepath)
   {
-    std::ifstream file(filepath);
+    std::ifstream file(getAbsPath(filepath));
     String fileStr((std::istreambuf_iterator<char>(file)),
                    std::istreambuf_iterator<char>());
 
