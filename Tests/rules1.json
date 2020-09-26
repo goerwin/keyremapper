@@ -7,23 +7,25 @@
   ],
   "keybindings": [
     {
-      "hotkeys": ["Alt"],
+      "keys": ["Alt"],
       "fire": ["Ctrl:down", "Ctrl:up"]
     },
     {
-      "hotkeys": ["B"],
+      "keys": ["B"],
       "fire": ["C", "D"]
     },
     {
-      "hotkeys": ["F G"],
+      "keys": ["G"],
+      "when": { "F": true },
       "fire": ["H:down", "H:up"]
     },
     {
-      "hotkeys": ["Ctrl Caps H"],
+      "keys": ["H"],
+      "when": { "Ctrl": true, "Caps": true },
       "fire": ["Left", null]
     },
     {
-      "hotkeys": ["X", "Y"],
+      "keys": ["X", "Y"],
       "fire": ["Z:down", "Z:up"]
     }
   ],

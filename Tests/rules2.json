@@ -11,15 +11,15 @@
   },
   "keybindings": [
     {
-      "hotkeys": ["F"],
+      "keys": ["F"],
       "fire": ["X:down", "X:up"]
     },
     {
-      "hotkeys": ["F"],
+      "keys": ["F"],
       "fire": ["Z:down", "Z:up"]
     },
     {
-      "hotkeys": ["Alt"],
+      "keys": ["Alt"],
       "fire": ["Ctrl:down", "Ctrl:up"]
     }
   ],

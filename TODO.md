@@ -2,7 +2,6 @@
 - use setOnDown, setOnUp, instead of set
 - UI to debug events
 - add builds for both x86 and x64 archs
-- general Key
 
 # DONE
 - double press modifiers (eg. for the capslock with double shift press)
@@ -14,6 +13,7 @@
 - you should only test key cases, not entire flows (like vim mode)
 - rethink alghoritm to be more general so it can be used in any OS
 - validate if keycode doesnt exist
+- general Key (TOO COMPLEX TO IMPLEMENT)
 
 # NOTES
 - FakeShiftL is triggered when some special keys (left, right) are used with NumLock on. So I'm ignoring it.

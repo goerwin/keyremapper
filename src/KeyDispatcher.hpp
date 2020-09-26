@@ -394,41 +394,17 @@ private:
     for (auto i = 0; i < allKeybindings.size(); i++)
     {
       auto keybinding = allKeybindings[i];
-      auto hotkeys = keybinding["hotkeys"];
+      auto keys = keybinding["keys"];
 
       if (!isWhen(keybinding["when"]))
         continue;
 
-      for (auto j = 0; j < hotkeys.size(); j++)
+      for (auto j = 0; j < keys.size(); j++)
       {
-        String hotkey = hotkeys[j];
-        auto hotkeyKeys = Helpers::split(hotkey, ' ');
-        auto hotkeyKeysSize = hotkeyKeys.size();
-        auto skipHotkey = false;
-
-        for (auto k = 0; k < hotkeyKeysSize; k++)
-        {
-          auto hotkeyKey = std::string(hotkeyKeys[k]);
-          auto hotkeyKeyDownState = globals[hotkeyKey];
-
-          if (k < hotkeyKeysSize - 1 && (hotkeyKeyDownState.is_null() || hotkeyKeyDownState == false))
-          {
-            skipHotkey = true;
-            break;
-          }
-
-          if (k == hotkeyKeysSize - 1 && currentKey != hotkeyKey)
-          {
-            skipHotkey = true;
-            break;
-          }
-        }
-
-        if (skipHotkey)
+        if (currentKey != keys[j])
           continue;
 
         setValues(keybinding["set"]);
-
         return keybinding["fire"];
       }
     }

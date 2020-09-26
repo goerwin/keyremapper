@@ -2,26 +2,26 @@
   "description": ["currentKey", "set", "when"],
   "keybindings": [
     {
-      "hotkeys": ["A"],
+      "keys": ["A"],
       "fire": ["B currentKey", null]
     },
     {
-      "hotkeys": ["C"],
+      "keys": ["C"],
       "when": { "C": true },
       "set": { "RANDOM_STR": true }
     },
     {
-      "hotkeys": ["C"],
+      "keys": ["C"],
       "when": { "C": false },
       "set": { "RANDOM_STR": false }
     },
     {
-      "hotkeys": ["D"],
+      "keys": ["D"],
       "when": { "RANDOM_STR": true },
       "fire": ["X", null]
     },
     {
-      "hotkeys": ["D"],
+      "keys": ["D"],
       "when": { "RANDOM_STR": false },
       "fire": ["Y", null]
     }

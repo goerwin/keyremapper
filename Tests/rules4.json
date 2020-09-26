@@ -2,12 +2,12 @@
   "description": ["app keybindings"],
   "keybindings": [
     {
-      "hotkeys": ["A"],
+      "keys": ["A"],
       "when": { "appName": "chrome.exe" },
       "fire": ["C", null]
     },
     {
-      "hotkeys": ["A"],
+      "keys": ["A"],
       "fire": ["B", null]
     }
   ],

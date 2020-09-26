@@ -17,18 +17,3 @@
 - Win U => Down(Alt↓ NP0↕ NP2↕ NP5↕ NP0↕ Alt↑) Up(null)
 - Win N => Down(Alt↓ NP1↕ NP6↕ NP4↕ Alt↑) Up(null)
 ```
-
-### Alt
-```
-- Alt P => Down(K↕) Up(null) "slack.exe"
-- Alt Space => Down(F12↕) Up(null)
-- Alt ` => Down(keyDownLAltAsLAlt `↕ keyDownLAltAsLCtrl) Up(null)
-```
-
-### Key
-```
-- Key F3 => Down(Ctrl↓ Shift↓ Tab↕ Shift↑ Ctrl↑) Up(null) "chrome.exe"
-- Key F4 => Down(Ctrl↓ Tab↕ Ctrl↑) Up(null) "chrome.exe"
-- Key F5 => Down(Alt↓ M↕ Alt↑) Up(null) "chrome.exe"
-- Key F6 => Down(Alt↓ T↕ Alt↑) Up(null) "chrome.exe"
-```

@@ -9,11 +9,11 @@
   ],
   "keybindings": [
     {
-      "hotkeys": ["A"],
+      "keys": ["A"],
       "fire": ["B:down", "B:up"]
     },
     {
-      "hotkeys": ["Win"],
+      "keys": ["Win"],
       "fire": [null, null]
     }
   ]
