@@ -1,4 +1,5 @@
 # TODO
+- alt tab enter issue
 - add builds for both x86 and x64 archs
 - modes
 - multiple configs with json inheritance

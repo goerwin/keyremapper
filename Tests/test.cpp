@@ -3,18 +3,18 @@
 #include <thread>
 #include "../src/KeyDispatcher.hpp"
 #include "../src/libraries/json.hpp"
-#include "../src/helpers.hpp"
+#include "../src/helpersWindows.hpp"
 
 using json = nlohmann::json;
 TEST(KeyDispatcher_test, find_correct_fireKeys)
 {
-  auto symbols = Helpers::getJsonFile("symbols.json");
+  auto symbols = HelpersWindows::getJsonFile("symbols.json");
 
   auto ruleFiles = json::array({
-      Helpers::getJsonFile("rules1.json"),
-      Helpers::getJsonFile("rules2.json"),
-      Helpers::getJsonFile("rules3.json"),
-      Helpers::getJsonFile("rules4.json"),
+      HelpersWindows::getJsonFile("rules1.json"),
+      HelpersWindows::getJsonFile("rules2.json"),
+      HelpersWindows::getJsonFile("rules3.json"),
+      HelpersWindows::getJsonFile("rules4.json"),
   });
 
   for (auto i = 0; i < ruleFiles.size(); i++)
@@ -36,8 +36,8 @@ TEST(KeyDispatcher_test, find_correct_fireKeys)
 
 TEST(KeyDispatcher_test, keyPresses)
 {
-  auto symbols = Helpers::getJsonFile("symbols.json");
-  auto ruleFile = Helpers::getJsonFile("rules5.json");
+  auto symbols = HelpersWindows::getJsonFile("symbols.json");
+  auto ruleFile = HelpersWindows::getJsonFile("rules5.json");
   std::string resultKeysStr;
 
   auto keyDispatcher = new KeyDispatcher(ruleFile, symbols);

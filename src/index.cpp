@@ -3,7 +3,7 @@
 #include "images/index.h"
 #include "helpers/brightness.h"
 #include "KeyDispatcher.hpp"
-#include "helpers.hpp"
+#include "helpersWindows.hpp"
 #include "libraries/Interception/utils.h"
 #include "libraries/Interception/interception.h"
 
@@ -16,8 +16,8 @@ namespace
   const auto APP_TITLE = L"KeyRemapper";
   bool isAppEnabled = true;
 
-  auto rules = Helpers::getJsonFile("mode1.json");
-  auto symbols = Helpers::getJsonFile("symbols.json");
+  auto rules = HelpersWindows::getJsonFile("mode1.json");
+  auto symbols = HelpersWindows::getJsonFile("symbols.json");
   auto keyDispatcher = new KeyDispatcher(rules, symbols);
 
   HWND g_hwnd;
@@ -66,7 +66,7 @@ namespace
     interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
 
     auto testResults = keyDispatcher->runTests();
-    Helpers::print(!testResults.is_null() ? testResults["message"] : "NO TESTS RUN");
+    HelpersWindows::print(!testResults.is_null() ? testResults["message"] : "NO TESTS RUN");
 
     while (interception_receive(
                context,
@@ -135,7 +135,7 @@ namespace
 
   void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
   {
-    keyDispatcher->setAppName(Helpers::getActiveWindowProcessName(hwnd));
+    keyDispatcher->setAppName(HelpersWindows::getActiveWindowProcessName(hwnd));
   }
 
   LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
