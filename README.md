@@ -1,3 +1,8 @@
+* Install Interception driver following https://github.com/oblitum/Interception
+* Download `KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
+* Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
+* Rules (remaps, keybindings, keyPresses, tests) can be found in `mode1.json`
+
 ## Development
 - In Visual Studio 2019, run a batch build and mark all projects, they all should build successfully
 - Run the tests via Text Explorer -> Run all tests
