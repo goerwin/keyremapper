@@ -34,10 +34,10 @@
       "fire": ["Tab", null]
     },
     {
-      "keys": ["Esc"],
+      "keys": ["Esc", "Enter"],
       "when": { "Alt": true, "isAltTabMode": true },
       "set": { "isAltTabMode": false },
-      "fire": ["Esc Alt:up Ctrl:down", null]
+      "fire": ["currentKey Alt:up Ctrl:down", null]
     },
     {
       "keys": ["Q"],

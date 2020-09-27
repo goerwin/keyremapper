@@ -1,11 +1,17 @@
-# TODO
-- alt tab enter issue
-- add builds for both x86 and x64 archs
-- modes
+## Development
+- In Visual Studio 2019, run a batch build and mark all projects, they all should build successfully
+- Run the tests via Text Explorer -> Run all tests
+- Run `$ bash release.sh` in terminal to generate the KeyRemapper.zip file with
+.exes for x86 and x64.
+
+### TODO
+- multiple modes
 - multiple configs with json inheritance
 - UI to debug events
 
-# DONE
+### DONE
+- alt tab enter issue
+- add builds for both x86 and x64 archs
 - enable/disable with double esc
 - logo
 - brightness
@@ -20,9 +26,9 @@
 - validate if keycode doesnt exist
 - general Key (TOO COMPLEX TO IMPLEMENT)
 
-# NOTES
+### NOTES
 - FakeShiftL is triggered when some special keys (left, right) are used with NumLock on. So I'm ignoring it.
-- Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock position. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
+- Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock status. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
 - For unicode (accents, tildes, etc)
   - http://www.fileformat.info/tip/microsoft/enter_unicode.htm
 - Numlock

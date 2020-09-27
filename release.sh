@@ -16,16 +16,17 @@ filesx64=(
 
 tmpDir=$(mktemp -d)
 
-mkdir $tmpDir/$projectName
-mkdir $tmpDir/$projectName/x86
-mkdir $tmpDir/$projectName/x64
+folder86="$projectName""_x86"
+folder64="$projectName""_x64"
+mkdir $tmpDir/$folder86
+mkdir $tmpDir/$folder64
 
 for entry in "${filesx86[@]}"; do
-  cp $entry $tmpDir/$projectName/x86
+  cp $entry $tmpDir/$folder86
 done
 
 for entry in "${filesx64[@]}"; do
-  cp $entry $tmpDir/$projectName/x64
+  cp $entry $tmpDir/$folder64
 done
 
 # Since zip always includes the parent dir, in this case
@@ -35,7 +36,6 @@ done
 (cd $tmpDir && zip -q -r $projectName.zip .)
 mv $tmpDir/$projectName.zip .
 
-# zip -q $projectName.zip $tmpDir/$projectName/x86
 rm -rf $tmpDir
 
 echo "Release $projectName.zip was created!"
