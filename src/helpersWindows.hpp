@@ -1,7 +1,6 @@
 #pragma once
 
 #include <windows.h>
-#include <psapi.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -58,8 +57,9 @@ namespace HelpersWindows
     if (handle)
     {
       CHAR path[MAX_PATH];
+      DWORD maxPath = MAX_PATH;
 
-      if (GetModuleFileNameExA(handle, 0, path, MAX_PATH))
+      if (QueryFullProcessImageNameA(handle, 0, path, &maxPath))
       {
         processName = path;
         String::size_type idx = processName.rfind("\\");

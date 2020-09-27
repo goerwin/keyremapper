@@ -1,3 +1,6 @@
+// https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-queryfullprocessimagenamea
+#define _WIN32_WINNT 0x0600
+
 #include <windows.h>
 #include "images/index.h"
 #include "images/index.h"
