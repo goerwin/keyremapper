@@ -40,19 +40,6 @@ private:
   json keyPresses;
   int REPEAT_TIME;
 
-public:
-  KeyDispatcher(json rulesEl, json symbolsEl)
-  {
-    rules = rulesEl;
-    symbols = symbolsEl;
-    keybindings = rulesEl["keybindings"];
-    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null() ? 200 : rulesEl["keyPressesDelay"].get<int>();
-    tests = rulesEl["tests"];
-    remaps = rulesEl["remaps"];
-    keyPresses = rulesEl["keyPresses"];
-    appsDefinitions = rulesEl["apps"];
-  }
-
   double getTimeDifference(double time1, double time2)
   {
     return (time1 - time2) / CLOCKS_PER_SEC * 1000;
@@ -124,6 +111,19 @@ public:
     }
 
     return {};
+  }
+
+public:
+  KeyDispatcher(json rulesEl, json symbolsEl)
+  {
+    rules = rulesEl;
+    symbols = symbolsEl;
+    keybindings = rulesEl["keybindings"];
+    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null() ? 200 : rulesEl["keyPressesDelay"].get<int>();
+    tests = rulesEl["tests"];
+    remaps = rulesEl["remaps"];
+    keyPresses = rulesEl["keyPresses"];
+    appsDefinitions = rulesEl["apps"];
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents)

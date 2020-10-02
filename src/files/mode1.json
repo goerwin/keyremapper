@@ -203,6 +203,67 @@
 
     // General
 
+    {
+      "keys": ["A"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP1 NP9 NP3 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["A"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP2 NP5 Alt:up", null]
+    },
+    {
+      "keys": ["E"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP0 NP1 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["E"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP3 NP3 Alt:up", null]
+    },
+    {
+      "keys": ["I"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP0 NP5 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["I"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP3 NP7 Alt:up", null]
+    },
+    {
+      "keys": ["O"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP1 NP1 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["O"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP4 NP3 Alt:up", null]
+    },
+    {
+      "keys": ["U"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP1 NP8 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["U"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP5 NP0 Alt:up", null]
+    },
+    {
+      "keys": ["N"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP1 NP6 NP5 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["N"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP1 NP6 NP4 Alt:up", null]
+    },
+
     { "keys": ["Ctrl"], "fire": ["Alt:down", "Alt:up"] },
     { "keys": ["Caps"], "fire": [null, null] },
     { "keys": ["Win"], "fire": [null, null] },
@@ -237,12 +298,6 @@
       "fire": ["Ctrl:up Win:down vimArrowKey Win:up", "Ctrl:down"]
     },
 
-    // TODO:
-    {
-      "keys": ["A"],
-      "when": { "Win": true },
-      "fire": ["Alt:down NP0 NP2 NP2 NP5 Alt:up", null]
-    },
     //     - Win A => Down(Alt↓ NP0↕ NP2↕ NP2↕ NP5↕ Alt↑) Up(null)
     // - Win E => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP3↕ Alt↑) Up(null)
     // - Win I => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP7↕ Alt↑) Up(null)

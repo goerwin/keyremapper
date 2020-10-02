@@ -1,5 +1,6 @@
 #pragma once
 
+#include <windows.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -55,5 +56,6 @@ namespace Helpers
   {
     auto res = str + str2;
     std::cout << res << "";
+    OutputDebugStringA(res.c_str());
   }
 } // namespace Helpers
