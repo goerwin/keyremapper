@@ -51,12 +51,6 @@
       "fire": [null, "Alt:up"]
     },
     {
-      "keys": ["Alt"],
-      "fire": ["Ctrl:down", "Ctrl:up"]
-    },
-
-    // Vim Mode With Caps
-    {
       "keys": ["H", "L"],
       "when": { "Caps": true, "Alt": true, "isAltTabMode": false },
       "fire": ["Ctrl:up vimHomeEndKey Ctrl:down", null]
@@ -66,6 +60,12 @@
       "when": { "Caps": true, "Alt": true, "isAltTabMode": true },
       "fire": ["vimArrowKey", null]
     },
+    {
+      "keys": ["Alt"],
+      "fire": ["Ctrl:down", "Ctrl:up"]
+    },
+
+    // Vim Mode With Caps
     {
       "keys": ["J", "K"],
       "when": { "Caps": true, "Alt": true },
@@ -112,7 +112,7 @@
     },
     {
       "keys": ["C"],
-      "when": { "Win": true, "Caps": true, "C": true, "isClickDown": true },
+      "when": { "Win": true, "Caps": true, "C": true },
       "fire": [null, null]
     },
     {
@@ -129,7 +129,7 @@
     },
     {
       "keys": ["C"],
-      "when": { "Win": true, "isClickDown": true, "C": true },
+      "when": { "Win": true, "C": true },
       "fire": [null, null]
     },
     {
@@ -297,14 +297,6 @@
       "when": { "Win": true, "Alt": true },
       "fire": ["Ctrl:up Win:down vimArrowKey Win:up", "Ctrl:down"]
     },
-
-    //     - Win A => Down(Alt↓ NP0↕ NP2↕ NP2↕ NP5↕ Alt↑) Up(null)
-    // - Win E => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP3↕ Alt↑) Up(null)
-    // - Win I => Down(Alt↓ NP0↕ NP2↕ NP3↕ NP7↕ Alt↑) Up(null)
-    // - Win O => Down(Alt↓ NP0↕ NP2↕ NP4↕ NP3↕ Alt↑) Up(null)
-    // - Win U => Down(Alt↓ NP0↕ NP2↕ NP5↕ NP0↕ Alt↑) Up(null)
-    // - Win N => Down(Alt↓ NP1↕ NP6↕ NP4↕ Alt↑) Up(null)
-
     {
       "keys": ["F", "J", "K"],
       "when": { "Win": true },
@@ -343,7 +335,7 @@
     },
     {
       "keys": ["Esc"],
-      "when": { "Alt": true, "isAltTabMode": false },
+      "when": { "Alt": true },
       "fire": [null, null]
     },
     {

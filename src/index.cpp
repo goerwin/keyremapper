@@ -19,9 +19,7 @@ namespace
   const auto APP_TITLE = L"KeyRemapper";
   bool isAppEnabled = true;
 
-  auto rules = HelpersWindows::getJsonFile("mode1.json");
-  auto symbols = HelpersWindows::getJsonFile("symbols.json");
-  auto keyDispatcher = new KeyDispatcher(rules, symbols);
+  KeyDispatcher* keyDispatcher;
 
   HWND g_hwnd;
   const int IDM_EXIT = 5;
@@ -50,10 +48,24 @@ namespace
     Shell_NotifyIcon(NIM_ADD, &nid);
   }
 
+  void initializeKeyDispatcher()
+  {
+    auto rules = HelpersWindows::getJsonFile("mode1.json");
+    auto symbols = HelpersWindows::getJsonFile("symbols.json");
+    keyDispatcher = new KeyDispatcher(rules, symbols);
+  }
+
   void toggleAppEnabled()
   {
     isAppEnabled = !isAppEnabled;
-    nid.hIcon = isAppEnabled ? globalIconImage : globalIconImageDisabled;
+
+    if (isAppEnabled) {
+      nid.hIcon = globalIconImage;
+      initializeKeyDispatcher();
+    } else {
+      nid.hIcon = globalIconImageDisabled;
+    }
+   
     Shell_NotifyIcon(NIM_MODIFY, &nid);
   }
 
@@ -67,6 +79,8 @@ namespace
     raise_process_priority();
     context = interception_create_context();
     interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
+
+    initializeKeyDispatcher();
 
     auto testResults = keyDispatcher->runTests();
     HelpersWindows::print(!testResults.is_null() ? testResults["message"] : "NO TESTS RUN");
@@ -88,7 +102,8 @@ namespace
         continue;
       }
 
-      if (!isAppEnabled) {
+      if (!isAppEnabled)
+      {
         interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
         continue;
       }
@@ -163,7 +178,7 @@ namespace
         InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3, L"Mode 3");
         InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2, L"Mode 2");
         InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1, L"Mode 1");
-        InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, L"Toggle/Enable");
+        InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, L"On/Off");
         TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
         return 0;
       };
