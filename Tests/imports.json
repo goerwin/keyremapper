@@ -1,0 +1,12 @@
+{
+  "object": "%object(importsObject.json)",
+  "object2": {
+    "noice": false,
+    "%dotdotdotObject": "(importsObject.json)"
+  },
+  "array": [
+    "noice",
+    "%dotdotdotArray(importsArray.json)"
+  ],
+  "array2": "%array(importsArray.json)"
+}

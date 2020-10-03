@@ -1,0 +1,43 @@
+[
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "Caps": true, "C": true, "isClickDown": false },
+    "fire": ["RightClick:down", null],
+    "set": { "isClickDown": true }
+  },
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "Caps": true, "C": true },
+    "fire": [null, null]
+  },
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "Caps": true, "C": false, "isClickDown": true },
+    "fire": [null, "RightClick:up"],
+    "set": { "isClickDown": false }
+  },
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "C": true, "isClickDown": false },
+    "fire": ["LeftClick:down", null],
+    "set": { "isClickDown": true }
+  },
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "C": true },
+    "fire": [null, null]
+  },
+  {
+    "keys": ["C"],
+    "when": { "Win": true, "isClickDown": true },
+    "fire": [null, "LeftClick:up"],
+    "set": { "isClickDown": false }
+  },
+  {
+    "keys": ["Win"],
+    "when": { "Win": false, "isClickDown": true },
+    "fire": [null, "LeftClick:up"],
+    "set": { "isClickDown": false }
+  },
+  { "keys": ["Win"], "fire": [null, null] }
+]

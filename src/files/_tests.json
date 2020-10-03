@@ -1,0 +1,56 @@
+[
+  //Alt Tab Mode
+  ["Alt:down Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Alt:up"],
+  ["Alt:down Tab Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Tab Alt:up"],
+  [
+    "Alt:down Shift:down Tab Shift:up Alt:up",
+    "Ctrl:down Shift:down Ctrl:up Alt:down Tab Shift:up Alt:up"
+  ],
+  [
+    "Alt:down Shift:down Tab Tab Shift:up Alt:up",
+    "Ctrl:down Shift:down Ctrl:up Alt:down Tab Tab Shift:up Alt:up"
+  ],
+  [
+    "Alt:down Tab Esc Alt:up",
+    "Ctrl:down Ctrl:up Alt:down Tab Esc Alt:up Ctrl:down Ctrl:up"
+  ],
+  // Key
+  ["A", "A"],
+  // Key - Down
+  ["H:down H:down H:down", "H:down H:down H:down"],
+  // Key - Down then Up
+  ["H:down H:down H:up", "H:down H:down H:up"],
+  // Key - 2 Keys In Order
+  ["H:down J H:up", "H:down J:down J:up H:up"],
+  // Key - 2 Keys In No Order
+  ["H:down J:down H:up J:up", "H:down J:down H:up J:up"],
+  // Key - 3 Keys In Order
+  ["H:down J:down K J:up H:up", "H:down J:down K:down K:up J:up H:up"],
+  // Key - 3 Keys No Order
+  ["H:down J:down K H:up J:up", "H:down J:down K:down K:up H:up J:up"],
+
+  ["Alt", "Ctrl"],
+
+  // VIM MODE
+  ["Caps", "Esc"],
+  ["Caps:down A Caps:up", "A"],
+  ["Caps:down H Caps:up", "Left"],
+  ["Caps:down L Caps:up", "Right"],
+  ["Caps:down J Caps:up", "Down"],
+  ["Caps:down K Caps:up", "Up"],
+  ["Caps:down Alt:down H Alt:up Caps:up", "Ctrl Home Ctrl"],
+  ["Caps:down Alt:down L Alt:up Caps:up", "Ctrl End Ctrl"],
+  ["Caps:down S:down H S:up Caps:up", "Shift:down Left Shift:up"],
+
+  // VIM MODE: When Caps is not the first pressed key
+  ["T:down Caps:down T:up Caps:up", "T"],
+  ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
+  ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"],
+
+  // Clicks
+  ["Win:down C Win:up", "LeftClick"],
+  ["Win:down C:down C:down C Win:up", "LeftClick"],
+  ["Win:down C:down Win:up C:up", "LeftClick C:up"],
+  ["Win:down Caps:down C Caps:up Win:up", "RightClick"],
+  ["Win:down Caps:down C:down C:down C Caps:up Win:up", "RightClick"]
+]

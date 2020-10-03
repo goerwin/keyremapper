@@ -122,3 +122,10 @@ TEST(KeyDispatcher_test, keyPresses)
   expectedKeys = keyDispatcher->getKeyEventsFromString("B Caps");
   EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
 }
+
+TEST(KeyDispatcher_test, imports)
+{
+  auto jsonFile = HelpersWindows::getJsonFile("imports.json");
+  auto expectedFile = HelpersWindows::getJsonFile("importsExpected.json");
+  EXPECT_EQ(jsonFile.dump(), expectedFile.dump());
+}

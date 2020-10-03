@@ -3,15 +3,13 @@ projectName="KeyRemapper"
 filesx86=(
   "x86/$projectName/Release/$projectName.exe"
   "x86/$projectName/Release/interception.dll"
-  "x86/$projectName/Release/symbols.json"
-  "x86/$projectName/Release/mode1.json"
+  "x86/$projectName/Release/*.json"
 )
 
 filesx64=(
   "x64/$projectName/Release/$projectName.exe"
   "x64/$projectName/Release/interception.dll"
-  "x64/$projectName/Release/symbols.json"
-  "x64/$projectName/Release/mode1.json"
+  "x64/$projectName/Release/*.json"
 )
 
 tmpDir=$(mktemp -d)

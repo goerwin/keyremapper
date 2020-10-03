@@ -1,0 +1,34 @@
+[
+  {
+    "keys": ["J", "K"],
+    "when": { "Caps": true, "Alt": true },
+    "fire": ["vimHomeEndKey", null]
+  },
+  {
+    "keys": ["H", "L"],
+    "when": { "Caps": true, "Win": true },
+    "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
+  },
+  {
+    "keys": ["H", "J", "K", "L"],
+    "when": { "Caps": true },
+    "fire": ["vimArrowKey", null]
+  },
+  {
+    "keys": ["S"],
+    "when": { "Caps": true },
+    "fire": ["Shift:down", "Shift:up"]
+  },
+  {
+    "keys": ["Caps"],
+    "when": { "S": true },
+    "fire": [null, "Shift:up"]
+  },
+  {
+    // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
+    "keys": ["F7", "Y", "BracketR"],
+    "when": { "Caps": true },
+    "fire": [null, null]
+  },
+  { "keys": ["Caps"], "fire": [null, null] }
+]

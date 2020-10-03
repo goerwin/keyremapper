@@ -13,10 +13,10 @@ namespace Helpers
   typedef std::string String;
   typedef unsigned short ushort;
 
-  string trim(string str)
+  String trim(String str)
   {
     size_t first = str.find_first_not_of(' ');
-    if (string::npos == first)
+    if (String::npos == first)
     {
       return str;
     }
@@ -24,7 +24,18 @@ namespace Helpers
     return str.substr(first, (last - first + 1));
   }
 
-  vector<string> split(string str, char key)
+  String replaceAll(String str, const String &from, const String &to)
+  {
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != String::npos)
+    {
+      str.replace(start_pos, from.length(), to);
+      start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+  }
+
+  vector<String> split(String str, char key)
   {
     std::stringstream test(str);
     String segment;

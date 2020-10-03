@@ -65,7 +65,7 @@ namespace
     } else {
       nid.hIcon = globalIconImageDisabled;
     }
-   
+
     Shell_NotifyIcon(NIM_MODIFY, &nid);
   }
 

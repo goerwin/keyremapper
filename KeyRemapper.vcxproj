@@ -177,6 +177,18 @@
     <CopyFileToFolders Include="src\files\mode1.json">
       <FileType>Document</FileType>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="src\files\_altTabMode.json">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="src\files\_vimMode.json">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="src\files\_clicksMode.json">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="src\files\_tests.json">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CopyFileToFolders Include="src\libraries\Interception\x86\interception.dll">

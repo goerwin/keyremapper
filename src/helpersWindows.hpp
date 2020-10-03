@@ -5,6 +5,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <regex>
+#include "helpers.hpp"
 #include "libraries/json.hpp"
 
 namespace HelpersWindows
@@ -37,9 +39,54 @@ namespace HelpersWindows
     String fileStr((std::istreambuf_iterator<char>(file)),
                    std::istreambuf_iterator<char>());
 
-    auto jsonFile = json::parse(fileStr, nullptr, false, true);
+    std::vector<std::vector<String>> importKeys = {
+        {"dotdotdotObject", "\"%dotdotdotObject\".*\".*\""},
+        {"object", "\"%object.*\""},
+        {"array", "\"%array.*\""},
+        {"dotdotdotArray", "\"%dotdotdotArray.*\""}};
 
-    return jsonFile;
+    for (auto i = 0; i < importKeys.size(); i++)
+    {
+      auto importKey = importKeys[i];
+      auto name = importKey[0];
+      auto regex = std::regex(importKey[1]);
+
+      std::regex_token_iterator<std::string::iterator> rend;
+      std::regex_token_iterator<std::string::iterator> a(fileStr.begin(), fileStr.end(), regex);
+
+      std::vector<std::string> res;
+      while (a != rend)
+      {
+        res.push_back(*a);
+        a++;
+      };
+
+      for (auto j = 0; j < res.size(); j++)
+      {
+        std::smatch matches;
+        auto resItem = res[j];
+        if (std::regex_search(resItem, matches, std::regex("\\((.*)\\)")))
+        {
+          String innerFileStr = "";
+
+          if (matches.size() == 2)
+          {
+            innerFileStr = getJsonFile(matches[1]).dump();
+
+            if (name == "dotdotdotArray" || name == "dotdotdotObject")
+            {
+              auto openingBracketIdx = name == "dotdotdotArray" ? innerFileStr.find("[") : innerFileStr.find("{");
+              auto closingBracketIdx = name == "dotdotdotArray" ? innerFileStr.find_last_of("]") : innerFileStr.find_last_of("}");
+              innerFileStr = innerFileStr.substr(openingBracketIdx + 1, closingBracketIdx - 1);
+            }
+          }
+
+          fileStr = Helpers::replaceAll(fileStr, resItem, innerFileStr);
+        }
+      }
+    }
+
+    return json::parse(fileStr, nullptr, false, true);
   }
 
   String getActiveWindowProcessName(HWND hwnd)

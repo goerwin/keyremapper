@@ -1,0 +1,13 @@
+{
+  "object": {
+    "random": true,
+    "nice": false
+  },
+  "object2": {
+    "noice": false,
+    "random": true,
+    "nice": false
+  },
+  "array": ["noice", "1", "2", "3", "4"],
+  "array2": ["1", "2", "3", "4"]
+}
