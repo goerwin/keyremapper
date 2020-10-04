@@ -45,7 +45,7 @@ namespace HelpersWindows
         {"array", "\"%array.*\""},
         {"dotdotdotArray", "\"%dotdotdotArray.*\""}};
 
-    for (auto i = 0; i < importKeys.size(); i++)
+    for (size_t i = 0; i < importKeys.size(); i++)
     {
       auto importKey = importKeys[i];
       auto name = importKey[0];
@@ -61,7 +61,7 @@ namespace HelpersWindows
         a++;
       };
 
-      for (auto j = 0; j < res.size(); j++)
+      for (size_t j = 0; j < res.size(); j++)
       {
         std::smatch matches;
         auto resItem = res[j];

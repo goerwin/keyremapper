@@ -17,7 +17,7 @@ TEST(KeyDispatcher_test, find_correct_fireKeys)
       HelpersWindows::getJsonFile("rules4.json"),
   });
 
-  for (auto i = 0; i < ruleFiles.size(); i++)
+  for (size_t i = 0; i < ruleFiles.size(); i++)
   {
     auto keyDispatcher = new KeyDispatcher(ruleFiles[i], symbols);
     auto results = keyDispatcher->runTests();

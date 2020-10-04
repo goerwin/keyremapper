@@ -108,7 +108,7 @@ namespace
         continue;
       }
 
-      for (int i = 0; i < newKeysSize; i++)
+      for (size_t i = 0; i < newKeysSize; i++)
       {
         auto [code, state] = newKeys[i];
         auto newKeyStroke = InterceptionKeyStroke({code, state});

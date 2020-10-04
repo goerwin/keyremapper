@@ -94,7 +94,7 @@ private:
       }
     }
 
-    for (auto i = 0; i < keyPresses.size(); i++)
+    for (size_t i = 0; i < keyPresses.size(); i++)
     {
       auto keyPress = keyPresses[i];
       int repeat = keyPress["repeat"];
@@ -130,7 +130,7 @@ public:
   {
     KeyEvents newKeyEvents = {};
 
-    for (int i = 0; i < keyEvents.size(); i++)
+    for (size_t i = 0; i < keyEvents.size(); i++)
     {
       auto keyEvent = keyEvents[i];
       auto [code, state] = keyEvent;
@@ -155,12 +155,7 @@ public:
       auto fireKeys = getFireFromKeybindings();
 
       if (!fireKeys.is_null())
-      {
-        if (isKeyDownEl)
-          localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[0]));
-        else
-          localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(fireKeys[1]));
-      }
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(isKeyDownEl ? fireKeys[0] : fireKeys[1]));
       else
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
 
@@ -198,7 +193,7 @@ public:
   {
     String result = "";
 
-    for (auto i = 0; i < keyEvents.size(); i++)
+    for (size_t i = 0; i < keyEvents.size(); i++)
     {
       if (i != 0)
         result += " ";
@@ -221,7 +216,7 @@ public:
     auto currentKey = globals["currentKey"];
     KeyEvents keyEvents = {};
 
-    for (auto i = 0; i < strKeysSize; i++)
+    for (size_t i = 0; i < strKeysSize; i++)
     {
       String keyStateStr;
       Key key;
@@ -277,20 +272,16 @@ public:
     auto testsSize = tests.size();
     String message = "ALL TESTS PASSED! Number of tests: " + std::to_string(testsSize);
 
-    for (auto i = 0; i < testsSize; i++)
+    for (size_t i = 0; i < testsSize; i++)
     {
       Strings test = tests[i];
-      auto inputKeys = getKeyEventsFromString(test.at(0));
-      String expectedKeysStr = test.at(1);
-
+      auto inputKeys = getKeyEventsFromString(test[0]);
+      String expectedKeysStr = test[1];
+      auto testSize = test.size();
       reset();
-      try
-      {
-        globals["appName"] = test.at(2);
-      }
-      catch (...)
-      {
-      }
+
+      if (testSize == 3)
+        globals["appName"] = test[2];
 
       auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
       auto resultKeysStr = stringifyKeyEvents(applyKeys(inputKeys));
@@ -391,7 +382,7 @@ private:
     auto currentKey = globals["currentKey"];
     auto allKeybindings = keybindings.get<JsonArray>();
 
-    for (auto i = 0; i < allKeybindings.size(); i++)
+    for (size_t i = 0; i < allKeybindings.size(); i++)
     {
       auto keybinding = allKeybindings[i];
       auto keys = keybinding["keys"];
@@ -399,7 +390,7 @@ private:
       if (!isWhen(keybinding["when"]))
         continue;
 
-      for (auto j = 0; j < keys.size(); j++)
+      for (size_t j = 0; j < keys.size(); j++)
       {
         if (currentKey != keys[j])
           continue;
