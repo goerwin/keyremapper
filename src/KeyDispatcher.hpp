@@ -1,20 +1,19 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include "libraries/json.hpp"
 #include "helpers.hpp"
+#include "libraries/json.hpp"
+#include <string>
+#include <time.h>
+#include <vector>
 
-class KeyDispatcher
-{
+class KeyDispatcher {
   using json = nlohmann::json;
   typedef std::string String;
   typedef std::vector<String> Strings;
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
 
-  struct Key
-  {
+  struct Key {
     String name;
     ushort code;
     ushort downState;
@@ -22,8 +21,7 @@ class KeyDispatcher
   };
   typedef std::vector<Key> Keys;
 
-  struct KeyEvent
-  {
+  struct KeyEvent {
     ushort code;
     ushort state;
   };
@@ -40,8 +38,7 @@ private:
   json keyPresses;
   int REPEAT_TIME;
 
-  double getTimeDifference(double time1, double time2)
-  {
+  double getTimeDifference(double time1, double time2) {
     return (time1 - time2) / CLOCKS_PER_SEC * 1000;
   }
 
@@ -50,43 +47,38 @@ private:
   double keyDownTime = 0;
   double keyUpTime = 0;
 
-  json getMultiplePressesFireItem(String keyName, bool isKeyDown)
-  {
+  json getMultiplePressesFireItem(String keyName, bool isKeyDown) {
     if (keyPresses.is_null())
       return {};
 
     if (multiplePressesCount == 0)
       lastKeyName = keyName;
 
-    if (lastKeyName != keyName)
-    {
+    if (lastKeyName != keyName) {
       multiplePressesCount = 0;
       keyDownTime = 0;
       keyUpTime = 0;
     }
 
-    if (isKeyDown)
-    {
+    if (isKeyDown) {
       if (!keyDownTime)
         keyDownTime = clock();
 
-      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
+      if (!keyUpTime ||
+          getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
         multiplePressesCount = 0;
 
       keyUpTime = 0;
       return {};
-    }
-    else
-    {
+    } else {
       keyUpTime = clock();
 
-      if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME)
-      {
+      if (keyDownTime != 0 &&
+          getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME) {
         keyDownTime = 0;
-        multiplePressesCount = lastKeyName == keyName ? multiplePressesCount + 1 : 1;
-      }
-      else
-      {
+        multiplePressesCount =
+            lastKeyName == keyName ? multiplePressesCount + 1 : 1;
+      } else {
         multiplePressesCount = 0;
         keyDownTime = 0;
         keyUpTime = 0;
@@ -94,19 +86,17 @@ private:
       }
     }
 
-    for (size_t i = 0; i < keyPresses.size(); i++)
-    {
+    for (size_t i = 0; i < keyPresses.size(); i++) {
       auto keyPress = keyPresses[i];
       int repeat = keyPress["repeat"];
       String inputKey = keyPress["inputKey"];
       String ruleItem = keyPress["fire"];
       auto skipKeyBindings = keyPress["skipKeyBindings"];
 
-      if (repeat == multiplePressesCount && inputKey == keyName)
-      {
-        return {
-            ruleItem,
-            skipKeyBindings.is_null() ? false : skipKeyBindings.get<bool>()};
+      if (repeat == multiplePressesCount && inputKey == keyName) {
+        return {ruleItem, skipKeyBindings.is_null()
+                              ? false
+                              : skipKeyBindings.get<bool>()};
       }
     }
 
@@ -114,24 +104,23 @@ private:
   }
 
 public:
-  KeyDispatcher(json rulesEl, json symbolsEl)
-  {
+  KeyDispatcher(json rulesEl, json symbolsEl) {
     rules = rulesEl;
     symbols = symbolsEl;
     keybindings = rulesEl["keybindings"];
-    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null() ? 200 : rulesEl["keyPressesDelay"].get<int>();
+    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null()
+                      ? 200
+                      : rulesEl["keyPressesDelay"].get<int>();
     tests = rulesEl["tests"];
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
     appsDefinitions = rulesEl["apps"];
   }
 
-  KeyEvents applyKeys(KeyEvents keyEvents)
-  {
+  KeyEvents applyKeys(KeyEvents keyEvents) {
     KeyEvents newKeyEvents = {};
 
-    for (size_t i = 0; i < keyEvents.size(); i++)
-    {
+    for (size_t i = 0; i < keyEvents.size(); i++) {
       auto keyEvent = keyEvents[i];
       auto [code, state] = keyEvent;
       auto keyName = getKeyName(code, state);
@@ -155,28 +144,32 @@ public:
       auto fireKeys = getFireFromKeybindings();
 
       if (!fireKeys.is_null())
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(isKeyDownEl ? fireKeys[0] : fireKeys[1]));
+        localKeyEvents = Helpers::concatArrays(
+            localKeyEvents,
+            getKeyEventsFromString(isKeyDownEl ? fireKeys[0] : fireKeys[1]));
       else
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
+        localKeyEvents =
+            Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
 
-      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
-      if (!multiplePressesFireItem.is_null())
-      {
+      auto multiplePressesFireItem =
+          getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+      if (!multiplePressesFireItem.is_null()) {
         auto fire = multiplePressesFireItem[0].get<String>();
         auto skipKeyBindings = multiplePressesFireItem[1].get<bool>();
         auto keyPressKeyEvents = getKeyEventsFromString(fire);
 
         if (skipKeyBindings)
-          localKeyEvents = Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
+          localKeyEvents =
+              Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
         else
-          keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
+          keyEvents =
+              Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-      Helpers::print(
-          std::to_string(code) + ":" + std::to_string(state) + ":" +
-          stringifyKeyEvents({keyEvent}) + " ==> " +
-          stringifyKeyEvents({newKeyEvent}) + " ==> " +
-          stringifyKeyEvents(localKeyEvents));
+      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
+                     stringifyKeyEvents({keyEvent}) + " ==> " +
+                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
+                     stringifyKeyEvents(localKeyEvents));
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -184,17 +177,12 @@ public:
     return newKeyEvents;
   }
 
-  void setAppName(String appName)
-  {
-    globals["appName"] = appName;
-  }
+  void setAppName(String appName) { globals["appName"] = appName; }
 
-  String stringifyKeyEvents(KeyEvents keyEvents)
-  {
+  String stringifyKeyEvents(KeyEvents keyEvents) {
     String result = "";
 
-    for (size_t i = 0; i < keyEvents.size(); i++)
-    {
+    for (size_t i = 0; i < keyEvents.size(); i++) {
       if (i != 0)
         result += " ";
 
@@ -206,8 +194,7 @@ public:
     return result;
   }
 
-  KeyEvents getKeyEventsFromString(json str)
-  {
+  KeyEvents getKeyEventsFromString(json str) {
     if (str.is_null())
       return {};
 
@@ -216,8 +203,7 @@ public:
     auto currentKey = globals["currentKey"];
     KeyEvents keyEvents = {};
 
-    for (size_t i = 0; i < strKeysSize; i++)
-    {
+    for (size_t i = 0; i < strKeysSize; i++) {
       String keyStateStr;
       Key key;
       String strKey = strKeys[i];
@@ -244,8 +230,7 @@ public:
         keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
       else if (keyStateStr == "up")
         keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
-      else
-      {
+      else {
         keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
         keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
       }
@@ -254,8 +239,7 @@ public:
     return keyEvents;
   }
 
-  void reset()
-  {
+  void reset() {
     globals = {};
     lastKeyName = "";
     multiplePressesCount = 0;
@@ -263,17 +247,16 @@ public:
     keyUpTime = 0;
   }
 
-  json runTests()
-  {
+  json runTests() {
     if (tests.is_null())
       return {};
 
     bool ok = true;
     auto testsSize = tests.size();
-    String message = "ALL TESTS PASSED! Number of tests: " + std::to_string(testsSize);
+    String message =
+        "ALL TESTS PASSED! Number of tests: " + std::to_string(testsSize);
 
-    for (size_t i = 0; i < testsSize; i++)
-    {
+    for (size_t i = 0; i < testsSize; i++) {
       Strings test = tests[i];
       auto inputKeys = getKeyEventsFromString(test[0]);
       String expectedKeysStr = test[1];
@@ -286,23 +269,19 @@ public:
       auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
       auto resultKeysStr = stringifyKeyEvents(applyKeys(inputKeys));
 
-      if (resultKeysStr != stringifyKeyEvents(expectedKeys))
-      {
+      if (resultKeysStr != stringifyKeyEvents(expectedKeys)) {
         ok = false;
-        message = "TEST " + std::to_string(i) + " FAILED: expected \"" + expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
+        message = "TEST " + std::to_string(i) + " FAILED: expected \"" +
+                  expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
         break;
       }
     }
 
-    return {
-        {"ok", ok},
-        {"testsSize", testsSize},
-        {"message", message}};
+    return {{"ok", ok}, {"testsSize", testsSize}, {"message", message}};
   }
 
 private:
-  Key getVimArrowKey(String keyName)
-  {
+  Key getVimArrowKey(String keyName) {
     if (keyName == "H")
       return getKey("Left");
     else if (keyName == "J")
@@ -315,8 +294,7 @@ private:
     return getKey(keyName);
   }
 
-  Key getVimHomeEndKey(String keyName)
-  {
+  Key getVimHomeEndKey(String keyName) {
     if (keyName == "H" || keyName == "K")
       return getKey("Home");
     else if (keyName == "J" || keyName == "L")
@@ -325,13 +303,10 @@ private:
     return getKey(keyName);
   }
 
-  static bool isKeyDown(ushort state)
-  {
-    return state == 0 || state == 2;
-  }
+  static bool isKeyDown(ushort state) { return state == 0 || state == 2; }
 
-  KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state, bool isKeyDown)
-  {
+  KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state,
+                               bool isKeyDown) {
     auto newKeyName = remaps[keyName];
 
     if (newKeyName.is_null())
@@ -343,24 +318,20 @@ private:
     return {newCode, isKeyDown ? downState : upState};
   }
 
-  bool isWhen(json when)
-  {
+  bool isWhen(json when) {
     if (when.is_null())
       return true;
 
-    for (auto &[key, value] : when.items())
-    {
+    for (auto &[key, value] : when.items()) {
       auto globalValue = globals[key];
 
-      if (globalValue.is_null())
-      {
+      if (globalValue.is_null()) {
         if (value != false)
           return false;
         continue;
       }
 
-      if (value != globalValue)
-      {
+      if (value != globalValue) {
         return false;
       }
     }
@@ -368,8 +339,7 @@ private:
     return true;
   }
 
-  void setValues(json values)
-  {
+  void setValues(json values) {
     if (values.is_null())
       return;
 
@@ -377,21 +347,18 @@ private:
       globals[key] = value;
   }
 
-  json getFireFromKeybindings()
-  {
+  json getFireFromKeybindings() {
     auto currentKey = globals["currentKey"];
     auto allKeybindings = keybindings.get<JsonArray>();
 
-    for (size_t i = 0; i < allKeybindings.size(); i++)
-    {
+    for (size_t i = 0; i < allKeybindings.size(); i++) {
       auto keybinding = allKeybindings[i];
       auto keys = keybinding["keys"];
 
       if (!isWhen(keybinding["when"]))
         continue;
 
-      for (size_t j = 0; j < keys.size(); j++)
-      {
+      for (size_t j = 0; j < keys.size(); j++) {
         if (currentKey != keys[j])
           continue;
 
@@ -403,10 +370,8 @@ private:
     return {};
   }
 
-  String getKeyName(short scanCode, short keyState)
-  {
-    for (auto &[key, value] : symbols.items())
-    {
+  String getKeyName(short scanCode, short keyState) {
+    for (auto &[key, value] : symbols.items()) {
       if (value[0] == scanCode &&
           (value[1] == keyState || value[2] == keyState))
         return key;
@@ -415,8 +380,7 @@ private:
     return {};
   }
 
-  Key getKey(String keyName)
-  {
+  Key getKey(String keyName) {
     auto symbolDef = symbols[keyName];
     Key key = {};
 
