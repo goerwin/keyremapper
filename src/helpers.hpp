@@ -1,7 +1,9 @@
 #pragma once
 
 #include "libraries/json.hpp"
+#include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <windows.h>
@@ -60,5 +62,60 @@ void print(string str, string str2 = "\n") {
   auto res = str + str2;
   std::cout << res << "";
   OutputDebugStringA(res.c_str());
+}
+
+json getJsonFile(String filepath, std::function<String(string)> getAbsPath) {
+  std::ifstream file(getAbsPath(filepath));
+  String fileStr((std::istreambuf_iterator<char>(file)),
+                 std::istreambuf_iterator<char>());
+
+  std::vector<std::vector<String>> importKeys = {
+      {"dotdotdotObject", "\"%dotdotdotObject\".*\".*\""},
+      {"object", "\"%object.*\""},
+      {"array", "\"%array.*\""},
+      {"dotdotdotArray", "\"%dotdotdotArray.*\""}};
+
+  for (size_t i = 0; i < importKeys.size(); i++) {
+    auto importKey = importKeys[i];
+    auto name = importKey[0];
+    auto regex = std::regex(importKey[1]);
+
+    std::regex_token_iterator<std::string::iterator> rend;
+    std::regex_token_iterator<std::string::iterator> a(fileStr.begin(),
+                                                       fileStr.end(), regex);
+
+    std::vector<std::string> res;
+    while (a != rend) {
+      res.push_back(*a);
+      a++;
+    };
+
+    for (size_t j = 0; j < res.size(); j++) {
+      std::smatch matches;
+      auto resItem = res[j];
+      if (std::regex_search(resItem, matches, std::regex("\\((.*)\\)"))) {
+        String innerFileStr = "";
+
+        if (matches.size() == 2) {
+          innerFileStr = getJsonFile(matches[1], getAbsPath).dump();
+
+          if (name == "dotdotdotArray" || name == "dotdotdotObject") {
+            auto openingBracketIdx = name == "dotdotdotArray"
+                                         ? innerFileStr.find("[")
+                                         : innerFileStr.find("{");
+            auto closingBracketIdx = name == "dotdotdotArray"
+                                         ? innerFileStr.find_last_of("]")
+                                         : innerFileStr.find_last_of("}");
+            innerFileStr = innerFileStr.substr(openingBracketIdx + 1,
+                                               closingBracketIdx - 1);
+          }
+        }
+
+        fileStr = Helpers::replaceAll(fileStr, resItem, innerFileStr);
+      }
+    }
+  }
+
+  return json::parse(fileStr, nullptr, false, true);
 }
 } // namespace Helpers

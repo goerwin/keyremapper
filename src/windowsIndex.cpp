@@ -1,13 +1,13 @@
 // https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-queryfullprocessimagenamea
 #define _WIN32_WINNT 0x0600
 
-#include "images/index.h"
 #include "KeyDispatcher.hpp"
-#include "helpers/brightness.h"
-#include "helpersWindows.hpp"
-#include "images/index.h"
-#include "libraries/Interception/interception.h"
-#include "libraries/Interception/utils.h"
+#include "helpers.hpp"
+#include "windowsBrightness.h"
+#include "windowsHelpers.hpp"
+#include "windowsImages.h"
+#include "windowsLibraries/Interception/interception.h"
+#include "windowsLibraries/Interception/utils.h"
 #include <windows.h>
 
 namespace {
@@ -50,8 +50,9 @@ void createSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
 }
 
 void initializeKeyDispatcher() {
-  auto rules = HelpersWindows::getJsonFile("mode1.json");
-  auto symbols = HelpersWindows::getJsonFile("symbols.json");
+  auto rules = Helpers::getJsonFile("mode1.json", WindowsHelpers::getAbsPath);
+  auto symbols =
+      Helpers::getJsonFile("symbols.json", WindowsHelpers::getAbsPath);
   keyDispatcher = new KeyDispatcher(rules, symbols);
 }
 
@@ -79,7 +80,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
   initializeKeyDispatcher();
 
   auto testResults = keyDispatcher->runTests();
-  HelpersWindows::print(!testResults.is_null() ? testResults["message"]
+  WindowsHelpers::print(!testResults.is_null() ? testResults["message"]
                                                : "NO TESTS RUN");
 
   while (interception_receive(context, device = interception_wait(context),
@@ -132,7 +133,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  HWND hwnd, LONG idObject, LONG idChild,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
-  keyDispatcher->setAppName(HelpersWindows::getActiveWindowProcessName(hwnd));
+  keyDispatcher->setAppName(WindowsHelpers::getActiveWindowProcessName(hwnd));
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,

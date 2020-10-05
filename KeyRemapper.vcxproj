@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>src/libraries/Interception/x86/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>src/windowsLibraries/Interception/x86/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,7 +119,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>src/libraries/Interception/x86/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>src/windowsLibraries/Interception/x86/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -134,7 +134,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>src/libraries/Interception/x64/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>src/windowsLibraries/Interception/x64/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,17 +152,17 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>src/libraries/Interception/x64/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>src/windowsLibraries/Interception/x64/interception.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src/index.cpp" />
-    <ClCompile Include="src/libraries/Interception/utils.c">
+    <ClCompile Include="src/windowsIndex.cpp" />
+    <ClCompile Include="src/windowsLibraries/Interception/utils.c">
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\images\index.rc" />
+    <ResourceCompile Include="src\windowsImages.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\images\letter-e-red.ico" />
@@ -191,22 +191,22 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <CopyFileToFolders Include="src\libraries\Interception\x86\interception.dll">
+    <CopyFileToFolders Include="src\windowsLibraries\Interception\x86\interception.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <CopyFileToFolders Include="src\libraries\Interception\x86\interception.dll">
+    <CopyFileToFolders Include="src\windowsLibraries\Interception\x86\interception.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CopyFileToFolders Include="src\libraries\Interception\x64\interception.dll">
+    <CopyFileToFolders Include="src\windowsLibraries\Interception\x64\interception.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CopyFileToFolders Include="src\libraries\Interception\x64\interception.dll">
+    <CopyFileToFolders Include="src\windowsLibraries\Interception\x64\interception.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>

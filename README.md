@@ -11,6 +11,7 @@
 
 ### TODO
 - multiple modes
+- keybindings per keyboard
 - UI to debug events
 
 ### DONE

@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "index.h"
+#include "windowsImages.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -51,11 +51,11 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON_DEFAULT           ICON                    "letter-e.ico"
+IDI_ICON_DEFAULT           ICON                    "images/letter-e.ico"
 
-IDI_ICON_RED               ICON                    "letter-e-red.ico"
+IDI_ICON_RED               ICON                    "images/letter-e-red.ico"
 
-IDI_ICON_WARNING           ICON                    "letter-e-warning.ico"
+IDI_ICON_WARNING           ICON                    "images/letter-e-warning.ico"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
