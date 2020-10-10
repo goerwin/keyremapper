@@ -1,0 +1,272 @@
+{
+  "remaps": {
+    "CtrlR": "Win",
+    "AltR": "Alt",
+    "ShiftR": "Shift",
+    "NextToShiftL": "Shift"
+  },
+  "keyPresses": [
+    //{ "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    { "repeat": 2, "inputKey": "Esc", "fire": "ToggleAppEnabled" },
+    {
+      "repeat": 2,
+      "inputKey": "Shift",
+      "fire": "Caps",
+      "skipKeyBindings": true
+    }
+  ],
+  "keybindings": [
+    "%dotdotdotArray(_altTabMode.json)",
+    "%dotdotdotArray(_vimMode.json)",
+    "%dotdotdotArray(_clicksMode.json)",
+
+    // Google Chrome
+
+    {
+      "keys": ["F"],
+      "when": { "appName": "chrome.exe", "Alt": true, "Win": true },
+      "fire": ["Ctrl:up F11 Ctrl:down", null]
+    },
+    {
+      "keys": ["Enter"],
+      "when": { "appName": "chrome.exe", "Alt": true },
+      "fire": ["Ctrl:up Alt:down Enter Alt:up Ctrl:down", null]
+    },
+    {
+      "keys": ["H"],
+      "when": { "appName": "chrome.exe", "Alt": true, "Win": false },
+      "fire": ["Shift:down Tab Shift:up", null]
+    },
+    {
+      "keys": ["L"],
+      "when": { "appName": "chrome.exe", "Alt": true, "Win": false },
+      "fire": ["Tab", null]
+    },
+    {
+      "keys": ["Colon"],
+      "when": { "appName": "chrome.exe", "Alt": true },
+      "fire": ["L", null]
+    },
+    {
+      "keys": ["F3"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Ctrl:down Shift:down Tab Shift:up Ctrl:up", null]
+    },
+    {
+      "keys": ["F4"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Ctrl:down Tab Ctrl:up", null]
+    },
+    {
+      "keys": ["F5"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Alt:down M Alt:up", null]
+    },
+    {
+      "keys": ["F6"],
+      "when": { "appName": "chrome.exe" },
+      "fire": ["Alt:down T Alt:up", null]
+    },
+
+    // Slack
+
+    {
+      "keys": ["P"],
+      "when": { "appName": "slack.exe", "Alt": true },
+      "fire": ["K", null]
+    },
+
+    // General
+
+    { "keys": ["Ctrl"], "fire": ["Alt:down", "Alt:up"] },
+    { "keys": ["Win"], "fire": [null, null] },
+    {
+      "keys": ["V"],
+      "when": { "Caps": true, "Alt": true },
+      "fire": ["Ctrl:up Win:down V Win:up Ctrl:down", null]
+    },
+    {
+      "keys": ["C"],
+      "when": { "Caps": true },
+      "fire": ["Ctrl:down C Ctrl:up", null]
+    },
+    {
+      "keys": ["Tab"],
+      "when": { "Caps": true },
+      "fire": ["Ctrl:down Tab Ctrl:up", null]
+    },
+    {
+      "keys": ["Tab"],
+      "when": { "Ctrl": true },
+      "fire": ["Alt:up Ctrl:down Tab Ctrl:up Alt:down", null]
+    },
+    {
+      "keys": ["Space"],
+      "when": { "Caps": true },
+      "fire": ["Ctrl:down Space Ctrl:up", null]
+    },
+    {
+      "keys": ["Caps"],
+      "fire": [null, null]
+    },
+    {
+      "keys": ["H", "J", "K", "L"],
+      "when": { "Win": true, "Alt": true },
+      "fire": ["Ctrl:up Win:down vimArrowKey Win:up", "Ctrl:down"]
+    },
+    {
+      "keys": ["F", "J", "K"],
+      "when": { "Win": true },
+      "fire": ["Alt:down currentKey Alt:up", null]
+    },
+    {
+      "keys": ["D"],
+      "when": { "Win": true },
+      "fire": ["Win:down D Win:up", null]
+    },
+    {
+      "keys": ["Back"],
+      "when": { "Win": true },
+      "fire": ["Ctrl:down Back Ctrl:up", null]
+    },
+    {
+      "keys": ["Space"],
+      "when": { "Win": true },
+      "fire": ["Win", null]
+    },
+    {
+      "keys": ["H", "L"],
+      "when": { "Win": true },
+      "fire": ["Alt:down vimArrowKey Alt:up", null]
+    },
+
+    {
+      "keys": ["Space"],
+      "when": { "Alt": true },
+      "fire": ["F12", null]
+    },
+    {
+      "keys": ["Back"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up Shift:down Home Shift:up Back Ctrl:down", null]
+    },
+    {
+      "keys": ["Esc"],
+      "when": { "Alt": true },
+      "fire": [null, null]
+    },
+    {
+      "keys": ["Q"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up Alt:down F4 Alt:up Ctrl:down", null]
+    },
+    {
+      "keys": ["J"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up Next Ctrl:down", null]
+    },
+    {
+      "keys": ["K"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up Prior Ctrl:down", null]
+    },
+    {
+      "keys": ["F1"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up F1 Ctrl:down", null]
+    },
+    { "keys": ["F1"], "fire": ["BrightnessDown", null] },
+    {
+      "keys": ["F2"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up F2 Ctrl:down", null]
+    },
+    { "keys": ["F2"], "fire": ["BrightnessUp", null] },
+    {
+      "keys": ["F10"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up F10 Ctrl:down", null]
+    },
+    { "keys": ["F10"], "fire": ["Mute", null] },
+    {
+      "keys": ["F11"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up F11 Ctrl:down", null]
+    },
+    {
+      "keys": ["F11"],
+      "fire": ["VolumeDown VolumeDown VolumeDown VolumeDown", null]
+    },
+    {
+      "keys": ["F12"],
+      "when": { "Alt": true },
+      "fire": ["Ctrl:up F12 Ctrl:down", null]
+    },
+    {
+      "keys": ["F12"],
+      "fire": ["VolumeUp VolumeUp VolumeUp VolumeUp", null]
+    },
+
+    {
+      "keys": ["A"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP1 NP9 NP3 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["A"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP2 NP5 Alt:up", null]
+    },
+    {
+      "keys": ["E"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP0 NP1 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["E"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP3 NP3 Alt:up", null]
+    },
+    {
+      "keys": ["I"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP0 NP5 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["I"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP3 NP7 Alt:up", null]
+    },
+    {
+      "keys": ["O"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP1 NP1 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["O"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP4 NP3 Alt:up", null]
+    },
+    {
+      "keys": ["U"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP0 NP2 NP1 NP8 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["U"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP0 NP2 NP5 NP0 Alt:up", null]
+    },
+    {
+      "keys": ["N"],
+      "when": { "Shift": true, "Win": true },
+      "fire": ["Shift:up Alt:down NP1 NP6 NP5 Alt:up Shift:down", null]
+    },
+    {
+      "keys": ["N"],
+      "when": { "Win": true },
+      "fire": ["Alt:down NP1 NP6 NP4 Alt:up", null]
+    }
+  ],
+  "tests": "%array(_tests.json)"
+}

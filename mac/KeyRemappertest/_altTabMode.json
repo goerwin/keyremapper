@@ -1,0 +1,44 @@
+[
+  {
+    "keys": ["Tab"],
+    "when": { "Alt": true, "isAltTabMode": false },
+    "set": { "isAltTabMode": true },
+    "fire": ["Ctrl:up Alt:down Tab", null]
+  },
+  {
+    "keys": ["Tab"],
+    "when": { "Alt": true, "isAltTabMode": true },
+    "fire": ["Tab", null]
+  },
+  {
+    "keys": ["Esc", "Enter"],
+    "when": { "Alt": true, "isAltTabMode": true },
+    "set": { "isAltTabMode": false },
+    "fire": ["currentKey Alt:up Ctrl:down", null]
+  },
+  {
+    "keys": ["Q"],
+    "when": { "Alt": true, "isAltTabMode": true },
+    "fire": ["Supr", null]
+  },
+  {
+    "keys": ["Alt"],
+    "when": { "isAltTabMode": true },
+    "set": { "isAltTabMode": false },
+    "fire": [null, "Alt:up"]
+  },
+  {
+    "keys": ["H", "L"],
+    "when": { "Caps": true, "Alt": true, "isAltTabMode": false },
+    "fire": ["Ctrl:up vimHomeEndKey Ctrl:down", null]
+  },
+  {
+    "keys": ["H", "J", "K", "L"],
+    "when": { "Caps": true, "Alt": true, "isAltTabMode": true },
+    "fire": ["vimArrowKey", null]
+  },
+  {
+    "keys": ["Alt"],
+    "fire": ["Ctrl:down", "Ctrl:up"]
+  }
+]
