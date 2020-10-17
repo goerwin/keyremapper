@@ -18,6 +18,7 @@ InterceptionKeyStroke keyStroke;
 const auto APP_TITLE = L"KeyRemapper";
 bool isAppEnabled = true;
 int globalMode;
+std::string globalAppName;
 
 KeyDispatcher *keyDispatcher;
 
@@ -66,6 +67,7 @@ void initializeKeyDispatcher(int mode = 0) {
 
   delete keyDispatcher;
   keyDispatcher = new KeyDispatcher(rules, symbols);
+  keyDispatcher->setAppName(globalAppName);
 }
 
 void toggleAppEnabled() {
@@ -153,7 +155,8 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  HWND hwnd, LONG idObject, LONG idChild,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
-  keyDispatcher->setAppName(WindowsHelpers::getActiveWindowProcessName(hwnd));
+  globalAppName = WindowsHelpers::getActiveWindowProcessName(hwnd);
+  keyDispatcher->setAppName(globalAppName);
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
