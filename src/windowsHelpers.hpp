@@ -57,4 +57,10 @@ String getActiveWindowProcessName(HWND hwnd) {
 
   return processName;
 }
-} // namespace HelpersWindows
+
+bool fileExists(String path) {
+  DWORD dwAttrib = GetFileAttributesA(path.c_str());
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+          !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+} // namespace WindowsHelpers

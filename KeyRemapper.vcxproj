@@ -177,6 +177,9 @@
     <CopyFileToFolders Include="src\files\mode1.json">
       <FileType>Document</FileType>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="src\files\_switchModes.json">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
     <CopyFileToFolders Include="src\files\_altTabMode.json">
       <FileType>Document</FileType>
     </CopyFileToFolders>

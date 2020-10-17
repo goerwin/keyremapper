@@ -10,11 +10,11 @@
 .exes for x86 and x64.
 
 ### TODO
-- multiple modes
 - keybindings per keyboard
 - UI to debug events
 
 ### DONE
+- multiple modes
 - multiple configs with json inheritance
 - alt tab enter issue
 - add builds for both x86 and x64 archs

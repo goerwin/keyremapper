@@ -17,6 +17,7 @@ InterceptionKeyStroke keyStroke;
 
 const auto APP_TITLE = L"KeyRemapper";
 bool isAppEnabled = true;
+int globalMode;
 
 KeyDispatcher *keyDispatcher;
 
@@ -49,10 +50,21 @@ void createSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
   Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
-void initializeKeyDispatcher() {
-  auto rules = Helpers::getJsonFile("mode1.json", WindowsHelpers::getAbsPath);
+void initializeKeyDispatcher(int mode = 0) {
+  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json",
+                                    "mode4.json"};
+
+  if (WindowsHelpers::fileExists(WindowsHelpers::getAbsPath(modes[mode])))
+    globalMode = mode;
+  else
+    globalMode = 0;
+
+  auto rules =
+      Helpers::getJsonFile(modes[globalMode], WindowsHelpers::getAbsPath);
   auto symbols =
       Helpers::getJsonFile("symbols.json", WindowsHelpers::getAbsPath);
+
+  delete keyDispatcher;
   keyDispatcher = new KeyDispatcher(rules, symbols);
 }
 
@@ -118,6 +130,14 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
         BrightnessHandler::Increment(-10);
       } else if (code == 244 && state == 0) {
         BrightnessHandler::Increment(10);
+      } else if (code == 246 && state == 1) {
+        initializeKeyDispatcher();
+      } else if (code == 247 && state == 1) {
+        initializeKeyDispatcher(1);
+      } else if (code == 248 && state == 1) {
+        initializeKeyDispatcher(2);
+      } else if (code == 249 && state == 1) {
+        initializeKeyDispatcher(3);
       } else {
         interception_send(context, device, (InterceptionStroke *)&newKeyStroke,
                           1);
@@ -152,10 +172,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       SetForegroundWindow(hWnd);
 
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, L"Exit");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4, L"Mode 4");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3, L"Mode 3");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2, L"Mode 2");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1, L"Mode 1");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4,
+                 globalMode == 3 ? L"# Mode 4" : L"Mode 4");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3,
+                 globalMode == 2 ? L"# Mode 3" : L"Mode 3");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2,
+                 globalMode == 1 ? L"# Mode 2" : L"Mode 2");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1,
+                 globalMode == 0 ? L"# Mode 1" : L"Mode 1");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, L"On/Off");
       TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN,
                      pt.x, pt.y, 0, hWnd, NULL);
@@ -170,9 +194,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       toggleAppEnabled();
       return 0;
     case IDM_MODE_1:
+      initializeKeyDispatcher();
+      return 0;
     case IDM_MODE_2:
+      initializeKeyDispatcher(1);
+      return 0;
     case IDM_MODE_3:
+      initializeKeyDispatcher(2);
+      return 0;
     case IDM_MODE_4:
+      initializeKeyDispatcher(3);
       return 0;
     }
   }

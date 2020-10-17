@@ -97,5 +97,9 @@
   "RightClick": [242, 0, 1],
   "BrightnessDown": [243, 0, 1],
   "BrightnessUp": [244, 0, 1],
-  "ToggleAppEnabled": [245, 0, 1]
+  "ToggleAppEnabled": [245, 0, 1],
+  "AppMode1": [246, 0, 1],
+  "AppMode2": [247, 0, 1],
+  "AppMode3": [248, 0, 1],
+  "AppMode4": [249, 0, 1]
 }

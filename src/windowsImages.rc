@@ -55,8 +55,6 @@ IDI_ICON_DEFAULT           ICON                    "images/letter-e.ico"
 
 IDI_ICON_RED               ICON                    "images/letter-e-red.ico"
 
-IDI_ICON_WARNING           ICON                    "images/letter-e-warning.ico"
-
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -16,6 +16,7 @@
     }
   ],
   "keybindings": [
+    "%dotdotdotArray(_switchModes.json)",
     "%dotdotdotArray(_altTabMode.json)",
     "%dotdotdotArray(_vimMode.json)",
     "%dotdotdotArray(_clicksMode.json)",
