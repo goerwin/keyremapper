@@ -58,13 +58,13 @@ vector<T> concatArrays(vector<T> arr1, vector<T> arr2, int pos = -1) {
   return arr1;
 }
 
-void print(string str, string str2 = "\n") {
+void print(String str, String str2 = "\n") {
   auto res = str + str2;
   std::cout << res << "";
   OutputDebugStringA(res.c_str());
 }
 
-json getJsonFile(String filepath, std::function<String(string)> getAbsPath) {
+json getJsonFile(String filepath, std::function<String(String)> getAbsPath) {
   std::ifstream file(getAbsPath(filepath));
   String fileStr((std::istreambuf_iterator<char>(file)),
                  std::istreambuf_iterator<char>());

@@ -30,7 +30,7 @@ String getAbsPath(String filepath) {
 
 String getActiveWindowProcessName(HWND hwnd) {
   if (!hwnd) {
-    return NULL;
+    return {};
   }
 
   String processName;

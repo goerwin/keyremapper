@@ -37,6 +37,7 @@ private:
   json tests;
   json keyPresses;
   int REPEAT_TIME;
+  std::function<void(String)> applyKeysCb;
 
   double getTimeDifference(double time1, double time2) {
     return (time1 - time2) / CLOCKS_PER_SEC * 1000;
@@ -161,10 +162,12 @@ public:
               Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
-                     stringifyKeyEvents({keyEvent}) + " ==> " +
-                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
-                     stringifyKeyEvents(localKeyEvents));
+      if (applyKeysCb) {
+        applyKeysCb(std::to_string(code) + ":" + std::to_string(state) +
+                    " -> " + stringifyKeyEvents({keyEvent}) + " -> " +
+                    stringifyKeyEvents({newKeyEvent}) + " -> " +
+                    stringifyKeyEvents(localKeyEvents));
+      }
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -173,6 +176,10 @@ public:
   }
 
   void setAppName(String appName) { globals["appName"] = appName; }
+
+  void setApplyKeysCb(std::function<void(String)> _applyKeysCb) {
+    applyKeysCb = _applyKeysCb;
+  }
 
   String stringifyKeyEvents(KeyEvents keyEvents) {
     String result = "";
@@ -272,6 +279,8 @@ public:
       }
     }
 
+    reset();
+
     return {{"ok", ok}, {"testsSize", testsSize}, {"message", message}};
   }
 
@@ -326,9 +335,8 @@ private:
         continue;
       }
 
-      if (value != globalValue) {
+      if (value != globalValue)
         return false;
-      }
     }
 
     return true;

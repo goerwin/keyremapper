@@ -11,9 +11,10 @@
 
 ### TODO
 - keybindings per keyboard
-- UI to debug events
 
 ### DONE
+- Tests via popup message
+- UI to debug events
 - multiple modes
 - multiple configs with json inheritance
 - alt tab enter issue
