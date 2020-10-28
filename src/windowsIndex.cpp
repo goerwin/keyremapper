@@ -110,21 +110,20 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     auto newKeys = keyDispatcher->applyKeys({{code, state}});
     auto newKeysSize = newKeys.size();
 
-    if (newKeysSize == 3 && newKeys[2].code == 245) {
-      toggleAppEnabled();
-      continue;
-    }
-
     if (!g_isAppEnabled) {
-      interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
-      continue;
+      interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
     }
 
     for (size_t i = 0; i < newKeysSize; i++) {
       auto [code, state] = newKeys[i];
       auto newKeyStroke = InterceptionKeyStroke({code, state});
 
-      if (code == 241) {
+      if (code == 245) {
+        toggleAppEnabled();
+        break;
+      } else if (!g_isAppEnabled) {
+        continue;
+      } else if (code == 241) {
         if (state == 0)
           mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
         else
