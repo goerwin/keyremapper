@@ -21,11 +21,11 @@ class KeyDispatcher {
   };
   typedef std::vector<Key> Keys;
 
-  struct KeyEvent {
+public: struct KeyEvent {
     ushort code;
     ushort state;
   };
-  typedef std::vector<KeyEvent> KeyEvents;
+public: typedef std::vector<KeyEvent> KeyEvents;
 
 private:
   json globals = {};
