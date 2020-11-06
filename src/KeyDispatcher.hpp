@@ -52,13 +52,11 @@ private:
     if (keyPresses.is_null())
       return {};
 
-    if (multiplePressesCount == 0)
-      lastKeyName = keyName;
-
     if (lastKeyName != keyName) {
       multiplePressesCount = 0;
       keyDownTime = 0;
       keyUpTime = 0;
+      lastKeyName = keyName;
     }
 
     if (isKeyDown) {

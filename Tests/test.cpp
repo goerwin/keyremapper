@@ -101,6 +101,14 @@ TEST(KeyDispatcher_test, keyPresses) {
       keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
   EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
 
+  keyDispatcher->reset();
+  inputKeys = keyDispatcher->getKeyEventsFromString(
+      "Caps:down Win:down Caps:up Win:up");
+  expectedKeys = keyDispatcher->getKeyEventsFromString("Caps");
+  resultKeysStr =
+      keyDispatcher->stringifyKeyEvents(keyDispatcher->applyKeys(inputKeys));
+  EXPECT_EQ(resultKeysStr, keyDispatcher->stringifyKeyEvents(expectedKeys));
+
   // WITHOUT/WITH skipKeyBindings
 
   keyDispatcher->reset();
