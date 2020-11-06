@@ -11,6 +11,7 @@
 
 ### TODO
 - keybindings per keyboard
+- MacOS Version
 
 ### DONE
 - Tests via popup message
