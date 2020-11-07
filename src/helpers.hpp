@@ -6,7 +6,6 @@
 #include <regex>
 #include <sstream>
 #include <string>
-#include <windows.h>
 
 namespace Helpers {
 using namespace std;
@@ -61,7 +60,6 @@ vector<T> concatArrays(vector<T> arr1, vector<T> arr2, int pos = -1) {
 void print(String str, String str2 = "\n") {
   auto res = str + str2;
   std::cout << res << "";
-  OutputDebugStringA(res.c_str());
 }
 
 json getJsonFile(String filepath, std::function<String(String)> getAbsPath) {
