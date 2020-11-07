@@ -116,4 +116,31 @@ json getJsonFile(String filepath, std::function<String(String)> getAbsPath) {
 
   return json::parse(fileStr, nullptr, false, true);
 }
+
+template <class T> class circular_buffer {
+private:
+  int capacity;
+  T *buf;
+  int currSize;
+
+public:
+  circular_buffer(int _capacity)
+      : currSize(0), buf(new T[_capacity]), capacity(_capacity) {}
+
+  void push_back(T item) {
+    if (currSize < capacity) {
+      buf[currSize] = item;
+      currSize++;
+    } else {
+      for (size_t i = 0; i < capacity - 1; i++) {
+        buf[i] = buf[i + 1];
+      }
+
+      buf[capacity - 1] = item;
+    }
+  }
+  int size() const { return currSize; }
+
+  T operator[](int idx) const { return buf[idx]; }
+};
 } // namespace Helpers

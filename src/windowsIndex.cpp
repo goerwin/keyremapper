@@ -24,7 +24,7 @@ KeyDispatcher *keyDispatcher;
 
 HWND g_systemTrayIconWindow;
 HWND g_eventWindow;
-std::vector<std::string> g_remapInfo;
+Helpers::circular_buffer<std::string> g_remapInfo(30);
 
 const int IDM_EXIT = 5;
 const int IDM_ENABLE = 6;
@@ -57,7 +57,7 @@ void createSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
 }
 
 void handleApplyKeysCb(std::string remapInfo) {
-  g_remapInfo.insert(g_remapInfo.begin(), remapInfo);
+  g_remapInfo.push_back(remapInfo);
   RedrawWindow(g_eventWindow, 0, 0, RDW_INVALIDATE | RDW_INTERNALPAINT);
 }
 
@@ -111,7 +111,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     auto newKeysSize = newKeys.size();
 
     if (!g_isAppEnabled) {
-      interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
+      interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
     }
 
     for (size_t i = 0; i < newKeysSize; i++) {
@@ -177,11 +177,14 @@ LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 
     auto title = "originalCode:originalState -> keyEvent -> remappedKeyEvent "
                  "-> transformedKeyEvents";
+    auto remapInfoSize = g_remapInfo.size();
+
     TextOutA(hdc, 0, 0, title, strlen(title));
-    for (auto i = 0; i < g_remapInfo.size(); i++) {
-      auto str = g_remapInfo[i].c_str();
-      auto size = g_remapInfo[i].size();
-      TextOutA(hdc, 0, i * 20 + 30, g_remapInfo[i].c_str(), size);
+
+    for (auto i = 0; i < remapInfoSize; i++) {
+      auto size = g_remapInfo[remapInfoSize - 1 - i].size();
+      TextOutA(hdc, 0, i * 20 + 30, g_remapInfo[remapInfoSize - 1 - i].c_str(),
+               size);
     }
 
     EndPaint(hWnd, &ps);
@@ -287,7 +290,6 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     }
     case IDM_OPEN_EVENT_WINDOW:
       SwitchToThisWindow(g_eventWindow, false);
-      g_remapInfo = {};
       g_eventWindow = createEventWindow(g_hInstance);
       ShowWindow(g_eventWindow, g_nCmdShow);
       return 0;
