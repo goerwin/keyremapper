@@ -4,7 +4,7 @@
 * text=auto
 
 # Vendor files/dirs
-src/libraries/json.hpp linguist-vendored
+vendor/json.hpp linguist-language=Java
 src/libraries/** linguist-vendored
 src/windowsLibraries/** linguist-vendored
 
