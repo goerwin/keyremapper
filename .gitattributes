@@ -6,6 +6,7 @@
 # Vendor files/dirs
 src/libraries/** linguist-vendored
 src/windowsLibraries/** linguist-vendored
+mac/KeyRemappertest/json.hpp linguist-vendored
 
 ###############################################################################
 # Set default behavior for command prompt diff.
