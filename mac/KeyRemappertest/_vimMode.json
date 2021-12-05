@@ -15,20 +15,22 @@
     "fire": ["vimArrowKey", null]
   },
   {
-    "keys": ["S"],
-    "when": { "Caps": true },
-    "fire": ["Shift:down", "Shift:up"]
+    "keys": ["F"],
+    "when": { "Caps": true, "F": true },
+    "set": { "_vimModeShift": true },
+    "fire": ["Shift:down", null]
   },
   {
-    "keys": ["Caps"],
-    "when": { "S": true },
+    "keys": ["F"],
+    "when": { "Caps": true, "F": false },
+    "set": { "_vimModeShift": false },
     "fire": [null, "Shift:up"]
   },
   {
-    // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
-    "keys": ["F7", "Y", "BracketR"],
-    "when": { "Caps": true },
-    "fire": [null, null]
+    "keys": ["Caps"],
+    "when": { "Caps": false, "_vimModeShift": true },
+    "set": { "_vimModeShift": false },
+    "fire": [null, "Shift:up"]
   },
   { "keys": ["Caps"], "fire": [null, null] }
 ]
