@@ -131,6 +131,7 @@ public:
       bool newIsKeyDownEl = isKeyDown(newState);
 
       globals["currentKey"] = newKeyName;
+      // TODO: I think I can delete this currentKeyDown
       globals["currentKeyDown"] = newIsKeyDownEl;
       globals[newKeyName] = newIsKeyDownEl;
 
@@ -165,10 +166,10 @@ public:
               Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-//      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
-//                     stringifyKeyEvents({keyEvent}) + " ==> " +
-//                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
-//                     stringifyKeyEvents(localKeyEvents));
+      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
+                     stringifyKeyEvents({keyEvent}) + " ==> " +
+                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
+                     stringifyKeyEvents(localKeyEvents));
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }

@@ -1,9 +1,13 @@
 #include "KeyDispatcher.hpp"
-#include <Carbon/Carbon.h>
+#include <Carbon/Carbon.h> // TODO: see if you can use another library (this is gonna be deprecated)
 #include <IOKit/hid/IOHIDManager.h>
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/hid/IOHIDElement.h>
 #include <IOKit/hid/IOHIDValue.h>
+
+// If you dont need this, delete the app in the build phase of the project
+// I think I will have to create a swift project instead
+//#include <AppKit/AppKit.h>
 
 #include <thread>
 #include <iostream>
@@ -103,8 +107,8 @@ void setModifierFlagsToEvent(CGEventRef event)
 
 bool g_shouldKeyRepeat = false;
 CGKeyCode g_repeatedKey;
-auto g_delayUntilRepeat = 500;
-auto g_keyRepeat = 50;
+int g_delayUntilRepeat;
+int g_keyRepeatInterval;
 int g_keyRepeatThreadCount = 0;
 nlohmann::json g_noAllowedRepeatVKCodes = {};
 void handleKeyRepeat(CGKeyCode vkCode, ushort state)
@@ -113,8 +117,9 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state)
   {
     g_shouldKeyRepeat = true;
     g_repeatedKey = vkCode;
-    g_keyRepeatThreadCount = g_keyRepeatThreadCount + 1;
-    // make sure that only non letter/numbers/modifiers repeat
+    g_keyRepeatThreadCount = g_keyRepeatThreadCount > 9999 ? 0 : g_keyRepeatThreadCount + 1;
+    
+    // In theory only non letter/numbers/modifiers should repeat
     std::thread threadObj([](int threadIdx)
                           {
                             if (threadIdx != g_keyRepeatThreadCount || !g_shouldKeyRepeat)
@@ -128,7 +133,7 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state)
                               auto event = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)g_repeatedKey, 1);
                               CGEventPost(kCGHIDEventTap, event);
                               std::this_thread::sleep_for(
-                              std::chrono::milliseconds(g_keyRepeat));
+                              std::chrono::milliseconds(g_keyRepeatInterval));
                             }
                           },
                           g_keyRepeatThreadCount);
@@ -203,6 +208,13 @@ void initializeKeyDispatcher()
 {
   auto rules = Helpers::getJsonFile("mode1.json");
   g_symbols = Helpers::getJsonFile("symbols.json");
+  g_delayUntilRepeat = rules["delayUntilRepeat"].is_null()
+    ? 250
+    : rules["delayUntilRepeat"].get<int>();
+  g_keyRepeatInterval = rules["keyRepeatInterval"].is_null()
+    ? 25
+    : rules["keyRepeatInterval"].get<int>();
+    
   keyDispatcher = new KeyDispatcher(rules, g_symbols);
   //auto testResults = keyDispatcher->runTests();
   //Helpers::print(!testResults.is_null() ? testResults["message"]
@@ -213,6 +225,14 @@ CGEventRef myEventTapCallBack(CGEventTapProxy proxy, CGEventType type, CGEventRe
 {
   setModifierFlagsToEvent(event);
   return event;
+}
+
+void myNotificationCenterCallback (CFNotificationCenterRef center, void* observer, CFNotificationName name,
+               const void* object,
+               CFDictionaryRef userInfo)
+{
+  std::cout << "Hello World\n";
+  //NSLog(@"New application: %@", [[name userInfo] objectForKey:NSWorkspaceApplicationKey]);
 }
 
 int main(int argc, const char *argv[])
@@ -244,9 +264,18 @@ int main(int argc, const char *argv[])
   IOHIDManagerSetInputValueMatching(hidManager, keyboard);
   IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(),
                                   kCFRunLoopDefaultMode);
+    
+    
+//    Listen for frontmostapp not working for now
+//    NSWorkspaceDidActivateApplicationNotification  CFSTR
+//      CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), nullptr, myNotificationCenterCallback,
+//                                      CFSTR("NSWorkspaceDidActivateApplicationNotification"), nullptr,
+//                                      CFNotificationSuspensionBehaviorDeliverImmediately);
+    
+    
 
   // had issues syncronizing timing from hidManager loop and this one.
-  // So I'm emulating the flags for keyboard in the hidManager loop and use this only for
+  // So I'm emulating the flags for keyboard events in the hidManager loop and use this only for
   // mouse events
   auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDragged) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventRightMouseDragged), myEventTapCallBack, NULL);
   if (myEventTap)
@@ -267,5 +296,7 @@ int main(int argc, const char *argv[])
   // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
   //    kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
   IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
+    
+  // main thread
   CFRunLoopRun();
 }

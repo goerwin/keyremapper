@@ -1,5 +1,9 @@
 {
+  "delayUntilRepeat": 300,
+  "keyRepeatInterval": 25,
+  "keyPressesDelay": 200,
   "remaps": {
+    "Caps": "F18",
     "CmdR": "Cmd",
     "AltR": "Alt",
     "ShiftR": "Shift",
@@ -7,7 +11,7 @@
     "NonUSBackslash": "GraveAccent"
   },
   "keyPresses": [
-    { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    { "repeat": 1, "inputKey": "F18", "fire": "Esc" },
     { "repeat": 2, "inputKey": "Esc", "fire": "ToggleAppEnabled" },
     {
       "repeat": 2,
@@ -16,6 +20,53 @@
       "skipKeyBindings": true
     }
   ],
-  "keybindings": ["%dotdotdotArray(_vimMode.json)"],
+  "keybindings": [
+    "%dotdotdotArray(_vimMode.json)",
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true },
+      "fire": ["Cmd:up pageDown:down", "pageDown:up Cmd:down"]
+    },
+    {
+      "keys": ["K"],
+      "when": { "Cmd": true },
+      "fire": ["Cmd:up pageUp:down", "pageUp:up Cmd:down"]
+    },
+
+    // Globals
+
+    // F18/Caps as control for some keys
+    {
+      "keys": ["C", "Space", "V", "Tab"],
+      "when": { "F18": true },
+      "fire": ["Ctrl:down currentKey Ctrl:up", null]
+    },
+
+    // Mute mic
+    {
+      "keys": ["M"],
+      "when": { "Alt": true },
+      "fire": ["Cmd:down M Cmd:up"]
+    },
+
+    // App exposé TODO: NOT WORKING
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true, "Alt": true },
+      "fire": [null, null]
+    },
+
+    // Go to back/forward page in browser navigation
+    {
+      "keys": ["H"],
+      "when": {"Alt": true},
+      "fire": ["Alt:up Cmd:down BracketL Cmd:up Alt:down", null]
+    },
+    {
+      "keys": ["L"],
+      "when": {"Alt": true},
+      "fire": ["Alt:up Cmd:down BracketR Cmd:up Alt:down", null]
+    }
+  ],
   "tests": "%array(_tests.json)"
 }
