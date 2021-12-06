@@ -1,18 +1,8 @@
 [
   {
-    "keys": ["J", "K"],
-    "when": { "Caps": true, "Alt": true },
-    "fire": ["vimHomeEndKey", null]
-  },
-  {
-    "keys": ["H", "L"],
-    "when": { "Caps": true, "Win": true },
-    "fire": ["Ctrl:down vimArrowKey Ctrl:up", null]
-  },
-  {
     "keys": ["H", "J", "K", "L"],
     "when": { "Caps": true },
-    "fire": ["vimArrowKey", null]
+    "fire": ["vimArrowKey:down", "vimArrowKey:up"]
   },
   {
     "keys": ["F"],

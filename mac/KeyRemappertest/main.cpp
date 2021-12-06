@@ -4,9 +4,12 @@
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/hid/IOHIDElement.h>
 #include <IOKit/hid/IOHIDValue.h>
+
 #include <thread>
 #include <iostream>
 #include <chrono>
+
+#include "json.hpp"
 
 // HELPFUL
 //https://stackoverflow.com/questions/7190852/using-iohidmanager-to-get-modifier-key-events
@@ -17,6 +20,7 @@
 // (See comments in `handle_pointing_device_event_from_event_tap` for details.)
 
 KeyDispatcher *keyDispatcher;
+nlohmann::json g_symbols;
 
 //CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 
@@ -60,10 +64,10 @@ CFMutableDictionaryRef myCreateDeviceMatchingDictionary(UInt32 usagePage,
   return ret;
 }
 
-auto symbols = Helpers::getJsonFile("symbols.json");
+// TODO: This is inefficient
 ushort getMacVKCode(short scanCode)
 {
-  for (auto &[key, value] : symbols.items())
+  for (auto &[key, value] : g_symbols.items())
   {
     if (value[0] == scanCode)
     {
@@ -81,39 +85,64 @@ bool isCtrlDown = false;
 bool isModifierDown = false;
 CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
-void setModifierFlagsToEvent(CGEventRef event) {
-    CGEventFlags flags = 0;
+void setModifierFlagsToEvent(CGEventRef event)
+{
+  CGEventFlags flags = 0;
 
-    if (isCmdDown)
-      flags = flags | kCGEventFlagMaskCommand;
-    if (isShiftDown)
-      flags = flags | kCGEventFlagMaskShift;
-    if (isAltDown)
-      flags = flags | kCGEventFlagMaskAlternate;
-    if (isCtrlDown)
-      flags = flags | kCGEventFlagMaskControl;
-    
-    CGEventSetFlags(event, flags);
+  if (isCmdDown)
+    flags = flags | kCGEventFlagMaskCommand;
+  if (isShiftDown)
+    flags = flags | kCGEventFlagMaskShift;
+  if (isAltDown)
+    flags = flags | kCGEventFlagMaskAlternate;
+  if (isCtrlDown)
+    flags = flags | kCGEventFlagMaskControl;
+
+  CGEventSetFlags(event, flags);
 }
 
-void timer_start(std::function<void(void)> func, unsigned int interval)
+bool g_shouldKeyRepeat = false;
+CGKeyCode g_repeatedKey;
+auto g_delayUntilRepeat = 500;
+auto g_keyRepeat = 50;
+int g_keyRepeatThreadCount = 0;
+nlohmann::json g_noAllowedRepeatVKCodes = {};
+void handleKeyRepeat(CGKeyCode vkCode, ushort state)
 {
-  std::thread([func, interval]()
+  if (state == 0)
   {
-    while (true)
-    {
-      auto x = std::chrono::steady_clock::now() + std::chrono::milliseconds(interval);
-      func();
-      std::this_thread::sleep_until(x);
-        std::terminate();
-    }
-  }).detach();
+    g_shouldKeyRepeat = true;
+    g_repeatedKey = vkCode;
+    g_keyRepeatThreadCount = g_keyRepeatThreadCount + 1;
+    // make sure that only non letter/numbers/modifiers repeat
+    std::thread threadObj([](int threadIdx)
+                          {
+                            if (threadIdx != g_keyRepeatThreadCount || !g_shouldKeyRepeat)
+                              return;
+
+                            std::this_thread::sleep_for(
+                                std::chrono::milliseconds(g_delayUntilRepeat));
+
+                            while (g_keyRepeatThreadCount == threadIdx && g_shouldKeyRepeat)
+                            {
+                              auto event = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)g_repeatedKey, 1);
+                              CGEventPost(kCGHIDEventTap, event);
+                              std::this_thread::sleep_for(
+                              std::chrono::milliseconds(g_keyRepeat));
+                            }
+                          },
+                          g_keyRepeatThreadCount);
+    threadObj.detach();
+  }
+  else
+  {
+    g_shouldKeyRepeat = false;
+    g_repeatedKey = {};
+  }
 }
 
 void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
 {
-  auto rules = Helpers::getJsonFile("mode1.json");
-  auto symbols = Helpers::getJsonFile("symbols.json");
   auto newKeys = keyDispatcher->applyKeys({{ioKitKeyEvent.scancode, ushort(ioKitKeyEvent.isPressed ? 0 : 1)}});
   auto newKeysSize = newKeys.size();
 
@@ -121,10 +150,6 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
   {
     auto [code, state] = newKeys[i];
     auto vkCode = getMacVKCode(code);
-
-    //    std::cout << "\niokitCode: " << std::to_string(ioKitKeyEvent.scancode) << " vkode:" << std::to_string((CGKeyCode)vkCode) << ":" << std::to_string(state) << "\n";
-
-    //       CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 
     auto newEvent = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, state == 0);
 
@@ -145,34 +170,18 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
     else if (vkCode == 59 && state == 1)
       isCtrlDown = false;
 
-    setModifierFlagsToEvent(newEvent);
     // This enables onhold popup it for a/e/i/o/u
     //    CGEventSetIntegerValueField(newEvent, kCGKeyboardEventAutorepeat, 1);
 
-    // TODO: keyrepeat
     // TODO: pressed n times feature
     // after testing laptop keyboard seems that numbers/letters are the ones that dont repeat
     // other keys repeat
 
-
-    CGEventTapLocation loc = kCGHIDEventTap;
-    CGEventPost(loc, newEvent);
-      
-      if (vkCode == 28 && state == 0) {
-          auto _execute = true;
-          int delay = 300;
-          while (_execute) {
-              std::this_thread::sleep_for(
-              std::chrono::milliseconds(delay));
-              CGEventPost(loc, newEvent);
-              std::this_thread::sleep_for(
-              std::chrono::milliseconds(delay));
-          }
-      }
-          
+    setModifierFlagsToEvent(newEvent);
+    CGEventPost(kCGHIDEventTap, newEvent);
     CFRelease(newEvent);
-    //    CFRelease(eventSource);
-    //    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+    handleKeyRepeat(vkCode, state);
   }
 }
 
@@ -193,8 +202,8 @@ void myHIDKeyboardCallback(void *context, IOReturn result, void *sender,
 void initializeKeyDispatcher()
 {
   auto rules = Helpers::getJsonFile("mode1.json");
-  auto symbols = Helpers::getJsonFile("symbols.json");
-  keyDispatcher = new KeyDispatcher(rules, symbols);
+  g_symbols = Helpers::getJsonFile("symbols.json");
+  keyDispatcher = new KeyDispatcher(rules, g_symbols);
   //auto testResults = keyDispatcher->runTests();
   //Helpers::print(!testResults.is_null() ? testResults["message"]
   // TODO: "NO TESTS RUN");

@@ -104,11 +104,11 @@
   "MediaPause": [205, 0, 1, 0],
 
   "VolumeDown": [234, 0, 1, 73],
-  "VolumeUp": [233, 0, 1, 72]
+  "VolumeUp": [233, 0, 1, 72],
 
   // "LeftClick": [241, 0, 1],
   // "RightClick": [242, 0, 1],
   // "BrightnessDown": [107, 0, 1],
   // "BrightnessUp": [113, 0, 1],
-  // "ToggleAppEnabled": [245, 0, 1]
+  "ToggleAppEnabled": [245, 0, 1, 0]
 }

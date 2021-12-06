@@ -3,8 +3,8 @@
 #include "Helpers.hpp"
 #include "json.hpp"
 #include <string>
-#include <time.h>
 #include <vector>
+#include <chrono>
 
 class KeyDispatcher {
   using json = nlohmann::json;
@@ -39,13 +39,13 @@ private:
   int REPEAT_TIME;
 
   double getTimeDifference(double time1, double time2) {
-    return (time1 - time2) / CLOCKS_PER_SEC * 1000;
+      return time1 - time2;
   }
 
   String lastKeyName;
   int multiplePressesCount = 0;
-  double keyDownTime = 0;
-  double keyUpTime = 0;
+  double keyDownTime = 0; // in ms
+  double keyUpTime = 0; // in ms
 
   json getMultiplePressesFireItem(String keyName, bool isKeyDown) {
     if (keyPresses.is_null())
@@ -62,8 +62,7 @@ private:
 
     if (isKeyDown) {
       if (!keyDownTime)
-        keyDownTime = clock();
-
+          keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
       if (!keyUpTime ||
           getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
         multiplePressesCount = 0;
@@ -71,7 +70,7 @@ private:
       keyUpTime = 0;
       return {};
     } else {
-      keyUpTime = clock();
+      keyUpTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
       if (keyDownTime != 0 &&
           getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME) {
@@ -166,10 +165,10 @@ public:
               Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
-                     stringifyKeyEvents({keyEvent}) + " ==> " +
-                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
-                     stringifyKeyEvents(localKeyEvents));
+//      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
+//                     stringifyKeyEvents({keyEvent}) + " ==> " +
+//                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
+//                     stringifyKeyEvents(localKeyEvents));
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
