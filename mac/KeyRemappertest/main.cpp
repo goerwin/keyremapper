@@ -26,7 +26,6 @@
 KeyDispatcher *keyDispatcher;
 nlohmann::json g_symbols;
 
-//CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 
 struct IOKitKeyEvent
 {
@@ -86,10 +85,22 @@ bool isCmdDown = false;
 bool isShiftDown = false;
 bool isAltDown = false;
 bool isCtrlDown = false;
-bool isModifierDown = false;
+bool isFnDown = false;
+//CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
-void setModifierFlagsToEvent(CGEventRef event)
+auto g_fnKeyVkCodes = {122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111};
+auto g_arrowKeyVkCodes = {123,124,125,126};
+
+bool isArrowKeyVkCode(ushort vkCode) {
+    return std::find(g_arrowKeyVkCodes.begin(), g_arrowKeyVkCodes.end(), vkCode) != g_arrowKeyVkCodes.end();
+}
+
+bool isFunctionKeyVkCode(ushort vkCode) {
+    return std::find(g_fnKeyVkCodes.begin(), g_fnKeyVkCodes.end(), vkCode) != g_fnKeyVkCodes.end();
+}
+
+void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown)
 {
   CGEventFlags flags = 0;
 
@@ -101,9 +112,37 @@ void setModifierFlagsToEvent(CGEventRef event)
     flags = flags | kCGEventFlagMaskAlternate;
   if (isCtrlDown)
     flags = flags | kCGEventFlagMaskControl;
+  if (isFnDown)
+    flags = flags | kCGEventFlagMaskSecondaryFn;
+
+  if (isArrowKeyVkCode(vkCode))
+      flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
+  else if (isFunctionKeyVkCode(vkCode))
+    flags = flags | kCGEventFlagMaskSecondaryFn;
+  else
+    flags = flags | kCGEventFlagMaskNonCoalesced;
 
   CGEventSetFlags(event, flags);
 }
+
+void setModifierFlagsToExternalMouseEvent(CGEventRef event)
+{
+  CGEventFlags flags = 0;
+
+  if (isCmdDown)
+    flags = flags | kCGEventFlagMaskCommand;
+  if (isShiftDown)
+    flags = flags | kCGEventFlagMaskShift;
+  if (isAltDown)
+    flags = flags | kCGEventFlagMaskAlternate;
+  if (isCtrlDown)
+    flags = flags | kCGEventFlagMaskControl;
+  if (isFnDown)
+    flags = flags | kCGEventFlagMaskSecondaryFn;
+
+  CGEventSetFlags(event, flags);
+}
+
 
 bool g_shouldKeyRepeat = false;
 CGKeyCode g_repeatedKey;
@@ -118,7 +157,7 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state)
     g_shouldKeyRepeat = true;
     g_repeatedKey = vkCode;
     g_keyRepeatThreadCount = g_keyRepeatThreadCount > 9999 ? 0 : g_keyRepeatThreadCount + 1;
-    
+
     // In theory only non letter/numbers/modifiers should repeat
     std::thread threadObj([](int threadIdx)
                           {
@@ -130,7 +169,10 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state)
 
                             while (g_keyRepeatThreadCount == threadIdx && g_shouldKeyRepeat)
                             {
-                              auto event = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)g_repeatedKey, 1);
+                              auto vkCode = (CGKeyCode)g_repeatedKey;
+                              auto event = CGEventCreateKeyboardEvent(eventSource, vkCode, 1);
+                              setModifierFlagsToKeyEvent(event, vkCode, true);
+                              CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
                               CGEventPost(kCGHIDEventTap, event);
                               std::this_thread::sleep_for(
                               std::chrono::milliseconds(g_keyRepeatInterval));
@@ -155,34 +197,70 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
   {
     auto [code, state] = newKeys[i];
     auto vkCode = getMacVKCode(code);
+    auto isKeyDown = state == 0;
 
-    auto newEvent = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, state == 0);
-
-    if (vkCode == 55 && state == 0)
+    if (vkCode == 55 && isKeyDown)
       isCmdDown = true;
-    else if (vkCode == 55 && state == 1)
+    else if (vkCode == 55 && !isKeyDown)
       isCmdDown = false;
-    else if (vkCode == 56 && state == 0)
+    else if (vkCode == 56 && isKeyDown)
       isShiftDown = true;
-    else if (vkCode == 56 && state == 1)
+    else if (vkCode == 56 && !isKeyDown)
       isShiftDown = false;
-    else if (vkCode == 58 && state == 0)
+    else if (vkCode == 58 && isKeyDown)
       isAltDown = true;
-    else if (vkCode == 58 && state == 1)
+    else if (vkCode == 58 && !isKeyDown)
       isAltDown = false;
-    else if (vkCode == 59 && state == 0)
+    else if (vkCode == 59 && isKeyDown)
       isCtrlDown = true;
-    else if (vkCode == 59 && state == 1)
+    else if (vkCode == 59 && !isKeyDown)
       isCtrlDown = false;
+    else if (vkCode == 63 && isKeyDown)
+      isFnDown = true;
+    else if (vkCode == 63 && !isKeyDown)
+      isFnDown = false;
 
     // This enables onhold popup it for a/e/i/o/u
     //    CGEventSetIntegerValueField(newEvent, kCGKeyboardEventAutorepeat, 1);
 
-    // TODO: pressed n times feature
+
+    // TODO: There's an issue with arrow keys. Dont work in chrome when hammerspoon in mode 2 and also the f11 you have to keep pressing the key to actually work. Test with Ctrl+down
     // after testing laptop keyboard seems that numbers/letters are the ones that dont repeat
     // other keys repeat
 
-    setModifierFlagsToEvent(newEvent);
+    if (vkCode == 241 && isKeyDown) {
+// https://github.com/pqrs-org/Karabiner-Elements/blob/fdc9d542a6f17258655f595e4d51d1e26aa25d41/src/vendor/cget/cget/pkg/pqrs-org__cpp-osx-cg_event/install/include/pqrs/osx/cg_event/mouse.hpp
+//    https://stackoverflow.com/questions/1483657/performing-a-double-click-using-cgeventcreatemouseevent
+        // Note: Drag partially works on webpages, not in system wide events though
+        CGEventRef ourEvent = CGEventCreate(NULL);
+        auto mouseLoc  = CGEventGetLocation(ourEvent); //get current mouse position
+        auto newMouseEvent = CGEventCreateMouseEvent(eventSource, kCGEventLeftMouseDown, mouseLoc, kCGMouseButtonLeft);
+//        auto newMouseEventDrag = CGEventCreateMouseEvent(eventSource, kCGEventLeftMouseDragged, mouseLoc, kCGMouseButtonLeft);
+        CGEventSetIntegerValueField(newMouseEvent, kCGMouseEventClickState, 1);
+
+//        CGEventSetFlags(newMouseEvent, kCGEventLeftMouseDragged);
+        CGEventPost(kCGHIDEventTap, newMouseEvent);
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(100));
+//        CGEventPost(kCGHIDEventTap, newMouseEventDrag);
+
+//        CFRelease(newMouseEvent);
+    } else if (vkCode == 241 && !isKeyDown) {
+        CGEventRef ourEvent = CGEventCreate(NULL);
+        auto mouseLoc  = CGEventGetLocation(ourEvent); //get current mouse position
+      auto newMouseEvent = CGEventCreateMouseEvent(eventSource, kCGEventLeftMouseUp, mouseLoc, kCGMouseButtonLeft);
+        CGEventSetIntegerValueField(newMouseEvent, kCGMouseEventClickState, 1);
+
+        CGEventPost(kCGHIDEventTap, newMouseEvent);
+      CFRelease(newMouseEvent);
+
+      return;
+    }
+
+
+    auto newEvent = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, state == 0);
+
+    setModifierFlagsToKeyEvent(newEvent, vkCode, isKeyDown);
     CGEventPost(kCGHIDEventTap, newEvent);
     CFRelease(newEvent);
 
@@ -214,7 +292,7 @@ void initializeKeyDispatcher()
   g_keyRepeatInterval = rules["keyRepeatInterval"].is_null()
     ? 25
     : rules["keyRepeatInterval"].get<int>();
-    
+
   keyDispatcher = new KeyDispatcher(rules, g_symbols);
   //auto testResults = keyDispatcher->runTests();
   //Helpers::print(!testResults.is_null() ? testResults["message"]
@@ -223,7 +301,7 @@ void initializeKeyDispatcher()
 
 CGEventRef myEventTapCallBack(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-  setModifierFlagsToEvent(event);
+  setModifierFlagsToExternalMouseEvent(event);
   return event;
 }
 
@@ -264,25 +342,31 @@ int main(int argc, const char *argv[])
   IOHIDManagerSetInputValueMatching(hidManager, keyboard);
   IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(),
                                   kCFRunLoopDefaultMode);
-    
-    
+
+
 //    Listen for frontmostapp not working for now
 //    NSWorkspaceDidActivateApplicationNotification  CFSTR
-//      CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), nullptr, myNotificationCenterCallback,
-//                                      CFSTR("NSWorkspaceDidActivateApplicationNotification"), nullptr,
-//                                      CFNotificationSuspensionBehaviorDeliverImmediately);
-    
-    
+      CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), nullptr, myNotificationCenterCallback,
+                                      CFSTR("NSWorkspaceDidActivateApplicationNotification"), nullptr,
+                                      CFNotificationSuspensionBehaviorDeliverImmediately);
+
+
 
   // had issues syncronizing timing from hidManager loop and this one.
   // So I'm emulating the flags for keyboard events in the hidManager loop and use this only for
   // mouse events
-  auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDragged) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventRightMouseDragged), myEventTapCallBack, NULL);
+
+  auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+                                     CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDragged) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventRightMouseDragged),
+                                     myEventTapCallBack, NULL);
   if (myEventTap)
   {
     auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEventTap, 0);
-    if (myRunLoopSource)
-      CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
+      if (myRunLoopSource) {
+          CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
+      }
+  } else {
+      std::cout << "Accesibility disabled for this app";
   }
   //    auto myEventTap = CGEventTapCreate(kCGHIDEventTap,
   //                                                kCGHeadInsertEventTap,
@@ -293,10 +377,10 @@ int main(int argc, const char *argv[])
 
   //CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventKeyDown | CGEventMaskBit(kCGEventKeyUp) | CGEventMaskBit(kCGEventFlagsChanged)), <#CGEventTapCallBack  _Nonnull callback#>, <#void * _Nullable userInfo#>)
 
-  // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
-  //    kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
+//   kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
+//      kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
   IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
-    
+
   // main thread
   CFRunLoopRun();
 }
