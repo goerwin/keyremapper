@@ -16,3 +16,11 @@ IOHIDSetModifierLockState(ioConnect, Int32(kIOHIDCapsLockState), modifierLockSta
 
 IOServiceClose(ioConnect)
 ```
+
+# TODO:
+- detect current application
+- move option value keyPressDelay in keyDispatcher to main file
+- toggle caps
+- trigger media keys
+- mouse clicks/drags/etc
+- simple GUI

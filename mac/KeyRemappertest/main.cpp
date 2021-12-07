@@ -1,5 +1,5 @@
 #include "KeyDispatcher.hpp"
-#include <Carbon/Carbon.h> // TODO: see if you can use another library (this is gonna be deprecated)
+#include <ApplicationServices/ApplicationServices.h>
 #include <IOKit/hid/IOHIDManager.h>
 #include <IOKit/hid/IOHIDDevice.h>
 #include <IOKit/hid/IOHIDElement.h>
@@ -7,7 +7,8 @@
 
 // If you dont need this, delete the app in the build phase of the project
 // I think I will have to create a swift project instead
-//#include <AppKit/AppKit.h>
+//#include <AppKit/NSWorkspace.h>
+//#include <AppKit/NSApplication.h>
 
 #include <thread>
 #include <iostream>
@@ -220,14 +221,6 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
     else if (vkCode == 63 && !isKeyDown)
       isFnDown = false;
 
-    // This enables onhold popup it for a/e/i/o/u
-    //    CGEventSetIntegerValueField(newEvent, kCGKeyboardEventAutorepeat, 1);
-
-
-    // TODO: There's an issue with arrow keys. Dont work in chrome when hammerspoon in mode 2 and also the f11 you have to keep pressing the key to actually work. Test with Ctrl+down
-    // after testing laptop keyboard seems that numbers/letters are the ones that dont repeat
-    // other keys repeat
-
     if (vkCode == 241 && isKeyDown) {
 // https://github.com/pqrs-org/Karabiner-Elements/blob/fdc9d542a6f17258655f595e4d51d1e26aa25d41/src/vendor/cget/cget/pkg/pqrs-org__cpp-osx-cg_event/install/include/pqrs/osx/cg_event/mouse.hpp
 //    https://stackoverflow.com/questions/1483657/performing-a-double-click-using-cgeventcreatemouseevent
@@ -245,6 +238,7 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
 //        CGEventPost(kCGHIDEventTap, newMouseEventDrag);
 
 //        CFRelease(newMouseEvent);
+        return;
     } else if (vkCode == 241 && !isKeyDown) {
         CGEventRef ourEvent = CGEventCreate(NULL);
         auto mouseLoc  = CGEventGetLocation(ourEvent); //get current mouse position
@@ -346,8 +340,10 @@ int main(int argc, const char *argv[])
 
 //    Listen for frontmostapp not working for now
 //    NSWorkspaceDidActivateApplicationNotification  CFSTR
-      CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), nullptr, myNotificationCenterCallback,
-                                      CFSTR("NSWorkspaceDidActivateApplicationNotification"), nullptr,
+
+    CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
+      CFNotificationCenterAddObserver(center, nullptr, myNotificationCenterCallback,
+                                      NULL, CFSTR("NSWorkspaceDidActivateApplicationNotification"),
                                       CFNotificationSuspensionBehaviorDeliverImmediately);
 
 
