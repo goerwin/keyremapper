@@ -51,11 +51,11 @@
       "fire": ["Cmd:down M Cmd:up"]
     },
 
-    // App exposé TODO: NOT WORKING
+    // App exposé
     {
       "keys": ["J"],
       "when": { "Cmd": true, "Alt": true },
-      "fire": [null, null]
+      "fire": ["Cmd:up Alt:up Ctrl:down Down Ctrl:up Cmd:down Alt:down", null]
     },
 
     // Go to back/forward page in browser navigation

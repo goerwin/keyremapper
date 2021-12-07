@@ -55,6 +55,7 @@
 		AAE06C8F252A8DE60048027D /* mode1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = mode1.json; path = KeyRemappertest/mode1.json; sourceTree = "<group>"; };
 		AAE06C90252A8DE60048027D /* symbols.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = symbols.json; path = KeyRemappertest/symbols.json; sourceTree = "<group>"; };
 		F92A8D18275DBE7500EFDC0F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F934AAC4275FE7CF00FDE60F /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = main.h; path = KeyRemappertest/main.h; sourceTree = "<group>"; };
 		F93B717A275C495A000976F7 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -75,6 +76,7 @@
 		AADC6FC3252A59FC009CA133 = {
 			isa = PBXGroup;
 			children = (
+				F934AAC4275FE7CF00FDE60F /* main.h */,
 				AAE06C8C252A8DE50048027D /* _altTabMode.json */,
 				AAE06C8E252A8DE60048027D /* _clicksMode.json */,
 				AAE06C8B252A8DE40048027D /* _tests.json */,
@@ -143,7 +145,7 @@
 		AADC6FC4252A59FC009CA133 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1170;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = "Erwin GO";
 				TargetAttributes = {
 					AADC6FCB252A59FC009CA133 = {
@@ -209,6 +211,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -268,6 +271,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -298,6 +302,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -309,6 +314,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;

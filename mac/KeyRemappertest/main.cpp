@@ -1,9 +1,15 @@
 #include "KeyDispatcher.hpp"
 #include <ApplicationServices/ApplicationServices.h>
-#include <IOKit/hid/IOHIDManager.h>
-#include <IOKit/hid/IOHIDDevice.h>
-#include <IOKit/hid/IOHIDElement.h>
-#include <IOKit/hid/IOHIDValue.h>
+
+#include <IOKit/IOKitLib.h>
+#include <IOKit/hid/IOHIDLib.h>
+#include <IOKit/hidsystem/IOHIDLib.h>
+
+
+//#include <IOKit/hid/IOHIDManager.h>
+//#include <IOKit/hid/IOHIDDevice.h>
+//#include <IOKit/hid/IOHIDElement.h>
+//#include <IOKit/hid/IOHIDValue.h>
 
 // If you dont need this, delete the app in the build phase of the project
 // I think I will have to create a swift project instead
@@ -14,6 +20,7 @@
 #include <iostream>
 #include <chrono>
 
+#include "main.h"
 #include "json.hpp"
 
 // HELPFUL
@@ -27,6 +34,7 @@
 KeyDispatcher *keyDispatcher;
 nlohmann::json g_symbols;
 
+bool g_capslockState;
 
 struct IOKitKeyEvent
 {
@@ -87,6 +95,7 @@ bool isShiftDown = false;
 bool isAltDown = false;
 bool isCtrlDown = false;
 bool isFnDown = false;
+
 //CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
@@ -115,6 +124,8 @@ void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown)
     flags = flags | kCGEventFlagMaskControl;
   if (isFnDown)
     flags = flags | kCGEventFlagMaskSecondaryFn;
+  if (g_capslockState)
+    flags = flags | kCGEventFlagMaskAlphaShift;
 
   if (isArrowKeyVkCode(vkCode))
       flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
@@ -159,7 +170,6 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state)
     g_repeatedKey = vkCode;
     g_keyRepeatThreadCount = g_keyRepeatThreadCount > 9999 ? 0 : g_keyRepeatThreadCount + 1;
 
-    // In theory only non letter/numbers/modifiers should repeat
     std::thread threadObj([](int threadIdx)
                           {
                             if (threadIdx != g_keyRepeatThreadCount || !g_shouldKeyRepeat)
@@ -221,6 +231,8 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
     else if (vkCode == 63 && !isKeyDown)
       isFnDown = false;
 
+    if (vkCode == 57 && isKeyDown) return toggleCapslockState();
+
     if (vkCode == 241 && isKeyDown) {
 // https://github.com/pqrs-org/Karabiner-Elements/blob/fdc9d542a6f17258655f595e4d51d1e26aa25d41/src/vendor/cget/cget/pkg/pqrs-org__cpp-osx-cg_event/install/include/pqrs/osx/cg_event/mouse.hpp
 //    https://stackoverflow.com/questions/1483657/performing-a-double-click-using-cgeventcreatemouseevent
@@ -262,6 +274,9 @@ void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
   }
 }
 
+IOHIDManagerRef hidManager = IOHIDManagerCreate(kCFAllocatorDefault,
+                                                kIOHIDOptionsTypeNone);
+
 void myHIDKeyboardCallback(void *context, IOReturn result, void *sender,
                            IOHIDValueRef value)
 {
@@ -274,6 +289,32 @@ void myHIDKeyboardCallback(void *context, IOReturn result, void *sender,
     return;
 
   handleIOKitKeyEvent(IOKitKeyEvent({scancode, isPressed}));
+}
+
+void initializeIOHIDManager() {
+  CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
+  CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
+
+  CFMutableDictionaryRef matchesList[] = { keyboard, keypad };
+
+  CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault,
+                                     (const void **)matchesList, 2, NULL);
+
+  IOHIDManagerSetDeviceMatchingMultiple(hidManager, matches);
+  IOHIDManagerRegisterInputValueCallback(hidManager, myHIDKeyboardCallback, NULL);
+  IOHIDManagerSetInputValueMatching(hidManager, keyboard);
+}
+
+void openIOHIDManager() {
+  // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
+  // kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
+  IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+  IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
+}
+
+void closeIOHIDManager() {
+  // apparently, you don't have to UnscheduleWithRunLoop before or after closing the manager
+  IOHIDManagerClose(hidManager, kIOHIDOptionsTypeSeizeDevice);
 }
 
 void initializeKeyDispatcher()
@@ -293,10 +334,71 @@ void initializeKeyDispatcher()
   // TODO: "NO TESTS RUN");
 }
 
-CGEventRef myEventTapCallBack(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
-{
-  setModifierFlagsToExternalMouseEvent(event);
-  return event;
+void initializeMouseListener() {
+  // apparently, real mouse events don't register modifier presses, so I have to listen for
+  // mouse events and attach the modifier flags accordingly
+  auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+                                     CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDragged) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventRightMouseDragged),
+                                     [](CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
+                                     {
+                                       setModifierFlagsToExternalMouseEvent(event);
+                                       return event;
+                                     }, NULL);
+  if (myEventTap) {
+    auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEventTap, 0);
+    if (myRunLoopSource) {
+      CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
+    }
+    } else {
+      std::cout << "Accesibility disabled for this app";
+    }
+}
+
+bool getCapslockState() {
+  kern_return_t kr;
+  io_connect_t ioc;
+  CFMutableDictionaryRef mdict = IOServiceMatching(kIOHIDSystemClass);
+  io_connect_t ios = IOServiceGetMatchingService(kIOMasterPortDefault, (CFDictionaryRef) mdict);
+
+  if (!ios) {
+    if (mdict) CFRelease(mdict);
+    std::cout << "IOServiceGetMatchingService() failed\n";
+    return false;
+  }
+
+  kr = IOServiceOpen(ios, mach_task_self(), kIOHIDParamConnectType, &ioc);
+  IOObjectRelease(ios);
+  if (kr != KERN_SUCCESS) {
+    std::cout << "IOServiceOpen() failed: " << kr << "\n";
+    return false;
+  }
+
+  // CAPSLOCK_QUERY
+  bool state;
+
+  kr = IOHIDGetModifierLockState(ioc, kIOHIDCapsLockState, &state);
+  if (kr != KERN_SUCCESS) {
+    IOServiceClose(ioc);
+    std::cout << "IOHIDGetModifierLockState() failed: " << kr << "\n";
+    return false;
+  }
+
+  return state;
+}
+
+void toggleCapslockState() {
+  // I had to keep track of capslock on a global variable.
+  // When I was calling getModifierLockState and then toggling via setModifierLockState
+  // it was working the first time, but subsequent get calls return the same state
+  kern_return_t kr;
+  io_connect_t ioc;
+  CFMutableDictionaryRef mdict = IOServiceMatching(kIOHIDSystemClass);
+  io_connect_t ios = IOServiceGetMatchingService(kIOMasterPortDefault, (CFDictionaryRef) mdict);
+
+  g_capslockState = !g_capslockState;
+  kr = IOServiceOpen(ios, mach_task_self(), kIOHIDParamConnectType, &ioc);
+  IOHIDSetModifierLockState(ioc, kIOHIDCapsLockState, g_capslockState);
+  IOObjectRelease(ios);
 }
 
 void myNotificationCenterCallback (CFNotificationCenterRef center, void* observer, CFNotificationName name,
@@ -310,73 +412,33 @@ void myNotificationCenterCallback (CFNotificationCenterRef center, void* observe
 int main(int argc, const char *argv[])
 {
   initializeKeyDispatcher();
+  initializeIOHIDManager();
+  openIOHIDManager();
 
-  IOHIDManagerRef hidManager = IOHIDManagerCreate(kCFAllocatorDefault,
-                                                  kIOHIDOptionsTypeNone);
+  g_capslockState = getCapslockState();
 
-  CFMutableDictionaryRef keyboard =
-      myCreateDeviceMatchingDictionary(0x01, 6);
-  CFMutableDictionaryRef keypad =
-      myCreateDeviceMatchingDictionary(0x01, 7);
+  initializeMouseListener();
 
-  CFMutableDictionaryRef matchesList[] = {
-      keyboard,
-      keypad,
-  };
-
-  CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault,
-                                     (const void **)matchesList, 2, NULL);
-
-  IOHIDManagerSetDeviceMatchingMultiple(hidManager, matches);
-  IOHIDManagerRegisterInputValueCallback(
-      hidManager,
-      myHIDKeyboardCallback,
-      NULL);
-
-  IOHIDManagerSetInputValueMatching(hidManager, keyboard);
-  IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(),
-                                  kCFRunLoopDefaultMode);
-
+//  IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(kiohdsys))
+//  var ioConnect: io_connect_t = .init(0)
+//  let ioService = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(kIOHIDSystemClass))
+//  IOServiceOpen(ioService, mach_task_self_, UInt32(kIOHIDParamConnectType), &ioConnect)
+//
+//  var modifierLockState = false
+//  IOHIDGetModifierLockState(ioConnect, Int32(kIOHIDCapsLockState), &modifierLockState)
+//
+//  modifierLockState.toggle()
+//  IOHIDSetModifierLockState(ioConnect, Int32(kIOHIDCapsLockState), modifierLockState)
+//
+//  IOServiceClose(ioConnect)
 
 //    Listen for frontmostapp not working for now
 //    NSWorkspaceDidActivateApplicationNotification  CFSTR
-
     CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
       CFNotificationCenterAddObserver(center, nullptr, myNotificationCenterCallback,
                                       NULL, CFSTR("NSWorkspaceDidActivateApplicationNotification"),
                                       CFNotificationSuspensionBehaviorDeliverImmediately);
 
-
-
-  // had issues syncronizing timing from hidManager loop and this one.
-  // So I'm emulating the flags for keyboard events in the hidManager loop and use this only for
-  // mouse events
-
-  auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
-                                     CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventMouseMoved) | CGEventMaskBit(kCGEventLeftMouseDragged) | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp) | CGEventMaskBit(kCGEventRightMouseDragged),
-                                     myEventTapCallBack, NULL);
-  if (myEventTap)
-  {
-    auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEventTap, 0);
-      if (myRunLoopSource) {
-          CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
-      }
-  } else {
-      std::cout << "Accesibility disabled for this app";
-  }
-  //    auto myEventTap = CGEventTapCreate(kCGHIDEventTap,
-  //                                                kCGHeadInsertEventTap,
-  //                                                kCGEventTapOptionDefault,
-  //                                                CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) | CGEventMaskBit(kCGEventFlagsChanged),
-  //                                                MyEventTapCallBack,
-  //                                                (__bridge void *)self);
-
-  //CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventKeyDown | CGEventMaskBit(kCGEventKeyUp) | CGEventMaskBit(kCGEventFlagsChanged)), <#CGEventTapCallBack  _Nonnull callback#>, <#void * _Nullable userInfo#>)
-
-//   kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
-//      kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
-  IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
-
-  // main thread
+  // Run in main thread
   CFRunLoopRun();
 }

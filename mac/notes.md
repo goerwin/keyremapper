@@ -1,26 +1,12 @@
 # Notes
-- Key Codes App very useful to debug event keys and flags sent to the system
-
-
-# Capslock handle
-```
-var ioConnect: io_connect_t = .init(0)
-let ioService = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching(kIOHIDSystemClass))
-IOServiceOpen(ioService, mach_task_self_, UInt32(kIOHIDParamConnectType), &ioConnect)
-
-var modifierLockState = false
-IOHIDGetModifierLockState(ioConnect, Int32(kIOHIDCapsLockState), &modifierLockState)
-
-modifierLockState.toggle()
-IOHIDSetModifierLockState(ioConnect, Int32(kIOHIDCapsLockState), modifierLockState)
-
-IOServiceClose(ioConnect)
-```
+- Key Codes App is very useful to debug event keys and flags sent to the system
 
 # TODO:
-- detect current application
-- move option value keyPressDelay in keyDispatcher to main file
-- toggle caps
-- trigger media keys
-- mouse clicks/drags/etc
-- simple GUI
+- [ ] detect current application
+- [ ] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
+- [ ] move option value keyPressDelay in keyDispatcher to main file
+- [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
+- [x] toggle caps
+- [ ] trigger media keys
+- [ ] mouse clicks/drags/etc
+- [ ] simple GUI
