@@ -160,8 +160,9 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  HWND hwnd, LONG idObject, LONG idChild,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
-  g_appName = WindowsHelpers::getActiveWindowProcessName(hwnd);
-  keyDispatcher->setAppName(g_appName);
+    auto foregroundWindow = GetForegroundWindow();
+    g_appName = WindowsHelpers::getActiveWindowProcessName(foregroundWindow);
+    keyDispatcher->setAppName(g_appName);
 }
 
 LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
@@ -175,15 +176,19 @@ LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, 0x00DDDDDD);
 
+    std::string currentWinTitle = "Active appName: " + g_appName;
+
     auto title = "originalCode:originalState -> keyEvent -> remappedKeyEvent "
                  "-> transformedKeyEvents";
     auto remapInfoSize = g_remapInfo.size();
 
-    TextOutA(hdc, 0, 0, title, strlen(title));
+    TextOutA(hdc, 0, 0, currentWinTitle.c_str(), strlen(currentWinTitle.c_str()));
+
+    TextOutA(hdc, 0, 30, title, strlen(title));
 
     for (auto i = 0; i < remapInfoSize; i++) {
       auto size = g_remapInfo[remapInfoSize - 1 - i].size();
-      TextOutA(hdc, 0, i * 20 + 30, g_remapInfo[remapInfoSize - 1 - i].c_str(),
+      TextOutA(hdc, 0, i * 20 + 60, g_remapInfo[remapInfoSize - 1 - i].c_str(),
                size);
     }
 
