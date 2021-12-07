@@ -183,7 +183,6 @@ LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     auto remapInfoSize = g_remapInfo.size();
 
     TextOutA(hdc, 0, 0, currentWinTitle.c_str(), strlen(currentWinTitle.c_str()));
-
     TextOutA(hdc, 0, 30, title, strlen(title));
 
     for (auto i = 0; i < remapInfoSize; i++) {

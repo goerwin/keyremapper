@@ -1,17 +1,18 @@
-- Install Interception driver following https://github.com/oblitum/Interception
+- Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
 - Download `KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
 - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
 - Rules (remaps, keybindings, keyPresses, tests) can be found in `mode1.json`
 
-## Development
+## Build
 
-- In Visual Studio 2019, run a batch build and mark all projects, they all should build successfully
-- Run the tests via Text Explorer -> Run all tests
+- In Visual Studio 2019+, run a batch build and mark all (non-tests) projects, they all should build successfully
+- Run the tests via Text Explorer -> Run all tests (you should install Google Test Adapter)
 - Run `$ bash release.sh` in terminal to generate the KeyRemapper.zip file with
-  .exes for x86 and x64.
+  .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
 
 ### TODO
 
+- [ ] Add versioning
 - [ ] MacOS Version (Not viable as of now, use karabiner-elements instead)
 - [ ] keybindings per keyboard
 - [x] Tests via popup message
