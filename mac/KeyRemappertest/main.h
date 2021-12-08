@@ -13,5 +13,6 @@ void openIOHIDManager();
 void closeIOHIDManager();
 bool getCapslockState();
 void toggleCapslockState();
+void initializeIOHIDManager();
 
 #endif /* main_h */

@@ -13,12 +13,11 @@
 		AAE06C87252A70010048027D /* mode1.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C86252A6B1B0048027D /* mode1.json */; };
 		AAE06C8A252A7FC30048027D /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAE06C89252A7FC20048027D /* ApplicationServices.framework */; };
 		AAE06C91252A8DE70048027D /* _tests.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C8B252A8DE40048027D /* _tests.json */; };
-		AAE06C92252A8DE70048027D /* _altTabMode.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C8C252A8DE50048027D /* _altTabMode.json */; };
 		AAE06C93252A8DE70048027D /* _vimMode.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C8D252A8DE50048027D /* _vimMode.json */; };
 		AAE06C94252A8DE70048027D /* _clicksMode.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C8E252A8DE60048027D /* _clicksMode.json */; };
 		AAE06C95252A8DE70048027D /* symbols.json in Copy Files */ = {isa = PBXBuildFile; fileRef = AAE06C90252A8DE60048027D /* symbols.json */; };
-		F92A8D19275DBE7500EFDC0F /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92A8D18275DBE7500EFDC0F /* AppKit.framework */; };
 		F93B717B275C495A000976F7 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F93B717A275C495A000976F7 /* IOKit.framework */; };
+		F9D28DD727601B9C00E3539C /* json.hpp in Sources */ = {isa = PBXBuildFile; fileRef = AADC6FD9252A5F02009CA133 /* json.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,7 +28,6 @@
 			dstSubfolderSpec = 6;
 			files = (
 				AAE06C91252A8DE70048027D /* _tests.json in Copy Files */,
-				AAE06C92252A8DE70048027D /* _altTabMode.json in Copy Files */,
 				AAE06C93252A8DE70048027D /* _vimMode.json in Copy Files */,
 				AAE06C94252A8DE70048027D /* _clicksMode.json in Copy Files */,
 				AAE06C87252A70010048027D /* mode1.json in Copy Files */,
@@ -64,7 +62,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F92A8D19275DBE7500EFDC0F /* AppKit.framework in Frameworks */,
 				F93B717B275C495A000976F7 /* IOKit.framework in Frameworks */,
 				AAE06C8A252A7FC30048027D /* ApplicationServices.framework in Frameworks */,
 			);
@@ -176,6 +173,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9D28DD727601B9C00E3539C /* json.hpp in Sources */,
 				AADC6FDA252A6145009CA133 /* Helpers.hpp in Sources */,
 				AADC6FD7252A5D9A009CA133 /* KeyDispatcher.hpp in Sources */,
 				AADC6FD0252A59FC009CA133 /* main.cpp in Sources */,

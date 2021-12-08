@@ -36,15 +36,13 @@ nlohmann::json g_symbols;
 
 bool g_capslockState;
 
-struct IOKitKeyEvent
-{
+struct IOKitKeyEvent {
   ushort scancode;
   bool isPressed;
 };
 
 CFMutableDictionaryRef myCreateDeviceMatchingDictionary(UInt32 usagePage,
-                                                        UInt32 usage)
-{
+                                                        UInt32 usage) {
   CFMutableDictionaryRef ret = CFDictionaryCreateMutable(kCFAllocatorDefault,
                                                          0, &kCFTypeDictionaryKeyCallBacks,
                                                          &kCFTypeDictionaryValueCallBacks);
@@ -77,14 +75,9 @@ CFMutableDictionaryRef myCreateDeviceMatchingDictionary(UInt32 usagePage,
 }
 
 // TODO: This is inefficient
-ushort getMacVKCode(short scanCode)
-{
-  for (auto &[key, value] : g_symbols.items())
-  {
-    if (value[0] == scanCode)
-    {
-      return value[3];
-    }
+ushort getMacVKCode(short scanCode) {
+  for (auto &[key, value] : g_symbols.items()) {
+    if (value[0] == scanCode) return value[3];
   }
 
   return {};
@@ -103,54 +96,39 @@ auto g_fnKeyVkCodes = {122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111};
 auto g_arrowKeyVkCodes = {123,124,125,126};
 
 bool isArrowKeyVkCode(ushort vkCode) {
-    return std::find(g_arrowKeyVkCodes.begin(), g_arrowKeyVkCodes.end(), vkCode) != g_arrowKeyVkCodes.end();
+  return std::find(g_arrowKeyVkCodes.begin(), g_arrowKeyVkCodes.end(), vkCode) != g_arrowKeyVkCodes.end();
 }
 
 bool isFunctionKeyVkCode(ushort vkCode) {
-    return std::find(g_fnKeyVkCodes.begin(), g_fnKeyVkCodes.end(), vkCode) != g_fnKeyVkCodes.end();
+  return std::find(g_fnKeyVkCodes.begin(), g_fnKeyVkCodes.end(), vkCode) != g_fnKeyVkCodes.end();
 }
 
-void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown)
-{
+void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) {
   CGEventFlags flags = 0;
 
-  if (isCmdDown)
-    flags = flags | kCGEventFlagMaskCommand;
-  if (isShiftDown)
-    flags = flags | kCGEventFlagMaskShift;
-  if (isAltDown)
-    flags = flags | kCGEventFlagMaskAlternate;
-  if (isCtrlDown)
-    flags = flags | kCGEventFlagMaskControl;
-  if (isFnDown)
-    flags = flags | kCGEventFlagMaskSecondaryFn;
-  if (g_capslockState)
-    flags = flags | kCGEventFlagMaskAlphaShift;
+  if (isCmdDown) flags = flags | kCGEventFlagMaskCommand;
+  if (isShiftDown) flags = flags | kCGEventFlagMaskShift;
+  if (isAltDown) flags = flags | kCGEventFlagMaskAlternate;
+  if (isCtrlDown) flags = flags | kCGEventFlagMaskControl;
+  if (isFnDown) flags = flags | kCGEventFlagMaskSecondaryFn;
+  if (g_capslockState) flags = flags | kCGEventFlagMaskAlphaShift;
 
   if (isArrowKeyVkCode(vkCode))
-      flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
-  else if (isFunctionKeyVkCode(vkCode))
-    flags = flags | kCGEventFlagMaskSecondaryFn;
-  else
-    flags = flags | kCGEventFlagMaskNonCoalesced;
+    flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
+  else if (isFunctionKeyVkCode(vkCode)) flags = flags | kCGEventFlagMaskSecondaryFn;
+  else flags = flags | kCGEventFlagMaskNonCoalesced;
 
   CGEventSetFlags(event, flags);
 }
 
-void setModifierFlagsToExternalMouseEvent(CGEventRef event)
-{
+void setModifierFlagsToExternalMouseEvent(CGEventRef event) {
   CGEventFlags flags = 0;
 
-  if (isCmdDown)
-    flags = flags | kCGEventFlagMaskCommand;
-  if (isShiftDown)
-    flags = flags | kCGEventFlagMaskShift;
-  if (isAltDown)
-    flags = flags | kCGEventFlagMaskAlternate;
-  if (isCtrlDown)
-    flags = flags | kCGEventFlagMaskControl;
-  if (isFnDown)
-    flags = flags | kCGEventFlagMaskSecondaryFn;
+  if (isCmdDown) flags = flags | kCGEventFlagMaskCommand;
+  if (isShiftDown) flags = flags | kCGEventFlagMaskShift;
+  if (isAltDown) flags = flags | kCGEventFlagMaskAlternate;
+  if (isCtrlDown) flags = flags | kCGEventFlagMaskControl;
+  if (isFnDown) flags = flags | kCGEventFlagMaskSecondaryFn;
 
   CGEventSetFlags(event, flags);
 }
@@ -162,76 +140,65 @@ int g_delayUntilRepeat;
 int g_keyRepeatInterval;
 int g_keyRepeatThreadCount = 0;
 nlohmann::json g_noAllowedRepeatVKCodes = {};
-void handleKeyRepeat(CGKeyCode vkCode, ushort state)
-{
-  if (state == 0)
-  {
-    g_shouldKeyRepeat = true;
-    g_repeatedKey = vkCode;
-    g_keyRepeatThreadCount = g_keyRepeatThreadCount > 9999 ? 0 : g_keyRepeatThreadCount + 1;
-
-    std::thread threadObj([](int threadIdx)
-                          {
-                            if (threadIdx != g_keyRepeatThreadCount || !g_shouldKeyRepeat)
-                              return;
-
-                            std::this_thread::sleep_for(
-                                std::chrono::milliseconds(g_delayUntilRepeat));
-
-                            while (g_keyRepeatThreadCount == threadIdx && g_shouldKeyRepeat)
-                            {
-                              auto vkCode = (CGKeyCode)g_repeatedKey;
-                              auto event = CGEventCreateKeyboardEvent(eventSource, vkCode, 1);
-                              setModifierFlagsToKeyEvent(event, vkCode, true);
-                              CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
-                              CGEventPost(kCGHIDEventTap, event);
-                              std::this_thread::sleep_for(
-                              std::chrono::milliseconds(g_keyRepeatInterval));
-                            }
-                          },
-                          g_keyRepeatThreadCount);
-    threadObj.detach();
-  }
-  else
-  {
+void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
+  if (state != 0) {
     g_shouldKeyRepeat = false;
     g_repeatedKey = {};
+    return;
   }
+
+  g_shouldKeyRepeat = true;
+  g_repeatedKey = vkCode;
+  g_keyRepeatThreadCount = g_keyRepeatThreadCount > 9999 ? 0 : g_keyRepeatThreadCount + 1;
+
+  std::thread threadObj([](int threadIdx) {
+    if (threadIdx != g_keyRepeatThreadCount || !g_shouldKeyRepeat)
+      return;
+
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(g_delayUntilRepeat));
+
+    while (g_keyRepeatThreadCount == threadIdx && g_shouldKeyRepeat)
+    {
+      auto vkCode = (CGKeyCode)g_repeatedKey;
+      auto event = CGEventCreateKeyboardEvent(eventSource, vkCode, 1);
+      setModifierFlagsToKeyEvent(event, vkCode, true);
+      CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
+      CGEventPost(kCGHIDEventTap, event);
+      std::this_thread::sleep_for(
+      std::chrono::milliseconds(g_keyRepeatInterval));
+    }
+  },
+  g_keyRepeatThreadCount);
+  threadObj.detach();
 }
 
-void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent)
-{
+void handleIOKitKeyEvent(IOKitKeyEvent ioKitKeyEvent) {
   auto newKeys = keyDispatcher->applyKeys({{ioKitKeyEvent.scancode, ushort(ioKitKeyEvent.isPressed ? 0 : 1)}});
   auto newKeysSize = newKeys.size();
 
-  for (size_t i = 0; i < newKeysSize; i++)
-  {
+  for (size_t i = 0; i < newKeysSize; i++) {
     auto [code, state] = newKeys[i];
     auto vkCode = getMacVKCode(code);
     auto isKeyDown = state == 0;
-
-    if (vkCode == 55 && isKeyDown)
-      isCmdDown = true;
-    else if (vkCode == 55 && !isKeyDown)
-      isCmdDown = false;
-    else if (vkCode == 56 && isKeyDown)
-      isShiftDown = true;
-    else if (vkCode == 56 && !isKeyDown)
-      isShiftDown = false;
-    else if (vkCode == 58 && isKeyDown)
-      isAltDown = true;
-    else if (vkCode == 58 && !isKeyDown)
-      isAltDown = false;
-    else if (vkCode == 59 && isKeyDown)
-      isCtrlDown = true;
-    else if (vkCode == 59 && !isKeyDown)
-      isCtrlDown = false;
-    else if (vkCode == 63 && isKeyDown)
-      isFnDown = true;
-    else if (vkCode == 63 && !isKeyDown)
-      isFnDown = false;
-
+    
+    if (vkCode == 999 && isKeyDown) {
+      exit(0);
+      return;
+    }
+    
     if (vkCode == 57 && isKeyDown) return toggleCapslockState();
+
+    if (vkCode == 55 && isKeyDown) isCmdDown = true;
+    else if (vkCode == 55 && !isKeyDown) isCmdDown = false;
+    else if (vkCode == 56 && isKeyDown) isShiftDown = true;
+    else if (vkCode == 56 && !isKeyDown) isShiftDown = false;
+    else if (vkCode == 58 && isKeyDown) isAltDown = true;
+    else if (vkCode == 58 && !isKeyDown) isAltDown = false;
+    else if (vkCode == 59 && isKeyDown) isCtrlDown = true;
+    else if (vkCode == 59 && !isKeyDown) isCtrlDown = false;
+    else if (vkCode == 63 && isKeyDown) isFnDown = true;
+    else if (vkCode == 63 && !isKeyDown) isFnDown = false;
 
     if (vkCode == 241 && isKeyDown) {
 // https://github.com/pqrs-org/Karabiner-Elements/blob/fdc9d542a6f17258655f595e4d51d1e26aa25d41/src/vendor/cget/cget/pkg/pqrs-org__cpp-osx-cg_event/install/include/pqrs/osx/cg_event/mouse.hpp
@@ -278,15 +245,13 @@ IOHIDManagerRef hidManager = IOHIDManagerCreate(kCFAllocatorDefault,
                                                 kIOHIDOptionsTypeNone);
 
 void myHIDKeyboardCallback(void *context, IOReturn result, void *sender,
-                           IOHIDValueRef value)
-{
+                           IOHIDValueRef value) {
   IOHIDElementRef elem = IOHIDValueGetElement(value);
   ushort scancode = IOHIDElementGetUsage(elem);
   long pressed = IOHIDValueGetIntegerValue(value);
   auto isPressed = pressed == 1;
 
-  if (scancode < 3 || scancode > 235)
-    return;
+  if (scancode < 3 || scancode > 235) return;
 
   handleIOKitKeyEvent(IOKitKeyEvent({scancode, isPressed}));
 }
@@ -313,12 +278,15 @@ void openIOHIDManager() {
 }
 
 void closeIOHIDManager() {
-  // apparently, you don't have to UnscheduleWithRunLoop before or after closing the manager
-  IOHIDManagerClose(hidManager, kIOHIDOptionsTypeSeizeDevice);
+  try {
+    // apparently, you don't have to UnscheduleWithRunLoop before or after closing the manager
+    IOHIDManagerClose(hidManager, kIOHIDOptionsTypeSeizeDevice);
+  } catch (...) {
+    std::cout << "Error trying to close the IOHIDManager";
+  }
 }
 
-void initializeKeyDispatcher()
-{
+void initializeKeyDispatcher() {
   auto rules = Helpers::getJsonFile("mode1.json");
   g_symbols = Helpers::getJsonFile("symbols.json");
   g_delayUntilRepeat = rules["delayUntilRepeat"].is_null()
@@ -348,6 +316,7 @@ void initializeMouseListener() {
     auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEventTap, 0);
     if (myRunLoopSource) {
       CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
+      CFRunLoopRemoveSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
     }
     } else {
       std::cout << "Accesibility disabled for this app";
@@ -439,6 +408,8 @@ int main(int argc, const char *argv[])
                                       NULL, CFSTR("NSWorkspaceDidActivateApplicationNotification"),
                                       CFNotificationSuspensionBehaviorDeliverImmediately);
 
+//  bool isProcessTrusted = AXIsProcessTrusted();
+  
   // Run in main thread
   CFRunLoopRun();
 }

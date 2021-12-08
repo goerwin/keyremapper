@@ -21,6 +21,11 @@
     }
   ],
   "keybindings": [
+    {
+      "keys": ["Esc"],
+      "when": {"Ctrl": true },
+      "fire": ["CloseApp", null]
+    },
     "%dotdotdotArray(_vimMode.json)",
     "%dotdotdotArray(_clicksMode.json)",
 

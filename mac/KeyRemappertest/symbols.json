@@ -67,7 +67,7 @@
   "NonUSBackslash": [100, 0, 1, 50],
   "Tab": [43, 0, 1, 48],
   "Enter": [40, 0, 1, 36],
-  "Back": [42, 0, 1, 51],
+  "Backspace": [42, 0, 1, 51],
   "Semicolon": [51, 0, 1, 41],
   "Minus": [45, 0, 1, 27],
   "BracketL": [47, 0, 1, 33],
@@ -117,5 +117,6 @@
   "MouseRightButton": [242, 0, 1, 242],
   // "BrightnessDown": [107, 0, 1],
   // "BrightnessUp": [113, 0, 1],
-  "ToggleAppEnabled": [245, 0, 1, 0]
+  "ToggleAppEnabled": [245, 0, 1, 0],
+  "CloseApp": [999, 0, 1, 999]
 }
