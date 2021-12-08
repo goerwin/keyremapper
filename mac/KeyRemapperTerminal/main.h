@@ -1,9 +1,8 @@
 //
 //  main.h
-//  KeyRemappertest
+//  KeyRemapperTerminal
 //
 //  Created by Erwin Gaitan Ospino on 7/12/21.
-//  Copyright © 2021 Erwin GO. All rights reserved.
 //
 
 #ifndef main_h

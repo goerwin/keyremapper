@@ -1,6 +1,6 @@
 #pragma once
 
-#include "json.hpp"
+#include "vendor_json.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -62,8 +62,8 @@ void print(string str, string str2 = "\n") {
   std::cout << res << "";
 }
 
-json getJsonFile(String filepath) {
-    std::ifstream file(std::filesystem::current_path().concat("/").concat(filepath));
+json getJsonFile(String dirPath, String filename) {
+  std::ifstream file(dirPath + "/" + filename);
   String fileStr((std::istreambuf_iterator<char>(file)),
                  std::istreambuf_iterator<char>());
 
@@ -95,7 +95,7 @@ json getJsonFile(String filepath) {
         String innerFileStr = "";
 
         if (matches.size() == 2) {
-          innerFileStr = getJsonFile(matches[1]).dump();
+          innerFileStr = getJsonFile(dirPath, matches[1]).dump();
 
           if (name == "dotdotdotArray" || name == "dotdotdotObject") {
             auto openingBracketIdx = name == "dotdotdotArray"
@@ -114,6 +114,7 @@ json getJsonFile(String filepath) {
     }
   }
 
+  if (fileStr.size() == 0) return {};
   return json::parse(fileStr, nullptr, false, true);
 }
 } // namespace Helpers

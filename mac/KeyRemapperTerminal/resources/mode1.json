@@ -1,0 +1,79 @@
+{
+  "delayUntilRepeat": 300,
+  "keyRepeatInterval": 25,
+  "keyPressesDelay": 200,
+  "remaps": {
+    "Caps": "F18",
+    "CmdR": "Cmd",
+    "AltR": "Alt",
+    "ShiftR": "Shift",
+    "GraveAccent": "Shift",
+    "NonUSBackslash": "GraveAccent"
+  },
+  "keyPresses": [
+    { "repeat": 1, "inputKey": "F18", "fire": "Esc" },
+    { "repeat": 2, "inputKey": "Esc", "fire": "ToggleAppEnabled" },
+    {
+      "repeat": 2,
+      "inputKey": "Shift",
+      "fire": "Caps",
+      "skipKeyBindings": true
+    }
+  ],
+  "keybindings": [
+    {
+      "keys": ["Esc"],
+      "when": {"Ctrl": true },
+      "fire": ["CloseApp", null]
+    },
+    "%dotdotdotArray(_vimMode.json)",
+    "%dotdotdotArray(_clicksMode.json)",
+
+    // Globals
+
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true, "Alt": false },
+      "fire": ["Cmd:up pageDown:down", "pageDown:up Cmd:down"]
+    },
+    {
+      "keys": ["K"],
+      "when": { "Cmd": true, "Alt": false },
+      "fire": ["Cmd:up pageUp:down", "pageUp:up Cmd:down"]
+    },
+
+    // F18/Caps as control for some keys
+    {
+      "keys": ["C", "Space", "V", "Tab"],
+      "when": { "F18": true },
+      "fire": ["Ctrl:down currentKey Ctrl:up", null]
+    },
+
+    // Mute mic
+    {
+      "keys": ["M"],
+      "when": { "Alt": true },
+      "fire": ["Cmd:down M Cmd:up"]
+    },
+
+    // App exposé
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true, "Alt": true },
+      "fire": ["Cmd:up Alt:up Ctrl:down Down Ctrl:up Cmd:down Alt:down", null]
+    },
+
+    // Go to back/forward page in browser navigation
+    {
+      "keys": ["H"],
+      "when": { "Alt": true, "Cmd": false },
+      "fire": ["Alt:up Cmd:down BracketL Cmd:up Alt:down", null]
+    },
+    {
+      "keys": ["L"],
+      "when": { "Alt": true, "Cmd": false },
+      "fire": ["Alt:up Cmd:down BracketR Cmd:up Alt:down", null]
+    }
+  ],
+  "tests": "%array(_tests.json)"
+}
