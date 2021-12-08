@@ -51,39 +51,35 @@ private:
     if (keyPresses.is_null())
       return {};
 
-    if (multiplePressesCount == 0)
-      lastKeyName = keyName;
-
     if (lastKeyName != keyName) {
       multiplePressesCount = 0;
       keyDownTime = 0;
       keyUpTime = 0;
+      lastKeyName = keyName;
     }
 
     if (isKeyDown) {
-      if (!keyDownTime)
-          keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-      if (!keyUpTime ||
-          getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
+      keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+
+      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
         multiplePressesCount = 0;
 
       keyUpTime = 0;
       return {};
-    } else {
-      keyUpTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-
-      if (keyDownTime != 0 &&
-          getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME) {
-        keyDownTime = 0;
-        multiplePressesCount =
-            lastKeyName == keyName ? multiplePressesCount + 1 : 1;
-      } else {
-        multiplePressesCount = 0;
-        keyDownTime = 0;
-        keyUpTime = 0;
-        return {};
-      }
     }
+
+    keyUpTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+
+    if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME) {
+      keyDownTime = 0;
+      multiplePressesCount = lastKeyName == keyName ? multiplePressesCount + 1 : 1;
+    } else {
+      multiplePressesCount = 0;
+      keyDownTime = 0;
+      keyUpTime = 0;
+      return {};
+    }
+
 
     for (size_t i = 0; i < keyPresses.size(); i++) {
       auto keyPress = keyPresses[i];
@@ -93,14 +89,14 @@ private:
       auto skipKeyBindings = keyPress["skipKeyBindings"];
 
       if (repeat == multiplePressesCount && inputKey == keyName) {
-        return {ruleItem, skipKeyBindings.is_null()
-                              ? false
-                              : skipKeyBindings.get<bool>()};
+        return {
+          ruleItem,
+          skipKeyBindings.is_null() ? false : skipKeyBindings.get<bool>()};
+        }
       }
-    }
 
-    return {};
-  }
+      return {};
+    }
 
 public:
   KeyDispatcher(json rulesEl, json symbolsEl) {
@@ -135,6 +131,8 @@ public:
       globals["currentKeyDown"] = newIsKeyDownEl;
       globals[newKeyName] = newIsKeyDownEl;
 
+      // TODO: This shouldn't be here or add a specialname/value to ignore
+      // those values
       // Ignore FakeShiftL coming from special keys
       // like NumPadRight when NumLock is on
       if (newKeyName == "FakeShiftL")
@@ -148,28 +146,25 @@ public:
             localKeyEvents,
             getKeyEventsFromString(isKeyDownEl ? fireKeys[0] : fireKeys[1]));
       else
-        localKeyEvents =
-            Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
 
-      auto multiplePressesFireItem =
-          getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+
       if (!multiplePressesFireItem.is_null()) {
         auto fire = multiplePressesFireItem[0].get<String>();
         auto skipKeyBindings = multiplePressesFireItem[1].get<bool>();
         auto keyPressKeyEvents = getKeyEventsFromString(fire);
 
         if (skipKeyBindings)
-          localKeyEvents =
-              Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
+          localKeyEvents = Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
         else
-          keyEvents =
-              Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
+          keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-      Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
-                     stringifyKeyEvents({keyEvent}) + " ==> " +
-                     stringifyKeyEvents({newKeyEvent}) + " ==> " +
-                     stringifyKeyEvents(localKeyEvents));
+      // Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
+      //                stringifyKeyEvents({keyEvent}) + " ==> " +
+      //                stringifyKeyEvents({newKeyEvent}) + " ==> " +
+      //                stringifyKeyEvents(localKeyEvents));
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -250,7 +245,7 @@ public:
   json runTests() {
     if (tests.is_null())
       return {};
-
+    
     bool ok = true;
     auto testsSize = tests.size();
     String message =
@@ -258,16 +253,36 @@ public:
 
     for (size_t i = 0; i < testsSize; i++) {
       Strings test = tests[i];
-      auto inputKeys = getKeyEventsFromString(test[0]);
-      String expectedKeysStr = test[1];
+      auto inputKeysStr = test[0];
       auto testSize = test.size();
       reset();
+      
+      KeyEvents inputKeyEvents = {};
+      KeyEvents resultKeyEvents = {};
+      std::stringstream ss(inputKeysStr);
+      
+      while(ss.good()) {
+        String item;
+        getline(ss, item, ' ');
+        String delayKey = "__delay";
+        auto delayTokenIdx = item.find(delayKey);
+        
+        if (delayTokenIdx != std::string::npos) {
+          auto delayTimeStr = item.substr(delayKey.size(), item.size());
+          int delayTimeMs = atoi(delayTimeStr.c_str());
+          std::this_thread::sleep_for(std::chrono::milliseconds(delayTimeMs));
+        } else {
+          auto inputKey = getKeyEventsFromString(item);
+          auto resKeyEvents = applyKeys({inputKey});
+          resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
+        }
+      }
 
-      if (testSize == 3)
-        globals["appName"] = test[2];
+      if (testSize == 3) globals["appName"] = test[2];
 
+      String expectedKeysStr = test[1];
       auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
-      auto resultKeysStr = stringifyKeyEvents(applyKeys(inputKeys));
+      auto resultKeysStr = stringifyKeyEvents(resultKeyEvents);
 
       if (resultKeysStr != stringifyKeyEvents(expectedKeys)) {
         ok = false;

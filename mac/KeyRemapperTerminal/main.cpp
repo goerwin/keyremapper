@@ -126,9 +126,9 @@ void initializeKeyDispatcher() {
 
   g_keyDispatcher = new KeyDispatcher(rules, g_symbols);
   
-  //auto testResults = keyDispatcher->runTests();
-  //Helpers::print(!testResults.is_null() ? testResults["message"]
-  // TODO: "NO TESTS RUN");
+  auto testResults = g_keyDispatcher->runTests();
+  Helpers::print(!testResults.is_null() ? testResults["message"]
+   : "NO TESTS RUN");
 }
 
 void initializeMouseListener() {
@@ -343,6 +343,7 @@ int main(int argc, const char *argv[]) {
   g_capslockState = getCapslockState();
 
   initializeKeyDispatcher();
+//  return 0;
 
   g_hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
 
