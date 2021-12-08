@@ -3,6 +3,7 @@
   "keyPressesDelay": 20,
   "keyPresses": [
     { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    { "repeat": 1, "inputKey": "Alt", "fire": "Esc" },
     { "repeat": 2, "inputKey": "Win", "fire": "Shift" },
     { "repeat": 1, "inputKey": "R", "fire": "A" },
     { "repeat": 1, "inputKey": "S", "fire": "A", "skipKeyBindings": true }
@@ -13,8 +14,30 @@
       "fire": ["B:down", "B:up"]
     },
     {
-      "keys": ["Win"],
+      "keys": ["Win", "Alt"],
       "fire": [null, null]
     }
+  ],
+  "tests": [
+    ["A Caps", "B Caps Esc"],
+    ["A:down Caps:down A:up Caps:up", "B:down Caps:down B:up Caps:up"],
+    ["Win", ""],
+    ["Win Win C", "Shift C"],
+    ["Win C:down Win", "C:down"],
+    ["Caps", "Caps Esc"],
+    ["Shift:down Caps Shift:up", "Shift:down Caps Esc Shift:up"],
+    ["Caps:down Win:down Caps:up Win:up", "Caps"],
+
+    // WITHOUT/WITH skipKeyBindings
+    ["R", "R B"],
+    ["S", "S A"],
+
+    // WITHOUT/WITH DELAY
+    ["A Caps:down Caps:up", "B Caps Esc"],
+    ["A Caps:down __delay10 Caps:up", "B Caps Esc"],
+    ["A Caps:down __delay21 Caps:up", "B Caps"],
+    ["Shift:down Win Shift:up", "Shift:down Shift:up"],
+    ["A:down Alt:down __delay10 Alt:up A:up", "B:down Esc B:up"],
+    ["A:down Alt:down __delay21 Alt:up A:up", "B:down B:up"]
   ]
 }

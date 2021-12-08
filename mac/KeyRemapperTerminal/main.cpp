@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <thread>
+#include "../../common/TestHelpers.hpp"
 #include "../../common/Helpers.hpp"
 #include "../../common/vendors/json.hpp"
 #include "../../common/KeyDispatcher.hpp"
@@ -126,9 +127,12 @@ void initializeKeyDispatcher() {
 
   g_keyDispatcher = new KeyDispatcher(rules, g_symbols);
   
-  auto testResults = g_keyDispatcher->runTests();
-  Helpers::print(!testResults.is_null() ? testResults["message"]
-   : "NO TESTS RUN");
+  auto tests = rules["tests"];
+  if (!tests.is_null()) {
+    auto testResults = TestHelpers::runTests(tests, rules, g_symbols);
+    Helpers::print(!testResults.is_null() ? testResults["message"]
+     : "NO TESTS RUN");
+  }
 }
 
 void initializeMouseListener() {

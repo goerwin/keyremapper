@@ -5,10 +5,18 @@
 
 ## Build
 
-- In Visual Studio 2019+, run a batch build and mark all (non-tests) projects, they all should build successfully
-- Run the tests via Text Explorer -> Run all tests (you should install Google Test Adapter)
-- Run `$ bash release.sh` in terminal to generate the KeyRemapper.zip file with
-  .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
+- Windows
+  - In Visual Studio 2019+, run a batch build and mark all (non-tests) projects, they all should build successfully
+  - Run `$ bash release.sh` in terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
+- Mac
+  - Open Xcode project
+
+## Tests
+
+Run the tests in terminal
+```
+$ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+```
 
 ### TODO
 

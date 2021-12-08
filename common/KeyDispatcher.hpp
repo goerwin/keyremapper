@@ -3,6 +3,7 @@
 #include "Helpers.hpp"
 #include "vendors/json.hpp"
 #include <string>
+#include <thread>
 #include <vector>
 #include <chrono>
 
@@ -34,7 +35,6 @@ private:
   json keybindings;
   json appsDefinitions;
   json remaps;
-  json tests;
   json keyPresses;
   int REPEAT_TIME;
 
@@ -106,7 +106,6 @@ public:
     REPEAT_TIME = rulesEl["keyPressesDelay"].is_null()
                       ? 200
                       : rulesEl["keyPressesDelay"].get<int>();
-    tests = rulesEl["tests"];
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
     appsDefinitions = rulesEl["apps"];
@@ -240,59 +239,6 @@ public:
     multiplePressesCount = 0;
     keyDownTime = 0;
     keyUpTime = 0;
-  }
-
-  json runTests() {
-    if (tests.is_null())
-      return {};
-    
-    bool ok = true;
-    auto testsSize = tests.size();
-    String message =
-        "ALL TESTS PASSED! Number of tests: " + std::to_string(testsSize);
-
-    for (size_t i = 0; i < testsSize; i++) {
-      Strings test = tests[i];
-      auto inputKeysStr = test[0];
-      auto testSize = test.size();
-      reset();
-      
-      KeyEvents inputKeyEvents = {};
-      KeyEvents resultKeyEvents = {};
-      std::stringstream ss(inputKeysStr);
-      
-      while(ss.good()) {
-        String item;
-        getline(ss, item, ' ');
-        String delayKey = "__delay";
-        auto delayTokenIdx = item.find(delayKey);
-        
-        if (delayTokenIdx != std::string::npos) {
-          auto delayTimeStr = item.substr(delayKey.size(), item.size());
-          int delayTimeMs = atoi(delayTimeStr.c_str());
-          std::this_thread::sleep_for(std::chrono::milliseconds(delayTimeMs));
-        } else {
-          auto inputKey = getKeyEventsFromString(item);
-          auto resKeyEvents = applyKeys({inputKey});
-          resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
-        }
-      }
-
-      if (testSize == 3) globals["appName"] = test[2];
-
-      String expectedKeysStr = test[1];
-      auto expectedKeys = getKeyEventsFromString(expectedKeysStr);
-      auto resultKeysStr = stringifyKeyEvents(resultKeyEvents);
-
-      if (resultKeysStr != stringifyKeyEvents(expectedKeys)) {
-        ok = false;
-        message = "TEST " + std::to_string(i) + " FAILED: expected \"" +
-                  expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
-        break;
-      }
-    }
-
-    return {{"ok", ok}, {"testsSize", testsSize}, {"message", message}};
   }
 
 private:
