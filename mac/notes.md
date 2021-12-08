@@ -5,13 +5,12 @@
 - When developing in XCode
   - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
   - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
-  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `/Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxxx/Build/Products/Debug/KeyRemapperTerminal)`
+  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
 
 # TODO:
 - [ ] detect current application (probably need to work with Swift)
 - [ ] simple GUI
 - [ ] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
-- [ ] move option value keyPressDelay in keyDispatcher to main file
 - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
 - [ ] versioning
 - [x] toggle caps

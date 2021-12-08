@@ -10,8 +10,7 @@
 		F9923D79276033E400565B4E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9923D78276033E400565B4E /* main.cpp */; };
 		F9923D812760376E00565B4E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D802760376E00565B4E /* IOKit.framework */; };
 		F9923D832760380F00565B4E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D822760380F00565B4E /* ApplicationServices.framework */; };
-		F9923D852760471300565B4E /* symbols.json in Copy Files */ = {isa = PBXBuildFile; fileRef = F9923D842760471300565B4E /* symbols.json */; };
-		F9923D872760474A00565B4E /* mode1.json in Copy Files */ = {isa = PBXBuildFile; fileRef = F9923D862760474A00565B4E /* mode1.json */; };
+		F9EDD88F276080BA00D946FC /* resources in Copy Files */ = {isa = PBXBuildFile; fileRef = F9EDD88E276080BA00D946FC /* resources */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -21,8 +20,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F9923D872760474A00565B4E /* mode1.json in Copy Files */,
-				F9923D852760471300565B4E /* symbols.json in Copy Files */,
+				F9EDD88F276080BA00D946FC /* resources in Copy Files */,
 			);
 			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -37,9 +35,9 @@
 		F9923D842760471300565B4E /* symbols.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = symbols.json; path = KeyRemapperTerminal/resources/symbols.json; sourceTree = "<group>"; };
 		F9923D862760474A00565B4E /* mode1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = mode1.json; path = KeyRemapperTerminal/resources/mode1.json; sourceTree = "<group>"; };
 		F9923D89276049DD00565B4E /* Helpers.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Helpers.hpp; sourceTree = "<group>"; };
-		F9923D8A27604A1E00565B4E /* vendor_json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vendor_json.hpp; sourceTree = "<group>"; };
 		F9923D8B27604A2D00565B4E /* KeyDispatcher.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KeyDispatcher.hpp; sourceTree = "<group>"; };
 		F9923D8C276059B100565B4E /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		F9EDD88E276080BA00D946FC /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperTerminal/resources; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +56,7 @@
 		F9923D6C276033E400565B4E = {
 			isa = PBXGroup;
 			children = (
+				F9EDD88E276080BA00D946FC /* resources */,
 				F9923D862760474A00565B4E /* mode1.json */,
 				F9923D842760471300565B4E /* symbols.json */,
 				F9923D77276033E400565B4E /* KeyRemapperTerminal */,
@@ -78,7 +77,6 @@
 			isa = PBXGroup;
 			children = (
 				F9923D8B27604A2D00565B4E /* KeyDispatcher.hpp */,
-				F9923D8A27604A1E00565B4E /* vendor_json.hpp */,
 				F9923D89276049DD00565B4E /* Helpers.hpp */,
 				F9923D78276033E400565B4E /* main.cpp */,
 				F9923D8C276059B100565B4E /* main.h */,

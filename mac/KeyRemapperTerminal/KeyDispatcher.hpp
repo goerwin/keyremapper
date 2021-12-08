@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Helpers.hpp"
-#include "vendor_json.hpp"
+#include "vendors/json.hpp"
 #include <string>
 #include <vector>
 #include <chrono>
@@ -119,7 +119,7 @@ public:
   KeyEvents applyKeys(KeyEvents keyEvents) {
     KeyEvents newKeyEvents = {};
 
-    for (size_t i = 0; i < keyEvents.size(); i++) {
+    for (int i = 0; i < keyEvents.size(); i++) {
       auto keyEvent = keyEvents[i];
       auto [code, state] = keyEvent;
       auto keyName = getKeyName(code, state);

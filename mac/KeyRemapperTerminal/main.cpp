@@ -14,7 +14,7 @@
 #include <iostream>
 #include <thread>
 #include "Helpers.hpp"
-#include "vendor_json.hpp"
+#include "vendors/json.hpp"
 #include "KeyDispatcher.hpp"
 
 std::string g_path;
@@ -339,7 +339,7 @@ void initializeIOHIDManager() {
 int main(int argc, const char *argv[]) {
   // argv[0] is the absolute path of the executable
   g_path = std::string(argv[0]);
-  g_path = g_path.substr(0, g_path.find_last_of("/"));
+  g_path = g_path.substr(0, g_path.find_last_of("/")).append("/resources");
   g_capslockState = getCapslockState();
 
   initializeKeyDispatcher();
