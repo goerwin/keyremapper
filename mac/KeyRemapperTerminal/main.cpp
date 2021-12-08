@@ -13,9 +13,9 @@
 
 #include <iostream>
 #include <thread>
-#include "Helpers.hpp"
-#include "vendors/json.hpp"
-#include "KeyDispatcher.hpp"
+#include "../../common/Helpers.hpp"
+#include "../../common/vendors/json.hpp"
+#include "../../common/KeyDispatcher.hpp"
 
 std::string g_path;
 bool g_capslockState;
@@ -343,10 +343,8 @@ int main(int argc, const char *argv[]) {
   g_capslockState = getCapslockState();
 
   initializeKeyDispatcher();
-//  return 0;
 
   g_hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-
   
   CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
   CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
