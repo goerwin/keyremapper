@@ -75,16 +75,5 @@ int main(int argc, const char *argv[]) {
       Helpers::getJsonFile(dirPath, "importsExpected.json");
   expect(jsonFile.dump() == expectedFile.dump(), "imports.json and importsExpected.json didn't match");
 
-  // keyDispatcher->reset();
-  // inputKeys = keyDispatcher->getKeyEventsFromString("A Caps:down");
-  // partialKeyEvents = keyDispatcher->applyKeys(inputKeys);
-  // inputKeys = keyDispatcher->getKeyEventsFromString("Caps:up");
-  // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  // partialKeyEvents = Helpers::concatArrays(partialKeyEvents,
-  //                                          keyDispatcher->applyKeys(inputKeys));
-  // resultKeysStr = keyDispatcher->stringifyKeyEvents(partialKeyEvents);
-  // expectedKeys = keyDispatcher->getKeyEventsFromString("B Caps");
-  // expect(resultKeysStr == keyDispatcher->stringifyKeyEvents(expectedKeys));
-
   return 0;
 }
