@@ -2,6 +2,8 @@
 
 #if __APPLE__
   #include <mach-o/dyld.h>
+#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+  #include <windows.h>
 #endif
 
 #include "../common/vendors/json.hpp"
@@ -18,9 +20,9 @@ void expect(bool value, std::string errorMsg = "") {
 int main(int argc, const char *argv[]) {
   std::string dirPath;
 
+  // find absolute path for executable in different OSs
+  // https://stackoverflow.com/a/1024937/1623282
   #if __APPLE__
-    // find absolute path for executable in different OSs
-    // https://stackoverflow.com/a/1024937/1623282
     char path[1024];
     uint32_t size = sizeof(path);
     if (_NSGetExecutablePath(path, &size) != 0) {
@@ -30,6 +32,13 @@ int main(int argc, const char *argv[]) {
 
     dirPath = Helpers::replaceAll(path, "/./", "/");
     dirPath = Helpers::replaceAll(path, "/output", "");
+  #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+    char moduleFilepath[MAX_PATH];
+    GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
+    auto strModuleFilepath = std::string(moduleFilepath);
+
+    dirPath = strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
+    Helpers::print(dirPath);
   #endif
 
   auto symbols = Helpers::getJsonFile(dirPath, "symbols.json");

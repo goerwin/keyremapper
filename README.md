@@ -7,16 +7,21 @@
 
 - Windows
   - In Visual Studio 2019+, run a batch build and mark all projects, they all should REBUILD successfully
-  - Navigate to project's root folder and run `$ bash win/release.sh` in terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
+  - Navigate to project's root folder and run `$ bash win/release.sh` in WSL Ubuntu's terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell)
+  - File `output/win/KeyRemapper.zip` is generated
 - Mac
-  - Open Xcode project
+  - Open project with Xcode
 
 ## Tests
 
-Run the tests in terminal
-```
-$ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
-```
+- For Unix env run the tests in terminal
+  ```
+    $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+  ```
+- For Windows, open `Developer PowerShell for VS 2022` or similar run
+  ```
+    $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
+  ```
 
 ### TODO
 

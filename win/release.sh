@@ -33,7 +33,7 @@ done
 # cd in the main shell
 (cd $tmpDir && zip -q -r $projectName.zip .)
 
-outputWinDir="output/win"
+outputWinDir="win/output"
 rm -rf $outputWinDir
 mkdir -p $outputWinDir
 mv $tmpDir/$projectName.zip $outputWinDir

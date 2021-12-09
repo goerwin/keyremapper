@@ -1,6 +1,6 @@
 {
   "description": ["KeyPresses"],
-  "keyPressesDelay": 20,
+  "keyPressesDelay": 50,
   "keyPresses": [
     { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
     { "repeat": 1, "inputKey": "Alt", "fire": "Esc" },
@@ -35,9 +35,9 @@
     // WITHOUT/WITH DELAY
     ["A Caps:down Caps:up", "B Caps Esc"],
     ["A Caps:down __delay10 Caps:up", "B Caps Esc"],
-    ["A Caps:down __delay21 Caps:up", "B Caps"],
+    ["A Caps:down __delay51 Caps:up", "B Caps"],
     ["Shift:down Win Shift:up", "Shift:down Shift:up"],
     ["A:down Alt:down __delay10 Alt:up A:up", "B:down Esc B:up"],
-    ["A:down Alt:down __delay21 Alt:up A:up", "B:down B:up"]
+    ["A:down Alt:down __delay51 Alt:up A:up", "B:down B:up"]
   ]
 }

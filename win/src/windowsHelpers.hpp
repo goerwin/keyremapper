@@ -23,8 +23,7 @@ String getAbsDirPath() {
   GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
   auto strModuleFilepath = std::string(moduleFilepath);
 
-  auto dir = strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
-  return dir + "";
+  return strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
 }
 
 String getActiveWindowProcessName(HWND hwnd) {
