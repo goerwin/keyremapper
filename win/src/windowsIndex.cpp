@@ -119,6 +119,10 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
     }
 
+    // "FakeShiftL": [42, 2, 3],
+    // Discard FakeShiftL events
+    if (code == 42 && (state == 2 || state == 3)) continue;
+
     for (size_t i = 0; i < newKeysSize; i++) {
       auto [code, state] = newKeys[i];
       auto newKeyStroke = InterceptionKeyStroke({code, state});

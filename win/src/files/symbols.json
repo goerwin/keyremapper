@@ -63,7 +63,6 @@
   "CtrlR": [29, 2, 3],
   "Shift": [42, 0, 1],
   "ShiftR": [54, 0, 1],
-  "FakeShiftL": [42, 2, 3],
   "NextToShiftL": [86, 0, 1],
   "Enter": [28, 0, 1],
   "Supr": [83, 2, 3],

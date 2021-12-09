@@ -131,13 +131,6 @@ public:
       globals["currentKeyDown"] = newIsKeyDownEl;
       globals[newKeyName] = newIsKeyDownEl;
 
-      // TODO: This shouldn't be here or add a specialname/value to ignore
-      // those values
-      // Ignore FakeShiftL coming from special keys
-      // like NumPadRight when NumLock is on
-      if (newKeyName == "FakeShiftL")
-        continue;
-
       KeyEvents localKeyEvents = {};
       auto fireKeys = getFireFromKeybindings();
 
