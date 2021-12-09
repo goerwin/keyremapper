@@ -122,6 +122,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     // "FakeShiftL": [42, 2, 3],
     // Discard FakeShiftL events
     if (code == 42 && (state == 2 || state == 3)) continue;
+    WindowsHelpers::print(std::to_string(code));
 
     for (size_t i = 0; i < newKeysSize; i++) {
       auto [code, state] = newKeys[i];

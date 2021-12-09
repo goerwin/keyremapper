@@ -60,7 +60,15 @@ private:
     }
 
     if (isKeyDown) {
+      // this is for windows, since interception keeps sending the keydown
+      // events when key is held down
+      if (lastKeyName == keyName && keyDownTime != 0) {
+        keyUpTime = 0;
+        return {};
+      }
+
       keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+      //WindowsHelpers::print(std::to_string(keyDownTime));
 
       if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
         multiplePressesCount = 0;

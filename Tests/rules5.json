@@ -33,6 +33,11 @@
     ["S", "S A"],
 
     // WITHOUT/WITH DELAY
+    ["Alt:down Alt:up", "Esc"],
+    ["Alt:down __delay10 Alt:up", "Esc"],
+    ["Alt:down __delay51 Alt:up", ""],
+    ["Alt:down __delay10 Alt:down Alt:up", "Esc"],
+    ["Alt:down __delay51 Alt:down Alt:up", ""],
     ["A Caps:down Caps:up", "B Caps Esc"],
     ["A Caps:down __delay10 Caps:up", "B Caps Esc"],
     ["A Caps:down __delay51 Caps:up", "B Caps"],
