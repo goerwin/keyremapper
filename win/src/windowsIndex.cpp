@@ -1,14 +1,16 @@
 // https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-queryfullprocessimagenamea
 #define _WIN32_WINNT 0x0600
 
-#include "KeyDispatcher.hpp"
-#include "helpers.hpp"
-#include "windowsBrightness.h"
-#include "windowsHelpers.hpp"
-#include "windowsImages.h"
-#include "windowsLibraries/Interception/interception.h"
-#include "windowsLibraries/Interception/utils.h"
 #include <windows.h>
+#include "./windowsBrightness.h"
+#include "./windowsHelpers.hpp"
+#include "./windowsImages.h"
+#include "./windowsLibraries/Interception/interception.h"
+#include "./windowsLibraries/Interception/utils.h"
+#include "../../common/vendors/json.hpp"
+#include "../../common/Helpers.hpp"
+#include "../../common/TestHelpers.hpp"
+#include "../../common/KeyDispatcher.hpp"
 
 InterceptionContext context;
 InterceptionDevice device;
@@ -20,7 +22,9 @@ int g_mode;
 int g_nCmdShow;
 HINSTANCE g_hInstance;
 std::string g_appName;
-KeyDispatcher *keyDispatcher;
+KeyDispatcher *g_keyDispatcher;
+nlohmann::json g_rules;
+nlohmann::json g_symbols;
 
 HWND g_systemTrayIconWindow;
 HWND g_eventWindow;
@@ -65,19 +69,20 @@ void initializeKeyDispatcher(int mode = 0) {
   std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json",
                                     "mode4.json"};
 
-  if (WindowsHelpers::fileExists(WindowsHelpers::getAbsPath(modes[mode])))
+  auto absDirPath = WindowsHelpers::getAbsDirPath();
+
+  if (WindowsHelpers::fileExists(absDirPath + "\\" + modes[mode]))
     g_mode = mode;
   else
     g_mode = 0;
 
-  auto rules = Helpers::getJsonFile(modes[g_mode], WindowsHelpers::getAbsPath);
-  auto symbols =
-      Helpers::getJsonFile("symbols.json", WindowsHelpers::getAbsPath);
+  g_rules = Helpers::getJsonFile(absDirPath, modes[g_mode]);
+  g_symbols = Helpers::getJsonFile(absDirPath, "symbols.json");
 
-  delete keyDispatcher;
-  keyDispatcher = new KeyDispatcher(rules, symbols);
-  keyDispatcher->setApplyKeysCb(handleApplyKeysCb);
-  keyDispatcher->setAppName(g_appName);
+  delete g_keyDispatcher;
+  g_keyDispatcher = new KeyDispatcher(g_rules, g_symbols);
+  g_keyDispatcher->setApplyKeysCb(handleApplyKeysCb);
+  g_keyDispatcher->setAppName(g_appName);
 }
 
 void toggleAppEnabled() {
@@ -107,7 +112,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
                               (InterceptionStroke *)&keyStroke, 1) > 0) {
     auto code = keyStroke.code;
     auto state = keyStroke.state;
-    auto newKeys = keyDispatcher->applyKeys({{code, state}});
+    auto newKeys = g_keyDispatcher->applyKeys({{code, state}});
     auto newKeysSize = newKeys.size();
 
     if (!g_isAppEnabled) {
@@ -162,7 +167,7 @@ void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
     auto foregroundWindow = GetForegroundWindow();
     g_appName = WindowsHelpers::getActiveWindowProcessName(foregroundWindow);
-    keyDispatcher->setAppName(g_appName);
+    g_keyDispatcher->setAppName(g_appName);
 }
 
 LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
@@ -285,7 +290,7 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       initializeKeyDispatcher(3);
       return 0;
     case IDM_RUN_MODE_TESTS: {
-      auto testResults = keyDispatcher->runTests();
+      auto testResults = TestHelpers::runTests(g_rules["tests"], g_rules, g_symbols);
       std::string testResultsStr =
           testResults.is_null() ? "NO TESTS RUN" : testResults["message"];
       MessageBoxA(NULL, testResultsStr.c_str(), "Tests Results",

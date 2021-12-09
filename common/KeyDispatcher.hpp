@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Helpers.hpp"
-#include "vendors/json.hpp"
 #include <string>
 #include <thread>
 #include <vector>
 #include <chrono>
+#include "./Helpers.hpp"
+#include "./vendors/json.hpp"
 
 class KeyDispatcher {
   using json = nlohmann::json;
@@ -37,6 +37,7 @@ private:
   json remaps;
   json keyPresses;
   int REPEAT_TIME;
+  std::function<void(String)> applyKeysCb;
 
   double getTimeDifference(double time1, double time2) {
       return time1 - time2;
@@ -160,10 +161,13 @@ public:
           keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
       }
 
-      // Helpers::print(std::to_string(code) + ":" + std::to_string(state) + ":" +
-      //                stringifyKeyEvents({keyEvent}) + " ==> " +
-      //                stringifyKeyEvents({newKeyEvent}) + " ==> " +
-      //                stringifyKeyEvents(localKeyEvents));
+      if (applyKeysCb) {
+        applyKeysCb(std::to_string(code) + ":" +
+          std::to_string(state) +
+          " -> " + stringifyKeyEvents({keyEvent}) + " -> " +
+          stringifyKeyEvents({newKeyEvent}) + " -> " +
+          stringifyKeyEvents(localKeyEvents));
+      }
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -171,7 +175,13 @@ public:
     return newKeyEvents;
   }
 
-  void setAppName(String appName) { globals["appName"] = appName; }
+  void setAppName(String appName) {
+    globals["appName"] = appName;
+  }
+
+  void setApplyKeysCb(std::function<void(String)> _applyKeysCb) {
+    applyKeysCb = _applyKeysCb;
+  }
 
   String stringifyKeyEvents(KeyEvents keyEvents) {
     String result = "";

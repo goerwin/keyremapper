@@ -1,11 +1,10 @@
 #pragma once
 
-#include "helpers.hpp"
-#include "libraries/json.hpp"
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <windows.h>
+#include "../../common/vendors/json.hpp"
 
 namespace WindowsHelpers {
 using namespace std;
@@ -19,13 +18,13 @@ void print(string str, string str2 = "\n") {
   OutputDebugStringA(res.c_str());
 }
 
-String getAbsPath(String filepath) {
+String getAbsDirPath() {
   char moduleFilepath[MAX_PATH];
   GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
   auto strModuleFilepath = std::string(moduleFilepath);
 
   auto dir = strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
-  return dir + "\\" + filepath;
+  return dir + "";
 }
 
 String getActiveWindowProcessName(HWND hwnd) {

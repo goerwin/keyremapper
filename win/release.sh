@@ -1,15 +1,15 @@
 projectName="KeyRemapper"
 
 filesx86=(
-  "x86/$projectName/Release/$projectName.exe"
-  "x86/$projectName/Release/interception.dll"
-  "x86/$projectName/Release/*.json"
+  "win/x86/$projectName/Release/$projectName.exe"
+  "win/x86/$projectName/Release/interception.dll"
+  "win/x86/$projectName/Release/*.json"
 )
 
 filesx64=(
-  "x64/$projectName/Release/$projectName.exe"
-  "x64/$projectName/Release/interception.dll"
-  "x64/$projectName/Release/*.json"
+  "win/x64/$projectName/Release/$projectName.exe"
+  "win/x64/$projectName/Release/interception.dll"
+  "win/x64/$projectName/Release/*.json"
 )
 
 tmpDir=$(mktemp -d)
@@ -32,8 +32,12 @@ done
 # and move it. Parenthesis are required so it doesn't change the
 # cd in the main shell
 (cd $tmpDir && zip -q -r $projectName.zip .)
-mv $tmpDir/$projectName.zip .
+
+outputWinDir="output/win"
+rm -rf $outputWinDir
+mkdir -p $outputWinDir
+mv $tmpDir/$projectName.zip $outputWinDir
 
 rm -rf $tmpDir
 
-echo "Release $projectName.zip was created!"
+echo "$outputWinDir/$projectName.zip was created!"

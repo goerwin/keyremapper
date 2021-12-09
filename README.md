@@ -6,8 +6,8 @@
 ## Build
 
 - Windows
-  - In Visual Studio 2019+, run a batch build and mark all (non-tests) projects, they all should build successfully
-  - Run `$ bash release.sh` in terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
+  - In Visual Studio 2019+, run a batch build and mark all projects, they all should REBUILD successfully
+  - Navigate to project's root folder and run `$ bash win/release.sh` in terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell, I use this from the WSL Ubuntu's terminal)
 - Mac
   - Open Xcode project
 
