@@ -1,5 +1,6 @@
+## Installation
 - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
-- Download `KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
+- Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
 - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
 - Rules (remaps, keybindings, keyPresses, tests) can be found in `mode1.json`
 
@@ -8,7 +9,7 @@
 - Windows
   - In Visual Studio 2019+, run a batch build and mark all projects, they all should REBUILD successfully
   - Navigate to project's root folder and run `$ bash win/release.sh` in WSL Ubuntu's terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell)
-  - File `output/win/KeyRemapper.zip` is generated
+  - File `win/output/KeyRemapper.zip` is generated
 - Mac
   - Open project with Xcode
 
@@ -16,11 +17,11 @@
 
 - For Unix env run the tests in terminal
   ```
-    $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+  $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
   ```
 - For Windows, open `Developer PowerShell for VS 2022` or similar run
   ```
-    $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
+  $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
   ```
 
 ### TODO
@@ -46,7 +47,7 @@
 - [x] you should only test key cases, not entire flows (like vim mode)
 - [x] rethink alghoritm to be more general so it can be used in any OS
 - [x] validate if keycode doesnt exist
-- [x] general Key (TOO COMPLEX TO IMPLEMENT)
+- [x] general Key
 
 ### Text navigation/manipulation
 
