@@ -1,0 +1,36 @@
+{
+  "delayUntilRepeat": 300,
+  "keyRepeatInterval": 25,
+  "keyPressesDelay": 200,
+  "remaps": "%object(_remaps.json)",
+  "keyPresses": "%array(_keyPresses.json)",
+  "keybindings": [
+    "%dotdotdotArray(_appKeybindings.json)",
+    "%dotdotdotArray(_vimMode.json)",
+    "%dotdotdotArray(_clicksMode.json)",
+    "%dotdotdotArray(_apps.json)",
+    "%dotdotdotArray(_globals.json)",
+
+    {
+      "keys": ["Left"],
+      "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
+      "fire": ["Cmd:down 5 Cmd:up"]
+    },
+    {
+      "keys": ["Right"],
+      "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
+      "fire": ["Cmd:down 6 Cmd:up"]
+    },
+    {
+      "keys": ["Up"],
+      "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
+      "fire": ["Alt:down S Alt:up"]
+    },
+    {
+      "keys": ["Down"],
+      "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
+      "fire": ["Alt:down T Alt:up"]
+    }
+  ],
+  "tests": "%array(_tests.json)"
+}

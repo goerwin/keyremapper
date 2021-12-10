@@ -1,0 +1,8 @@
+{
+  "Caps": "F18",
+  "CmdR": "Cmd",
+  "AltR": "Alt",
+  "ShiftR": "Shift",
+  "GraveAccent": "Shift",
+  "NonUSBackslash": "GraveAccent"
+}

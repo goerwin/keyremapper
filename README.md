@@ -1,4 +1,5 @@
 ## Installation
+
 - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
 - Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
 - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
@@ -49,18 +50,21 @@
   - [x] rethink alghoritm to be more general so it can be used in any OS
   - [x] validate if keycode doesnt exist
   - [x] general Key
+
 - Mac
   - [x] Move tests out of the Google test framework so it is easy to test on Mac too
   - [x] implement tests with time delays to test multiple key presses
   - [x] Move files that are shared between OSs to a common place
-  - [ ] detect current application (probably need to work with Swift)
+  - [x] detect current application
+  - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
+  - [x] toggle caps
+  - [x] modes
+  - [ ] enables/disabled app with double esc
+  - [ ] trigger media keys (not easy to do, probably just use Hammerspoon)
+  - [ ] mouse clicks/drags/etc
+  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
-  - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
-  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
-  - [x] toggle caps
-  - [ ] trigger media keys
-  - [ ] mouse clicks/drags/etc
 
 
 ### Text navigation/manipulation
@@ -84,6 +88,7 @@ Since I prefer how text manipulations work in Mac over windows, the following sh
   - https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
 
 # Mac Notes
+
 - Key Codes App is very useful to debug event keys and flags sent to the system
 - Input Monitoring check is required by IOHIDKit to globally listen for keyboard input across the system
 - when you send a CGEventCreateKeyboardEvent, the system will automatically ask for you permission for Accessibility(Allow the app to control your computer)
@@ -91,3 +96,6 @@ Since I prefer how text manipulations work in Mac over windows, the following sh
   - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
   - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
   - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
+- You can execute command line commands via system. eg.
+  - `system("say hello world");`
+  - `system("osascript -e \"set volume 5\"");`

@@ -1,0 +1,64 @@
+[
+  // Google Chrome
+  {
+    "keys": ["F3"],
+    "when": { "appName": "com.google.Chrome" },
+    "fire": ["Cmd:down 5 Cmd:up", null]
+  },
+  {
+    "keys": ["F4"],
+    "when": { "appName": "com.google.Chrome" },
+    "fire": ["Cmd:down 6 Cmd:up", null]
+  },
+  {
+    "keys": ["F5"],
+    "when": { "appName": "com.google.Chrome" },
+    "fire": ["Alt:down S Alt:up", null]
+  },
+  {
+    "keys": ["F6"],
+    "when": { "appName": "com.google.Chrome" },
+    "fire": ["Alt:down T Alt:up", null]
+  },
+  {
+    "keys": ["H"],
+    "when": { "appName": "com.google.Chrome", "Cmd": true, "Alt": false },
+    "fire": ["Cmd:down 5 Cmd:up Cmd:down", null]
+  },
+  {
+    "keys": ["L"],
+    "when": { "appName": "com.google.Chrome", "Cmd": true, "Alt": false },
+    "fire": ["Cmd:down 6 Cmd:up Cmd:down", null]
+  },
+  {
+    "keys": ["Semicolon"],
+    "when": { "appName": "com.google.Chrome", "Cmd": true },
+    "fire": ["Cmd:down L Cmd:up Cmd:down", null]
+  },
+  {
+    "keys": ["F"],
+    "when": { "appName": "com.google.Chrome", "Cmd": true, "Alt": true },
+    "fire": ["Alt:up Ctrl:down currentKey Ctrl:up Alt:up", null]
+  },
+  {
+    "keys": ["I"],
+    "when": { "appName": "com.google.Chrome", "Cmd": true, "Shift": true },
+    "fire": ["Shift:up Alt:down I Alt:up Shift:down", null]
+  },
+
+  // Terminal
+
+  {
+    "keys": ["O"],
+    "when": { "appName": "com.googlecode.iterm2", "Cmd": true },
+    "fire": ["K", null]
+  },
+
+  // Slack
+
+  {
+    "keys": ["P"],
+    "when": { "appName": "com.tinyspeck.slackmacgap", "Cmd": true },
+    "fire": ["K", null]
+  }
+]

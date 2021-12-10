@@ -29,6 +29,7 @@ KeyDispatcher *g_keyDispatcher;
 nlohmann::json g_symbols;
 int g_delayUntilRepeat = 250;
 int g_keyRepeatInterval = 25;
+std::string g_activeApp;
 bool isCmdDown = false;
 bool isShiftDown = false;
 bool isAltDown = false;
@@ -37,6 +38,7 @@ bool isFnDown = false;
 auto g_fnKeyVkCodes = {122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111};
 auto g_arrowKeyVkCodes = {123,124,125,126};
 bool g_shouldKeyRepeat = false;
+bool g_isAppEnabled = true;
 CGKeyCode g_repeatedKey;
 int g_keyRepeatThreadCount = 0;
 CGEventSourceRef g_eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
@@ -113,13 +115,26 @@ void setModifierFlagsToExternalMouseEvent(CGEventRef event) {
   CGEventSetFlags(event, flags);
 }
 
-void initializeKeyDispatcher() {
-  auto rules = Helpers::getJsonFile(g_path, "mode1.json");
+void sendNotification(std::string message, std::string title = "KeyRemapper") {
+  Helpers::print(message);
+  system(("osascript -e 'display notification \""
+    + message + "\" with title \"" + title + "\"'").c_str());
+}
+
+void initializeKeyDispatcher(int mode = 0) {
+  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
+  
+  std::string selectedMode = modes[mode];
+  if (access((g_path + "/" + selectedMode).c_str(), R_OK) < 0) {
+    sendNotification(selectedMode + " file does not exist");
+    return;
+  }
+  
+  auto rules = Helpers::getJsonFile(g_path, selectedMode);
   g_symbols = Helpers::getJsonFile(g_path, "/symbols.json");
   
   if (rules.is_null() || g_symbols.is_null()) {
-    Helpers::print("No rules (mode1.json) or symbols.json files provided");
-    exit(0);
+    sendNotification("No rules (" + selectedMode + ") or symbols.json files provided");
     return;
   }
   
@@ -130,17 +145,22 @@ void initializeKeyDispatcher() {
     ? g_keyRepeatInterval
     : rules["keyRepeatInterval"].get<int>();
 
+  delete g_keyDispatcher;
   g_keyDispatcher = new KeyDispatcher(rules, g_symbols);
+  g_keyDispatcher->setAppName(g_activeApp);
   g_keyDispatcher->setApplyKeysCb([](std::string appliedKeys) {
     Helpers::print(appliedKeys);
   });
   
   auto tests = rules["tests"];
+  std::string testsResultsMsg = "";
   if (!tests.is_null()) {
     auto testResults = TestHelpers::runTests(tests, rules, g_symbols);
-    Helpers::print(!testResults.is_null() ? testResults["message"]
-     : "NO TESTS RUN");
+    testsResultsMsg = "\n" + std::string(!testResults.is_null() ?
+    testResults["message"] : "NO TESTS RAN");
   }
+  
+  sendNotification(selectedMode + " selected" + testsResultsMsg);
 }
 
 void initializeMouseListener() {
@@ -252,6 +272,12 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
   threadObj.detach();
 }
 
+void toggleAppEnabled() {
+  g_isAppEnabled = !g_isAppEnabled;
+  if (g_isAppEnabled) initializeKeyDispatcher();
+  sendNotification("App status: " + std::string(g_isAppEnabled ? "Enabled" : "Disabled"));
+}
+
 void handleIOKitKeyEvent(ushort scancode, bool isKeyDown) {
   auto newKeys = g_keyDispatcher->applyKeys({{scancode, ushort(isKeyDown ? 0 : 1)}});
   auto newKeysSize = newKeys.size();
@@ -265,6 +291,16 @@ void handleIOKitKeyEvent(ushort scancode, bool isKeyDown) {
       exit(0);
       return;
     }
+    
+    if (code == 245) {
+      toggleAppEnabled();
+      break;
+    } else if (!g_isAppEnabled) continue;
+    
+    if (vkCode == 246 && isKeyDown) return initializeKeyDispatcher(0);
+    if (vkCode == 247 && isKeyDown) return initializeKeyDispatcher(1);
+    if (vkCode == 248 && isKeyDown) return initializeKeyDispatcher(2);
+    if (vkCode == 249 && isKeyDown) return initializeKeyDispatcher(3);
     
     if (vkCode == 57 && isKeyDown) return toggleCapslockState();
 
@@ -351,8 +387,9 @@ void initializeIOHIDManager() {
 }
 
 void setActiveApp(std::string activeApp) {
-  g_keyDispatcher->setAppName(activeApp);
-  Helpers::print("Active App: " + activeApp);
+  g_activeApp = activeApp;
+  g_keyDispatcher->setAppName(g_activeApp);
+  Helpers::print("Active App: " + g_activeApp);
 }
 
 int main(int argc, const char *argv[]) {
