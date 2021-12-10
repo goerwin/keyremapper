@@ -26,28 +26,42 @@
 
 ### TODO
 
-- [ ] Add versioning
-- [ ] MacOS Version (Not viable as of now, use karabiner-elements instead)
-- [ ] keybindings per keyboard
-- [x] Tests via popup message
-- [x] UI to debug events
-- [x] multiple modes
-- [x] multiple configs with json inheritance
-- [x] alt tab enter issue
-- [x] add builds for both x86 and x64 archs
-- [x] enable/disable with double esc
-- [x] logo
-- [x] brightness
-- [x] double press modifiers (eg. for the capslock with double shift press)
-- [x] CLICKS
-- [x] keybindings per app
-- [x] fix issue with numpad and arrows (VERSION 1 is working properly!)
-- [x] remaps
-- [x] move all files to src (no dirs allowed to avoid issues when importing header files)
-- [x] you should only test key cases, not entire flows (like vim mode)
-- [x] rethink alghoritm to be more general so it can be used in any OS
-- [x] validate if keycode doesnt exist
-- [x] general Key
+- Windows
+  - [ ] Add versioning
+  - [ ] MacOS Version (Not viable as of now, use karabiner-elements instead)
+  - [ ] keybindings per keyboard
+  - [x] Tests via popup message
+  - [x] UI to debug events
+  - [x] multiple modes
+  - [x] multiple configs with json inheritance
+  - [x] alt tab enter issue
+  - [x] add builds for both x86 and x64 archs
+  - [x] enable/disable with double esc
+  - [x] logo
+  - [x] brightness
+  - [x] double press modifiers (eg. for the capslock with double shift press)
+  - [x] CLICKS
+  - [x] keybindings per app
+  - [x] fix issue with numpad and arrows (VERSION 1 is working properly!)
+  - [x] remaps
+  - [x] move all files to src (no dirs allowed to avoid issues when importing header files)
+  - [x] you should only test key cases, not entire flows (like vim mode)
+  - [x] rethink alghoritm to be more general so it can be used in any OS
+  - [x] validate if keycode doesnt exist
+  - [x] general Key
+- Mac
+  - [x] Move tests out of the Google test framework so it is easy to test on Mac too
+  - [x] implement tests with time delays to test multiple key presses
+  - [x] Move files that are shared between OSs to a common place
+  - [ ] detect current application (probably need to work with Swift)
+  - [ ] exiting app from terminal (cmd+q) doesnt remove the process
+  - [ ] simple GUI
+  - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
+  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
+  - [x] toggle caps
+  - [ ] trigger media keys
+  - [ ] mouse clicks/drags/etc
+
 
 ### Text navigation/manipulation
 
@@ -68,3 +82,12 @@ Since I prefer how text manipulations work in Mac over windows, the following sh
   - http://www.fileformat.info/tip/microsoft/enter_unicode.htm
 - Numlock
   - https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
+
+# Mac Notes
+- Key Codes App is very useful to debug event keys and flags sent to the system
+- Input Monitoring check is required by IOHIDKit to globally listen for keyboard input across the system
+- when you send a CGEventCreateKeyboardEvent, the system will automatically ask for you permission for Accessibility(Allow the app to control your computer)
+- When developing in XCode
+  - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
+  - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
+  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`

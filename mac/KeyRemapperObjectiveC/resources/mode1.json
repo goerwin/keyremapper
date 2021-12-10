@@ -1,0 +1,141 @@
+{
+  "delayUntilRepeat": 300,
+  "keyRepeatInterval": 25,
+  "keyPressesDelay": 200,
+  "remaps": {
+    "Caps": "F18",
+    "CmdR": "Cmd",
+    "AltR": "Alt",
+    "ShiftR": "Shift",
+    "GraveAccent": "Shift",
+    "NonUSBackslash": "GraveAccent"
+  },
+  "keyPresses": [
+    { "repeat": 1, "inputKey": "F18", "fire": "Esc" },
+    { "repeat": 2, "inputKey": "Esc", "fire": "ToggleAppEnabled" },
+    {
+      "repeat": 2,
+      "inputKey": "Shift",
+      "fire": "Caps",
+      "skipKeyBindings": true
+    }
+  ],
+  "keybindings": [
+    {
+      "keys": ["Esc"],
+      "when": { "Ctrl": true },
+      "fire": ["CloseApp", null]
+    },
+    "%dotdotdotArray(_vimMode.json)",
+    "%dotdotdotArray(_clicksMode.json)",
+
+    // Google Chrome
+    {
+      "keys": ["F3"],
+      "when": { "appName": "com.google.Chrome" },
+      "fire": ["Cmd:down 5 Cmd:up", null]
+    },
+    {
+      "keys": ["F4"],
+      "when": { "appName": "com.google.Chrome" },
+      "fire": ["Cmd:down 6 Cmd:up", null]
+    },
+    {
+      "keys": ["F5"],
+      "when": { "appName": "com.google.Chrome" },
+      "fire": ["Alt:down S Alt:up", null]
+    },
+    {
+      "keys": ["F6"],
+      "when": { "appName": "com.google.Chrome" },
+      "fire": ["Alt:down T Alt:up", null]
+    },
+    {
+      "keys": ["H"],
+      "when": { "appName": "com.google.Chrome", "Cmd": true },
+      "fire": ["Cmd:down 5 Cmd:up Cmd:down", null]
+    },
+    {
+      "keys": ["Semicolon"],
+      "when": { "appName": "com.google.Chrome", "Cmd": true },
+      "fire": ["Cmd:down L Cmd:up Cmd:down", null]
+    },
+    {
+      "keys": ["L"],
+      "when": { "appName": "com.google.Chrome", "Cmd": true },
+      "fire": ["Cmd:down 6 Cmd:up Cmd:down", null]
+    },
+    {
+      "keys": ["F"],
+      "when": { "appName": "com.google.Chrome", "Cmd": true, "Alt": true },
+      "fire": ["Alt:up Ctrl:down currentKey Ctrl:up Alt:up", null]
+    },
+    {
+      "keys": ["I"],
+      "when": { "appName": "com.google.Chrome", "Cmd": true, "Shift": true },
+      "fire": ["Shift:up Alt:down I Alt:up Shift:down", null]
+    },
+
+    // Terminal
+
+    {
+      "keys": ["O"],
+      "when": { "appName": "com.googlecode.iterm2", "Cmd": true },
+      "fire": ["K", null]
+    },
+
+    // Slack
+    {
+      "keys": ["P"],
+      "when": { "appName": "com.tinyspeck.slackmacgap", "Cmd": true },
+      "fire": ["K", null]
+    },
+
+    // Globals
+
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true, "Alt": false },
+      "fire": ["Cmd:up pageDown:down", "pageDown:up Cmd:down"]
+    },
+    {
+      "keys": ["K"],
+      "when": { "Cmd": true, "Alt": false },
+      "fire": ["Cmd:up pageUp:down", "pageUp:up Cmd:down"]
+    },
+
+    // F18/Caps as control for some keys
+    {
+      "keys": ["C", "Space", "V", "Tab"],
+      "when": { "F18": true },
+      "fire": ["Ctrl:down currentKey Ctrl:up", null]
+    },
+
+    // Mute mic
+    {
+      "keys": ["M"],
+      "when": { "Alt": true },
+      "fire": ["Cmd:down M Cmd:up"]
+    },
+
+    // App exposé
+    {
+      "keys": ["J"],
+      "when": { "Cmd": true, "Alt": true },
+      "fire": ["Cmd:up Alt:up Ctrl:down Down Ctrl:up Cmd:down Alt:down", null]
+    },
+
+    // Go to back/forward page in browser navigation
+    {
+      "keys": ["H"],
+      "when": { "Alt": true, "Cmd": false },
+      "fire": ["Alt:up Cmd:down BracketL Cmd:up Alt:down", null]
+    },
+    {
+      "keys": ["L"],
+      "when": { "Alt": true, "Cmd": false },
+      "fire": ["Alt:up Cmd:down BracketR Cmd:up Alt:down", null]
+    }
+  ],
+  "tests": "%array(_tests.json)"
+}

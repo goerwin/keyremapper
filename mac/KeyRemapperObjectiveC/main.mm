@@ -11,12 +11,17 @@
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hidsystem/IOHIDLib.h>
 
+#import <AppKit/AppKit.h>
+#import <AppKit/NSWorkspace.h>
+
 #include <iostream>
 #include <thread>
+
 #include "../../common/TestHelpers.hpp"
 #include "../../common/Helpers.hpp"
 #include "../../common/vendors/json.hpp"
 #include "../../common/KeyDispatcher.hpp"
+#include "./Application.h"
 
 std::string g_path;
 bool g_capslockState;
@@ -126,6 +131,9 @@ void initializeKeyDispatcher() {
     : rules["keyRepeatInterval"].get<int>();
 
   g_keyDispatcher = new KeyDispatcher(rules, g_symbols);
+  g_keyDispatcher->setApplyKeysCb([](std::string appliedKeys) {
+    Helpers::print(appliedKeys);
+  });
   
   auto tests = rules["tests"];
   if (!tests.is_null()) {
@@ -323,6 +331,8 @@ void myHIDKeyboardCallback(void *context, IOReturn result, void *sender, IOHIDVa
 }
 
 void initializeIOHIDManager() {
+  g_hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
+  
   CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
   CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
 
@@ -340,6 +350,11 @@ void initializeIOHIDManager() {
   IOHIDManagerOpen(g_hidManager, kIOHIDOptionsTypeSeizeDevice);
 }
 
+void setActiveApp(std::string activeApp) {
+  g_keyDispatcher->setAppName(activeApp);
+  Helpers::print("Active App: " + activeApp);
+}
+
 int main(int argc, const char *argv[]) {
   // argv[0] is the absolute path of the executable
   g_path = std::string(argv[0]);
@@ -347,26 +362,23 @@ int main(int argc, const char *argv[]) {
   g_capslockState = getCapslockState();
 
   initializeKeyDispatcher();
-
-  g_hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-  
-  CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
-  CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
-
-  CFMutableDictionaryRef matchesList[] = { keyboard, keypad, };
-
-  CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault, (const void **)matchesList, 2, NULL);
-
-  IOHIDManagerSetDeviceMatchingMultiple(g_hidManager, matches);
-  IOHIDManagerRegisterInputValueCallback(g_hidManager, myHIDKeyboardCallback, NULL);
-  IOHIDManagerSetInputValueMatching(g_hidManager, keyboard);
-  
-  // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
-  // kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
-  IOHIDManagerScheduleWithRunLoop(g_hidManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
-  IOHIDManagerOpen(g_hidManager, kIOHIDOptionsTypeSeizeDevice);
-  
+  initializeIOHIDManager();
   initializeMouseListener();
-  
+
+
+  // NOTE: Running this Objective C code inside a function doesn't work
+  Application *application = [[Application alloc]init];
+  application.activeApplicationChangeCb = setActiveApp;
+  [[[NSWorkspace sharedWorkspace] notificationCenter]
+    addObserver:application
+    selector:@selector(handleApplicationChange:)
+    name:NSWorkspaceDidActivateApplicationNotification
+    object:nil
+  ];
+  NSRunningApplication *frontmostApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
+  NSString *bundleIdentifier = [frontmostApp bundleIdentifier];
+  Helpers::print(std::string([bundleIdentifier UTF8String]));
+  setActiveApp(std::string([bundleIdentifier UTF8String]));
+
   CFRunLoopRun();
 }

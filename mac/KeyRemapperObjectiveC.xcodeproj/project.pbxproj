@@ -7,93 +7,86 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F9923D79276033E400565B4E /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9923D78276033E400565B4E /* main.mm */; };
-		F9923D812760376E00565B4E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D802760376E00565B4E /* IOKit.framework */; };
-		F9923D832760380F00565B4E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D822760380F00565B4E /* ApplicationServices.framework */; };
-		F9BD115E2762CD8300E1EF77 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9BD115D2762CD8300E1EF77 /* AppKit.framework */; };
-		F9BD11792762E86200E1EF77 /* Application.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BD11782762E86200E1EF77 /* Application.m */; };
-		F9EDD88F276080BA00D946FC /* resources in Copy Files */ = {isa = PBXBuildFile; fileRef = F9EDD88E276080BA00D946FC /* resources */; };
+		F9BD116C2762CEAB00E1EF77 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9BD116B2762CEAB00E1EF77 /* main.mm */; };
+		F9BD11742762D40400E1EF77 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9BD11732762D40400E1EF77 /* AppKit.framework */; };
+		F9BD11762762D81400E1EF77 /* Application.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9BD11752762D81400E1EF77 /* Application.mm */; };
+		F9F066E12762EA21003119A0 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9F066E02762EA21003119A0 /* IOKit.framework */; };
+		F9F066E72762EB0E003119A0 /* resources in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9F066E62762EB0E003119A0 /* resources */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F9923D73276033E400565B4E /* Copy Files */ = {
+		F9BD11662762CEAB00E1EF77 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F9EDD88F276080BA00D946FC /* resources in Copy Files */,
+				F9F066E72762EB0E003119A0 /* resources in CopyFiles */,
 			);
-			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F9923D75276033E400565B4E /* KeyRemapperTerminal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperTerminal; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9923D78276033E400565B4E /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
-		F9923D802760376E00565B4E /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
-		F9923D822760380F00565B4E /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
-		F9923D842760471300565B4E /* symbols.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = symbols.json; path = KeyRemapperTerminal/resources/symbols.json; sourceTree = "<group>"; };
-		F9923D862760474A00565B4E /* mode1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = mode1.json; path = KeyRemapperTerminal/resources/mode1.json; sourceTree = "<group>"; };
-		F9923D8C276059B100565B4E /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		F9BD115D2762CD8300E1EF77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		F9BD11782762E86200E1EF77 /* Application.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Application.m; sourceTree = "<group>"; };
-		F9BD117A2762E89200E1EF77 /* Application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
-		F9EDD88E276080BA00D946FC /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperTerminal/resources; sourceTree = "<group>"; };
+		F9BD11682762CEAB00E1EF77 /* KeyRemapperObjectiveC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperObjectiveC; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9BD116B2762CEAB00E1EF77 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		F9BD11732762D40400E1EF77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F9BD11752762D81400E1EF77 /* Application.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Application.mm; sourceTree = "<group>"; };
+		F9BD11772762D91F00E1EF77 /* Application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		F9F066E02762EA21003119A0 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		F9F066E22762EA8F003119A0 /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperTerminal/resources; sourceTree = "<group>"; };
+		F9F066E42762EACF003119A0 /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperObjectiveC/resources; sourceTree = "<group>"; };
+		F9F066E62762EB0E003119A0 /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperObjectiveC/resources; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F9923D72276033E400565B4E /* Frameworks */ = {
+		F9BD11652762CEAB00E1EF77 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9BD115E2762CD8300E1EF77 /* AppKit.framework in Frameworks */,
-				F9923D832760380F00565B4E /* ApplicationServices.framework in Frameworks */,
-				F9923D812760376E00565B4E /* IOKit.framework in Frameworks */,
+				F9F066E12762EA21003119A0 /* IOKit.framework in Frameworks */,
+				F9BD11742762D40400E1EF77 /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F9923D6C276033E400565B4E = {
+		F9BD115F2762CEAB00E1EF77 = {
 			isa = PBXGroup;
 			children = (
-				F9EDD88E276080BA00D946FC /* resources */,
-				F9923D862760474A00565B4E /* mode1.json */,
-				F9923D842760471300565B4E /* symbols.json */,
-				F9923D77276033E400565B4E /* KeyRemapperTerminal */,
-				F9923D76276033E400565B4E /* Products */,
-				F9923D7F2760376E00565B4E /* Frameworks */,
+				F9F066E22762EA8F003119A0 /* resources */,
+				F9F066E42762EACF003119A0 /* resources */,
+				F9F066E62762EB0E003119A0 /* resources */,
+				F9BD116A2762CEAB00E1EF77 /* KeyRemapperObjectiveC */,
+				F9BD11692762CEAB00E1EF77 /* Products */,
+				F9BD11722762D40400E1EF77 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		F9923D76276033E400565B4E /* Products */ = {
+		F9BD11692762CEAB00E1EF77 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9923D75276033E400565B4E /* KeyRemapperTerminal */,
+				F9BD11682762CEAB00E1EF77 /* KeyRemapperObjectiveC */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F9923D77276033E400565B4E /* KeyRemapperTerminal */ = {
+		F9BD116A2762CEAB00E1EF77 /* KeyRemapperObjectiveC */ = {
 			isa = PBXGroup;
 			children = (
-				F9923D78276033E400565B4E /* main.mm */,
-				F9923D8C276059B100565B4E /* main.h */,
-				F9BD11782762E86200E1EF77 /* Application.m */,
-				F9BD117A2762E89200E1EF77 /* Application.h */,
+				F9BD116B2762CEAB00E1EF77 /* main.mm */,
+				F9BD11752762D81400E1EF77 /* Application.mm */,
+				F9BD11772762D91F00E1EF77 /* Application.h */,
 			);
-			path = KeyRemapperTerminal;
+			path = KeyRemapperObjectiveC;
 			sourceTree = "<group>";
 		};
-		F9923D7F2760376E00565B4E /* Frameworks */ = {
+		F9BD11722762D40400E1EF77 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F9BD115D2762CD8300E1EF77 /* AppKit.framework */,
-				F9923D822760380F00565B4E /* ApplicationServices.framework */,
-				F9923D802760376E00565B4E /* IOKit.framework */,
+				F9F066E02762EA21003119A0 /* IOKit.framework */,
+				F9BD11732762D40400E1EF77 /* AppKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -101,37 +94,37 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F9923D74276033E400565B4E /* KeyRemapperTerminal */ = {
+		F9BD11672762CEAB00E1EF77 /* KeyRemapperObjectiveC */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F9923D7C276033E400565B4E /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */;
+			buildConfigurationList = F9BD116F2762CEAB00E1EF77 /* Build configuration list for PBXNativeTarget "KeyRemapperObjectiveC" */;
 			buildPhases = (
-				F9923D71276033E400565B4E /* Sources */,
-				F9923D72276033E400565B4E /* Frameworks */,
-				F9923D73276033E400565B4E /* Copy Files */,
+				F9BD11642762CEAB00E1EF77 /* Sources */,
+				F9BD11652762CEAB00E1EF77 /* Frameworks */,
+				F9BD11662762CEAB00E1EF77 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = KeyRemapperTerminal;
-			productName = KeyRemapperTerminal;
-			productReference = F9923D75276033E400565B4E /* KeyRemapperTerminal */;
+			name = KeyRemapperObjectiveC;
+			productName = KeyRemapperObjectiveC;
+			productReference = F9BD11682762CEAB00E1EF77 /* KeyRemapperObjectiveC */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F9923D6D276033E400565B4E /* Project object */ = {
+		F9BD11602762CEAB00E1EF77 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
-					F9923D74276033E400565B4E = {
+					F9BD11672762CEAB00E1EF77 = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
 			};
-			buildConfigurationList = F9923D70276033E400565B4E /* Build configuration list for PBXProject "KeyRemapperTerminal" */;
+			buildConfigurationList = F9BD11632762CEAB00E1EF77 /* Build configuration list for PBXProject "KeyRemapperObjectiveC" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -139,36 +132,36 @@
 				en,
 				Base,
 			);
-			mainGroup = F9923D6C276033E400565B4E;
-			productRefGroup = F9923D76276033E400565B4E /* Products */;
+			mainGroup = F9BD115F2762CEAB00E1EF77;
+			productRefGroup = F9BD11692762CEAB00E1EF77 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F9923D74276033E400565B4E /* KeyRemapperTerminal */,
+				F9BD11672762CEAB00E1EF77 /* KeyRemapperObjectiveC */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F9923D71276033E400565B4E /* Sources */ = {
+		F9BD11642762CEAB00E1EF77 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9BD11792762E86200E1EF77 /* Application.m in Sources */,
-				F9923D79276033E400565B4E /* main.mm in Sources */,
+				F9BD11762762D81400E1EF77 /* Application.mm in Sources */,
+				F9BD116C2762CEAB00E1EF77 /* main.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F9923D7A276033E400565B4E /* Debug */ = {
+		F9BD116D2762CEAB00E1EF77 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -221,13 +214,13 @@
 			};
 			name = Debug;
 		};
-		F9923D7B276033E400565B4E /* Release */ = {
+		F9BD116E2762CEAB00E1EF77 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -273,11 +266,9 @@
 			};
 			name = Release;
 		};
-		F9923D7D276033E400565B4E /* Debug */ = {
+		F9BD11702762CEAB00E1EF77 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -285,11 +276,9 @@
 			};
 			name = Debug;
 		};
-		F9923D7E276033E400565B4E /* Release */ = {
+		F9BD11712762CEAB00E1EF77 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -300,25 +289,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F9923D70276033E400565B4E /* Build configuration list for PBXProject "KeyRemapperTerminal" */ = {
+		F9BD11632762CEAB00E1EF77 /* Build configuration list for PBXProject "KeyRemapperObjectiveC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F9923D7A276033E400565B4E /* Debug */,
-				F9923D7B276033E400565B4E /* Release */,
+				F9BD116D2762CEAB00E1EF77 /* Debug */,
+				F9BD116E2762CEAB00E1EF77 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F9923D7C276033E400565B4E /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */ = {
+		F9BD116F2762CEAB00E1EF77 /* Build configuration list for PBXNativeTarget "KeyRemapperObjectiveC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F9923D7D276033E400565B4E /* Debug */,
-				F9923D7E276033E400565B4E /* Release */,
+				F9BD11702762CEAB00E1EF77 /* Debug */,
+				F9BD11712762CEAB00E1EF77 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = F9923D6D276033E400565B4E /* Project object */;
+	rootObject = F9BD11602762CEAB00E1EF77 /* Project object */;
 }

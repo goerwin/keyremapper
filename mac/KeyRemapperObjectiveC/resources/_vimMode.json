@@ -1,0 +1,26 @@
+[
+  {
+    "keys": ["H", "J", "K", "L"],
+    "when": { "F18": true },
+    "fire": ["vimArrowKey:down", "vimArrowKey:up"]
+  },
+  {
+    "keys": ["F"],
+    "when": { "F18": true, "F": true },
+    "set": { "_vimModeShift": true },
+    "fire": ["Shift:down", null]
+  },
+  {
+    "keys": ["F"],
+    "when": { "F18": true, "F": false },
+    "set": { "_vimModeShift": false },
+    "fire": [null, "Shift:up"]
+  },
+  {
+    "keys": ["F18"],
+    "when": { "F18": false, "_vimModeShift": true },
+    "set": { "_vimModeShift": false },
+    "fire": [null, "Shift:up"]
+  },
+  { "keys": ["F18"], "fire": [null, null] }
+]

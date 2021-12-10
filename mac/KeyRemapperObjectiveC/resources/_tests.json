@@ -1,0 +1,11 @@
+[
+  // Delays
+  ["Caps:down Caps:up", "Esc"],
+  ["Caps:down __delay100 Caps:up", "Esc"],
+  ["Caps:down __delay251 Caps:up", ""],
+  [
+    "Shift:down Caps:down Caps:up Shift:up",
+    "Shift:down Esc:down Esc:up Shift:up"
+  ],
+  ["Shift:down Caps:down __delay251 Caps:up Shift:up", "Shift:down Shift:up"]
+]
