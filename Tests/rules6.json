@@ -1,0 +1,45 @@
+{
+  "description": ["Multiple keyboards, order matters"],
+  "keyPresses": [
+    {
+      "repeat": 1,
+      "inputKey": "Caps",
+      "fire": "Win",
+      "when": { "keyboard": "1234" }
+    },
+    { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
+    { "repeat": 1, "inputKey": "Alt", "fire": "A" },
+    {
+      "repeat": 1,
+      "inputKey": "Alt",
+      "fire": "B",
+      "when": { "keyboard": "1234" }
+    }
+  ],
+  "keybindings": [
+    {
+      "keys": ["D"],
+      "when": { "keyboard": "1234" },
+      "fire": ["E:down", "E:up"]
+    },
+    {
+      "keys": ["D"],
+      "fire": ["F:down", "F:up"]
+    },
+    {
+      "keys": ["Caps"],
+      "fire": [null, null]
+    }
+  ],
+  "tests": [
+    ["D", "F"],
+    ["keyboard:1234 D", "E"],
+    ["keyboard:1234 D:down keyboard:_ D:up", "E:down F:up"],
+    ["keyboard:1234 Caps:down Caps:up", "Win"],
+    ["keyboard:_ Caps:down Caps:up", "Esc"],
+    ["keyboard:_ Caps:down keyboard:1234 Caps:up", "Win"],
+    ["keyboard:1234 Caps:down keyboard:_ Caps:up", "Esc"],
+    ["keyboard:_ Alt:down keyboard:_ Alt:up", "Alt A"],
+    ["keyboard:1234 Alt:down keyboard:_ Alt:up", "Alt A"]
+  ]
+}

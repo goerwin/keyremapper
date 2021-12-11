@@ -13,6 +13,8 @@
   ],
   "tests": [
     ["A", "B"],
-    ["A", "C", "chrome.exe"]
+    ["appName:_ A", "B"],
+    ["appName:com.apple.xcode A", "B"],
+    ["appName:chrome.exe A", "C"]
   ]
 }

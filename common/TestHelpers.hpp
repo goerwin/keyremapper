@@ -29,23 +29,40 @@ json runTests(json tests, json rules, json symbols) {
     auto resultKeyEvents = keyDispatcher->getKeyEventsFromString("");
     std::stringstream ss(inputKeysStr);
 
-    if (testSize == 3) keyDispatcher->setAppName(test[2]);
-
     while(ss.good()) {
       String item;
       getline(ss, item, ' ');
-      String delayKey = "__delay";
+      String delayKey = "delay:";
+      String appNameKey = "appName:";
+      String keyboardKey = "keyboard:";
       auto delayTokenIdx = item.find(delayKey);
+      auto appNameTokenIdx = item.find(appNameKey);
+      auto keyboardTokenIdx = item.find(keyboardKey);
+
+      if (keyboardTokenIdx != std::string::npos) {
+        auto keyboard = item.substr(keyboardKey.size(), item.size());
+        keyboard = keyboard == "_" ? "" : keyboard;
+        keyDispatcher->setKeyboard(keyboard);
+        continue;
+      }
+
+      if (appNameTokenIdx != std::string::npos) {
+        auto appName = item.substr(appNameKey.size(), item.size());
+        appName = appName == "_" ? "" : appName;
+        keyDispatcher->setAppName(appName);
+        continue;
+      }
 
       if (delayTokenIdx != std::string::npos) {
         auto delayTimeStr = item.substr(delayKey.size(), item.size());
         int delayTimeMs = atoi(delayTimeStr.c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(delayTimeMs));
-      } else {
-        auto inputKey = keyDispatcher->getKeyEventsFromString(item);
-        auto resKeyEvents = keyDispatcher->applyKeys({inputKey});
-        resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
+        continue;
       }
+
+      auto inputKey = keyDispatcher->getKeyEventsFromString(item);
+      auto resKeyEvents = keyDispatcher->applyKeys({inputKey});
+      resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
     }
 
     String expectedKeysStr = test[1];

@@ -97,6 +97,8 @@ private:
       String ruleItem = keyPress["fire"];
       auto skipKeyBindings = keyPress["skipKeyBindings"];
 
+      if (!isWhen(keyPress["when"])) continue;
+
       if (repeat == multiplePressesCount && inputKey == keyName) {
         return {
           ruleItem,
@@ -178,6 +180,10 @@ public:
 
   void setAppName(String appName) {
     globals["appName"] = appName;
+  }
+
+  void setKeyboard(String keyboard) {
+    globals["keyboard"] = keyboard;
   }
 
   void setApplyKeysCb(std::function<void(String)> _applyKeysCb) {
@@ -298,14 +304,11 @@ private:
       auto globalValue = globals[key];
 
       if (globalValue.is_null()) {
-        if (value != false)
-          return false;
+        if (value != false) return false;
         continue;
       }
 
-      if (value != globalValue) {
-        return false;
-      }
+      if (value != globalValue) return false;
     }
 
     return true;
@@ -327,12 +330,10 @@ private:
       auto keybinding = allKeybindings[i];
       auto keys = keybinding["keys"];
 
-      if (!isWhen(keybinding["when"]))
-        continue;
+      if (!isWhen(keybinding["when"])) continue;
 
       for (size_t j = 0; j < keys.size(); j++) {
-        if (currentKey != keys[j])
-          continue;
+        if (currentKey != keys[j]) continue;
 
         setValues(keybinding["set"]);
         return keybinding["fire"];

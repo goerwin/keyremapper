@@ -64,7 +64,7 @@
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
-  - [ ] trigger media keys (not easy to do, probably just use Hammerspoon)
+  - [x] ~~trigger media keys~~ (not easy to do, just use Hammerspoon)
 
 
 ### Text navigation/manipulation
