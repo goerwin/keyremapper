@@ -113,8 +113,8 @@
   "VolumeDown": [234, 0, 1, 73],
   "VolumeUp": [233, 0, 1, 72],
 
-  "MouseLeftButton": [241, 0, 1, 241],
-  "MouseRightButton": [242, 0, 1, 242],
+  "LeftClick": [241, 0, 1, 241],
+  "RightClick": [242, 0, 1, 242],
 
   "AppMode1": [246, 0, 1, 246],
   "AppMode2": [247, 0, 1, 247],

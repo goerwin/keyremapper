@@ -1,8 +1,12 @@
 [
   {
+    "keys": ["Fn"],
+    "fire": ["LeftClick:down", "LeftClick:up"]
+  },
+  {
     "keys": ["C"],
     "when": { "Alt": true },
-    "fire": ["Alt:up MouseLeftButton:down", "MouseLeftButton:up Alt:down"]
+    "fire": ["Alt:up LeftClick:down", "LeftClick:up Alt:down"]
   },
   {
     "keys": ["Alt111"],

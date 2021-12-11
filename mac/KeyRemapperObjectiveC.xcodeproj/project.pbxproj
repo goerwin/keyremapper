@@ -28,6 +28,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F9B64FD6276326750073C082 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		F9BD11682762CEAB00E1EF77 /* KeyRemapperObjectiveC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperObjectiveC; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9BD116B2762CEAB00E1EF77 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		F9BD11732762D40400E1EF77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -78,6 +79,7 @@
 				F9BD116B2762CEAB00E1EF77 /* main.mm */,
 				F9BD11752762D81400E1EF77 /* Application.mm */,
 				F9BD11772762D91F00E1EF77 /* Application.h */,
+				F9B64FD6276326750073C082 /* main.h */,
 			);
 			path = KeyRemapperObjectiveC;
 			sourceTree = "<group>";

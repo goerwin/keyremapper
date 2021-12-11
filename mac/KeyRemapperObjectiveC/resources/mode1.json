@@ -1,6 +1,7 @@
 {
   "delayUntilRepeat": 300,
   "keyRepeatInterval": 25,
+  "doubleClickSpeed": 500,
   "keyPressesDelay": 200,
   "remaps": "%object(_remaps.json)",
   "keyPresses": "%array(_keyPresses.json)",

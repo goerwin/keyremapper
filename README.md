@@ -59,12 +59,12 @@
   - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
   - [x] toggle caps
   - [x] modes
-  - [ ] enables/disabled app with double esc
-  - [ ] trigger media keys (not easy to do, probably just use Hammerspoon)
-  - [ ] mouse clicks/drags/etc
+  - [x] mouse clicks/drags/etc
+  - [ ] enable/disable app with double esc
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
+  - [ ] trigger media keys (not easy to do, probably just use Hammerspoon)
 
 
 ### Text navigation/manipulation
