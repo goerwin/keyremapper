@@ -7,129 +7,105 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F956C60227644E6200F1C95C /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F956C60127644E6200F1C95C /* main.mm */; };
-		F956C60A27644E8100F1C95C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F956C60927644E8100F1C95C /* IOKit.framework */; };
-		F956C60C27644E8700F1C95C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F956C60B27644E8700F1C95C /* AppKit.framework */; };
-		F956C60F27644F8000F1C95C /* Application.mm in Sources */ = {isa = PBXBuildFile; fileRef = F956C60D27644F8000F1C95C /* Application.mm */; };
-		F956C6132764581C00F1C95C /* resources in CopyFiles */ = {isa = PBXBuildFile; fileRef = F956C61127644F9600F1C95C /* resources */; };
-		F956C6172764CF4300F1C95C /* IOHIDManager.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F956C6162764CF4300F1C95C /* IOHIDManager.hpp */; };
+		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
+		F9A8926227644E33009ACA0A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8926127644E33009ACA0A /* ContentView.swift */; };
+		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
+		F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926627644E35009ACA0A /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		F956C5FC27644E6200F1C95C /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 6;
-			files = (
-				F956C6132764581C00F1C95C /* resources in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		F90A7D0B2764F06700BF7D65 /* MouseHandler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MouseHandler.hpp; sourceTree = "<group>"; };
-		F90A7D0C276532DE00BF7D65 /* Global.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Global.hpp; sourceTree = "<group>"; };
-		F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperTerminal; sourceTree = BUILT_PRODUCTS_DIR; };
-		F956C60127644E6200F1C95C /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
-		F956C60927644E8100F1C95C /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
-		F956C60B27644E8700F1C95C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		F956C60D27644F8000F1C95C /* Application.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Application.mm; sourceTree = "<group>"; };
-		F956C60E27644F8000F1C95C /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
-		F956C61027644F8900F1C95C /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		F956C61127644F9600F1C95C /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resources; sourceTree = "<group>"; };
-		F956C6162764CF4300F1C95C /* IOHIDManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOHIDManager.hpp; sourceTree = "<group>"; };
+		F9A8925C27644E33009ACA0A /* KeyRemapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyRemapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; };
+		F9A8926127644E33009ACA0A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F9A8926327644E35009ACA0A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F9A8926627644E35009ACA0A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		F9A8926827644E35009ACA0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyRemapper.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F956C5FB27644E6200F1C95C /* Frameworks */ = {
+		F9A8925927644E33009ACA0A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F956C60C27644E8700F1C95C /* AppKit.framework in Frameworks */,
-				F956C60A27644E8100F1C95C /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F956C5F527644E6200F1C95C = {
+		F9A8925327644E33009ACA0A = {
 			isa = PBXGroup;
 			children = (
-				F956C60027644E6200F1C95C /* KeyRemapperTerminal */,
-				F956C5FF27644E6200F1C95C /* Products */,
-				F956C60827644E8100F1C95C /* Frameworks */,
+				F9A8925E27644E33009ACA0A /* KeyRemapper */,
+				F9A8925D27644E33009ACA0A /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		F956C5FF27644E6200F1C95C /* Products */ = {
+		F9A8925D27644E33009ACA0A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */,
+				F9A8925C27644E33009ACA0A /* KeyRemapper.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F956C60027644E6200F1C95C /* KeyRemapperTerminal */ = {
+		F9A8925E27644E33009ACA0A /* KeyRemapper */ = {
 			isa = PBXGroup;
 			children = (
-				F956C60E27644F8000F1C95C /* Application.h */,
-				F956C60D27644F8000F1C95C /* Application.mm */,
-				F956C60127644E6200F1C95C /* main.mm */,
-				F956C61027644F8900F1C95C /* main.h */,
-				F90A7D0B2764F06700BF7D65 /* MouseHandler.hpp */,
-				F90A7D0C276532DE00BF7D65 /* Global.hpp */,
-				F956C6162764CF4300F1C95C /* IOHIDManager.hpp */,
-				F956C61127644F9600F1C95C /* resources */,
+				F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */,
+				F9A8926127644E33009ACA0A /* ContentView.swift */,
+				F9A8926327644E35009ACA0A /* Assets.xcassets */,
+				F9A8926827644E35009ACA0A /* Info.plist */,
+				F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */,
+				F9A8926527644E35009ACA0A /* Preview Content */,
 			);
-			path = KeyRemapperTerminal;
+			path = KeyRemapper;
 			sourceTree = "<group>";
 		};
-		F956C60827644E8100F1C95C /* Frameworks */ = {
+		F9A8926527644E35009ACA0A /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				F956C60B27644E8700F1C95C /* AppKit.framework */,
-				F956C60927644E8100F1C95C /* IOKit.framework */,
+				F9A8926627644E35009ACA0A /* Preview Assets.xcassets */,
 			);
-			name = Frameworks;
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F956C5FD27644E6200F1C95C /* KeyRemapperTerminal */ = {
+		F9A8925B27644E33009ACA0A /* KeyRemapper */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F956C60527644E6200F1C95C /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */;
+			buildConfigurationList = F9A8926C27644E35009ACA0A /* Build configuration list for PBXNativeTarget "KeyRemapper" */;
 			buildPhases = (
-				F956C5FA27644E6200F1C95C /* Sources */,
-				F956C5FB27644E6200F1C95C /* Frameworks */,
-				F956C5FC27644E6200F1C95C /* CopyFiles */,
+				F9A8925827644E33009ACA0A /* Sources */,
+				F9A8925927644E33009ACA0A /* Frameworks */,
+				F9A8925A27644E33009ACA0A /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = KeyRemapperTerminal;
-			productName = KeyRemapperTerminal;
-			productReference = F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */;
-			productType = "com.apple.product-type.tool";
+			name = KeyRemapper;
+			productName = KeyRemapper;
+			productReference = F9A8925C27644E33009ACA0A /* KeyRemapper.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F956C5F627644E6200F1C95C /* Project object */ = {
+		F9A8925427644E33009ACA0A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
-					F956C5FD27644E6200F1C95C = {
+					F9A8925B27644E33009ACA0A = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
 			};
-			buildConfigurationList = F956C5F927644E6200F1C95C /* Build configuration list for PBXProject "KeyRemapperTerminal" */;
+			buildConfigurationList = F9A8925727644E33009ACA0A /* Build configuration list for PBXProject "KeyRemapper" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -137,31 +113,42 @@
 				en,
 				Base,
 			);
-			mainGroup = F956C5F527644E6200F1C95C;
-			productRefGroup = F956C5FF27644E6200F1C95C /* Products */;
+			mainGroup = F9A8925327644E33009ACA0A;
+			productRefGroup = F9A8925D27644E33009ACA0A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F956C5FD27644E6200F1C95C /* KeyRemapperTerminal */,
+				F9A8925B27644E33009ACA0A /* KeyRemapper */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		F9A8925A27644E33009ACA0A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */,
+				F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		F956C5FA27644E6200F1C95C /* Sources */ = {
+		F9A8925827644E33009ACA0A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F956C60F27644F8000F1C95C /* Application.mm in Sources */,
-				F956C6172764CF4300F1C95C /* IOHIDManager.hpp in Sources */,
-				F956C60227644E6200F1C95C /* main.mm in Sources */,
+				F9A8926227644E33009ACA0A /* ContentView.swift in Sources */,
+				F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F956C60327644E6200F1C95C /* Debug */ = {
+		F9A8926A27644E35009ACA0A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -217,10 +204,12 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		F956C60427644E6200F1C95C /* Release */ = {
+		F9A8926B27644E35009ACA0A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -269,53 +258,81 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
-		F956C60627644E6200F1C95C /* Debug */ = {
+		F9A8926D27644E35009ACA0A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"KeyRemapper/Preview Content\"";
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = KeyRemapper/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		F956C60727644E6200F1C95C /* Release */ = {
+		F9A8926E27644E35009ACA0A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"KeyRemapper/Preview Content\"";
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = KeyRemapper/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F956C5F927644E6200F1C95C /* Build configuration list for PBXProject "KeyRemapperTerminal" */ = {
+		F9A8925727644E33009ACA0A /* Build configuration list for PBXProject "KeyRemapper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F956C60327644E6200F1C95C /* Debug */,
-				F956C60427644E6200F1C95C /* Release */,
+				F9A8926A27644E35009ACA0A /* Debug */,
+				F9A8926B27644E35009ACA0A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F956C60527644E6200F1C95C /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */ = {
+		F9A8926C27644E35009ACA0A /* Build configuration list for PBXNativeTarget "KeyRemapper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F956C60627644E6200F1C95C /* Debug */,
-				F956C60727644E6200F1C95C /* Release */,
+				F9A8926D27644E35009ACA0A /* Debug */,
+				F9A8926E27644E35009ACA0A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = F956C5F627644E6200F1C95C /* Project object */;
+	rootObject = F9A8925427644E33009ACA0A /* Project object */;
 }
