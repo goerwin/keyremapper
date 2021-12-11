@@ -31,6 +31,5 @@
       "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
       "fire": ["Alt:down T Alt:up"]
     }
-  ],
-  "tests": "%array(_tests.json)"
+  ]
 }
