@@ -1,6 +1,5 @@
 //
 //  Application.h
-//  KeyRemapperObjectiveC
 //
 //  Created by Erwin Gaitan Ospino on 9/12/21.
 //

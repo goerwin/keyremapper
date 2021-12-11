@@ -7,93 +7,82 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F9923D79276033E400565B4E /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9923D78276033E400565B4E /* main.mm */; };
-		F9923D812760376E00565B4E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D802760376E00565B4E /* IOKit.framework */; };
-		F9923D832760380F00565B4E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9923D822760380F00565B4E /* ApplicationServices.framework */; };
-		F9BD115E2762CD8300E1EF77 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9BD115D2762CD8300E1EF77 /* AppKit.framework */; };
-		F9BD11792762E86200E1EF77 /* Application.m in Sources */ = {isa = PBXBuildFile; fileRef = F9BD11782762E86200E1EF77 /* Application.m */; };
-		F9EDD88F276080BA00D946FC /* resources in Copy Files */ = {isa = PBXBuildFile; fileRef = F9EDD88E276080BA00D946FC /* resources */; };
+		F956C60227644E6200F1C95C /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F956C60127644E6200F1C95C /* main.mm */; };
+		F956C60A27644E8100F1C95C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F956C60927644E8100F1C95C /* IOKit.framework */; };
+		F956C60C27644E8700F1C95C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F956C60B27644E8700F1C95C /* AppKit.framework */; };
+		F956C60F27644F8000F1C95C /* Application.mm in Sources */ = {isa = PBXBuildFile; fileRef = F956C60D27644F8000F1C95C /* Application.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F9923D73276033E400565B4E /* Copy Files */ = {
+		F956C5FC27644E6200F1C95C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 6;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
 			files = (
-				F9EDD88F276080BA00D946FC /* resources in Copy Files */,
 			);
-			name = "Copy Files";
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F9923D75276033E400565B4E /* KeyRemapperTerminal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperTerminal; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9923D78276033E400565B4E /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
-		F9923D802760376E00565B4E /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
-		F9923D822760380F00565B4E /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
-		F9923D842760471300565B4E /* symbols.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = symbols.json; path = KeyRemapperTerminal/resources/symbols.json; sourceTree = "<group>"; };
-		F9923D862760474A00565B4E /* mode1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = mode1.json; path = KeyRemapperTerminal/resources/mode1.json; sourceTree = "<group>"; };
-		F9923D8C276059B100565B4E /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		F9BD115D2762CD8300E1EF77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		F9BD11782762E86200E1EF77 /* Application.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Application.m; sourceTree = "<group>"; };
-		F9BD117A2762E89200E1EF77 /* Application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
-		F9EDD88E276080BA00D946FC /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = KeyRemapperTerminal/resources; sourceTree = "<group>"; };
+		F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperTerminal; sourceTree = BUILT_PRODUCTS_DIR; };
+		F956C60127644E6200F1C95C /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		F956C60927644E8100F1C95C /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		F956C60B27644E8700F1C95C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F956C60D27644F8000F1C95C /* Application.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Application.mm; sourceTree = "<group>"; };
+		F956C60E27644F8000F1C95C /* Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Application.h; sourceTree = "<group>"; };
+		F956C61027644F8900F1C95C /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		F956C61127644F9600F1C95C /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resources; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F9923D72276033E400565B4E /* Frameworks */ = {
+		F956C5FB27644E6200F1C95C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9BD115E2762CD8300E1EF77 /* AppKit.framework in Frameworks */,
-				F9923D832760380F00565B4E /* ApplicationServices.framework in Frameworks */,
-				F9923D812760376E00565B4E /* IOKit.framework in Frameworks */,
+				F956C60C27644E8700F1C95C /* AppKit.framework in Frameworks */,
+				F956C60A27644E8100F1C95C /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F9923D6C276033E400565B4E = {
+		F956C5F527644E6200F1C95C = {
 			isa = PBXGroup;
 			children = (
-				F9EDD88E276080BA00D946FC /* resources */,
-				F9923D862760474A00565B4E /* mode1.json */,
-				F9923D842760471300565B4E /* symbols.json */,
-				F9923D77276033E400565B4E /* KeyRemapperTerminal */,
-				F9923D76276033E400565B4E /* Products */,
-				F9923D7F2760376E00565B4E /* Frameworks */,
+				F956C60027644E6200F1C95C /* KeyRemapperTerminal */,
+				F956C5FF27644E6200F1C95C /* Products */,
+				F956C60827644E8100F1C95C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		F9923D76276033E400565B4E /* Products */ = {
+		F956C5FF27644E6200F1C95C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F9923D75276033E400565B4E /* KeyRemapperTerminal */,
+				F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F9923D77276033E400565B4E /* KeyRemapperTerminal */ = {
+		F956C60027644E6200F1C95C /* KeyRemapperTerminal */ = {
 			isa = PBXGroup;
 			children = (
-				F9923D78276033E400565B4E /* main.mm */,
-				F9923D8C276059B100565B4E /* main.h */,
-				F9BD11782762E86200E1EF77 /* Application.m */,
-				F9BD117A2762E89200E1EF77 /* Application.h */,
+				F956C60E27644F8000F1C95C /* Application.h */,
+				F956C60D27644F8000F1C95C /* Application.mm */,
+				F956C60127644E6200F1C95C /* main.mm */,
+				F956C61027644F8900F1C95C /* main.h */,
+				F956C61127644F9600F1C95C /* resources */,
 			);
 			path = KeyRemapperTerminal;
 			sourceTree = "<group>";
 		};
-		F9923D7F2760376E00565B4E /* Frameworks */ = {
+		F956C60827644E8100F1C95C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F9BD115D2762CD8300E1EF77 /* AppKit.framework */,
-				F9923D822760380F00565B4E /* ApplicationServices.framework */,
-				F9923D802760376E00565B4E /* IOKit.framework */,
+				F956C60B27644E8700F1C95C /* AppKit.framework */,
+				F956C60927644E8100F1C95C /* IOKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -101,13 +90,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F9923D74276033E400565B4E /* KeyRemapperTerminal */ = {
+		F956C5FD27644E6200F1C95C /* KeyRemapperTerminal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F9923D7C276033E400565B4E /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */;
+			buildConfigurationList = F956C60527644E6200F1C95C /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */;
 			buildPhases = (
-				F9923D71276033E400565B4E /* Sources */,
-				F9923D72276033E400565B4E /* Frameworks */,
-				F9923D73276033E400565B4E /* Copy Files */,
+				F956C5FA27644E6200F1C95C /* Sources */,
+				F956C5FB27644E6200F1C95C /* Frameworks */,
+				F956C5FC27644E6200F1C95C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -115,23 +104,23 @@
 			);
 			name = KeyRemapperTerminal;
 			productName = KeyRemapperTerminal;
-			productReference = F9923D75276033E400565B4E /* KeyRemapperTerminal */;
+			productReference = F956C5FE27644E6200F1C95C /* KeyRemapperTerminal */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F9923D6D276033E400565B4E /* Project object */ = {
+		F956C5F627644E6200F1C95C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
-					F9923D74276033E400565B4E = {
+					F956C5FD27644E6200F1C95C = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
 			};
-			buildConfigurationList = F9923D70276033E400565B4E /* Build configuration list for PBXProject "KeyRemapperTerminal" */;
+			buildConfigurationList = F956C5F927644E6200F1C95C /* Build configuration list for PBXProject "KeyRemapperTerminal" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -139,30 +128,30 @@
 				en,
 				Base,
 			);
-			mainGroup = F9923D6C276033E400565B4E;
-			productRefGroup = F9923D76276033E400565B4E /* Products */;
+			mainGroup = F956C5F527644E6200F1C95C;
+			productRefGroup = F956C5FF27644E6200F1C95C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F9923D74276033E400565B4E /* KeyRemapperTerminal */,
+				F956C5FD27644E6200F1C95C /* KeyRemapperTerminal */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F9923D71276033E400565B4E /* Sources */ = {
+		F956C5FA27644E6200F1C95C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9BD11792762E86200E1EF77 /* Application.m in Sources */,
-				F9923D79276033E400565B4E /* main.mm in Sources */,
+				F956C60F27644F8000F1C95C /* Application.mm in Sources */,
+				F956C60227644E6200F1C95C /* main.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F9923D7A276033E400565B4E /* Debug */ = {
+		F956C60327644E6200F1C95C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -221,7 +210,7 @@
 			};
 			name = Debug;
 		};
-		F9923D7B276033E400565B4E /* Release */ = {
+		F956C60427644E6200F1C95C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -273,11 +262,10 @@
 			};
 			name = Release;
 		};
-		F9923D7D276033E400565B4E /* Debug */ = {
+		F956C60627644E6200F1C95C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -285,11 +273,10 @@
 			};
 			name = Debug;
 		};
-		F9923D7E276033E400565B4E /* Release */ = {
+		F956C60727644E6200F1C95C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -300,25 +287,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F9923D70276033E400565B4E /* Build configuration list for PBXProject "KeyRemapperTerminal" */ = {
+		F956C5F927644E6200F1C95C /* Build configuration list for PBXProject "KeyRemapperTerminal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F9923D7A276033E400565B4E /* Debug */,
-				F9923D7B276033E400565B4E /* Release */,
+				F956C60327644E6200F1C95C /* Debug */,
+				F956C60427644E6200F1C95C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F9923D7C276033E400565B4E /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */ = {
+		F956C60527644E6200F1C95C /* Build configuration list for PBXNativeTarget "KeyRemapperTerminal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F9923D7D276033E400565B4E /* Debug */,
-				F9923D7E276033E400565B4E /* Release */,
+				F956C60627644E6200F1C95C /* Debug */,
+				F956C60727644E6200F1C95C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = F9923D6D276033E400565B4E /* Project object */;
+	rootObject = F956C5F627644E6200F1C95C /* Project object */;
 }

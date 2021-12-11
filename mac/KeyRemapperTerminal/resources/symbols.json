@@ -113,10 +113,13 @@
   "VolumeDown": [234, 0, 1, 73],
   "VolumeUp": [233, 0, 1, 72],
 
-  "MouseLeftButton": [241, 0, 1, 241],
-  "MouseRightButton": [242, 0, 1, 242],
-  // "BrightnessDown": [107, 0, 1],
-  // "BrightnessUp": [113, 0, 1],
+  "LeftClick": [241, 0, 1, 241],
+  "RightClick": [242, 0, 1, 242],
+
+  "AppMode1": [246, 0, 1, 246],
+  "AppMode2": [247, 0, 1, 247],
+  "AppMode3": [248, 0, 1, 248],
+  "AppMode4": [249, 0, 1, 249],
   "ToggleAppEnabled": [245, 0, 1, 0],
   "CloseApp": [999, 0, 1, 999]
 }
