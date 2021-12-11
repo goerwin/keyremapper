@@ -2,7 +2,7 @@
   "delayUntilRepeat": 300,
   "keyRepeatInterval": 25,
   "keyPressesDelay": 200,
-  "remaps": "%object(_remaps.json)",
+  "remaps": "%array(_remaps.json)",
   "keyPresses": "%array(_keyPresses.json)",
   "keybindings": [
     "%dotdotdotArray(_appKeybindings.json)",

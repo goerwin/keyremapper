@@ -5,10 +5,10 @@
     "Key:down Key:up is the same as Key",
     "remaps"
   ],
-  "remaps": {
-    "N": "P",
-    "O": "F"
-  },
+  "remaps": [
+    { "from": "N", "to": "P" },
+    { "from": "O", "to": "F" }
+  ],
   "keybindings": [
     {
       "keys": ["F"],

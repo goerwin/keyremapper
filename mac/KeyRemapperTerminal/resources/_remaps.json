@@ -1,8 +1,8 @@
-{
-  "Caps": "F18",
-  "CmdR": "Cmd",
-  "AltR": "Alt",
-  "ShiftR": "Shift",
-  "GraveAccent": "Shift",
-  "NonUSBackslash": "GraveAccent"
-}
+[
+  { "from": "Caps", "to": "F18" },
+  { "from": "CmdR", "to": "Cmd" },
+  { "from": "AltR", "to": "Alt" },
+  { "from": "ShiftR", "to": "Shift" },
+  { "from": "GraveAccent", "to": "Shift" },
+  { "from": "NonUSBackslash", "to": "GraveAccent" }
+]

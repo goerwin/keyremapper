@@ -283,17 +283,20 @@ private:
 
   static bool isKeyDown(ushort state) { return state == 0 || state == 2; }
 
-  KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state,
-                               bool isKeyDown) {
-    auto newKeyName = remaps[keyName];
+  KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state, bool isKeyDown) {
+    size_t remapsSize = remaps.size();
+    
+    for (size_t i = 0; i < remapsSize; i++) {
+      auto remap = remaps[i];
+      if (keyName != remap["from"]) continue;
+      if (!isWhen(remap["when"])) continue;
 
-    if (newKeyName.is_null())
-      return {code, state};
-
-    auto newKey = getKey(newKeyName);
-    auto [name, newCode, downState, upState] = newKey;
-
-    return {newCode, isKeyDown ? downState : upState};
+      auto newKey = getKey(remap["to"]);
+      auto [name, newCode, downState, upState] = newKey;
+      return {newCode, isKeyDown ? downState : upState};
+    }
+    
+    return {code, state};
   }
 
   bool isWhen(json when) {
@@ -325,8 +328,9 @@ private:
   json getFireFromKeybindings() {
     auto currentKey = globals["currentKey"];
     auto allKeybindings = keybindings.get<JsonArray>();
+    size_t allKeybindingsSize = allKeybindings.size();
 
-    for (size_t i = 0; i < allKeybindings.size(); i++) {
+    for (size_t i = 0; i < allKeybindingsSize; i++) {
       auto keybinding = allKeybindings[i];
       auto keys = keybinding["keys"];
 

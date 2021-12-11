@@ -1,6 +1,23 @@
 {
   "description": ["Multiple keyboards, order matters"],
+  "remaps": [
+    {
+      "from": "N",
+      "to": "X",
+      "when": { "keyboard": "1234" }
+    },
+    { "from": "N", "to": "Y" },
+    { "from": "O", "to": "A" },
+    {
+      "from": "O",
+      "to": "B",
+      "when": { "keyboard": "1234" }
+    }
+  ],
   "keyPresses": [
+    { "repeat": 1, "inputKey": "N", "fire": "Win" },
+    { "repeat": 1, "inputKey": "X", "fire": "Esc" },
+
     {
       "repeat": 1,
       "inputKey": "Caps",
@@ -12,7 +29,7 @@
     {
       "repeat": 1,
       "inputKey": "Alt",
-      "fire": "B",
+      "fire": "2",
       "when": { "keyboard": "1234" }
     }
   ],
@@ -32,6 +49,15 @@
     }
   ],
   "tests": [
+    // remaps
+    ["N", "Y"],
+    ["keyboard:_ N", "Y"],
+    ["keyboard:1234 N", "X Esc"],
+    ["O", "A"],
+    ["keyboard:_ O", "A"],
+    ["keyboard:1234 O", "A"],
+
+    // keybindings
     ["D", "F"],
     ["keyboard:1234 D", "E"],
     ["keyboard:1234 D:down keyboard:_ D:up", "E:down F:up"],
