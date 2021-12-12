@@ -74,20 +74,20 @@ public:
         if (scancode < 3 || scancode > 235) return;
 
         IOHIDDeviceRef ioHIDDeviceRef = (IOHIDDeviceRef)sender;
-        int vendorId, productId;
-        char manufacturer[256], product[256];
+        int vendorId = 0, productId = 0;
+        char manufacturer[256] = "", product[256] = "";
 
         CFTypeRef vendorIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDVendorIDKey));
-        CFNumberGetValue((CFNumberRef)vendorIdRef, kCFNumberSInt32Type, &vendorId);
+        if (vendorIdRef) CFNumberGetValue((CFNumberRef)vendorIdRef, kCFNumberSInt32Type, &vendorId);
 
         CFTypeRef productIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductIDKey));
-        CFNumberGetValue((CFNumberRef)productIdRef, kCFNumberSInt32Type, &productId);
+        if (productIdRef) CFNumberGetValue((CFNumberRef)productIdRef, kCFNumberSInt32Type, &productId);
 
         CFTypeRef manufacturerRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDManufacturerKey));
-        CFStringGetCString((CFStringRef)manufacturerRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8);
+        if (manufacturerRef) CFStringGetCString((CFStringRef)manufacturerRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8);
 
         CFTypeRef propertyRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductKey));
-        CFStringGetCString((CFStringRef)propertyRef, product, sizeof(product), kCFStringEncodingUTF8);
+        if (propertyRef) CFStringGetCString((CFStringRef)propertyRef, product, sizeof(product), kCFStringEncodingUTF8);
 
         IOHIDManager::onIOHIDKeyboardInput(
           scancode,
