@@ -75,7 +75,7 @@ public:
 
         IOHIDDeviceRef ioHIDDeviceRef = (IOHIDDeviceRef)sender;
         int vendorId = 0, productId = 0;
-        char manufacturer[256] = "", product[256] = "";
+        char manufacturer[256] = "-", product[256] = "-";
 
         CFTypeRef vendorIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDVendorIDKey));
         if (vendorIdRef) CFNumberGetValue((CFNumberRef)vendorIdRef, kCFNumberSInt32Type, &vendorId);
