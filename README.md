@@ -29,41 +29,41 @@
 
 - Windows
   - [ ] Add versioning
-  - [ ] keybindings per keyboard
   - [x] Tests via popup message
   - [x] UI to debug events
   - [x] multiple modes
-  - [x] multiple configs with json inheritance
+  - [x] configs with json array/object replacement helpers
   - [x] alt tab enter issue
   - [x] add builds for both x86 and x64 archs
   - [x] enable/disable with double esc
   - [x] logo
   - [x] brightness
   - [x] double press modifiers (eg. for the capslock with double shift press)
-  - [x] CLICKS
+  - [x] mouse clicks/mousedown/mouseup/drags
   - [x] keybindings per app
   - [x] fix issue with numpad and arrows (VERSION 1 is working properly!)
   - [x] remaps
-  - [x] move all files to src (no dirs allowed to avoid issues when importing header files)
+  - [x] multiple keyboards
   - [x] you should only test key cases, not entire flows (like vim mode)
   - [x] rethink alghoritm to be more general so it can be used in any OS
   - [x] validate if keycode doesnt exist
   - [x] general Key
 
 - Mac
-  - [x] Move tests out of the Google test framework so it is easy to test on Mac too
-  - [x] implement tests with time delays to test multiple key presses
   - [x] Move files that are shared between OSs to a common place
   - [x] detect current application
   - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
   - [x] toggle caps
-  - [x] modes
-  - [x] mouse clicks/drags/etc
+  - [x] multiple modes
+  - [x] mouse clicks/mousedown/mouseup/drags
+  - [x] multiple keyboards
   - [ ] enable/disable app with double esc
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
   - [x] ~~trigger media keys~~ (not easy to do, just use Hammerspoon)
+  - [x] implement tests with time delays to test multiple key presses
+  - [x] Move tests out of the Google test framework so we can test on Mac too
 
 
 ### Text navigation/manipulation
@@ -92,9 +92,9 @@ Since I prefer how text manipulations work in Mac over windows, the following sh
 - Input Monitoring check is required by IOHIDKit to globally listen for keyboard input across the system
 - when you send a CGEventCreateKeyboardEvent, the system will automatically ask for you permission for Accessibility(Allow the app to control your computer)
 - When developing in XCode
-  - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
-  - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
-  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
+  - make sure the schemas (debug/release) have "Debug Process" as "root" so that it can actually capture all keyboard input from anywhere
+  - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes everytime
+  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
 - You can execute command line commands via system. eg.
   - `system("say hello world");`
   - `system("osascript -e \"set volume 5\"");`
