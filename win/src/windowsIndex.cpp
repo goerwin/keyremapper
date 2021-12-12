@@ -327,9 +327,11 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     }
     case IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD: {
       auto remapInfoSize = g_EventsInfo.size();
+      
       std::string str = "";
-      for (auto i = 0; i < remapInfoSize && i < 20; i++)
-        str = str + g_EventsInfo[i] + "\n";
+
+      for (auto i = 0, max = 0; i < remapInfoSize && i < 20; i++)
+        str = str + g_EventsInfo[remapInfoSize - 1 - i] + "\n";
 
       copyToClipboard(g_systemTrayIconWindow, str);
       MessageBoxA(NULL, "Events copied to clipboard!", "Copy to Clipboard",
