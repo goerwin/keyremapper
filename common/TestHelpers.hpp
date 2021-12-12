@@ -22,7 +22,6 @@ json runTests(json tests, json rules, json symbols) {
   for (size_t i = 0; i < testsSize; i++) {
     std::vector<String> test = tests[i];
     auto inputKeysStr = test[0];
-    auto testSize = test.size();
 
     keyDispatcher->reset();
 
@@ -42,7 +41,7 @@ json runTests(json tests, json rules, json symbols) {
       if (keyboardTokenIdx != std::string::npos) {
         auto keyboard = item.substr(keyboardKey.size(), item.size());
         keyboard = keyboard == "_" ? "" : keyboard;
-        keyDispatcher->setKeyboard(keyboard);
+        keyDispatcher->setKeyboard(keyboard, "keyboard description");
         continue;
       }
 

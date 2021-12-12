@@ -37,7 +37,9 @@ private:
   json remaps;
   json keyPresses;
   int REPEAT_TIME;
-  std::function<void(String)> applyKeysCb;
+  
+  // appName, keyboardId, keyboardDescription, keyEvents
+  std::function<void(String, String, String, String)> applyKeysCb;
 
   double getTimeDifference(double time1, double time2) {
       return time1 - time2;
@@ -165,11 +167,16 @@ public:
       }
 
       if (applyKeysCb) {
-        applyKeysCb(std::to_string(code) + ":" +
-          std::to_string(state) +
-          " -> " + stringifyKeyEvents({keyEvent}) + " -> " +
-          stringifyKeyEvents({newKeyEvent}) + " -> " +
-          stringifyKeyEvents(localKeyEvents));
+        applyKeysCb(
+          globals["appName"],
+          globals["keyboard"],
+          globals["keyboardDescription"],
+          std::to_string(code) + ":" +
+            std::to_string(state) +
+            " -> " + stringifyKeyEvents({keyEvent}) + " -> " +
+            stringifyKeyEvents({newKeyEvent}) + " -> " +
+            stringifyKeyEvents(localKeyEvents)
+        );
       }
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
@@ -182,11 +189,12 @@ public:
     globals["appName"] = appName;
   }
 
-  void setKeyboard(String keyboard) {
+  void setKeyboard(String keyboard, String description) {
     globals["keyboard"] = keyboard;
+    globals["keyboardDescription"] = description;
   }
 
-  void setApplyKeysCb(std::function<void(String)> _applyKeysCb) {
+  void setApplyKeysCb(std::function<void(String, String, String, String)> _applyKeysCb) {
     applyKeysCb = _applyKeysCb;
   }
 

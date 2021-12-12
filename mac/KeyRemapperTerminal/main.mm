@@ -22,6 +22,10 @@
 #include "./MouseHandler.hpp"
 #include "./Global.hpp"
 
+#include <IOKit/IOKitLib.h>
+#include <IOKit/hid/IOHIDLib.h>
+#include <IOKit/hidsystem/IOHIDLib.h>
+
 bool isArrowKeyVkCode(ushort vkCode) {
   return std::find(Global::arrowKeyVkCodes.begin(), Global::arrowKeyVkCodes.end(), vkCode) != Global::arrowKeyVkCodes.end();
 }
@@ -57,7 +61,6 @@ void toggleAppEnabled() {
 void setActiveApp(std::string activeApp) {
   Global::activeApp = activeApp;
   Global::keyDispatcher->setAppName(Global::activeApp);
-  Helpers::print("Active App: " + Global::activeApp);
 }
 
 void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) {
@@ -107,8 +110,13 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
   threadObj.detach();
 }
 
-void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown) {
+void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int productId, std::string manufacturer, std::string product) {
+  auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
+  
+  Global::keyDispatcher->setKeyboard(keyboard, manufacturer + " | " + product);
+  
   auto newKeys = Global::keyDispatcher->applyKeys({{scancode, ushort(isKeyDown ? 0 : 1)}});
+  
   auto newKeysSize = newKeys.size();
 
   for (size_t i = 0; i < newKeysSize; i++) {
@@ -180,8 +188,12 @@ void initializeKeyDispatcher(int mode) {
   delete Global::keyDispatcher;
   Global::keyDispatcher = new KeyDispatcher(rules, Global::symbols);
   Global::keyDispatcher->setAppName(Global::activeApp);
-  Global::keyDispatcher->setApplyKeysCb([](std::string appliedKeys) {
-    Helpers::print(appliedKeys);
+  Global::keyDispatcher->setApplyKeysCb([](std::string appName, std::string keyboardId, std::string keyboardDescription, std::string keys) {
+    Helpers::print(
+      "App: " + appName + "\n" +
+      "Keyboard (vendorId:productId): " + keyboardId + "\n" +
+      "KeyboardDescription: " + keyboardDescription + "\n" +
+      "Keys: " + keys + "\n");
   });
 
   auto tests = rules["tests"];
@@ -200,13 +212,11 @@ int main(int argc, const char *argv[]) {
   Global::resourcesParentDirPath = std::string(argv[0]);
   Global::resourcesParentDirPath = Global::resourcesParentDirPath.substr(0, Global::resourcesParentDirPath.find_last_of("/")).append("/resources");
 
+  initializeKeyDispatcher();
   IOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
   IOHIDManager::initializeIOHIDManager();
-
   MouseHandler::initialize();
   
-  initializeKeyDispatcher();
-
   // NOTE: Running this Objective C code inside a function doesn't work
   Application *application = [[Application alloc]init];
   application.activeApplicationChangeCb = setActiveApp;

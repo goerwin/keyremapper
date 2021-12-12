@@ -1,4 +1,13 @@
 [
+  { "from": "Alt", "to": "Cmd", "when": { "keyboard": "32:9494" } },
+  { "from": "Cmd", "to": "Alt", "when": { "keyboard": "32:9494" } },
+  { "from": "AltR", "to": "Cmd", "when": { "keyboard": "32:9494" } },
+  { "from": "CmdR", "to": "Alt", "when": { "keyboard": "32:9494" } },
+  {
+    "from": "GraveAccent",
+    "to": "GraveAccent",
+    "when": { "keyboard": "32:9494" }
+  },
   { "from": "Caps", "to": "F18" },
   { "from": "CmdR", "to": "Cmd" },
   { "from": "AltR", "to": "Alt" },
