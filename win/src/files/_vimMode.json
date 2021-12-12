@@ -15,17 +15,18 @@
     "fire": ["vimArrowKey", null]
   },
   {
-    "keys": ["S"],
+    "keys": ["F"],
     "when": { "Caps": true },
     "fire": ["Shift:down", "Shift:up"]
   },
   {
     "keys": ["Caps"],
-    "when": { "S": true },
+    "when": { "F": true },
     "fire": [null, "Shift:up"]
   },
   {
     // Because non n-rollover keyboard: Win + Caps + S + H/J = F7/Y/]
+    // Lenovo Thinkpad
     "keys": ["F7", "Y", "BracketR"],
     "when": { "Caps": true },
     "fire": [null, null]

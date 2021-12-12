@@ -122,6 +122,9 @@ public:
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
     appsDefinitions = rulesEl["apps"];
+    globals["appName"] = "";
+    globals["keyboard"] = "";
+    globals["keyboardDescription"] = "";
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents) {

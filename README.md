@@ -29,7 +29,6 @@
 
 - Windows
   - [ ] Add versioning
-  - [ ] MacOS Version (Not viable as of now, use karabiner-elements instead)
   - [ ] keybindings per keyboard
   - [x] Tests via popup message
   - [x] UI to debug events

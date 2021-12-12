@@ -28,7 +28,7 @@ nlohmann::json g_symbols;
 
 HWND g_systemTrayIconWindow;
 HWND g_eventWindow;
-Helpers::circular_buffer<std::string> g_remapInfo(30);
+Helpers::circular_buffer<std::string> g_EventsInfo(60);
 
 const int IDM_EXIT = 5;
 const int IDM_ENABLE = 6;
@@ -38,6 +38,7 @@ const int IDM_MODE_3 = 13;
 const int IDM_MODE_4 = 14;
 const int IDM_OPEN_EVENT_WINDOW = 15;
 const int IDM_RUN_MODE_TESTS = 16;
+const int IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD = 17;
 
 // https://codingmisadventures.wordpress.com/2009/02/20/creating-a-system-tray-icon-using-visual-c-and-win32/
 NOTIFYICONDATA nid;
@@ -60,21 +61,21 @@ void createSystemTrayIcon(HINSTANCE hInstance, HWND hWnd) {
   Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
-void handleApplyKeysCb(std::string remapInfo) {
-  g_remapInfo.push_back(remapInfo);
+void handleApplyKeysCb(std::string appName, std::string keyboard, std::string keyboardDesc, std::string keys) {
+  g_EventsInfo.push_back("");
+  g_EventsInfo.push_back("Keys: " + keys);
+  g_EventsInfo.push_back("Keyboard: " + keyboard);
+  g_EventsInfo.push_back("App: " + appName);
   RedrawWindow(g_eventWindow, 0, 0, RDW_INVALIDATE | RDW_INTERNALPAINT);
 }
 
 void initializeKeyDispatcher(int mode = 0) {
-  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json",
-                                    "mode4.json"};
+  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
 
   auto absDirPath = WindowsHelpers::getAbsDirPath();
 
-  if (WindowsHelpers::fileExists(absDirPath + "\\" + modes[mode]))
-    g_mode = mode;
-  else
-    g_mode = 0;
+  if (WindowsHelpers::fileExists(absDirPath + "\\" + modes[mode])) g_mode = mode;
+  else g_mode = 0;
 
   g_rules = Helpers::getJsonFile(absDirPath, modes[g_mode]);
   g_symbols = Helpers::getJsonFile(absDirPath, "symbols.json");
@@ -110,6 +111,14 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 
   while (interception_receive(context, device = interception_wait(context),
                               (InterceptionStroke *)&keyStroke, 1) > 0) {
+    wchar_t hardwareId[500];
+    size_t length = interception_get_hardware_id(context, device, hardwareId, sizeof(hardwareId));
+    if (length > 0 && length < sizeof(hardwareId)) {
+      std::wstring ws(hardwareId);
+      std::string hardwareIdStr(ws.begin(), ws.end());
+      g_keyDispatcher->setKeyboard(hardwareIdStr, "Not available");
+    }
+
     auto code = keyStroke.code;
     auto state = keyStroke.state;
     auto newKeys = g_keyDispatcher->applyKeys({{code, state}});
@@ -122,7 +131,6 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     // "FakeShiftL": [42, 2, 3],
     // Discard FakeShiftL events
     if (code == 42 && (state == 2 || state == 3)) continue;
-    WindowsHelpers::print(std::to_string(code));
 
     for (size_t i = 0; i < newKeysSize; i++) {
       auto [code, state] = newKeys[i];
@@ -186,18 +194,15 @@ LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, 0x00DDDDDD);
 
-    std::string currentWinTitle = "Active appName: " + g_appName;
-
     auto title = "originalCode:originalState -> keyEvent -> remappedKeyEvent "
                  "-> transformedKeyEvents";
-    auto remapInfoSize = g_remapInfo.size();
+    auto remapInfoSize = g_EventsInfo.size();
 
-    TextOutA(hdc, 0, 0, currentWinTitle.c_str(), strlen(currentWinTitle.c_str()));
-    TextOutA(hdc, 0, 30, title, strlen(title));
+    TextOutA(hdc, 0, 10, title, strlen(title));
 
     for (auto i = 0; i < remapInfoSize; i++) {
-      auto size = g_remapInfo[remapInfoSize - 1 - i].size();
-      TextOutA(hdc, 0, i * 20 + 60, g_remapInfo[remapInfoSize - 1 - i].c_str(),
+      auto size = g_EventsInfo[remapInfoSize - 1 - i].size();
+      TextOutA(hdc, 0, i * 20 + 60, g_EventsInfo[remapInfoSize - 1 - i].c_str(),
                size);
     }
 
@@ -241,6 +246,21 @@ HWND createEventWindow(HINSTANCE hInstance) {
   return hwnd;
 }
 
+void copyToClipboard(HWND hwnd, const std::string& s) {
+  OpenClipboard(hwnd);
+  EmptyClipboard();
+  HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
+  if (!hg) {
+    CloseClipboard();
+    return;
+  }
+  memcpy(GlobalLock(hg), s.c_str(), s.size() + 1);
+  GlobalUnlock(hg);
+  SetClipboardData(CF_TEXT, hg);
+  CloseClipboard();
+  GlobalFree(hg);
+}
+
 LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
                                       LPARAM lParam) {
   switch (uMsg) {
@@ -259,6 +279,8 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, L"Exit");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_RUN_MODE_TESTS,
                  L"Run mode tests");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD,
+                 L"Copy latest Events to Clipboard");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_EVENT_WINDOW,
                  L"Open Events Window");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4,
@@ -298,8 +320,20 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       auto testResults = TestHelpers::runTests(g_rules["tests"], g_rules, g_symbols);
       std::string testResultsStr =
           testResults.is_null() ? "NO TESTS RUN" : testResults["message"];
+
       MessageBoxA(NULL, testResultsStr.c_str(), "Tests Results",
                   MB_OK | MB_ICONINFORMATION);
+      return 0;
+    }
+    case IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD: {
+      auto remapInfoSize = g_EventsInfo.size();
+      std::string str = "";
+      for (auto i = 0; i < remapInfoSize && i < 20; i++)
+        str = str + g_EventsInfo[i] + "\n";
+
+      copyToClipboard(g_systemTrayIconWindow, str);
+      MessageBoxA(NULL, "Events copied to clipboard!", "Copy to Clipboard",
+        MB_OK | MB_ICONINFORMATION);
       return 0;
     }
     case IDM_OPEN_EVENT_WINDOW:
