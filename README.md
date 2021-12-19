@@ -70,31 +70,37 @@
 
 Since I prefer how text manipulations work in Mac over windows, the following shows how it works on Mac so I can replicate it on Windows:
 
-- <kbd>Cmd + ←/→</kbd> → jump to start/end of line
-- <kbd>Cmd + Shift + ←/→</kbd> → select to start/end of line
+- <kbd>Alt + [Shift] + ←/→</kbd> → jump [select] to start/end of word
+- <kbd>Cmd + [Shift] + ←/→</kbd> → jump [select] to start/end of line
+- <kbd>Cmd + [Shift] + ↓/↑</kbd> → jump [select] to start/end of file
+- <kbd>Alt + BackSpace</kbd> → Delete to start of word
 - <kbd>Cmd + BackSpace</kbd> → delete to start of line
-- <kbd>Alt + ←/→</kbd> → jump to beginning/end of word
-- <kbd>Alt + Shift + ←/→</kbd> → select to beginning/end of word
-- <kbd>Alt + BackSpace</kbd> → Delete to beginning of word
 
-### NOTES
+VIM mode should work like this for both win/mac (To match same layout keyboaord with Windows, replace Cmd/Alt with Ctrl/Win):
 
-- FakeShiftL is triggered when some special keys (left, right) are used with NumLock on. So I'm ignoring it.
-- Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock status. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
-- For unicode (accents, tildes, etc)
-  - http://www.fileformat.info/tip/microsoft/enter_unicode.htm
-- Numlock
-  - https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
+- <kbd>Caps + [F] + H/L/K/J</kbd> → move [select] Left/Right/Up/Down
+- <kbd>Caps + Alt + [F] + H/L</kbd> → jump [select] to start/end of word
+- <kbd>Caps + Cmd + [F] + H/L</kbd> → jump [select] to start/end of line
+- <kbd>Caps + Cmd + [F] + K/J</kbd> → jump [select] to start/end of file
 
-# Mac Notes
+### Notes
 
-- Key Codes App is very useful to debug event keys and flags sent to the system
-- Input Monitoring check is required by IOHIDKit to globally listen for keyboard input across the system
-- when you send a CGEventCreateKeyboardEvent, the system will automatically ask for you permission for Accessibility(Allow the app to control your computer)
-- When developing in XCode
-  - make sure the schemas (debug/release) have "Debug Process" as "root" so that it can actually capture all keyboard input from anywhere
-  - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes everytime
-  - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
-- You can execute command line commands via system. eg.
-  - `system("say hello world");`
-  - `system("osascript -e \"set volume 5\"");`
+- Windows
+  - FakeShiftL is triggered when some special keys (left, right) are used with NumLock on. So I'm ignoring it.
+  - Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock status. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
+  - For unicode (accents, tildes, etc)
+    - http://www.fileformat.info/tip/microsoft/enter_unicode.htm
+  - Numlock
+    - https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
+
+- Mac
+  - Key Codes App is very useful to debug event keys and flags sent to the system
+  - Input Monitoring check is required by IOHIDKit to globally listen for keyboard input across the system
+  - when you send a CGEventCreateKeyboardEvent, the system will automatically ask for you permission for Accessibility(Allow the app to control your computer)
+  - When developing in XCode
+    - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
+    - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
+    - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
+  - You can execute command line commands via system. eg.
+    - `system("say hello world");`
+    - `system("osascript -e \"set volume 5\"");`
