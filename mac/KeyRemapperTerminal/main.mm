@@ -22,14 +22,6 @@
 #include "./MouseHandler.hpp"
 #include "./Global.hpp"
 
-bool isArrowKeyVkCode(ushort vkCode) {
-  return std::find(Global::arrowKeyVkCodes.begin(), Global::arrowKeyVkCodes.end(), vkCode) != Global::arrowKeyVkCodes.end();
-}
-
-bool isFunctionKeyVkCode(ushort vkCode) {
-  return std::find(Global::fnKeyVkCodes.begin(), Global::fnKeyVkCodes.end(), vkCode) != Global::fnKeyVkCodes.end();
-}
-
 void sendNotification(std::string message, std::string title = "KeyRemapper") {
   Helpers::print(message);
   system(("osascript -e 'display notification \"" + message + "\" with title \"" + title + "\"'").c_str());
@@ -59,16 +51,16 @@ void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) 
   if (Global::isFnDown) flags = flags | kCGEventFlagMaskSecondaryFn;
   if (IOHIDManager::capslockState) flags = flags | kCGEventFlagMaskAlphaShift;
 
-  if (isArrowKeyVkCode(vkCode))
+  if (Global::isArrowKeyVkCode(vkCode))
     flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
-  else if (isFunctionKeyVkCode(vkCode)) flags = flags | kCGEventFlagMaskSecondaryFn;
+  else if (Global::isFunctionKeyVkCode(vkCode)) flags = flags | kCGEventFlagMaskSecondaryFn;
   else flags = flags | kCGEventFlagMaskNonCoalesced;
 
   CGEventSetFlags(event, flags);
 }
 
-void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
-  if (state != 0) {
+void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
+  if (!isKeyDown || Global::isModifierKeyVkCode(vkCode)) {
     Global::shouldKeyRepeat = false;
     Global::repeatedKey = {};
     return;
@@ -135,7 +127,7 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     CFRelease(eventSource);
     CFRelease(newEvent);
 
-    handleKeyRepeat(vkCode, state);
+    handleKeyRepeat(vkCode, isKeyDown);
   }
 }
 

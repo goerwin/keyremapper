@@ -62,6 +62,7 @@
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
   - [ ] Fn key not working
+  - [ ] Memory leaks
   - [x] ~~trigger media keys~~ (not easy to do, just use Hammerspoon)
   - [x] implement tests with time delays to test multiple key presses
   - [x] Move tests out of the Google test framework so we can test on Mac too

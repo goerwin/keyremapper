@@ -11,6 +11,7 @@ namespace Global {
   bool isCtrlDown = false;
   bool isFnDown= false;
   auto fnKeyVkCodes = {122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111};
+  auto modifierVkCodes = {55, 54, 56, 60, 58, 61, 59, 62, 63};
   auto arrowKeyVkCodes = {123,124,125,126};
 
   int delayUntilRepeat = 250;
@@ -23,6 +24,18 @@ namespace Global {
   bool isAppEnabled = false;
   nlohmann::json symbols;
   std::string resourcesParentDirPath;
+
+  bool isArrowKeyVkCode(ushort vkCode) {
+    return std::find(arrowKeyVkCodes.begin(), arrowKeyVkCodes.end(), vkCode) != arrowKeyVkCodes.end();
+  }
+
+  bool isFunctionKeyVkCode(ushort vkCode) {
+    return std::find(fnKeyVkCodes.begin(), fnKeyVkCodes.end(), vkCode) != fnKeyVkCodes.end();
+  }
+
+  bool isModifierKeyVkCode(ushort vkCode) {
+    return std::find(modifierVkCodes.begin(), modifierVkCodes.end(), vkCode) != modifierVkCodes.end();
+  }
 
   void reset() {
     isCmdDown = false;
