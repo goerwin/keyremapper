@@ -1,10 +1,5 @@
 [
   {
-    "keys": ["Esc"],
-    "when": { "Ctrl": true },
-    "fire": ["CloseApp", null]
-  },
-  {
     "keys": ["1"],
     "when": { "Ctrl": true },
     "fire": [null, "AppMode1"]

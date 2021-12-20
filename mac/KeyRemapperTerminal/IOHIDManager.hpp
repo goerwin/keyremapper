@@ -7,6 +7,8 @@
 #include <iostream>
 #include <thread>
 
+// https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/HID/new_api_10_5/tn2187.html
+
 class IOHIDManager {
 public:
   static IOHIDManagerRef hidManager;
@@ -47,65 +49,74 @@ private:
 
     return ret;
   }
+  
+  static void mortalKombat(void *context, IOReturn result, void *sender, IOHIDValueRef value) {
+    IOHIDElementRef elem = IOHIDValueGetElement(value);
+    ushort scancode = IOHIDElementGetUsage(elem);
+
+    long pressed = IOHIDValueGetIntegerValue(value);
+    auto isKeyDown = pressed == 1;
+
+    if (scancode < 3 || scancode > 235) return;
+
+    IOHIDDeviceRef ioHIDDeviceRef = (IOHIDDeviceRef)sender;
+    int vendorId = 0, productId = 0;
+    char manufacturer[256] = "-", product[256] = "-";
+
+    CFTypeRef vendorIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDVendorIDKey));
+    if (vendorIdRef) CFNumberGetValue((CFNumberRef)vendorIdRef, kCFNumberSInt32Type, &vendorId);
+
+    CFTypeRef productIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductIDKey));
+    if (productIdRef) CFNumberGetValue((CFNumberRef)productIdRef, kCFNumberSInt32Type, &productId);
+
+    CFTypeRef manufacturerRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDManufacturerKey));
+    if (manufacturerRef) CFStringGetCString((CFStringRef)manufacturerRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8);
+
+    CFTypeRef propertyRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductKey));
+    if (propertyRef) CFStringGetCString((CFStringRef)propertyRef, product, sizeof(product), kCFStringEncodingUTF8);
+
+    IOHIDManager::onIOHIDKeyboardInput(
+      scancode,
+      isKeyDown,
+      vendorId,
+      productId,
+      manufacturer,
+      product
+    );
+  }
 
 public:
-  static void initializeIOHIDManager() {
+  static void initialize() {
+    IOHIDManager::hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
+    
+    if (CFGetTypeID(IOHIDManager::hidManager) != IOHIDManagerGetTypeID()) return;
+    
     IOHIDManager::capslockState = IOHIDManager::getCapslockState();
 
-    auto mainLoop = CFRunLoopGetMain();
+    CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
+    CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
+    CFMutableDictionaryRef matchesListRef[] = { keyboard, keypad };
+    CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault, (const void **)matchesListRef, 2, NULL);
+    
+    IOHIDManagerSetDeviceMatchingMultiple(IOHIDManager::hidManager, matches);
 
-    auto ioHIDManagerThread = std::thread([](CFRunLoopRef loop) {
-      IOHIDManager::hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-      CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
-      CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
+    IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, IOHIDManager::mortalKombat, NULL);
 
-      CFMutableDictionaryRef matchesList[] = { keyboard, keypad };
+    CFRelease(keyboard);
+    CFRelease(keypad);
+    CFRelease(matches);
 
-      CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault, (const void **)matchesList, 2, NULL);
-
-      IOHIDManagerSetDeviceMatchingMultiple(IOHIDManager::hidManager, matches);
-      IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, [](void *context, IOReturn result, void *sender, IOHIDValueRef value) {
-        IOHIDElementRef elem = IOHIDValueGetElement(value);
-        ushort scancode = IOHIDElementGetUsage(elem);
-
-        long pressed = IOHIDValueGetIntegerValue(value);
-        auto isKeyDown = pressed == 1;
-
-        if (scancode < 3 || scancode > 235) return;
-
-        IOHIDDeviceRef ioHIDDeviceRef = (IOHIDDeviceRef)sender;
-        int vendorId = 0, productId = 0;
-        char manufacturer[256] = "-", product[256] = "-";
-
-        CFTypeRef vendorIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDVendorIDKey));
-        if (vendorIdRef) CFNumberGetValue((CFNumberRef)vendorIdRef, kCFNumberSInt32Type, &vendorId);
-
-        CFTypeRef productIdRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductIDKey));
-        if (productIdRef) CFNumberGetValue((CFNumberRef)productIdRef, kCFNumberSInt32Type, &productId);
-
-        CFTypeRef manufacturerRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDManufacturerKey));
-        if (manufacturerRef) CFStringGetCString((CFStringRef)manufacturerRef, manufacturer, sizeof(manufacturer), kCFStringEncodingUTF8);
-
-        CFTypeRef propertyRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductKey));
-        if (propertyRef) CFStringGetCString((CFStringRef)propertyRef, product, sizeof(product), kCFStringEncodingUTF8);
-
-        IOHIDManager::onIOHIDKeyboardInput(
-          scancode,
-          isKeyDown,
-          vendorId,
-          productId,
-          manufacturer,
-          product
-        );
-      }, NULL);
-
-      // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
-      // kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
-      IOHIDManagerScheduleWithRunLoop(IOHIDManager::hidManager, loop, kCFRunLoopDefaultMode);
-      IOHIDManagerOpen(IOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
-    }, mainLoop);
-
-    ioHIDManagerThread.detach();
+    // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
+    // kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
+    IOHIDManagerScheduleWithRunLoop(IOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+    IOHIDManagerOpen(IOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
+  }
+  
+  static void terminate() {
+    IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, NULL, NULL);
+    IOHIDManagerSetDeviceMatchingMultiple(IOHIDManager::hidManager, NULL);
+    IOHIDManagerUnscheduleFromRunLoop(IOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+    IOHIDManagerClose(IOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
   }
 
   static bool getCapslockState() {

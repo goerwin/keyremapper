@@ -19,10 +19,16 @@ namespace Global {
   int keyRepeatThreadCount = 0;
   CGKeyCode repeatedKey;
 
-  CGEventSourceRef eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-
   std::string activeApp;
-  bool isAppEnabled = true;
+  bool isAppEnabled = false;
   nlohmann::json symbols;
   std::string resourcesParentDirPath;
+
+  void reset() {
+    isCmdDown = false;
+    isShiftDown = false;
+    isAltDown = false;
+    isCtrlDown = false;
+    isFnDown= false;
+  }
 }

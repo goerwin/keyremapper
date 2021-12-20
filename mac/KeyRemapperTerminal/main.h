@@ -8,5 +8,6 @@
 #define main_h
 
 void initializeKeyDispatcher(int mode = 0);
+void toggleAppEnabled();
 
 #endif /* main_h */

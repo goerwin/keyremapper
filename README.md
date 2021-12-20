@@ -104,3 +104,44 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
   - You can execute command line commands via system. eg.
     - `system("say hello world");`
     - `system("osascript -e \"set volume 5\"");`
+  - Debug message sent to deallocated instance errors (EXC_BAD_INSTRUCTION)
+    - Edit Schema -> Diagnostics -> Check: Zombie objects, Guard Malloc, Malloc Stack Logging (All allocations and Free History)
+    - reproduce the error then in the llbd console:
+      - (lldb) command script import lldb.macosx.heap
+      - (lldb) malloc_info --stack-history 0xAAAAAAAAA
+
+### Snippets Mac
+
+```cpp
+// Capture media key events in init main.mm
+auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGTailAppendEventTap, kCGEventTapOptionDefault,
+  CGEventMaskBit(NX_SYSDEFINED),
+  [](CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+//    CGEventMaskBit(kCGEventKeyDown); // this traps expose and launchpad keys
+    Helpers::print("LLORALO");
+      return event;
+    }, NULL);
+
+if (!myEventTap) {
+  std::cout << "Accesibility disabled for this app";
+}
+
+auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEventTap, 0);
+
+if (!myEventTap) {
+  std::cout << "Couldn't create runLoopSource";
+}
+```
+
+```cpp
+// Test memory leaks in init main.mm
+ std::thread threadObj([]() {
+   int i = 0;
+   while (i < 500000) {
+     toggleAppEnabled();
+     std::this_thread::sleep_for(std::chrono::milliseconds(15));
+     i++;
+   }
+ });
+ threadObj.detach();
+```

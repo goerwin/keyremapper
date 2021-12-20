@@ -22,10 +22,6 @@
 #include "./MouseHandler.hpp"
 #include "./Global.hpp"
 
-#include <IOKit/IOKitLib.h>
-#include <IOKit/hid/IOHIDLib.h>
-#include <IOKit/hidsystem/IOHIDLib.h>
-
 bool isArrowKeyVkCode(ushort vkCode) {
   return std::find(Global::arrowKeyVkCodes.begin(), Global::arrowKeyVkCodes.end(), vkCode) != Global::arrowKeyVkCodes.end();
 }
@@ -36,8 +32,7 @@ bool isFunctionKeyVkCode(ushort vkCode) {
 
 void sendNotification(std::string message, std::string title = "KeyRemapper") {
   Helpers::print(message);
-  system(("osascript -e 'display notification \""
-    + message + "\" with title \"" + title + "\"'").c_str());
+  system(("osascript -e 'display notification \"" + message + "\" with title \"" + title + "\"'").c_str());
 }
 
 // TODO: This is inefficient
@@ -47,15 +42,6 @@ ushort getMacVKCode(short scanCode) {
   }
 
   return {};
-}
-
-void toggleAppEnabled() {
-  Global::isAppEnabled = !Global::isAppEnabled;
-  if (Global::isAppEnabled) initializeKeyDispatcher();
-  else {
-    
-  }
-  sendNotification("App status: " + std::string(Global::isAppEnabled ? "Enabled" : "Disabled"));
 }
 
 void setActiveApp(std::string activeApp) {
@@ -96,13 +82,15 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
     if (threadIdx != Global::keyRepeatThreadCount || !Global::shouldKeyRepeat) return;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(Global::delayUntilRepeat));
-
     while (Global::keyRepeatThreadCount == threadIdx && Global::shouldKeyRepeat) {
       auto vkCode = (CGKeyCode)Global::repeatedKey;
-      auto event = CGEventCreateKeyboardEvent(Global::eventSource, vkCode, 1);
+      auto eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+      auto event = CGEventCreateKeyboardEvent(eventSource, vkCode, 1);
       setModifierFlagsToKeyEvent(event, vkCode, true);
       CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
       CGEventPost(kCGHIDEventTap, event);
+      CFRelease(eventSource);
+      CFRelease(event);
       std::this_thread::sleep_for(std::chrono::milliseconds(Global::keyRepeatInterval));
     }
   },
@@ -112,25 +100,17 @@ void handleKeyRepeat(CGKeyCode vkCode, ushort state) {
 
 void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int productId, std::string manufacturer, std::string product) {
   auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
-  
+
   Global::keyDispatcher->setKeyboard(keyboard, manufacturer + " | " + product);
-  
+
   auto newKeys = Global::keyDispatcher->applyKeys({{scancode, ushort(isKeyDown ? 0 : 1)}});
-  
+
   auto newKeysSize = newKeys.size();
 
   for (size_t i = 0; i < newKeysSize; i++) {
     auto [code, state] = newKeys[i];
     auto vkCode = getMacVKCode(code);
     auto isKeyDown = state == 0;
-
-    if (vkCode == 999 && isKeyDown) {
-      exit(0);
-      return;
-    }
-
-    if (code == 245) return toggleAppEnabled();
-    else if (!Global::isAppEnabled) continue;
 
     if (vkCode == 246 && isKeyDown) return initializeKeyDispatcher(0);
     if (vkCode == 247 && isKeyDown) return initializeKeyDispatcher(1);
@@ -144,13 +124,15 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     else if (vkCode == 63) Global::isFnDown = isKeyDown;
 
     if (vkCode == 57 && isKeyDown) return IOHIDManager::toggleCapslockState();
-    
+
     if (vkCode == 241) return MouseHandler::handleMouseDownUp(isKeyDown);
     else if (vkCode == 242) return MouseHandler::handleMouseDownUp(isKeyDown, "right");
 
-    auto newEvent = CGEventCreateKeyboardEvent(Global::eventSource, (CGKeyCode)vkCode, state == 0);
+    auto eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+    auto newEvent = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, state == 0);
     setModifierFlagsToKeyEvent(newEvent, vkCode, isKeyDown);
     CGEventPost(kCGHIDEventTap, newEvent);
+    CFRelease(eventSource);
     CFRelease(newEvent);
 
     handleKeyRepeat(vkCode, state);
@@ -188,6 +170,7 @@ void initializeKeyDispatcher(int mode) {
   delete Global::keyDispatcher;
   Global::keyDispatcher = new KeyDispatcher(rules, Global::symbols);
   Global::keyDispatcher->setAppName(Global::activeApp);
+
   Global::keyDispatcher->setApplyKeysCb([](std::string appName, std::string keyboardId, std::string keyboardDescription, std::string keys) {
     Helpers::print(
       "App: " + appName + "\n" +
@@ -195,6 +178,7 @@ void initializeKeyDispatcher(int mode) {
       "KeyboardDescription: " + keyboardDescription + "\n" +
       "Keys: " + keys + "\n");
   });
+
 
   auto tests = rules["tests"];
   std::string testsResultsMsg = "";
@@ -207,16 +191,73 @@ void initializeKeyDispatcher(int mode) {
   sendNotification(selectedMode + " selected" + testsResultsMsg);
 }
 
+CFMachPortRef g_appToggleEventTap;
+CFRunLoopSourceRef g_appToggleRunLoopSource;
+void initializeAppToggleHotkey() {
+  g_appToggleEventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventKeyUp), [](CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
+    auto flags = CGEventGetFlags(event);
+    bool isCtrlKeyDown = (flags & kCGEventFlagMaskControl) == kCGEventFlagMaskControl;
+    auto code = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+
+    // Ctrl + Esc
+    if (code == 53 && isCtrlKeyDown) toggleAppEnabled();
+
+    return event;
+  }, NULL);
+
+  if (!g_appToggleEventTap) {
+    std::cout << "Accesibility disabled for this app";
+    exit(1);
+  }
+
+  g_appToggleRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, g_appToggleEventTap, 0);
+
+  if (!g_appToggleRunLoopSource) {
+    std::cout << "Couldn't create runLoopSource";
+    exit(1);
+  }
+
+  CFRunLoopAddSource(CFRunLoopGetMain(), g_appToggleRunLoopSource, kCFRunLoopDefaultMode);
+}
+
+void terminateAppToggleHotkey() {
+  if (g_appToggleEventTap) {
+    CFMachPortInvalidate(g_appToggleEventTap);
+    CFRelease(g_appToggleEventTap);
+  }
+
+  if (g_appToggleRunLoopSource) {
+    CFRunLoopRemoveSource(CFRunLoopGetMain(), g_appToggleRunLoopSource, kCFRunLoopDefaultMode);
+    CFRelease(g_appToggleRunLoopSource);
+  }
+}
+
+void toggleAppEnabled() {
+  Global::isAppEnabled = !Global::isAppEnabled;
+
+  if (Global::isAppEnabled) {
+    Global::reset();
+    initializeKeyDispatcher();
+    IOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
+    IOHIDManager::initialize();
+    MouseHandler::initialize();
+  } else {
+    IOHIDManager::terminate();
+    MouseHandler::terminate();
+    sendNotification("App status: Disabled");
+  }
+
+  terminateAppToggleHotkey();
+  initializeAppToggleHotkey();
+}
+
 int main(int argc, const char *argv[]) {
   // argv[0] is the absolute path of the executable
   Global::resourcesParentDirPath = std::string(argv[0]);
   Global::resourcesParentDirPath = Global::resourcesParentDirPath.substr(0, Global::resourcesParentDirPath.find_last_of("/")).append("/resources");
 
-  initializeKeyDispatcher();
-  IOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
-  IOHIDManager::initializeIOHIDManager();
-  MouseHandler::initialize();
-  
+  toggleAppEnabled();
+
   // NOTE: Running this Objective C code inside a function doesn't work
   Application *application = [[Application alloc]init];
   application.activeApplicationChangeCb = setActiveApp;
