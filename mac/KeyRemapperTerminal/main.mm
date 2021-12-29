@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <thread>
+#include <IOKit/hidsystem/ev_keymap.h>
 
 #include "../../common/TestHelpers.hpp"
 #include "../../common/Helpers.hpp"
@@ -59,6 +60,60 @@ void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) 
   CGEventSetFlags(event, flags);
 }
 
+CGEventRef cgEventCreateMediaKey(ushort vkCode, bool isDown) {
+  ushort newCode = 0;
+
+  if (vkCode == 300) newCode = NX_KEYTYPE_BRIGHTNESS_DOWN;
+  else if (vkCode == 301) newCode = NX_KEYTYPE_BRIGHTNESS_UP;
+  else if (vkCode == 304) newCode = NX_KEYTYPE_ILLUMINATION_DOWN;
+  else if (vkCode == 305) newCode = NX_KEYTYPE_ILLUMINATION_UP;
+
+  else if (vkCode == 306) newCode = NX_KEYTYPE_REWIND;
+  else if (vkCode == 307) newCode = NX_KEYTYPE_PLAY;
+  else if (vkCode == 308) newCode = NX_KEYTYPE_FAST;
+
+  else if (vkCode == 309) newCode = NX_KEYTYPE_MUTE;
+  else if (vkCode == 310) newCode = NX_KEYTYPE_SOUND_DOWN;
+  else if (vkCode == 311) newCode = NX_KEYTYPE_SOUND_UP;
+
+  NSEvent* nsEvent = [NSEvent
+      otherEventWithType:NSEventTypeSystemDefined
+      location: NSMakePoint(0, 0)
+      modifierFlags:0xa00
+      timestamp:0
+      windowNumber:0
+      context:0
+      subtype:8
+      data1: (newCode << 16) | (isDown ? (0xa << 8) : (0xb << 8))
+      data2: -1
+  ];
+
+  return CGEventCreateCopy([nsEvent CGEvent]);
+}
+
+void postDownUpMediaKey(ushort vkCode, bool isKeyDown) {
+  if (!isKeyDown) return;
+
+  auto cgDownEvent = cgEventCreateMediaKey(vkCode, true);
+  auto cgUpEvent = cgEventCreateMediaKey(vkCode, false);
+
+  CGEventPost(kCGHIDEventTap, cgDownEvent);
+  CGEventPost(kCGHIDEventTap, cgUpEvent);
+  CFRelease(cgDownEvent);
+  CFRelease(cgUpEvent);
+}
+
+void postKey(ushort vkCode, bool isKeyDown, bool isRepeat = false) {
+  auto eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+  auto event = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, isKeyDown);
+  setModifierFlagsToKeyEvent(event, vkCode, isKeyDown);
+
+  if (isRepeat) CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
+  CGEventPost(kCGHIDEventTap, event);
+  CFRelease(eventSource);
+  CFRelease(event);
+}
+
 void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
   if (!isKeyDown || Global::isModifierKeyVkCode(vkCode)) {
     Global::shouldKeyRepeat = false;
@@ -76,13 +131,10 @@ void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
     std::this_thread::sleep_for(std::chrono::milliseconds(Global::delayUntilRepeat));
     while (Global::keyRepeatThreadCount == threadIdx && Global::shouldKeyRepeat) {
       auto vkCode = (CGKeyCode)Global::repeatedKey;
-      auto eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-      auto event = CGEventCreateKeyboardEvent(eventSource, vkCode, 1);
-      setModifierFlagsToKeyEvent(event, vkCode, true);
-      CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
-      CGEventPost(kCGHIDEventTap, event);
-      CFRelease(eventSource);
-      CFRelease(event);
+
+      if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, true);
+      else postKey(vkCode, true, true);
+
       std::this_thread::sleep_for(std::chrono::milliseconds(Global::keyRepeatInterval));
     }
   },
@@ -120,12 +172,8 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     if (vkCode == 241) return MouseHandler::handleMouseDownUp(isKeyDown);
     else if (vkCode == 242) return MouseHandler::handleMouseDownUp(isKeyDown, "right");
 
-    auto eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-    auto newEvent = CGEventCreateKeyboardEvent(eventSource, (CGKeyCode)vkCode, state == 0);
-    setModifierFlagsToKeyEvent(newEvent, vkCode, isKeyDown);
-    CGEventPost(kCGHIDEventTap, newEvent);
-    CFRelease(eventSource);
-    CFRelease(newEvent);
+    if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, isKeyDown);
+    else postKey(vkCode, isKeyDown);
 
     handleKeyRepeat(vkCode, isKeyDown);
   }
@@ -248,8 +296,6 @@ int main(int argc, const char *argv[]) {
   Global::resourcesParentDirPath = std::string(argv[0]);
   Global::resourcesParentDirPath = Global::resourcesParentDirPath.substr(0, Global::resourcesParentDirPath.find_last_of("/")).append("/resources");
 
-  toggleAppEnabled();
-
   // NOTE: Running this Objective C code inside a function doesn't work
   Application *application = [[Application alloc]init];
   application.activeApplicationChangeCb = setActiveApp;
@@ -261,8 +307,11 @@ int main(int argc, const char *argv[]) {
   ];
   NSRunningApplication *frontmostApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
   NSString *bundleIdentifier = [frontmostApp bundleIdentifier];
-  Helpers::print(std::string([bundleIdentifier UTF8String]));
-  setActiveApp(std::string([bundleIdentifier UTF8String]));
+  auto currentApp = std::string([bundleIdentifier UTF8String]);
+  Helpers::print(currentApp);
+
+  toggleAppEnabled();
+  setActiveApp(currentApp);
 
   CFRunLoopRun();
 }

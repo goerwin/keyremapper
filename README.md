@@ -57,13 +57,19 @@
   - [x] multiple modes
   - [x] mouse clicks/mousedown/mouseup/drags
   - [x] multiple keyboards
-  - [ ] enable/disable app with double esc
-  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity?
+  - [x] trigger media keys
+    - brightnessDown/up, keyboardIlluminationDown/up, rewind/playPause/fastForward, mute, volumeDown/up
+  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
   - [ ] exiting app from terminal (cmd+q) doesnt remove the process
   - [ ] simple GUI
-  - [ ] Fn key not working
+  - [ ] Fn key not working when app is disabled
   - [ ] Memory leaks
-  - [x] ~~trigger media keys~~ (not easy to do, just use Hammerspoon)
+  - [ ] shortcuts for mission control, launchpad?
+    - maybe via shell command
+    ```sh
+      $ open "/System/Applications/Launchpad.app"
+      $ open "/System/Applications/Mission Control.app"
+    ```
   - [x] implement tests with time delays to test multiple key presses
   - [x] Move tests out of the Google test framework so we can test on Mac too
 
@@ -117,9 +123,9 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
 // Capture media key events in init main.mm
 auto myEventTap = CGEventTapCreate(kCGHIDEventTap, kCGTailAppendEventTap, kCGEventTapOptionDefault,
   CGEventMaskBit(NX_SYSDEFINED),
+  //    CGEventMaskBit(kCGEventKeyDown), // this traps expose and launchpad keys
   [](CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
-//    CGEventMaskBit(kCGEventKeyDown); // this traps expose and launchpad keys
-    Helpers::print("LLORALO");
+    Helpers::print("NOICE");
       return event;
     }, NULL);
 
@@ -132,6 +138,7 @@ auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEven
 if (!myEventTap) {
   std::cout << "Couldn't create runLoopSource";
 }
+CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
 ```
 
 ```cpp
