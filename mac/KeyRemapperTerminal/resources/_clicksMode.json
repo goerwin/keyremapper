@@ -4,7 +4,9 @@
     "when": { "Alt": true, "F18": true },
     "set": { "rightClickMode": true },
     "setOnKeyUp": { "rightClickMode": false },
-    "send": ["Alt:up RightClick:down", "RightClick:up Alt:down"]
+    "send": ["Alt:up RightClick:down", "RightClick:up"]
+    // Using Alt:down at the end is making click behavior to send Alt+click sometimes
+    // "send": ["Alt:up RightClick:down", "RightClick:up Alt:down"]
   },
   {
     "keys": ["C"],
