@@ -31,7 +31,7 @@ void sendNotification(std::string message, std::string title = "KeyRemapper") {
 // TODO: This is inefficient
 ushort getMacVKCode(short scanCode) {
   for (auto &[key, value] : Global::symbols.items()) {
-    if (value[0] == scanCode) return value[3];
+    if (value[0] == scanCode) return value[1];
   }
 
   return {};
@@ -147,14 +147,13 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
 
   Global::keyDispatcher->setKeyboard(keyboard, manufacturer + " | " + product);
 
-  auto newKeys = Global::keyDispatcher->applyKeys({{scancode, ushort(isKeyDown ? 0 : 1)}});
+  auto newKeys = Global::keyDispatcher->applyKeys({{scancode, isKeyDown}});
 
   auto newKeysSize = newKeys.size();
 
   for (size_t i = 0; i < newKeysSize; i++) {
-    auto [code, state] = newKeys[i];
+    auto [code, isKeyDown] = newKeys[i];
     auto vkCode = getMacVKCode(code);
-    auto isKeyDown = state == 0;
 
     if (vkCode == 246 && isKeyDown) return initializeKeyDispatcher(0);
     if (vkCode == 247 && isKeyDown) return initializeKeyDispatcher(1);

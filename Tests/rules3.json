@@ -1,5 +1,5 @@
 {
-  "description": ["currentKey", "set", "setOnKeyUp", "when"],
+  "description": ["currentKey", "set", "setOnKeyUp", "when", "isKeyDown"],
   "keybindings": [
     {
       "keys": ["A"],
@@ -24,11 +24,23 @@
       "keys": ["D"],
       "when": { "RANDOM_STR": false },
       "fire": ["Y", null]
+    },
+    {
+      "keys": ["E"],
+      "when": { "isKeyDown": true },
+      "fire": ["A", "B"]
+    },
+    {
+      "keys": ["E"],
+      "when": { "isKeyDown": false },
+      "fire": ["C", "D"]
     }
   ],
   "tests": [
     ["A", "B A"],
     ["C:down D C:up", "C:down X C:up"],
-    ["C D C:down D C:up", "C Y C:down X C:up"]
+    ["C D C:down D C:up", "C Y C:down X C:up"],
+    ["E:down", "A"],
+    ["E:down E:up", "A D"]
   ]
 }

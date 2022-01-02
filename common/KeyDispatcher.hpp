@@ -14,17 +14,9 @@ class KeyDispatcher {
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
 
-  struct Key {
-    String name;
-    ushort code;
-    ushort downState;
-    ushort upState;
-  };
-  typedef std::vector<Key> Keys;
-
   struct KeyEvent {
     ushort code;
-    ushort state;
+    bool isKeyDown;
   };
   typedef std::vector<KeyEvent> KeyEvents;
 
@@ -130,29 +122,26 @@ public:
 
     for (int i = 0; i < keyEvents.size(); i++) {
       auto keyEvent = keyEvents[i];
-      auto [code, state] = keyEvent;
-      auto keyName = getKeyName(code, state);
-      bool isKeyDown = this->isKeyDown(state);
+      auto [code, isKeyDown] = keyEvent;
+      auto keyName = getKeyName(code);
 
-      auto newKeyEvent = getRemappedKeyEvent(keyName, code, state, isKeyDown);
-      auto [newCode, newState] = newKeyEvent;
-      auto newKeyName = getKeyName(newCode, newState);
-      bool newKeyIsDown = this->isKeyDown(newState);
+      auto [newKeyName, newCode] = getRemappedKey(keyName, code);
 
       globals["currentKey"] = newKeyName;
-      globals[newKeyName] = newKeyIsDown;
+      globals["isKeyDown"] = isKeyDown;
+      globals[newKeyName] = isKeyDown;
 
       KeyEvents localKeyEvents = {};
-      auto fireKeys = getFireFromKeybindings(newKeyName, newKeyIsDown);
+      auto fireKeys = getFireFromKeybindings(newKeyName, isKeyDown);
 
       if (!fireKeys.is_null())
         localKeyEvents = Helpers::concatArrays(
             localKeyEvents,
             getKeyEventsFromString(isKeyDown ? fireKeys[0] : fireKeys[1]));
       else
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, isKeyDown}});
 
-      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newKeyIsDown);
+      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, isKeyDown);
 
       if (!multiplePressesFireItem.is_null()) {
         auto fire = multiplePressesFireItem[0].get<String>();
@@ -171,9 +160,9 @@ public:
           globals["keyboard"],
           globals["keyboardDescription"],
           std::to_string(code) + ":" +
-            std::to_string(state) +
-            " -> " + stringifyKeyEvents({keyEvent}) + " -> " +
-            stringifyKeyEvents({newKeyEvent}) + " -> " +
+            (isKeyDown ? "down" : "up") + " -> " +
+            stringifyKeyEvents({keyEvent}) + " -> " +
+            stringifyKeyEvents({{newCode, isKeyDown}}) + " -> " +
             stringifyKeyEvents(localKeyEvents)
         );
       }
@@ -201,12 +190,11 @@ public:
     String result = "";
 
     for (size_t i = 0; i < keyEvents.size(); i++) {
-      if (i != 0)
-        result += " ";
+      if (i != 0) result += " ";
 
-      auto [code, state] = keyEvents[i];
-      auto keyName = getKeyName(code, state);
-      result += keyName + (isKeyDown(state) ? ":down" : ":up");
+      auto [code, isKeyDown] = keyEvents[i];
+      auto keyName = getKeyName(code);
+      result += keyName + (isKeyDown ? ":down" : ":up");
     }
 
     return result;
@@ -223,30 +211,23 @@ public:
 
     for (size_t i = 0; i < strKeysSize; i++) {
       String keyStateStr;
-      Key key;
+      ushort code;
       String strKey = strKeys[i];
       Strings keyDesc = Helpers::split(strKey, ':');
       String keyName = keyDesc[0];
 
-      if (keyDesc.size() == 2)
-        keyStateStr = keyDesc[1];
+      if (keyDesc.size() == 2) keyStateStr = keyDesc[1];
 
-      if (keyName == "currentKey")
-        key = getKey(currentKey);
-      else
-        key = getKey(keyName);
-
-      auto code = key.code;
-      auto downState = key.downState;
-      auto upState = key.upState;
+      if (keyName == "currentKey") code = getKey(currentKey);
+      else code = getKey(keyName);
 
       if (keyStateStr == "down")
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}});
       else if (keyStateStr == "up")
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, false}});
       else {
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, downState}});
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, upState}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}});
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, false}});
       }
     }
 
@@ -262,9 +243,7 @@ public:
   }
 
 private:
-  static bool isKeyDown(ushort state) { return state == 0 || state == 2; }
-
-  KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state, bool isKeyDown) {
+  std::pair<String, ushort> getRemappedKey(String keyName, ushort code) {
     size_t remapsSize = remaps.size();
 
     for (size_t i = 0; i < remapsSize; i++) {
@@ -272,17 +251,15 @@ private:
       if (keyName != remap["from"]) continue;
       if (!isWhen(remap["when"])) continue;
 
-      auto newKey = getKey(remap["to"]);
-      auto [name, newCode, downState, upState] = newKey;
-      return {newCode, isKeyDown ? downState : upState};
+      String newKeyName = remap["to"];
+      return {newKeyName, getKey(newKeyName)};
     }
 
-    return {code, state};
+    return {keyName, code};
   }
 
   bool isWhen(json when) {
-    if (when.is_null())
-      return true;
+    if (when.is_null()) return true;
 
     for (auto &[key, value] : when.items()) {
       auto globalValue = globals[key];
@@ -299,11 +276,8 @@ private:
   }
 
   void setValues(json values) {
-    if (values.is_null())
-      return;
-
-    for (auto &[key, value] : values.items())
-      globals[key] = value;
+    if (values.is_null()) return;
+    for (auto &[key, value] : values.items()) globals[key] = value;
   }
 
   json getFireFromKeybindings(json key, bool isKeyDown) {
@@ -328,24 +302,15 @@ private:
     return {};
   }
 
-  String getKeyName(short scanCode, short keyState) {
+  String getKeyName(short scanCode) {
     for (auto &[key, value] : symbols.items()) {
-      if (value[0] == scanCode &&
-          (value[1] == keyState || value[2] == keyState))
-        return key;
+      if (value[0] == scanCode) return key;
     }
 
     return {};
   }
 
-  Key getKey(String keyName) {
-    auto symbolDef = symbols[keyName];
-    Key key = {};
-
-    key.name = keyName;
-    key.code = symbolDef[0];
-    key.downState = symbolDef[1];
-    key.upState = symbolDef[2];
-    return key;
+  ushort getKey(String keyName) {
+    return symbols[keyName][0];
   }
 };

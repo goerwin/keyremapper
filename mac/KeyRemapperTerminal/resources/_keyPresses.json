@@ -3,7 +3,6 @@
   {
     "repeat": 2,
     "inputKey": "Shift",
-    "fire": "Caps",
-    "skipKeyBindings": true
+    "fire": "Caps"
   }
 ]
