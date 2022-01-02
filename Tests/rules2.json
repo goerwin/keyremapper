@@ -1,7 +1,7 @@
 {
   "description": [
-    "Only return the first fire found",
-    "If no fire is returned, let the key event go through",
+    "Only return the first send found",
+    "If no send is returned, let the key event go through",
     "Key:down Key:up is the same as Key",
     "remaps"
   ],
@@ -12,15 +12,15 @@
   "keybindings": [
     {
       "keys": ["F"],
-      "fire": ["X:down", "X:up"]
+      "send": ["X:down", "X:up"]
     },
     {
       "keys": ["F"],
-      "fire": ["Z:down", "Z:up"]
+      "send": ["Z:down", "Z:up"]
     },
     {
       "keys": ["Alt"],
-      "fire": ["Ctrl:down", "Ctrl:up"]
+      "send": ["Ctrl:down", "Ctrl:up"]
     }
   ],
   "tests": [

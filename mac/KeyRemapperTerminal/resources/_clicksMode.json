@@ -4,25 +4,25 @@
     "when": { "Alt": true, "F18": true },
     "set": { "rightClickMode": true },
     "setOnKeyUp": { "rightClickMode": false },
-    "fire": ["Alt:up RightClick:down", "RightClick:up Alt:down"]
+    "send": ["Alt:up RightClick:down", "RightClick:up Alt:down"]
   },
   {
     "keys": ["C"],
     "when": { "Alt": true },
     "set": { "leftClickMode": true },
     "setOnKeyUp": { "leftClickMode": false },
-    "fire": ["Alt:up LeftClick:down", "LeftClick:up Alt:down"]
+    "send": ["Alt:up LeftClick:down", "LeftClick:up Alt:down"]
   },
   {
     "keys": ["Alt"],
     "when": { "isKeyDown": false, "leftClickMode": true },
     "setOnKeyUp": { "rightClickMode": false },
-    "fire": [null, "LeftClick:up Alt:up"]
+    "send": [null, "LeftClick:up Alt:up"]
   },
   {
     "keys": ["Alt"],
     "when": { "isKeyDown": false, "rightClickMode": true },
     "setOnKeyUp": { "rightClickMode": false },
-    "fire": [null, "RightClick:up Alt:up"]
+    "send": [null, "RightClick:up Alt:up"]
   }
 ]

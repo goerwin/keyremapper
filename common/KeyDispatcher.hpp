@@ -112,10 +112,10 @@ public:
       globals["isKeyDown"] = isKeyDown;
       globals[newKeyName] = isKeyDown;
 
-      auto fireKeys = getFireFromKeybindings(newKeyName, isKeyDown);
-      if (!fireKeys.is_null())
+      auto send = getSendFromKeybindings(newKeyName, isKeyDown);
+      if (!send.is_null())
         localKeyEvents = Helpers::concatArrays(localKeyEvents,
-            getKeyEventsFromString(isKeyDown ? fireKeys[0] : fireKeys[1]));
+            getKeyEventsFromString(isKeyDown ? send[0] : send[1]));
       else
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, isKeyDown}});
 
@@ -246,7 +246,7 @@ private:
     for (auto &[key, value] : values.items()) globals[key] = value;
   }
 
-  json getFireFromKeybindings(String key, bool isKeyDown) {
+  json getSendFromKeybindings(String key, bool isKeyDown) {
     size_t keybindingsSize = keybindings.size();
 
     for (size_t i = 0; i < keybindingsSize; i++) {
@@ -261,7 +261,7 @@ private:
         if (isKeyDown) setValues(keybinding["set"]);
         else setValues(keybinding["setOnKeyUp"]);
 
-        return keybinding["fire"];
+        return keybinding["send"];
       }
     }
 

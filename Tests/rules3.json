@@ -3,7 +3,7 @@
   "keybindings": [
     {
       "keys": ["A"],
-      "fire": ["B currentKey", null]
+      "send": ["B currentKey", null]
     },
     {
       "keys": ["C"],
@@ -18,22 +18,22 @@
     {
       "keys": ["D"],
       "when": { "RANDOM_STR": true },
-      "fire": ["X", null]
+      "send": ["X", null]
     },
     {
       "keys": ["D"],
       "when": { "RANDOM_STR": false },
-      "fire": ["Y", null]
+      "send": ["Y", null]
     },
     {
       "keys": ["E"],
       "when": { "isKeyDown": true },
-      "fire": ["A", "B"]
+      "send": ["A", "B"]
     },
     {
       "keys": ["E"],
       "when": { "isKeyDown": false },
-      "fire": ["C", "D"]
+      "send": ["C", "D"]
     }
   ],
   "tests": [

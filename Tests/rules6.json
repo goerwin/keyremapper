@@ -37,15 +37,15 @@
     {
       "keys": ["D"],
       "when": { "keyboard": "1234" },
-      "fire": ["E:down", "E:up"]
+      "send": ["E:down", "E:up"]
     },
     {
       "keys": ["D"],
-      "fire": ["F:down", "F:up"]
+      "send": ["F:down", "F:up"]
     },
     {
       "keys": ["Caps"],
-      "fire": [null, null]
+      "send": [null, null]
     }
   ],
   "tests": [

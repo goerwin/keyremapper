@@ -4,11 +4,11 @@
     {
       "keys": ["A"],
       "when": { "appName": "chrome.exe" },
-      "fire": ["C", null]
+      "send": ["C", null]
     },
     {
       "keys": ["A"],
-      "fire": ["B", null]
+      "send": ["B", null]
     }
   ],
   "tests": [

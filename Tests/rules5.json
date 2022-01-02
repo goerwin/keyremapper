@@ -10,11 +10,11 @@
   "keybindings": [
     {
       "keys": ["A"],
-      "fire": ["B:down", "B:up"]
+      "send": ["B:down", "B:up"]
     },
     {
       "keys": ["Win", "Alt"],
-      "fire": [null, null]
+      "send": [null, null]
     }
   ],
   "tests": [

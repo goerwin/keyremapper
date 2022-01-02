@@ -1,4 +1,6 @@
 [
   { "key": "F18", "ifPressedNTimes": 1, "send": "Esc" },
+  { "key": "F18", "ifPressedNTimes": 2, "send": "Esc" },
+  { "key": "F18", "ifPressedNTimes": 3, "send": "Esc" },
   { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
 ]

@@ -3,39 +3,39 @@
     "keys": ["F18"],
     "when": { "isKeyDown": false, "_vimMode": true, "_vimModeShift": true },
     "setOnKeyUp": { "_vimMode": false, "_vimModeShift": false },
-    "fire": [null, "Shift:up"]
+    "send": [null, "Shift:up"]
   },
   {
     "keys": ["F18"],
     "set": { "_vimMode": true },
     "setOnKeyUp": { "_vimMode": false },
-    "fire": [null, null]
+    "send": [null, null]
   },
   {
     "keys": ["H"],
     "when": { "_vimMode": true },
-    "fire": ["LeftArrow:down", "LeftArrow:up"]
+    "send": ["LeftArrow:down", "LeftArrow:up"]
   },
   {
     "keys": ["L"],
     "when": { "_vimMode": true },
-    "fire": ["RightArrow:down", "RightArrow:up"]
+    "send": ["RightArrow:down", "RightArrow:up"]
   },
   {
     "keys": ["J"],
     "when": { "_vimMode": true },
-    "fire": ["DownArrow:down", "DownArrow:up"]
+    "send": ["DownArrow:down", "DownArrow:up"]
   },
   {
     "keys": ["K"],
     "when": { "_vimMode": true },
-    "fire": ["UpArrow:down", "UpArrow:up"]
+    "send": ["UpArrow:down", "UpArrow:up"]
   },
   {
     "keys": ["F"],
     "when": { "_vimMode": true },
     "set": { "_vimModeShift": true },
     "setOnKeyUp": { "_vimModeShift": false },
-    "fire": ["Shift:down", "Shift:up"]
+    "send": ["Shift:down", "Shift:up"]
   }
 ]

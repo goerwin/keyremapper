@@ -2,21 +2,21 @@
   {
     "keys": ["1"],
     "when": { "Ctrl": true },
-    "fire": [null, "AppMode1"]
+    "send": [null, "AppMode1"]
   },
   {
     "keys": ["2"],
     "when": { "Ctrl": true },
-    "fire": [null, "AppMode2"]
+    "send": [null, "AppMode2"]
   },
   {
     "keys": ["3"],
     "when": { "Ctrl": true },
-    "fire": [null, "AppMode3"]
+    "send": [null, "AppMode3"]
   },
   {
     "keys": ["4"],
     "when": { "Ctrl": true },
-    "fire": [null, "AppMode4"]
+    "send": [null, "AppMode4"]
   }
 ]

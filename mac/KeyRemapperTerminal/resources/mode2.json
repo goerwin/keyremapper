@@ -13,24 +13,24 @@
     "%dotdotdotArray(_globals.json)",
 
     {
-      "keys": ["Left"],
+      "keys": ["LeftArrow"],
       "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
-      "fire": ["Cmd:down 5 Cmd:up"]
+      "send": ["Cmd:down 5 Cmd:up"]
     },
     {
-      "keys": ["Right"],
+      "keys": ["RightArrow"],
       "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
-      "fire": ["Cmd:down 6 Cmd:up"]
+      "send": ["Cmd:down 6 Cmd:up"]
     },
     {
-      "keys": ["Up"],
+      "keys": ["UpArrow"],
       "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
-      "fire": ["Alt:down S Alt:up"]
+      "send": ["Alt:down S Alt:up"]
     },
     {
-      "keys": ["Down"],
+      "keys": ["DownArrow"],
       "when": { "appName": "com.google.Chrome", "Shift": false, "Cmd": false },
-      "fire": ["Alt:down T Alt:up"]
+      "send": ["Alt:down T Alt:up"]
     }
   ]
 }

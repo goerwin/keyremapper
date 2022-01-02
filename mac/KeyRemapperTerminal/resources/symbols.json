@@ -83,8 +83,8 @@
 
   "Home": [74, 115],
   "End": [77, 119],
-  "pageDown": [78, 121],
-  "pageUp": [75, 116],
+  "PageDown": [78, 121],
+  "PageUp": [75, 116],
 
   "LeftArrow": [80, 123],
   "RightArrow": [79, 124],

@@ -1,32 +1,32 @@
 {
   "description": [
     "Basic remaps",
-    "fire[0] is for keydown, fire[1] is for keyup",
+    "send[0] is for keydown, send[1] is for keyup",
     "keybinding triggered if one of its hotkeys matches",
     "hotkey matches if their keys but last one are down and last key is currentKey"
   ],
   "keybindings": [
     {
       "keys": ["Alt"],
-      "fire": ["Ctrl:down", "Ctrl:up"]
+      "send": ["Ctrl:down", "Ctrl:up"]
     },
     {
       "keys": ["B"],
-      "fire": ["C", "D"]
+      "send": ["C", "D"]
     },
     {
       "keys": ["G"],
       "when": { "F": true },
-      "fire": ["H:down", "H:up"]
+      "send": ["H:down", "H:up"]
     },
     {
       "keys": ["H"],
       "when": { "Ctrl": true, "Caps": true },
-      "fire": ["Left", null]
+      "send": ["Left", null]
     },
     {
       "keys": ["X", "Y"],
-      "fire": ["Z:down", "Z:up"]
+      "send": ["Z:down", "Z:up"]
     }
   ],
   "tests": [

@@ -2,45 +2,45 @@
   {
     "keys": ["J"],
     "when": { "Cmd": true, "Alt": false },
-    "fire": ["Cmd:up pageDown:down", "pageDown:up Cmd:down"]
+    "send": ["Cmd:up PageDown:down", "PageDown:up Cmd:down"]
   },
   {
     "keys": ["K"],
     "when": { "Cmd": true, "Alt": false },
-    "fire": ["Cmd:up pageUp:down", "pageUp:up Cmd:down"]
+    "send": ["Cmd:up PageUp:down", "PageUp:up Cmd:down"]
   },
 
   // F18/Caps as control for some keys
   {
     "keys": ["C", "Space", "V", "Tab"],
     "when": { "F18": true },
-    "fire": ["Ctrl:down currentKey Ctrl:up", null]
+    "send": ["Ctrl:down currentKey Ctrl:up", null]
   },
 
   // Mute mic
   {
     "keys": ["M"],
     "when": { "Alt": true },
-    "fire": ["Cmd:down M Cmd:up"]
+    "send": ["Cmd:down M Cmd:up"]
   },
 
   // App exposé
   {
     "keys": ["J"],
     "when": { "Cmd": true, "Alt": true },
-    "fire": ["Cmd:up Alt:up Ctrl:down Down Ctrl:up Cmd:down Alt:down", null]
+    "send": ["Cmd:up Alt:up Ctrl:down DownArrow Ctrl:up Cmd:down Alt:down", null]
   },
 
   // Go to back/forward page in browser navigation
   {
     "keys": ["H"],
     "when": { "Alt": true, "Cmd": false },
-    "fire": ["Alt:up Cmd:down BracketL Cmd:up Alt:down", null]
+    "send": ["Alt:up Cmd:down BracketL Cmd:up Alt:down", null]
   },
   {
     "keys": ["L"],
     "when": { "Alt": true, "Cmd": false },
-    "fire": ["Alt:up Cmd:down BracketR Cmd:up Alt:down", null]
+    "send": ["Alt:up Cmd:down BracketR Cmd:up Alt:down", null]
   },
 
   // Media Keys
@@ -48,41 +48,41 @@
   {
     "keys": ["F1"],
     "when": { "Cmd": false },
-    "fire": ["BrightnessDown:down", "BrightnessDown:up"]
+    "send": ["BrightnessDown:down", "BrightnessDown:up"]
   },
   {
     "keys": ["F2"],
     "when": { "Cmd": false },
-    "fire": ["BrightnessUp:down", "BrightnessUp:up"]
+    "send": ["BrightnessUp:down", "BrightnessUp:up"]
   },
   {
     "keys": ["F7"],
     "when": { "Cmd": false },
-    "fire": ["Rewind"]
+    "send": ["Rewind"]
   },
   {
     "keys": ["F8"],
     "when": { "Cmd": false },
-    "fire": ["PlayPause", null]
+    "send": ["PlayPause", null]
   },
   {
     "keys": ["F9"],
     "when": { "Cmd": false },
-    "fire": ["FastForward", null]
+    "send": ["FastForward", null]
   },
   {
     "keys": ["F10"],
     "when": { "Cmd": false },
-    "fire": ["Mute"]
+    "send": ["Mute"]
   },
   {
     "keys": ["F11"],
     "when": { "Cmd": false },
-    "fire": ["VolumeDown:down", "VolumeDown:up"]
+    "send": ["VolumeDown:down", "VolumeDown:up"]
   },
   {
     "keys": ["F12"],
     "when": { "Cmd": false },
-    "fire": ["VolumeUp:down", "VolumeUp:up"]
+    "send": ["VolumeUp:down", "VolumeUp:up"]
   }
 ]
