@@ -13,6 +13,7 @@
   - File `win/output/KeyRemapper.zip` is generated
 - Mac
   - Open project with Xcode
+  - Product -> Archive -> Distribute Content -> Built Products
 
 ## Tests
 

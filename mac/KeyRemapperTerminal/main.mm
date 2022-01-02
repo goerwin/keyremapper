@@ -165,12 +165,22 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     else if (vkCode == 58) Global::isAltDown = isKeyDown;
     else if (vkCode == 59) Global::isCtrlDown = isKeyDown;
     else if (vkCode == 63) Global::isFnDown = isKeyDown;
-
-    if (vkCode == 57 && isKeyDown) return IOHIDManager::toggleCapslockState();
-
-    if (vkCode == 241) return MouseHandler::handleMouseDownUp(isKeyDown);
-    else if (vkCode == 242) return MouseHandler::handleMouseDownUp(isKeyDown, "right");
-
+    
+    if (vkCode == 57) {
+      if (isKeyDown) IOHIDManager::toggleCapslockState();
+      continue;
+    }
+    
+    if (vkCode == 241) {
+      MouseHandler::handleMouseDownUp(isKeyDown);
+      continue;
+    }
+    
+    if (vkCode == 242) {
+      MouseHandler::handleMouseDownUp(isKeyDown, "right");
+      continue;
+    }
+      
     if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, isKeyDown);
     else postKey(vkCode, isKeyDown);
 
