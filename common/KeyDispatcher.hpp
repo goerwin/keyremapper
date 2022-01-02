@@ -33,11 +33,10 @@ private:
   json symbols;
   json rules;
   json keybindings;
-  json appsDefinitions;
   json remaps;
   json keyPresses;
   int REPEAT_TIME;
-  
+
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
 
@@ -115,13 +114,12 @@ public:
   KeyDispatcher(json rulesEl, json symbolsEl) {
     rules = rulesEl;
     symbols = symbolsEl;
-    keybindings = rulesEl["keybindings"];
+    keybindings = rulesEl["keybindings"].get<JsonArray>();
     REPEAT_TIME = rulesEl["keyPressesDelay"].is_null()
                       ? 200
                       : rulesEl["keyPressesDelay"].get<int>();
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
-    appsDefinitions = rulesEl["apps"];
     globals["appName"] = "";
     globals["keyboard"] = "";
     globals["keyboardDescription"] = "";
@@ -134,29 +132,27 @@ public:
       auto keyEvent = keyEvents[i];
       auto [code, state] = keyEvent;
       auto keyName = getKeyName(code, state);
-      bool isKeyDownEl = isKeyDown(state);
+      bool isKeyDown = this->isKeyDown(state);
 
-      auto newKeyEvent = getRemappedKeyEvent(keyName, code, state, isKeyDownEl);
+      auto newKeyEvent = getRemappedKeyEvent(keyName, code, state, isKeyDown);
       auto [newCode, newState] = newKeyEvent;
       auto newKeyName = getKeyName(newCode, newState);
-      bool newIsKeyDownEl = isKeyDown(newState);
+      bool newKeyIsDown = this->isKeyDown(newState);
 
       globals["currentKey"] = newKeyName;
-      // TODO: I think I can delete this currentKeyDown
-      globals["currentKeyDown"] = newIsKeyDownEl;
-      globals[newKeyName] = newIsKeyDownEl;
+      globals[newKeyName] = newKeyIsDown;
 
       KeyEvents localKeyEvents = {};
-      auto fireKeys = getFireFromKeybindings();
+      auto fireKeys = getFireFromKeybindings(newKeyName, newKeyIsDown);
 
       if (!fireKeys.is_null())
         localKeyEvents = Helpers::concatArrays(
             localKeyEvents,
-            getKeyEventsFromString(isKeyDownEl ? fireKeys[0] : fireKeys[1]));
+            getKeyEventsFromString(isKeyDown ? fireKeys[0] : fireKeys[1]));
       else
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, newState}});
 
-      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newIsKeyDownEl);
+      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, newKeyIsDown);
 
       if (!multiplePressesFireItem.is_null()) {
         auto fire = multiplePressesFireItem[0].get<String>();
@@ -235,11 +231,7 @@ public:
       if (keyDesc.size() == 2)
         keyStateStr = keyDesc[1];
 
-      if (keyName == "vimArrowKey")
-        key = getVimArrowKey(currentKey);
-      else if (keyName == "vimHomeEndKey")
-        key = getVimHomeEndKey(currentKey);
-      else if (keyName == "currentKey")
+      if (keyName == "currentKey")
         key = getKey(currentKey);
       else
         key = getKey(keyName);
@@ -270,33 +262,11 @@ public:
   }
 
 private:
-  Key getVimArrowKey(String keyName) {
-    if (keyName == "H")
-      return getKey("Left");
-    else if (keyName == "J")
-      return getKey("Down");
-    else if (keyName == "K")
-      return getKey("Up");
-    else if (keyName == "L")
-      return getKey("Right");
-
-    return getKey(keyName);
-  }
-
-  Key getVimHomeEndKey(String keyName) {
-    if (keyName == "H" || keyName == "K")
-      return getKey("Home");
-    else if (keyName == "J" || keyName == "L")
-      return getKey("End");
-
-    return getKey(keyName);
-  }
-
   static bool isKeyDown(ushort state) { return state == 0 || state == 2; }
 
   KeyEvent getRemappedKeyEvent(String keyName, ushort code, ushort state, bool isKeyDown) {
     size_t remapsSize = remaps.size();
-    
+
     for (size_t i = 0; i < remapsSize; i++) {
       auto remap = remaps[i];
       if (keyName != remap["from"]) continue;
@@ -306,7 +276,7 @@ private:
       auto [name, newCode, downState, upState] = newKey;
       return {newCode, isKeyDown ? downState : upState};
     }
-    
+
     return {code, state};
   }
 
@@ -336,21 +306,21 @@ private:
       globals[key] = value;
   }
 
-  json getFireFromKeybindings() {
-    auto currentKey = globals["currentKey"];
-    auto allKeybindings = keybindings.get<JsonArray>();
-    size_t allKeybindingsSize = allKeybindings.size();
+  json getFireFromKeybindings(json key, bool isKeyDown) {
+    size_t allKeybindingsSize = keybindings.size();
 
     for (size_t i = 0; i < allKeybindingsSize; i++) {
-      auto keybinding = allKeybindings[i];
+      auto keybinding = keybindings[i];
       auto keys = keybinding["keys"];
 
       if (!isWhen(keybinding["when"])) continue;
 
       for (size_t j = 0; j < keys.size(); j++) {
-        if (currentKey != keys[j]) continue;
+        if (key != keys[j]) continue;
 
-        setValues(keybinding["set"]);
+        if (isKeyDown) setValues(keybinding["set"]);
+        else setValues(keybinding["setOnKeyUp"]);
+
         return keybinding["fire"];
       }
     }

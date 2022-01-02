@@ -1,5 +1,5 @@
 {
-  "description": ["currentKey", "set", "when"],
+  "description": ["currentKey", "set", "setOnKeyUp", "when"],
   "keybindings": [
     {
       "keys": ["A"],
@@ -7,8 +7,8 @@
     },
     {
       "keys": ["C"],
-      "when": { "C": true },
-      "set": { "RANDOM_STR": true }
+      "set": { "RANDOM_STR": true },
+      "setOnKeyUp": { "RANDOM_STR": false }
     },
     {
       "keys": ["C"],
