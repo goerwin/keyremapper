@@ -1,8 +1,4 @@
 [
-  { "repeat": 1, "inputKey": "F18", "fire": "Esc" },
-  {
-    "repeat": 2,
-    "inputKey": "Shift",
-    "fire": "Caps"
-  }
+  { "key": "F18", "ifPressedNTimes": 1, "send": "Esc" },
+  { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
 ]

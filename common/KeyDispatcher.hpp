@@ -25,9 +25,9 @@ private:
   json symbols;
   json rules;
   json keybindings;
-  json remaps;
   json keyPresses;
-  int REPEAT_TIME;
+  json remaps;
+  short keyPressesDelay;
 
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
@@ -37,16 +37,13 @@ private:
   }
 
   String lastKeyName;
-  int multiplePressesCount = 0;
+  short keyPressesCount = 0;
   double keyDownTime = 0; // in ms
   double keyUpTime = 0; // in ms
 
-  json getMultiplePressesFireItem(String keyName, bool isKeyDown) {
-    if (keyPresses.is_null())
-      return {};
-
+  void setKeyPressesCount(String keyName, bool isKeyDown) {
     if (lastKeyName != keyName) {
-      multiplePressesCount = 0;
+      keyPressesCount = 0;
       keyDownTime = 0;
       keyUpTime = 0;
       lastKeyName = keyName;
@@ -57,64 +54,47 @@ private:
       // events when key is held down
       if (lastKeyName == keyName && keyDownTime != 0) {
         keyUpTime = 0;
-        return {};
+        return;
       }
 
       keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
       //WindowsHelpers::print(std::to_string(keyDownTime));
 
-      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= REPEAT_TIME)
-        multiplePressesCount = 0;
+      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
+        keyPressesCount = 0;
 
       keyUpTime = 0;
-      return {};
+      return;
     }
 
     keyUpTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
-    if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < REPEAT_TIME) {
+    if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < keyPressesDelay) {
       keyDownTime = 0;
-      multiplePressesCount = lastKeyName == keyName ? multiplePressesCount + 1 : 1;
-    } else {
-      multiplePressesCount = 0;
-      keyDownTime = 0;
-      keyUpTime = 0;
-      return {};
+      keyPressesCount = lastKeyName == keyName ? keyPressesCount + 1 : 1;
+      return;
     }
 
-
-    for (size_t i = 0; i < keyPresses.size(); i++) {
-      auto keyPress = keyPresses[i];
-      int repeat = keyPress["repeat"];
-      String inputKey = keyPress["inputKey"];
-      String ruleItem = keyPress["fire"];
-      auto skipKeyBindings = keyPress["skipKeyBindings"];
-
-      if (!isWhen(keyPress["when"])) continue;
-
-      if (repeat == multiplePressesCount && inputKey == keyName) {
-        return {
-          ruleItem,
-          skipKeyBindings.is_null() ? false : skipKeyBindings.get<bool>()};
-        }
-      }
-
-      return {};
-    }
+    keyPressesCount = 0;
+    keyDownTime = 0;
+    keyUpTime = 0;
+  }
 
 public:
   KeyDispatcher(json rulesEl, json symbolsEl) {
     rules = rulesEl;
     symbols = symbolsEl;
     keybindings = rulesEl["keybindings"].get<JsonArray>();
-    REPEAT_TIME = rulesEl["keyPressesDelay"].is_null()
+    keyPressesDelay = rulesEl["keyPressesDelay"].is_null()
                       ? 200
-                      : rulesEl["keyPressesDelay"].get<int>();
+                      : rulesEl["keyPressesDelay"].get<short>();
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
     globals["appName"] = "";
     globals["keyboard"] = "";
     globals["keyboardDescription"] = "";
+    globals["currentKey"] = "";
+    globals["isKeyDown"] = "";
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents) {
@@ -124,6 +104,7 @@ public:
       auto keyEvent = keyEvents[i];
       auto [code, isKeyDown] = keyEvent;
       auto keyName = getKeyName(code);
+      KeyEvents localKeyEvents = {};
 
       auto [newKeyName, newCode] = getRemappedKey(keyName, code);
 
@@ -131,28 +112,19 @@ public:
       globals["isKeyDown"] = isKeyDown;
       globals[newKeyName] = isKeyDown;
 
-      KeyEvents localKeyEvents = {};
       auto fireKeys = getFireFromKeybindings(newKeyName, isKeyDown);
-
       if (!fireKeys.is_null())
-        localKeyEvents = Helpers::concatArrays(
-            localKeyEvents,
+        localKeyEvents = Helpers::concatArrays(localKeyEvents,
             getKeyEventsFromString(isKeyDown ? fireKeys[0] : fireKeys[1]));
       else
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, isKeyDown}});
 
-      auto multiplePressesFireItem = getMultiplePressesFireItem(newKeyName, isKeyDown);
-
-      if (!multiplePressesFireItem.is_null()) {
-        auto fire = multiplePressesFireItem[0].get<String>();
-        auto skipKeyBindings = multiplePressesFireItem[1].get<bool>();
-        auto keyPressKeyEvents = getKeyEventsFromString(fire);
-
-        if (skipKeyBindings)
-          localKeyEvents = Helpers::concatArrays(localKeyEvents, keyPressKeyEvents);
-        else
-          keyEvents = Helpers::concatArrays(keyEvents, keyPressKeyEvents, i + 1);
-      }
+      setKeyPressesCount(newKeyName, isKeyDown);
+      if (!isKeyDown)
+        localKeyEvents = Helpers::concatArrays(
+          localKeyEvents,
+          getKeyEventsFromString(getSendFromKeyPresses(newKeyName))
+        );
 
       if (applyKeysCb) {
         applyKeysCb(
@@ -225,10 +197,8 @@ public:
         keyEvents = Helpers::concatArrays(keyEvents, {{code, true}});
       else if (keyStateStr == "up")
         keyEvents = Helpers::concatArrays(keyEvents, {{code, false}});
-      else {
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}});
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, false}});
-      }
+      else
+        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}, {code, false}});
     }
 
     return keyEvents;
@@ -237,7 +207,7 @@ public:
   void reset() {
     globals = {};
     lastKeyName = "";
-    multiplePressesCount = 0;
+    keyPressesCount = 0;
     keyDownTime = 0;
     keyUpTime = 0;
   }
@@ -264,11 +234,7 @@ private:
     for (auto &[key, value] : when.items()) {
       auto globalValue = globals[key];
 
-      if (globalValue.is_null()) {
-        if (value != false) return false;
-        continue;
-      }
-
+      if (globalValue.is_null() && value == false) continue;
       if (value != globalValue) return false;
     }
 
@@ -280,10 +246,10 @@ private:
     for (auto &[key, value] : values.items()) globals[key] = value;
   }
 
-  json getFireFromKeybindings(json key, bool isKeyDown) {
-    size_t allKeybindingsSize = keybindings.size();
+  json getFireFromKeybindings(String key, bool isKeyDown) {
+    size_t keybindingsSize = keybindings.size();
 
-    for (size_t i = 0; i < allKeybindingsSize; i++) {
+    for (size_t i = 0; i < keybindingsSize; i++) {
       auto keybinding = keybindings[i];
       auto keys = keybinding["keys"];
 
@@ -297,6 +263,22 @@ private:
 
         return keybinding["fire"];
       }
+    }
+
+    return {};
+  }
+
+  json getSendFromKeyPresses(String key) {
+    size_t keyPressesSize = keyPresses.size();
+
+    for (size_t i = 0; i < keyPressesSize; i++) {
+      auto keypress = keyPresses[i];
+
+      if (!isWhen(keypress["when"])) continue;
+      if (key != keypress["key"]) continue;
+      if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
+
+      return keypress["send"];
     }
 
     return {};

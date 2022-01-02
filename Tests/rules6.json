@@ -15,22 +15,22 @@
     }
   ],
   "keyPresses": [
-    { "repeat": 1, "inputKey": "N", "fire": "Win" },
-    { "repeat": 1, "inputKey": "X", "fire": "Esc" },
+    { "key": "N", "ifPressedNTimes": 1, "send": "Win" },
+    { "key": "X", "ifPressedNTimes": 1, "send": "Esc" },
 
     {
-      "repeat": 1,
-      "inputKey": "Caps",
-      "fire": "Win",
-      "when": { "keyboard": "1234" }
+      "key": "Caps",
+      "when": { "keyboard": "1234" },
+      "ifPressedNTimes": 1,
+      "send": "Win"
     },
-    { "repeat": 1, "inputKey": "Caps", "fire": "Esc" },
-    { "repeat": 1, "inputKey": "Alt", "fire": "A" },
+    { "key": "Caps", "ifPressedNTimes": 1, "send": "Esc" },
+    { "key": "Alt", "ifPressedNTimes": 1, "send": "A" },
     {
-      "repeat": 1,
-      "inputKey": "Alt",
-      "fire": "2",
-      "when": { "keyboard": "1234" }
+      "key": "Alt",
+      "when": { "keyboard": "1234" },
+      "ifPressedNTimes": 1,
+      "send": "2"
     }
   ],
   "keybindings": [

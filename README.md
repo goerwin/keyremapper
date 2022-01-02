@@ -3,7 +3,7 @@
 - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
 - Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
 - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
-- Rules (remaps, keybindings, keyPresses, tests) can be found in `mode1.json`
+- Rules (remaps, keybindings, tests) can be found in `mode1.json`
 
 ## Build
 
