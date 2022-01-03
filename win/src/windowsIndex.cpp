@@ -18,12 +18,14 @@ InterceptionKeyStroke keyStroke;
 
 const auto APP_TITLE = L"KeyRemapper";
 bool g_isAppEnabled = true;
+std::vector<std::string> g_modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
 int g_mode;
 int g_nCmdShow;
 HINSTANCE g_hInstance;
 std::string g_appName;
 KeyDispatcher *g_keyDispatcher;
 nlohmann::json g_rules;
+std::string g_mainDirPath;
 nlohmann::json g_symbols;
 
 HWND g_systemTrayIconWindow;
@@ -71,20 +73,19 @@ void handleApplyKeysCb(std::string appName, std::string keyboard, std::string ke
 }
 
 void initializeKeyDispatcher(int mode = 0) {
-  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
+  g_mainDirPath = WindowsHelpers::getMainDirPath();
 
-  auto mainDirPath = WindowsHelpers::getMainDirPath();
-
-  if (WindowsHelpers::fileExists(mainDirPath + "\\" + modes[mode])) g_mode = mode;
+  if (WindowsHelpers::fileExists(g_mainDirPath + "\\" + g_modes[mode])) g_mode = mode;
   else g_mode = 0;
 
-  g_rules = Helpers::getJsonFile(mainDirPath, modes[g_mode]);
-  g_symbols = Helpers::getJsonFile(mainDirPath, "symbols.json");
+  g_rules = Helpers::getJsonFile(g_mainDirPath, g_modes[g_mode]);
+  g_symbols = Helpers::getJsonFile(g_mainDirPath, "symbols.json");
 
   if (g_rules.is_null() || g_symbols.is_null()) {
-    WindowsHelpers::sendNotification(
+    // TODO: MessageBoxA in WindowsHelpers::sendNotification does not work
+    WindowsHelpers::print(
       "Error",
-      mainDirPath + "\\mode1.json and " + mainDirPath + "\\symbols.json files are required"
+      g_mainDirPath + "\\mode1.json and " + g_mainDirPath + "\\symbols.json files are required"
     );
     exit(1);
   }
@@ -110,54 +111,6 @@ void toggleAppEnabled() {
 
 void handleAppExit() { Shell_NotifyIcon(NIM_DELETE, &nid); }
 
-std::pair<ushort, bool> parseInteceptionKeyStroke(InterceptionKeyStroke keyStroke) {
-  ushort code = keyStroke.code;
-  ushort state = keyStroke.state;
-  bool isKeyDown = state == 0 || state == 2;
-
-  if (code == 42 && (state == 2 || state == 3)) return {0, isKeyDown}; // FakeShiftL
-  if (code == 83 && (state == 2 || state == 3)) return {300, isKeyDown}; // Supr
-  if (code == 71 && (state == 2 || state == 3)) return {301, isKeyDown}; // Home
-  if (code == 79 && (state == 2 || state == 3)) return {302, isKeyDown}; // End
-  if (code == 73 && (state == 2 || state == 3)) return {303, isKeyDown}; // PageUp
-  if (code == 81 && (state == 2 || state == 3)) return {304, isKeyDown}; // PageDown
-  if (code == 75 && (state == 2 || state == 3)) return {305, isKeyDown}; // LeftArrow
-  if (code == 77 && (state == 2 || state == 3)) return {306, isKeyDown}; // RightArrow
-  if (code == 72 && (state == 2 || state == 3)) return {307, isKeyDown}; // UpArrow
-  if (code == 80 && (state == 2 || state == 3)) return {308, isKeyDown}; // DownArrow
-  if (code == 91 && (state == 2 || state == 3)) return {309, isKeyDown}; // Win
-  if (code == 92 && (state == 2 || state == 3)) return {310, isKeyDown}; // WinR
-  if (code == 56 && (state == 2 || state == 3)) return {311, isKeyDown}; // AltR
-  if (code == 29 && (state == 2 || state == 3)) return {312, isKeyDown}; // CtrlR
-  if (code == 32 && (state == 2 || state == 3)) return {313, isKeyDown}; // Mute
-  if (code == 46 && (state == 2 || state == 3)) return {314, isKeyDown}; // VolumeDown
-  if (code == 48 && (state == 2 || state == 3)) return {315, isKeyDown}; // VolumeUp
-
-  return {code, isKeyDown};
-}
-
-std::pair<ushort, ushort> parseKeyEvent(ushort code, bool isKeyDown) {
-  if (code == 0) return {0, true};
-  if (code == 300) return {83, isKeyDown ? 2 : 3};
-  if (code == 301) return {71, isKeyDown ? 2 : 3};
-  if (code == 302) return {79, isKeyDown ? 2 : 3};
-  if (code == 303) return {73, isKeyDown ? 2 : 3};
-  if (code == 304) return {81, isKeyDown ? 2 : 3};
-  if (code == 305) return {75, isKeyDown ? 2 : 3};
-  if (code == 306) return {77, isKeyDown ? 2 : 3};
-  if (code == 307) return {72, isKeyDown ? 2 : 3};
-  if (code == 308) return {80, isKeyDown ? 2 : 3};
-  if (code == 309) return {91, isKeyDown ? 2 : 3};
-  if (code == 310) return {92, isKeyDown ? 2 : 3};
-  if (code == 311) return {56, isKeyDown ? 2 : 3};
-  if (code == 312) return {29, isKeyDown ? 2 : 3};
-  if (code == 313) return {32, isKeyDown ? 2 : 3};
-  if (code == 314) return {46, isKeyDown ? 2 : 3};
-  if (code == 315) return {48, isKeyDown ? 2 : 3};
-
-  return {code, isKeyDown ? 0 : 1};
-}
-
 DWORD WINAPI keyboardThreadFunc(void *data) {
   raise_process_priority();
   context = interception_create_context();
@@ -181,17 +134,19 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       g_keyDispatcher->setKeyboard(hardwareIdStr, "Not available");
     }
 
-    auto [code, isKeyDown] = parseInteceptionKeyStroke(keyStroke);
-    auto keyEvents = g_keyDispatcher->applyKeys({{code, isKeyDown}});
+    ushort code = keyStroke.code;
+    ushort state = keyStroke.state;
+
+    auto keyEvents = g_keyDispatcher->applyKeys({{"", code, state, false}});
     auto keyEventsSize = keyEvents.size();
 
     for (size_t i = 0; i < keyEventsSize; i++) {
-      auto [keyEventCode, isKeyDown] = keyEvents[i];
-      auto [code, state] = parseKeyEvent(keyEventCode, isKeyDown);
-      auto newKeyStroke = InterceptionKeyStroke({code, state});
+      auto keyEvent = keyEvents[i];
+      auto code = keyEvent.code;
+      auto state = keyEvent.state;
+      auto isKeyDown = keyEvent.isKeyDown;
 
-      if (code == 0) continue;
-      else if (code == 245) {
+      if (code == 245) {
         toggleAppEnabled();
         break;
       } else if (!g_isAppEnabled) continue;
@@ -212,7 +167,10 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       else if (code == 402 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(5));
       else if (code == 403 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(10));
       else if (code == 404 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(50));
-      else interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
+      else {
+        auto newKeyStroke = InterceptionKeyStroke({code, state});
+        interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
+      }
     }
   }
 
@@ -356,12 +314,15 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       initializeKeyDispatcher(3);
       return 0;
     case IDM_RUN_MODE_TESTS: {
-      auto testResults = TestHelpers::runTests(g_rules["tests"], g_rules, g_symbols);
+      auto rules = Helpers::getJsonFile(g_mainDirPath, g_modes[g_mode]);
+      auto tests = rules["tests"];
+      auto symbols = Helpers::getJsonFile(g_mainDirPath, "symbols.json");
+
+      auto testResults = TestHelpers::runTests(tests, rules, symbols);
       std::string testResultsStr =
           testResults.is_null() ? "NO TESTS RUN" : testResults["message"];
 
-      MessageBoxA(NULL, testResultsStr.c_str(), "Tests Results",
-                  MB_OK | MB_ICONINFORMATION);
+      WindowsHelpers::sendNotification("Tests Results", testResultsStr);
       return 0;
     }
     case IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD: {
@@ -373,7 +334,7 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
         str = str + g_EventsInfo[remapInfoSize - 1 - i] + "\n";
 
       copyToClipboard(g_systemTrayIconWindow, str);
-      WindowsHelpers::sendNotification("Events copied to clipboard!", "Copy to Clipboard");
+      WindowsHelpers::sendNotification("Clipboard", "Events copied to clipboard!");
 
       return 0;
     }
@@ -383,8 +344,7 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       ShowWindow(g_eventWindow, g_nCmdShow);
       return 0;
     case IDM_OPEN_MAIN_FOLDER:
-      auto mainFolder = WindowsHelpers::getMainDirPath();
-      ShellExecuteA(NULL, "open", mainFolder.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+      ShellExecuteA(NULL, "open", g_mainDirPath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
       return 0;
     }
 

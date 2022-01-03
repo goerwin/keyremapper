@@ -48,7 +48,7 @@ String getMainDirPath() {
   #if defined(_DEBUG)
     return WindowsHelpers::getAbsDirPath();
   #else
-    return WindowsHelpers::getHomeDirPath() + "\\" + "keyRemapper";
+    return WindowsHelpers::getHomeDirPath() + "\\" + "keyRemapperWin";
   #endif
 }
 
@@ -89,8 +89,6 @@ bool fileExists(String path) {
 }
 
 void sendNotification(std::string title, std::string message) {
-  print(title + ": " + message);
-  // TODO: doesnt work for when mode1.json file does not exist in home dir
-  // MessageBoxA(NULL, title.c_str(), message.c_str(), MB_OK | MB_ICONINFORMATION);
+  MessageBoxA(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
 }
 } // namespace WindowsHelpers

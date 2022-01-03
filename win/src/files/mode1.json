@@ -27,6 +27,8 @@
     { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
   ],
   "keybindings": [
+    { "keys": ["FakeShiftL"], "send": [null, null] },
+
     // switch modes
 
     { "keys": ["1"], "if": { "Esc": true }, "send": [null, "AppMode1"] },
@@ -134,11 +136,11 @@
       "send": ["Shift:down", "Shift:up"]
     },
 
-    // Click mode
+    // Clicks mode
 
     {
       "keys": ["C"],
-      "if": { "isKeyDown": true, "leftClickMode": true },
+      "if": { "isKeyDown": true, "rightClickMode": true },
       "send": [null, null]
     },
     {
@@ -316,7 +318,7 @@
     ],
     [
       "Alt:down Tab Esc Alt:up",
-      "Ctrl:down Ctrl:up Alt:down Tab Esc Alt:up Ctrl:down Ctrl:up"
+      "Ctrl:down Ctrl:up Alt:down Tab Esc Delay10 Alt:up Ctrl:down Ctrl:up"
     ],
     // Key
     ["A", "A"],
@@ -344,7 +346,7 @@
     ["Caps:down K Caps:up", "UpArrow"],
     ["Caps:down Alt:down H Alt:up Caps:up", "Ctrl Home Ctrl"],
     ["Caps:down Alt:down L Alt:up Caps:up", "Ctrl End Ctrl"],
-    ["Caps:down S:down H S:up Caps:up", "Shift:down LeftArrow Shift:up"],
+    ["Caps:down F:down H F:up Caps:up", "Shift:down LeftArrow Shift:up"],
 
     // VIM MODE: When Caps is not the first pressed key
     ["T:down Caps:down T:up Caps:up", "T"],

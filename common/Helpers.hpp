@@ -133,7 +133,7 @@ public:
       buf[currSize] = item;
       currSize++;
     } else {
-      for (size_t i = 0; i < capacity - 1; i++) {
+      for (int i = 0; i < capacity - 1; i++) {
         buf[i] = buf[i + 1];
       }
 

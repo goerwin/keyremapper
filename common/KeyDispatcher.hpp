@@ -15,7 +15,9 @@ class KeyDispatcher {
   typedef std::vector<json> JsonArray;
 
   struct KeyEvent {
+    String name;
     ushort code;
+    ushort state;
     bool isKeyDown;
   };
   typedef std::vector<KeyEvent> KeyEvents;
@@ -58,7 +60,6 @@ private:
       }
 
       keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-      //WindowsHelpers::print(std::to_string(keyDownTime));
 
       if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
         keyPressesCount = 0;
@@ -90,40 +91,38 @@ public:
                       : rulesEl["keyPressesDelay"].get<short>();
     remaps = rulesEl["remaps"];
     keyPresses = rulesEl["keyPresses"];
-    globals["appName"] = "";
-    globals["keyboard"] = "";
-    globals["keyboardDescription"] = "";
-    globals["currentKey"] = "";
-    globals["isKeyDown"] = "";
+    reset();
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents) {
     KeyEvents newKeyEvents = {};
 
-    for (int i = 0; i < keyEvents.size(); i++) {
-      auto keyEvent = keyEvents[i];
-      auto [code, isKeyDown] = keyEvent;
-      auto keyName = getKeyName(code);
+    for (size_t i = 0; i < keyEvents.size(); i++) {
       KeyEvents localKeyEvents = {};
 
-      auto [newKeyName, newCode] = getRemappedKey(keyName, code);
+      auto keyEvent = keyEvents[i];
+      auto parsedKeyEvent = getKeyEvent(keyEvent.code, keyEvent.state);
+      auto remappedKeyEvent = getRemappedKeyEvent(parsedKeyEvent);
+      auto code = remappedKeyEvent.code;
+      auto keyName = remappedKeyEvent.name;
+      auto isKeyDown = remappedKeyEvent.isKeyDown;
 
-      globals["currentKey"] = newKeyName;
-      globals["isKeyDown"] = isKeyDown;
-      globals[newKeyName] = isKeyDown;
+      globals["currentKey"] = remappedKeyEvent.name;
+      globals["isKeyDown"] = remappedKeyEvent.isKeyDown;
+      globals[keyName] = remappedKeyEvent.isKeyDown;
 
-      auto send = getSendFromKeybindings(newKeyName, isKeyDown);
+      auto send = getSendFromKeybindings(keyName, isKeyDown);
       if (!send.is_null())
         localKeyEvents = Helpers::concatArrays(localKeyEvents,
             getKeyEventsFromString(isKeyDown ? send[0] : send[1]));
       else
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, {{newCode, isKeyDown}});
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
 
-      setKeyPressesCount(newKeyName, isKeyDown);
+      setKeyPressesCount(keyName, isKeyDown);
       if (!isKeyDown)
         localKeyEvents = Helpers::concatArrays(
           localKeyEvents,
-          getKeyEventsFromString(getSendFromKeyPresses(newKeyName))
+          getKeyEventsFromString(getSendFromKeyPresses(keyName))
         );
 
       if (applyKeysCb) {
@@ -133,8 +132,8 @@ public:
           globals["keyboardDescription"],
           std::to_string(code) + ":" +
             (isKeyDown ? "down" : "up") + " -> " +
-            stringifyKeyEvents({keyEvent}) + " -> " +
-            stringifyKeyEvents({{newCode, isKeyDown}}) + " -> " +
+            stringifyKeyEvents({parsedKeyEvent}) + " -> " +
+            stringifyKeyEvents({remappedKeyEvent}) + " -> " +
             stringifyKeyEvents(localKeyEvents)
         );
       }
@@ -164,8 +163,10 @@ public:
     for (size_t i = 0; i < keyEvents.size(); i++) {
       if (i != 0) result += " ";
 
-      auto [code, isKeyDown] = keyEvents[i];
-      auto keyName = getKeyName(code);
+      auto keyEvent = keyEvents[i];
+      auto code = keyEvent.code;
+      auto keyName = keyEvent.name;
+      auto isKeyDown = keyEvent.isKeyDown;
       result += keyName + (isKeyDown ? ":down" : ":up");
     }
 
@@ -178,27 +179,26 @@ public:
 
     Strings strKeys = Helpers::split(str, ' ');
     auto strKeysSize = strKeys.size();
-    auto currentKey = globals["currentKey"];
+    String currentKey = globals["currentKey"];
     KeyEvents keyEvents = {};
 
     for (size_t i = 0; i < strKeysSize; i++) {
       String keyStateStr;
-      ushort code;
       String strKey = strKeys[i];
       Strings keyDesc = Helpers::split(strKey, ':');
       String keyName = keyDesc[0];
+      keyName = keyName == "currentKey" ? currentKey : keyName;
+      KeyEvent keyEventDown = getKeyEvent(keyName, true);
+      KeyEvent keyEventUp = getKeyEvent(keyName, false);
 
       if (keyDesc.size() == 2) keyStateStr = keyDesc[1];
 
-      if (keyName == "currentKey") code = getKey(currentKey);
-      else code = getKey(keyName);
-
       if (keyStateStr == "down")
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}});
+        keyEvents = Helpers::concatArrays(keyEvents, {keyEventDown});
       else if (keyStateStr == "up")
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, false}});
+        keyEvents = Helpers::concatArrays(keyEvents, {keyEventUp});
       else
-        keyEvents = Helpers::concatArrays(keyEvents, {{code, true}, {code, false}});
+        keyEvents = Helpers::concatArrays(keyEvents, {keyEventDown, keyEventUp});
     }
 
     return keyEvents;
@@ -206,6 +206,12 @@ public:
 
   void reset() {
     globals = {};
+    globals["appName"] = "";
+    globals["keyboard"] = "";
+    globals["keyboardDescription"] = "";
+    globals["currentKey"] = "";
+    globals["isKeyDown"] = "";
+
     lastKeyName = "";
     keyPressesCount = 0;
     keyDownTime = 0;
@@ -213,21 +219,6 @@ public:
   }
 
 private:
-  std::pair<String, ushort> getRemappedKey(String keyName, ushort code) {
-    size_t remapsSize = remaps.size();
-
-    for (size_t i = 0; i < remapsSize; i++) {
-      auto remap = remaps[i];
-      if (keyName != remap["from"]) continue;
-      if (!ifConditions(remap["if"])) continue;
-
-      String newKeyName = remap["to"];
-      return {newKeyName, getKey(newKeyName)};
-    }
-
-    return {keyName, code};
-  }
-
   bool ifConditions(json ifConds) {
     if (ifConds.is_null()) return true;
 
@@ -284,15 +275,32 @@ private:
     return {};
   }
 
-  String getKeyName(short scanCode) {
-    for (auto &[key, value] : symbols.items()) {
-      if (value[0] == scanCode) return key;
+  KeyEvent getRemappedKeyEvent(KeyEvent keyEvent) {
+    size_t remapsSize = remaps.size();
+    auto keyName = keyEvent.name;
+
+    for (size_t i = 0; i < remapsSize; i++) {
+      auto remap = remaps[i];
+      if (keyName != remap["from"]) continue;
+      if (!ifConditions(remap["if"])) continue;
+
+      String newKeyName = remap["to"];
+      return getKeyEvent(newKeyName, keyEvent.isKeyDown);
     }
 
-    return {};
+    return keyEvent;
   }
 
-  ushort getKey(String keyName) {
-    return symbols[keyName][0];
+  KeyEvent getKeyEvent(ushort code, ushort state) {
+    for (auto &[key, value] : symbols.items()) {
+      if (value[0] != code) continue;
+      if (state != value[1] && state != value[2]) continue;
+      return {key, code, state, state == value[1]};
+    }
+  }
+
+  KeyEvent getKeyEvent(String keyName, bool isKeyDown) {
+    auto symbol = symbols[keyName];
+    return {keyName, symbol[0], isKeyDown ? symbol[1] : symbol[2], isKeyDown};
   }
 };
