@@ -48,7 +48,9 @@
   - [x] you should only test key cases, not entire flows (like vim mode)
   - [x] rethink alghoritm to be more general so it can be used in any OS
   - [x] validate if keycode doesnt exist
-  - [x] general Key
+  - [x] general Key (currentKey)
+  - [ ] better error log for debug/release
+  - [ ] keybindings for toggling app and changing modes should be global from the system and not the app
 
 - Mac
   - [x] Move files that are shared between OSs to a common place
