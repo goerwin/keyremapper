@@ -39,6 +39,7 @@ const int IDM_MODE_4 = 14;
 const int IDM_OPEN_EVENT_WINDOW = 15;
 const int IDM_RUN_MODE_TESTS = 16;
 const int IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD = 17;
+const int IDM_OPEN_MAIN_FOLDER = 18;
 
 // https://codingmisadventures.wordpress.com/2009/02/20/creating-a-system-tray-icon-using-visual-c-and-win32/
 NOTIFYICONDATA nid;
@@ -72,13 +73,21 @@ void handleApplyKeysCb(std::string appName, std::string keyboard, std::string ke
 void initializeKeyDispatcher(int mode = 0) {
   std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
 
-  auto absDirPath = WindowsHelpers::getAbsDirPath();
+  auto mainDirPath = WindowsHelpers::getMainDirPath();
 
-  if (WindowsHelpers::fileExists(absDirPath + "\\" + modes[mode])) g_mode = mode;
+  if (WindowsHelpers::fileExists(mainDirPath + "\\" + modes[mode])) g_mode = mode;
   else g_mode = 0;
 
-  g_rules = Helpers::getJsonFile(absDirPath, modes[g_mode]);
-  g_symbols = Helpers::getJsonFile(absDirPath, "symbols.json");
+  g_rules = Helpers::getJsonFile(mainDirPath, modes[g_mode]);
+  g_symbols = Helpers::getJsonFile(mainDirPath, "symbols.json");
+
+  if (g_rules.is_null() || g_symbols.is_null()) {
+    WindowsHelpers::sendNotification(
+      "Error",
+      mainDirPath + "\\mode1.json and " + mainDirPath + "\\symbols.json files are required"
+    );
+    exit(1);
+  }
 
   delete g_keyDispatcher;
   g_keyDispatcher = new KeyDispatcher(g_rules, g_symbols);
@@ -314,23 +323,16 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       SetForegroundWindow(hWnd);
 
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, L"Exit");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_RUN_MODE_TESTS,
-                 L"Run mode tests");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD,
-                 L"Copy latest Events to Clipboard");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_EVENT_WINDOW,
-                 L"Open Events Window");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4,
-                 g_mode == 3 ? L"# Mode 4" : L"Mode 4");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3,
-                 g_mode == 2 ? L"# Mode 3" : L"Mode 3");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2,
-                 g_mode == 1 ? L"# Mode 2" : L"Mode 2");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1,
-                 g_mode == 0 ? L"# Mode 1" : L"Mode 1");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_RUN_MODE_TESTS, L"Run mode tests");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_MAIN_FOLDER, L"Open Main Folder");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD, L"Copy latest Events to Clipboard");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_EVENT_WINDOW, L"Open Events Window");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4, g_mode == 3 ? L"# Mode 4" : L"Mode 4");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3, g_mode == 2 ? L"# Mode 3" : L"Mode 3");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2, g_mode == 1 ? L"# Mode 2" : L"Mode 2");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1, g_mode == 0 ? L"# Mode 1" : L"Mode 1");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, L"On/Off");
-      TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN,
-                     pt.x, pt.y, 0, hWnd, NULL);
+      TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
       return 0;
     };
   case WM_COMMAND:
@@ -371,14 +373,18 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
         str = str + g_EventsInfo[remapInfoSize - 1 - i] + "\n";
 
       copyToClipboard(g_systemTrayIconWindow, str);
-      MessageBoxA(NULL, "Events copied to clipboard!", "Copy to Clipboard",
-        MB_OK | MB_ICONINFORMATION);
+      WindowsHelpers::sendNotification("Events copied to clipboard!", "Copy to Clipboard");
+
       return 0;
     }
     case IDM_OPEN_EVENT_WINDOW:
       SwitchToThisWindow(g_eventWindow, false);
       g_eventWindow = createEventWindow(g_hInstance);
       ShowWindow(g_eventWindow, g_nCmdShow);
+      return 0;
+    case IDM_OPEN_MAIN_FOLDER:
+      auto mainFolder = WindowsHelpers::getMainDirPath();
+      ShellExecuteA(NULL, "open", mainFolder.c_str(), NULL, NULL, SW_SHOWDEFAULT);
       return 0;
     }
 

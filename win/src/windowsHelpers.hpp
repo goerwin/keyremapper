@@ -26,6 +26,32 @@ String getAbsDirPath() {
   return strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
 }
 
+const char* getEnv(const char* name) {
+  const DWORD buffSize = 65535;
+  static char buffer[buffSize];
+  if (GetEnvironmentVariableA(name, buffer, buffSize)) {
+    return buffer;
+  } else {
+    return 0;
+  }
+}
+
+String getHomeDirPath() {
+  auto envHomePath = getEnv("HOMEPATH");
+  std::string homeDirPath(envHomePath);
+
+  print(homeDirPath);
+  return homeDirPath;
+}
+
+String getMainDirPath() {
+  #if defined(_DEBUG)
+    return WindowsHelpers::getAbsDirPath();
+  #else
+    return WindowsHelpers::getHomeDirPath() + "\\" + "keyRemapper";
+  #endif
+}
+
 String getActiveWindowProcessName(HWND hwnd) {
   if (!hwnd) {
     return {};
@@ -60,5 +86,11 @@ bool fileExists(String path) {
   DWORD dwAttrib = GetFileAttributesA(path.c_str());
   return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
           !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+void sendNotification(std::string title, std::string message) {
+  print(title + ": " + message);
+  // TODO: doesnt work for when mode1.json file does not exist in home dir
+  // MessageBoxA(NULL, title.c_str(), message.c_str(), MB_OK | MB_ICONINFORMATION);
 }
 } // namespace WindowsHelpers
