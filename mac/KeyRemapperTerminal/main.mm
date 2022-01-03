@@ -31,7 +31,7 @@ void sendNotification(std::string message, std::string title = "KeyRemapper") {
 // TODO: This is inefficient
 ushort getMacVKCode(short scanCode) {
   for (auto &[key, value] : Global::symbols.items()) {
-    if (value[0] == scanCode) return value[1];
+    if (value[0] == scanCode) return value[3];
   }
 
   return {};
@@ -147,12 +147,14 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
 
   Global::keyDispatcher->setKeyboard(keyboard, manufacturer + " | " + product);
 
-  auto newKeys = Global::keyDispatcher->applyKeys({{scancode, isKeyDown}});
+  auto keyEvents = Global::keyDispatcher->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
 
-  auto newKeysSize = newKeys.size();
+  auto keyEventsSize = keyEvents.size();
 
-  for (size_t i = 0; i < newKeysSize; i++) {
-    auto [code, isKeyDown] = newKeys[i];
+  for (size_t i = 0; i < keyEventsSize; i++) {
+    auto keyEvent = keyEvents[i];
+    auto code = keyEvent.code;
+    auto isKeyDown = keyEvent.isKeyDown;
     auto vkCode = getMacVKCode(code);
 
     if (vkCode == 246 && isKeyDown) return initializeKeyDispatcher(0);
@@ -165,22 +167,22 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     else if (vkCode == 58) Global::isAltDown = isKeyDown;
     else if (vkCode == 59) Global::isCtrlDown = isKeyDown;
     else if (vkCode == 63) Global::isFnDown = isKeyDown;
-    
+
     if (vkCode == 57) {
       if (isKeyDown) IOHIDManager::toggleCapslockState();
       continue;
     }
-    
+
     if (vkCode == 241) {
       MouseHandler::handleMouseDownUp(isKeyDown);
       continue;
     }
-    
+
     if (vkCode == 242) {
       MouseHandler::handleMouseDownUp(isKeyDown, "right");
       continue;
     }
-      
+
     if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, isKeyDown);
     else postKey(vkCode, isKeyDown);
 
@@ -228,7 +230,6 @@ void initializeKeyDispatcher(int mode) {
       "Keys: " + keys + "\n");
   });
 
-
   auto tests = rules["tests"];
   std::string testsResultsMsg = "";
   if (!tests.is_null()) {
@@ -237,7 +238,7 @@ void initializeKeyDispatcher(int mode) {
     testResults["message"] : "NO TESTS RAN");
   }
 
-  sendNotification(selectedMode + " selected" + testsResultsMsg);
+  sendNotification(selectedMode + " selected" + testsResultsMsg + "\n" + "Config files in: " + Global::resourcesParentDirPath);
 }
 
 CFMachPortRef g_appToggleEventTap;
@@ -302,8 +303,12 @@ void toggleAppEnabled() {
 
 int main(int argc, const char *argv[]) {
   // argv[0] is the absolute path of the executable
-  Global::resourcesParentDirPath = std::string(argv[0]);
-  Global::resourcesParentDirPath = Global::resourcesParentDirPath.substr(0, Global::resourcesParentDirPath.find_last_of("/")).append("/resources");
+  #ifdef DEBUG
+    Global::resourcesParentDirPath = std::string(argv[0]);
+    Global::resourcesParentDirPath = Global::resourcesParentDirPath.substr(0, Global::resourcesParentDirPath.find_last_of("/")).append("/resources");
+  #else
+    Global::resourcesParentDirPath = getenv("HOME") + std::string("/keyRemapperMac");
+  #endif
 
   // NOTE: Running this Objective C code inside a function doesn't work
   Application *application = [[Application alloc]init];

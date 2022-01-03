@@ -164,7 +164,6 @@ public:
       if (i != 0) result += " ";
 
       auto keyEvent = keyEvents[i];
-      auto code = keyEvent.code;
       auto keyName = keyEvent.name;
       auto isKeyDown = keyEvent.isKeyDown;
       result += keyName + (isKeyDown ? ":down" : ":up");
@@ -297,6 +296,8 @@ private:
       if (state != value[1] && state != value[2]) continue;
       return {key, code, state, state == value[1]};
     }
+
+    return {};
   }
 
   KeyEvent getKeyEvent(String keyName, bool isKeyDown) {

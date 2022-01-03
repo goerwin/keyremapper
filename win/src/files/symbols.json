@@ -1,7 +1,7 @@
 // http://www.flint.jp/misc/?q=dik&lang=en
 // https://www.freepascal.org/docs-html/rtl/keyboard/kbdscancode.html
 
-// { "keyName": [scanCode, keyDownState, keyUpState, 0, 1] }
+// { "keyName": [scanCode, keyDownState, keyUpState] }
 
 {
   "A": [30, 0, 1],
