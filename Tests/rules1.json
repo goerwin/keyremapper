@@ -22,7 +22,7 @@
     {
       "keys": ["H"],
       "when": { "Ctrl": true, "Caps": true },
-      "send": ["Left", null]
+      "send": ["LeftArrow", null]
     },
     {
       "keys": ["X", "Y"],
@@ -40,7 +40,7 @@
 
     [
       "Ctrl:down Caps:down H Caps:up Ctrl:up",
-      "Ctrl:down Caps:down Left Caps:up Ctrl:up"
+      "Ctrl:down Caps:down LeftArrow Caps:up Ctrl:up"
     ],
 
     ["X", "Z"],

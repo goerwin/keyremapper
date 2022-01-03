@@ -101,16 +101,69 @@ void toggleAppEnabled() {
 
 void handleAppExit() { Shell_NotifyIcon(NIM_DELETE, &nid); }
 
+std::pair<ushort, bool> parseInteceptionKeyStroke(InterceptionKeyStroke keyStroke) {
+  ushort code = keyStroke.code;
+  ushort state = keyStroke.state;
+  bool isKeyDown = state == 0 || state == 2;
+
+  if (code == 42 && (state == 2 || state == 3)) return {0, isKeyDown}; // FakeShiftL
+  if (code == 83 && (state == 2 || state == 3)) return {300, isKeyDown}; // Supr
+  if (code == 71 && (state == 2 || state == 3)) return {301, isKeyDown}; // Home
+  if (code == 79 && (state == 2 || state == 3)) return {302, isKeyDown}; // End
+  if (code == 73 && (state == 2 || state == 3)) return {303, isKeyDown}; // PageUp
+  if (code == 81 && (state == 2 || state == 3)) return {304, isKeyDown}; // PageDown
+  if (code == 75 && (state == 2 || state == 3)) return {305, isKeyDown}; // LeftArrow
+  if (code == 77 && (state == 2 || state == 3)) return {306, isKeyDown}; // RightArrow
+  if (code == 72 && (state == 2 || state == 3)) return {307, isKeyDown}; // UpArrow
+  if (code == 80 && (state == 2 || state == 3)) return {308, isKeyDown}; // DownArrow
+  if (code == 91 && (state == 2 || state == 3)) return {309, isKeyDown}; // Win
+  if (code == 92 && (state == 2 || state == 3)) return {310, isKeyDown}; // WinR
+  if (code == 56 && (state == 2 || state == 3)) return {311, isKeyDown}; // AltR
+  if (code == 29 && (state == 2 || state == 3)) return {312, isKeyDown}; // CtrlR
+  if (code == 32 && (state == 2 || state == 3)) return {313, isKeyDown}; // Mute
+  if (code == 46 && (state == 2 || state == 3)) return {314, isKeyDown}; // VolumeDown
+  if (code == 48 && (state == 2 || state == 3)) return {315, isKeyDown}; // VolumeUp
+
+  return {code, isKeyDown};
+}
+
+std::pair<ushort, ushort> parseKeyEvent(ushort code, bool isKeyDown) {
+  if (code == 0) return {0, true};
+  if (code == 300) return {83, isKeyDown ? 2 : 3};
+  if (code == 301) return {71, isKeyDown ? 2 : 3};
+  if (code == 302) return {79, isKeyDown ? 2 : 3};
+  if (code == 303) return {73, isKeyDown ? 2 : 3};
+  if (code == 304) return {81, isKeyDown ? 2 : 3};
+  if (code == 305) return {75, isKeyDown ? 2 : 3};
+  if (code == 306) return {77, isKeyDown ? 2 : 3};
+  if (code == 307) return {72, isKeyDown ? 2 : 3};
+  if (code == 308) return {80, isKeyDown ? 2 : 3};
+  if (code == 309) return {91, isKeyDown ? 2 : 3};
+  if (code == 310) return {92, isKeyDown ? 2 : 3};
+  if (code == 311) return {56, isKeyDown ? 2 : 3};
+  if (code == 312) return {29, isKeyDown ? 2 : 3};
+  if (code == 313) return {32, isKeyDown ? 2 : 3};
+  if (code == 314) return {46, isKeyDown ? 2 : 3};
+  if (code == 315) return {48, isKeyDown ? 2 : 3};
+
+  return {code, isKeyDown ? 0 : 1};
+}
+
 DWORD WINAPI keyboardThreadFunc(void *data) {
   raise_process_priority();
   context = interception_create_context();
-  interception_set_filter(context, interception_is_keyboard,
-                          INTERCEPTION_FILTER_KEY_ALL);
+  interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
 
   initializeKeyDispatcher();
 
-  while (interception_receive(context, device = interception_wait(context),
-                              (InterceptionStroke *)&keyStroke, 1) > 0) {
+  while (interception_receive(
+    context,
+    device = interception_wait(context),
+    (InterceptionStroke *)&keyStroke, 1) > 0
+  ) {
+    if (!g_isAppEnabled)
+      interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
+
     wchar_t hardwareId[500];
     size_t length = interception_get_hardware_id(context, device, hardwareId, sizeof(hardwareId));
     if (length > 0 && length < sizeof(hardwareId)) {
@@ -119,54 +172,38 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       g_keyDispatcher->setKeyboard(hardwareIdStr, "Not available");
     }
 
-    auto code = keyStroke.code;
-    auto state = keyStroke.state;
-    auto newKeys = g_keyDispatcher->applyKeys({{code, state}});
-    auto newKeysSize = newKeys.size();
+    auto [code, isKeyDown] = parseInteceptionKeyStroke(keyStroke);
+    auto keyEvents = g_keyDispatcher->applyKeys({{code, isKeyDown}});
+    auto keyEventsSize = keyEvents.size();
 
-    if (!g_isAppEnabled) {
-      interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
-    }
-
-    // "FakeShiftL": [42, 2, 3],
-    // Discard FakeShiftL events
-    if (code == 42 && (state == 2 || state == 3)) continue;
-
-    for (size_t i = 0; i < newKeysSize; i++) {
-      auto [code, state] = newKeys[i];
+    for (size_t i = 0; i < keyEventsSize; i++) {
+      auto [keyEventCode, isKeyDown] = keyEvents[i];
+      auto [code, state] = parseKeyEvent(keyEventCode, isKeyDown);
       auto newKeyStroke = InterceptionKeyStroke({code, state});
 
-      if (code == 245) {
+      if (code == 0) continue;
+      else if (code == 245) {
         toggleAppEnabled();
         break;
-      } else if (!g_isAppEnabled) {
-        continue;
-      } else if (code == 241) {
-        if (state == 0)
-          mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-        else
-          mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+      } else if (!g_isAppEnabled) continue;
+      else if (code == 241) {
+        if (isKeyDown) mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+        else mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
       } else if (code == 242) {
-        if (state == 0)
-          mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-        else
-          mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-      } else if (code == 243 && state == 0) {
-        BrightnessHandler::Increment(-10);
-      } else if (code == 244 && state == 0) {
-        BrightnessHandler::Increment(10);
-      } else if (code == 246 && state == 1) {
-        initializeKeyDispatcher();
-      } else if (code == 247 && state == 1) {
-        initializeKeyDispatcher(1);
-      } else if (code == 248 && state == 1) {
-        initializeKeyDispatcher(2);
-      } else if (code == 249 && state == 1) {
-        initializeKeyDispatcher(3);
-      } else {
-        interception_send(context, device, (InterceptionStroke *)&newKeyStroke,
-                          1);
-      }
+        if (isKeyDown) mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+        else mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+      } else if (code == 243 && isKeyDown) BrightnessHandler::Increment(-10);
+      else if (code == 244 && isKeyDown) BrightnessHandler::Increment(10);
+      else if (code == 246 && !isKeyDown) initializeKeyDispatcher();
+      else if (code == 247 && !isKeyDown) initializeKeyDispatcher(1);
+      else if (code == 248 && !isKeyDown) initializeKeyDispatcher(2);
+      else if (code == 249 && !isKeyDown) initializeKeyDispatcher(3);
+      else if (code == 400 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      else if (code == 401 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      else if (code == 402 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      else if (code == 403 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      else if (code == 404 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      else interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
     }
   }
 
@@ -327,7 +364,7 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     }
     case IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD: {
       auto remapInfoSize = g_EventsInfo.size();
-      
+
       std::string str = "";
 
       for (auto i = 0, max = 0; i < remapInfoSize && i < 20; i++)

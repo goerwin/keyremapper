@@ -277,7 +277,7 @@ private:
       if (!isWhen(keypress["when"])) continue;
       if (key != keypress["key"]) continue;
       if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
-
+      setValues(keypress["set"]);
       return keypress["send"];
     }
 
