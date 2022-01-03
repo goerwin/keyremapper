@@ -16,12 +16,12 @@
     },
     {
       "keys": ["G"],
-      "when": { "F": true },
+      "if": { "F": true },
       "send": ["H:down", "H:up"]
     },
     {
       "keys": ["H"],
-      "when": { "Ctrl": true, "Caps": true },
+      "if": { "Ctrl": true, "Caps": true },
       "send": ["LeftArrow", null]
     },
     {

@@ -3,7 +3,7 @@
   "keybindings": [
     {
       "keys": ["A"],
-      "when": { "appName": "chrome.exe" },
+      "if": { "appName": "chrome.exe" },
       "send": ["C", null]
     },
     {

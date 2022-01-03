@@ -1,5 +1,5 @@
 {
-  "description": ["currentKey", "set", "setOnKeyUp", "when", "isKeyDown"],
+  "description": ["currentKey", "set", "setOnKeyUp", "if", "isKeyDown"],
   "keybindings": [
     {
       "keys": ["A"],
@@ -10,29 +10,25 @@
       "set": { "RANDOM_STR": true },
       "setOnKeyUp": { "RANDOM_STR": false }
     },
-    {
-      "keys": ["C"],
-      "when": { "C": false },
-      "set": { "RANDOM_STR": false }
-    },
+    { "keys": ["C"], "if": { "C": false }, "set": { "RANDOM_STR": false } },
     {
       "keys": ["D"],
-      "when": { "RANDOM_STR": true },
+      "if": { "RANDOM_STR": true },
       "send": ["X", null]
     },
     {
       "keys": ["D"],
-      "when": { "RANDOM_STR": false },
+      "if": { "RANDOM_STR": false },
       "send": ["Y", null]
     },
     {
       "keys": ["E"],
-      "when": { "isKeyDown": true },
+      "if": { "isKeyDown": true },
       "send": ["A", "B"]
     },
     {
       "keys": ["E"],
-      "when": { "isKeyDown": false },
+      "if": { "isKeyDown": false },
       "send": ["C", "D"]
     }
   ],

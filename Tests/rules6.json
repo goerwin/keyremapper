@@ -4,14 +4,14 @@
     {
       "from": "N",
       "to": "X",
-      "when": { "keyboard": "1234" }
+      "if": { "keyboard": "1234" }
     },
     { "from": "N", "to": "Y" },
     { "from": "O", "to": "A" },
     {
       "from": "O",
       "to": "B",
-      "when": { "keyboard": "1234" }
+      "if": { "keyboard": "1234" }
     }
   ],
   "keyPresses": [
@@ -20,7 +20,7 @@
 
     {
       "key": "Caps",
-      "when": { "keyboard": "1234" },
+      "if": { "keyboard": "1234" },
       "ifPressedNTimes": 1,
       "send": "Win"
     },
@@ -28,7 +28,7 @@
     { "key": "Alt", "ifPressedNTimes": 1, "send": "A" },
     {
       "key": "Alt",
-      "when": { "keyboard": "1234" },
+      "if": { "keyboard": "1234" },
       "ifPressedNTimes": 1,
       "send": "2"
     }
@@ -36,7 +36,7 @@
   "keybindings": [
     {
       "keys": ["D"],
-      "when": { "keyboard": "1234" },
+      "if": { "keyboard": "1234" },
       "send": ["E:down", "E:up"]
     },
     {

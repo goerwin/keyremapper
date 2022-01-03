@@ -219,7 +219,7 @@ private:
     for (size_t i = 0; i < remapsSize; i++) {
       auto remap = remaps[i];
       if (keyName != remap["from"]) continue;
-      if (!isWhen(remap["when"])) continue;
+      if (!ifConditions(remap["if"])) continue;
 
       String newKeyName = remap["to"];
       return {newKeyName, getKey(newKeyName)};
@@ -228,10 +228,10 @@ private:
     return {keyName, code};
   }
 
-  bool isWhen(json when) {
-    if (when.is_null()) return true;
+  bool ifConditions(json ifConds) {
+    if (ifConds.is_null()) return true;
 
-    for (auto &[key, value] : when.items()) {
+    for (auto &[key, value] : ifConds.items()) {
       auto globalValue = globals[key];
 
       if (globalValue.is_null() && value == false) continue;
@@ -253,7 +253,7 @@ private:
       auto keybinding = keybindings[i];
       auto keys = keybinding["keys"];
 
-      if (!isWhen(keybinding["when"])) continue;
+      if (!ifConditions(keybinding["if"])) continue;
 
       for (size_t j = 0; j < keys.size(); j++) {
         if (key != keys[j]) continue;
@@ -274,7 +274,7 @@ private:
     for (size_t i = 0; i < keyPressesSize; i++) {
       auto keypress = keyPresses[i];
 
-      if (!isWhen(keypress["when"])) continue;
+      if (!ifConditions(keypress["if"])) continue;
       if (key != keypress["key"]) continue;
       if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
       setValues(keypress["set"]);
