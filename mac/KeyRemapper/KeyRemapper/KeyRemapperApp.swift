@@ -11,7 +11,7 @@ import SwiftUI
 struct KeyRemapperApp: App {
     var body: some Scene {
         WindowGroup {
-          ContentView().frame(minWidth: 500, idealWidth: 500, maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, minHeight: 500, idealHeight: 500, maxHeight: .infinity, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+          ContentView().frame(minWidth: 200, idealWidth: 200, maxWidth: 200, minHeight: 500, idealHeight: 500, maxHeight: .infinity, alignment: .center)
         }
     }
 }

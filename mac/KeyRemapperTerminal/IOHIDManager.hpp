@@ -5,7 +5,6 @@
 #include <IOKit/hidsystem/IOHIDLib.h>
 
 #include <iostream>
-#include <thread>
 
 // https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/HID/new_api_10_5/tn2187.html
 
@@ -18,7 +17,7 @@ public:
   static std::function<void(ushort, bool, int, int, std::string, std::string)> onIOHIDKeyboardInput;
 
 private:
-  static CFMutableDictionaryRef myCreateDeviceMatchingDictionary(UInt32 usagePage, UInt32 usage) {
+  static CFMutableDictionaryRef getDeviceMatchDictionary(UInt32 usagePage, UInt32 usage) {
     CFMutableDictionaryRef ret = CFDictionaryCreateMutable(
       kCFAllocatorDefault,
       0,
@@ -49,8 +48,8 @@ private:
 
     return ret;
   }
-  
-  static void mortalKombat(void *context, IOReturn result, void *sender, IOHIDValueRef value) {
+
+  static void inputValueCb(void *context, IOReturn result, void *sender, IOHIDValueRef value) {
     IOHIDElementRef elem = IOHIDValueGetElement(value);
     ushort scancode = IOHIDElementGetUsage(elem);
 
@@ -88,30 +87,30 @@ private:
 public:
   static void initialize() {
     IOHIDManager::hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-    
+
     if (CFGetTypeID(IOHIDManager::hidManager) != IOHIDManagerGetTypeID()) return;
-    
+
     IOHIDManager::capslockState = IOHIDManager::getCapslockState();
 
-    CFMutableDictionaryRef keyboard = myCreateDeviceMatchingDictionary(0x01, 6);
-    CFMutableDictionaryRef keypad = myCreateDeviceMatchingDictionary(0x01, 7);
+    CFMutableDictionaryRef keyboard = getDeviceMatchDictionary(0x01, 6);
+    CFMutableDictionaryRef keypad = getDeviceMatchDictionary(0x01, 7);
     CFMutableDictionaryRef matchesListRef[] = { keyboard, keypad };
     CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault, (const void **)matchesListRef, 2, NULL);
-    
+
     IOHIDManagerSetDeviceMatchingMultiple(IOHIDManager::hidManager, matches);
 
-    IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, IOHIDManager::mortalKombat, NULL);
+    IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, IOHIDManager::inputValueCb, NULL);
 
     CFRelease(keyboard);
     CFRelease(keypad);
     CFRelease(matches);
 
-    // kIOHIDOptionsTypeSeizeDevice: aUsed to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
-    // kIOHIDOptionsTypeNone: captures keyboard input evand let it through the OS
+    // kIOHIDOptionsTypeSeizeDevice: Used to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
+    // kIOHIDOptionsTypeNone: listens to keyboard input and let it through the OS
     IOHIDManagerScheduleWithRunLoop(IOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
     IOHIDManagerOpen(IOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
   }
-  
+
   static void terminate() {
     IOHIDManagerRegisterInputValueCallback(IOHIDManager::hidManager, NULL, NULL);
     IOHIDManagerSetDeviceMatchingMultiple(IOHIDManager::hidManager, NULL);
