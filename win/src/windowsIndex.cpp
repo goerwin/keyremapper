@@ -27,6 +27,8 @@ KeyDispatcher *g_keyDispatcher;
 nlohmann::json g_rules;
 std::string g_mainDirPath;
 nlohmann::json g_symbols;
+std::vector<std::tuple<ushort, ushort, ushort, ushort>> g_interceptionRemapCodesStates;
+size_t g_interceptionRemapCodesStatesSize;
 
 HWND g_systemTrayIconWindow;
 HWND g_eventWindow;
@@ -90,6 +92,9 @@ void initializeKeyDispatcher(int mode = 0) {
     exit(1);
   }
 
+  g_interceptionRemapCodesStates = g_symbols["_interceptionRemapCodesStates"].get<std::vector<std::tuple<ushort, ushort, ushort, ushort>>>();
+  g_interceptionRemapCodesStatesSize = g_interceptionRemapCodesStates.size();
+
   delete g_keyDispatcher;
   g_keyDispatcher = new KeyDispatcher(g_rules, g_symbols);
   g_keyDispatcher->setApplyKeysCb(handleApplyKeysCb);
@@ -121,10 +126,12 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
   while (interception_receive(
     context,
     device = interception_wait(context),
-    (InterceptionStroke *)&keyStroke, 1) > 0
+    (InterceptionStroke*)&keyStroke, 1) > 0
   ) {
+    // TODO: It should return immediately but since I'm not using global shortcuts,
+    // I have to use this until I implement global shortcuts
     if (!g_isAppEnabled)
-      interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
+      interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
 
     wchar_t hardwareId[500];
     size_t length = interception_get_hardware_id(context, device, hardwareId, sizeof(hardwareId));
@@ -136,6 +143,20 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 
     ushort code = keyStroke.code;
     ushort state = keyStroke.state;
+
+    // some keys send different scancode whether ctrl is pressed
+    // eg. prtScr sends [55,2,3] but if ctrl is down, it will send [84,0,1]
+    for (size_t i = 0; i < g_interceptionRemapCodesStatesSize; i++) {
+      auto &remapCodeState = g_interceptionRemapCodesStates[i];
+      auto secondCode = std::get<0>(remapCodeState);
+      auto secondState = std::get<1>(remapCodeState);
+      if (secondCode != code || secondState != state) continue;
+      code = std::get<2>(remapCodeState);
+      state = std::get<3>(remapCodeState);
+      break;
+    }
+
+    if (code == 0) continue;
 
     auto keyEvents = g_keyDispatcher->applyKeys({{"", code, state, false}});
     auto keyEventsSize = keyEvents.size();
@@ -198,8 +219,7 @@ LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, 0x00DDDDDD);
 
-    auto title = "originalCode:originalState -> keyEvent -> remappedKeyEvent "
-                 "-> transformedKeyEvents";
+    auto title = "inputCode:inputState -> remappedCode:remappedState -> parsedKeyEvent -> remappedKeyEvent -> keyEventsSent";
     auto remapInfoSize = g_EventsInfo.size();
 
     TextOutA(hdc, 0, 10, title, strlen(title));

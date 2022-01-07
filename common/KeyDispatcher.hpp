@@ -101,9 +101,12 @@ public:
       KeyEvents localKeyEvents = {};
 
       auto keyEvent = keyEvents[i];
-      auto parsedKeyEvent = getKeyEvent(keyEvent.code, keyEvent.state);
+      auto code = keyEvent.code;
+      auto state = keyEvent.state;
+      auto parsedKeyEvent = getKeyEvent(code, state);
       auto remappedKeyEvent = getRemappedKeyEvent(parsedKeyEvent);
-      auto code = remappedKeyEvent.code;
+      auto remappedCode = remappedKeyEvent.code;
+      auto remappedState = remappedKeyEvent.state;
       auto keyName = remappedKeyEvent.name;
       auto isKeyDown = remappedKeyEvent.isKeyDown;
 
@@ -130,8 +133,11 @@ public:
           globals["appName"],
           globals["keyboard"],
           globals["keyboardDescription"],
+          // inputCode:inputState -> remappedCode:remappedState -> parsedKeyEvent -> remappedKeyEvent -> keyEventsSent
           std::to_string(code) + ":" +
-            (isKeyDown ? "down" : "up") + " -> " +
+            std::to_string(state) + " -> " +
+            std::to_string(remappedCode) + ":" +
+            std::to_string(remappedState) + " -> " +
             stringifyKeyEvents({parsedKeyEvent}) + " -> " +
             stringifyKeyEvents({remappedKeyEvent}) + " -> " +
             stringifyKeyEvents(localKeyEvents)

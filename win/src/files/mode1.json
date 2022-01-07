@@ -5,6 +5,11 @@
       "to": "B",
       "if": { "keyboard": "HID\\VID_0B05&PID_19B6&REV_0002&EXAMPLE" }
     },
+    {
+      "from": "PrtScr",
+      "to": "Win",
+      "if": { "keyboard": "HID\\VID_0B05&PID_19B6&REV_0002&MI_02" }
+    },
     { "from": "CtrlR", "to": "Win" },
     { "from": "AltR", "to": "Alt" },
     { "from": "ShiftR", "to": "Shift" },
@@ -27,8 +32,6 @@
     { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
   ],
   "keybindings": [
-    { "keys": ["FakeShiftL"], "send": [null, null] },
-
     // switch modes
 
     { "keys": ["1"], "if": { "Esc": true }, "send": [null, "AppMode1"] },
