@@ -8,7 +8,9 @@
 class MouseHandler {
 private:
   static int clickCount;
+  static CGPoint mouseLoc;
   static std::string status;
+  static std::string mouseType;
   static double lastPressTime;
   static CFMachPortRef myEventTap;
   static CFRunLoopSourceRef myRunLoopSource;
@@ -18,47 +20,45 @@ public:
 
 public:
   static void handleMouseDownUp(bool isMouseDown, std::string mouseType = "left") {
-    auto eventType = mouseType == "right" ?
-      isMouseDown ? kCGEventRightMouseDown : kCGEventRightMouseDown
-      : isMouseDown ? kCGEventLeftMouseDown : kCGEventLeftMouseUp;
-
-    auto buttonType = mouseType == "right" ? kCGMouseButtonRight : kCGMouseButtonLeft;
-
     //get current mouse position
     CGEventRef tempEvent = CGEventCreate(NULL);
-    auto mouseLoc  = CGEventGetLocation(tempEvent);
-
-    eventType = isMouseDown ? mouseType == "right" ? kCGEventRightMouseDown : kCGEventLeftMouseDown : mouseType == "right" ? kCGEventRightMouseUp : kCGEventLeftMouseUp;
+    CGPoint newMouseLoc = CGEventGetLocation(tempEvent);
 
     if (isMouseDown) {
       double now = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
-      if (clickCount == 0 || now - lastPressTime > doubleClickSpeed)
-        clickCount = 1;
-      else
-        clickCount = clickCount + 1;
+      if (
+        MouseHandler::mouseType != mouseType ||
+        newMouseLoc.x != MouseHandler::mouseLoc.x ||
+        newMouseLoc.y != MouseHandler::mouseLoc.y ||
+        clickCount == 0 ||
+        now - lastPressTime > doubleClickSpeed
+      ) clickCount = 1;
+      else clickCount = clickCount + 1;
 
+      MouseHandler::mouseType = mouseType;
+      MouseHandler::mouseLoc = newMouseLoc;
       lastPressTime = now;
-      status = "mouse_is_down";
-
-      CGEventRef mouseEvent = CGEventCreateMouseEvent(NULL, eventType, mouseLoc, buttonType);
-      CGEventSetIntegerValueField(mouseEvent, kCGMouseEventClickState, clickCount);
-      CGEventPost(kCGHIDEventTap, mouseEvent);
-      CFRelease(tempEvent);
-      CFRelease(mouseEvent);
-
-      return;
     }
+    
+    MouseHandler::status = isMouseDown ? "mouse_is_down" : "mouse_is_up";
 
-    status = "mouse_is_up";
-    CGEventRef mouseEvent = CGEventCreateMouseEvent(NULL, eventType, mouseLoc, buttonType);
-    CGEventSetIntegerValueField(mouseEvent, kCGMouseEventClickState, clickCount);
-    CGEventPost(kCGHIDEventTap, mouseEvent);
+    auto eventType = isMouseDown ?
+      mouseType == "right" ?
+        kCGEventRightMouseDown : kCGEventLeftMouseDown :
+      mouseType == "right" ?
+        kCGEventRightMouseUp : kCGEventLeftMouseUp;
+    auto buttonType = mouseType == "right" ? kCGMouseButtonRight : kCGMouseButtonLeft;
+    CGEventRef event = CGEventCreateMouseEvent(NULL, eventType, newMouseLoc, buttonType);
+    CGEventSetIntegerValueField(event, kCGMouseEventClickState, clickCount);
+    CGEventSetDoubleValueField(event, kCGEventSourceUserData, 69);
+    setModifierFlagsToNativeMouseEvent(event, false);
+    CGEventPost(kCGHIDEventTap, event);
     CFRelease(tempEvent);
-    CFRelease(mouseEvent);
+    CFRelease(event);
   }
 
-  static void setModifierFlagsToNativeMouseEvent(CGEventRef event) {
+  static void setModifierFlagsToNativeMouseEvent(CGEventRef event, bool isNativeEvent) {
     CGEventFlags flags = 0;
 
     if (Global::isCmdDown) flags = flags | kCGEventFlagMaskCommand;
@@ -67,21 +67,24 @@ public:
     if (Global::isCtrlDown) flags = flags | kCGEventFlagMaskControl;
     if (Global::isFnDown) flags = flags | kCGEventFlagMaskSecondaryFn;
 
+    if (!isNativeEvent) return CGEventSetFlags(event, flags);
+
     auto eventType = CGEventGetType(event);
     bool isMoving = eventType == kCGEventMouseMoved;
     bool isDragging = eventType == kCGEventLeftMouseDragged || eventType == kCGEventRightMouseDragged;
 
     if (!isMoving && !isDragging) return CGEventSetFlags(event, flags);
 
-    if (status == "mouse_is_down") {
-      CGEventSetType(event, kCGEventLeftMouseDragged);
-    } else if (status == "mouse_is_up") {
+    // if it's moving or dragging, convert event to drag if mouse_is_down
+    if (MouseHandler::status == "mouse_is_down") {
+      CGEventSetType(event,
+        MouseHandler::mouseType == "left" ? kCGEventLeftMouseDragged : kCGEventRightMouseDragged);
+    } else if (MouseHandler::status == "mouse_is_up") {
       CGEventSetType(event, kCGEventMouseMoved);
-      status = {};
+      MouseHandler::status = {};
     }
 
-    clickCount = 0;
-    CGEventSetFlags(event, flags);
+    return CGEventSetFlags(event, flags);
   }
 
   static void initialize() {
@@ -95,9 +98,13 @@ public:
       CGEventMaskBit(kCGEventRightMouseDragged) |
       CGEventMaskBit(kCGEventMouseMoved),
       [](CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
-         setModifierFlagsToNativeMouseEvent(event);
-         return event;
-       }, NULL);
+        auto userData = CGEventGetDoubleValueField(event, kCGEventSourceUserData);
+
+        // only attach flags to native mouse events
+        if (userData != 69) setModifierFlagsToNativeMouseEvent(event, true);
+
+        return event;
+        }, NULL);
 
     if (!myEventTap) {
       std::cout << "Accesibility disabled for this app";
@@ -115,13 +122,13 @@ public:
 
     CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
   }
-  
+
   static void terminate() {
     if (myEventTap) {
       CFMachPortInvalidate(myEventTap);
       CFRelease(myEventTap);
     }
-    
+
     if (myRunLoopSource) {
       CFRunLoopRemoveSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
       CFRelease(myRunLoopSource);
@@ -129,7 +136,9 @@ public:
   }
 };
 
-std::string MouseHandler::status;
+CGPoint MouseHandler::mouseLoc;
+std::string MouseHandler::status = "";
+std::string MouseHandler::mouseType;
 int MouseHandler::clickCount = 0;
 double MouseHandler::lastPressTime = 0;
 double MouseHandler::doubleClickSpeed = 500;

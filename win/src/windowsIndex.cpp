@@ -183,12 +183,17 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       else if (code == 247 && !isKeyDown) initializeKeyDispatcher(1);
       else if (code == 248 && !isKeyDown) initializeKeyDispatcher(2);
       else if (code == 249 && !isKeyDown) initializeKeyDispatcher(3);
-      else if (code == 400 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      else if (code == 401 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(2));
-      else if (code == 402 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(5));
-      else if (code == 403 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      else if (code == 404 && isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(50));
-      else {
+      else if (code == 400) {
+        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      } else if (code == 401) {
+        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      } else if (code == 402) {
+        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      } else if (code == 403) {
+        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      } else if (code == 404) {
+        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      } else {
         auto newKeyStroke = InterceptionKeyStroke({code, state});
         interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
       }

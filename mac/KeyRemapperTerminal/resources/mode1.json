@@ -84,16 +84,15 @@
       "if": { "Alt": true, "F18": true },
       "set": { "rightClickMode": true },
       "setOnKeyUp": { "rightClickMode": false },
-      "send": ["Alt:up RightClick:down", "RightClick:up"]
-      // Using Alt:down at the end is making click behavior to send Alt+click sometimes
-      // "send": ["Alt:up RightClick:down", "RightClick:up Alt:down"]
+      "send": ["Alt:up RightClick:down", "RightClick:up Delay1 Alt:down"]
     },
     {
       "keys": ["C"],
       "if": { "Alt": true },
       "set": { "leftClickMode": true },
       "setOnKeyUp": { "leftClickMode": false },
-      "send": ["Alt:up LeftClick:down", "LeftClick:up Alt:down"]
+      // small delay needed to avoid sending alt+down click
+      "send": ["Alt:up LeftClick:down", "LeftClick:up Delay1 Alt:down"]
     },
     {
       "keys": ["Alt"],

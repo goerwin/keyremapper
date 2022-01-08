@@ -115,7 +115,7 @@ void postKey(ushort vkCode, bool isKeyDown, bool isRepeat = false) {
 }
 
 void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
-  if (!isKeyDown || Global::isModifierKeyVkCode(vkCode)) {
+  if (!isKeyDown) {
     Global::shouldKeyRepeat = false;
     Global::repeatedKey = {};
     return;
@@ -162,31 +162,46 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     if (vkCode == 248 && isKeyDown) return initializeKeyDispatcher(2);
     if (vkCode == 249 && isKeyDown) return initializeKeyDispatcher(3);
 
-    if (vkCode == 55) Global::isCmdDown = isKeyDown;
-    else if (vkCode == 56) Global::isShiftDown = isKeyDown;
-    else if (vkCode == 58) Global::isAltDown = isKeyDown;
-    else if (vkCode == 59) Global::isCtrlDown = isKeyDown;
-    else if (vkCode == 63) Global::isFnDown = isKeyDown;
-
-    if (vkCode == 57) {
+    if (vkCode == 55 || vkCode == 54) {
+      Global::isCmdDown = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 56 || vkCode == 60) {
+      Global::isShiftDown = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 58 || vkCode == 61) {
+      Global::isAltDown = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 59 || vkCode == 62) {
+      Global::isCtrlDown = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 63) {
+      Global::isFnDown = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 57) {
       if (isKeyDown) IOHIDManager::toggleCapslockState();
-      continue;
-    }
-
-    if (vkCode == 241) {
-      MouseHandler::handleMouseDownUp(isKeyDown);
-      continue;
-    }
-
-    if (vkCode == 242) {
+    } else if (vkCode == 241) {
+      std::thread threadObj([](bool isKeyDown) {
+        MouseHandler::handleMouseDownUp(isKeyDown);
+      }, isKeyDown);
+      threadObj.detach();
+    } else if (vkCode == 242) {
       MouseHandler::handleMouseDownUp(isKeyDown, "right");
-      continue;
+    } else if (code == 400) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    } else if (code == 401) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    } else if (code == 402) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    } else if (code == 403) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    } else if (code == 404) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    } else if (Global::isMediaVkKeyCode(vkCode)) {
+      postDownUpMediaKey(vkCode, isKeyDown);
+    } else {
+      postKey(vkCode, isKeyDown);
+      handleKeyRepeat(vkCode, isKeyDown);
     }
-
-    if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, isKeyDown);
-    else postKey(vkCode, isKeyDown);
-
-    handleKeyRepeat(vkCode, isKeyDown);
   }
 }
 
