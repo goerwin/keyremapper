@@ -198,6 +198,7 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
     } else if (Global::isMediaVkKeyCode(vkCode)) {
       postDownUpMediaKey(vkCode, isKeyDown);
+      handleKeyRepeat(vkCode, isKeyDown);
     } else {
       postKey(vkCode, isKeyDown);
       handleKeyRepeat(vkCode, isKeyDown);
