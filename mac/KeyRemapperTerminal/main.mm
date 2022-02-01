@@ -162,6 +162,8 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     if (vkCode == 248 && isKeyDown) return initializeKeyDispatcher(2);
     if (vkCode == 249 && isKeyDown) return initializeKeyDispatcher(3);
 
+    if (!isKeyDown) Global::shouldKeyRepeat = false;
+
     if (vkCode == 55 || vkCode == 54) {
       Global::isCmdDown = isKeyDown;
       postKey(vkCode, isKeyDown);
