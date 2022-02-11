@@ -109,6 +109,9 @@
 
   "Fn": [3, 0, 1, 63],
 
+  // Fn + Key
+  "ForwardDelete": [500, 0, 1, 117],
+
   // Media
 
   "BrightnessDown": [300, 0, 1, 300],
