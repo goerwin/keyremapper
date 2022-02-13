@@ -70,35 +70,35 @@ int main(int argc, const char *argv[]) {
     expect(bool(results["ok"]) == true, results["message"]);
   }
 
-  // Test that Delays are properly parsed
+  // Test that Special Keys are properly parsed
 
   auto t7_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
-  auto t7_keyEvents = t7_keyRemapper->getKeyEventsFromString("A SK:Delay:1234 B");
+  auto t7_keyEvents = t7_keyRemapper->getKeyEventsFromString("A SK:kekw:1234 B");
 
   std::vector<KeyRemapper::KeyEvent> t7_keyEvents2 = {
     {"A", 30, 0, true},
     {"A", 30, 1, false},
-    {"SK:Delay", 6969, 1234, true},
+    {"SK:kekw", 6969, 1234, true},
     {"B", 48, 0, true},
     {"B", 48, 1, false}
   };
 
-  expect(t7_keyEvents.size() == 5, "Delays results wrong size");
-  expect(t7_keyEvents.size() == t7_keyEvents2.size(), "Delays results not same size");
+  expect(t7_keyEvents.size() == 5, "SK results wrong size");
+  expect(t7_keyEvents.size() == t7_keyEvents2.size(), "SK results not same size");
 
   for (size_t i = 0; i < t7_keyEvents.size(); i++) {
     auto keyEvent = t7_keyEvents[i];
     auto keyEvent2 = t7_keyEvents2[i];
 
-    expect(keyEvent.name == keyEvent2.name, "Delays results not same name");
-    expect(keyEvent.code == keyEvent2.code, "Delays results not same code");
-    expect(keyEvent.state == keyEvent2.state, "Delays results not same state");
-    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown, "Delays results not same isKeyDown");
+    expect(keyEvent.name == keyEvent2.name, "SK results not same name");
+    expect(keyEvent.code == keyEvent2.code, "SK results not same code");
+    expect(keyEvent.state == keyEvent2.state, "SK results not same state");
+    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown, "SK results not same isKeyDown");
   }
 
-  expect(t7_keyRemapper->stringifyKeyEvents(t7_keyEvents2) == "A:down A:up SK:Delay:1234 B:down B:up", "Delays results for stringifyKeyEvents not equal");
+  expect(t7_keyRemapper->stringifyKeyEvents(t7_keyEvents2) == "A:down A:up SK:kekw:1234 B:down B:up", "SK results for stringifyKeyEvents not equal");
 
-  Helpers::print("rules7.json: Delay tests passed");
+  Helpers::print("rules7.json: Special keys (SK:) tests passed");
 
   // Array Object JSON helpers
 
