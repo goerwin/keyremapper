@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vendors/json.hpp"
-#include "KeyDispatcher.hpp"
+#include "KeyRemapper.hpp"
 
 using json = nlohmann::json;
 typedef std::string String;
@@ -12,7 +12,7 @@ json runTests(json tests, json rules, json symbols) {
   if (tests.is_null())
     return {};
 
-  auto keyDispatcher = new KeyDispatcher(rules, symbols);
+  auto keyRemapper = new KeyRemapper(rules, symbols);
 
   bool ok = true;
   auto testsSize = tests.size();
@@ -23,9 +23,9 @@ json runTests(json tests, json rules, json symbols) {
     std::vector<String> test = tests[i];
     auto inputKeysStr = test[0];
 
-    keyDispatcher->reset();
+    keyRemapper->reset();
 
-    auto resultKeyEvents = keyDispatcher->getKeyEventsFromString("");
+    auto resultKeyEvents = keyRemapper->getKeyEventsFromString("");
     std::stringstream ss(inputKeysStr);
 
     while(ss.good()) {
@@ -41,14 +41,14 @@ json runTests(json tests, json rules, json symbols) {
       if (keyboardTokenIdx != std::string::npos) {
         auto keyboard = item.substr(keyboardKey.size(), item.size());
         keyboard = keyboard == "_" ? "" : keyboard;
-        keyDispatcher->setKeyboard(keyboard, "keyboard description");
+        keyRemapper->setKeyboard(keyboard, "keyboard description");
         continue;
       }
 
       if (appNameTokenIdx != std::string::npos) {
         auto appName = item.substr(appNameKey.size(), item.size());
         appName = appName == "_" ? "" : appName;
-        keyDispatcher->setAppName(appName);
+        keyRemapper->setAppName(appName);
         continue;
       }
 
@@ -59,16 +59,16 @@ json runTests(json tests, json rules, json symbols) {
         continue;
       }
 
-      auto inputKey = keyDispatcher->getKeyEventsFromString(item);
-      auto resKeyEvents = keyDispatcher->applyKeys({inputKey});
+      auto inputKey = keyRemapper->getKeyEventsFromString(item);
+      auto resKeyEvents = keyRemapper->applyKeys({inputKey});
       resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
     }
 
     String expectedKeysStr = test[1];
-    auto expectedKeys = keyDispatcher->getKeyEventsFromString(expectedKeysStr);
-    auto resultKeysStr = keyDispatcher->stringifyKeyEvents(resultKeyEvents);
+    auto expectedKeys = keyRemapper->getKeyEventsFromString(expectedKeysStr);
+    auto resultKeysStr = keyRemapper->stringifyKeyEvents(resultKeyEvents);
 
-    if (resultKeysStr != keyDispatcher->stringifyKeyEvents(expectedKeys)) {
+    if (resultKeysStr != keyRemapper->stringifyKeyEvents(expectedKeys)) {
       ok = false;
       message = "TEST " + std::to_string(i) + " FAILED: expected \"" +
                 expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";

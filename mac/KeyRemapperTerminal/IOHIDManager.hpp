@@ -29,7 +29,7 @@ private:
 
     CFNumberRef pageNumberRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usagePage);
 
-    if (!pageNumberRef) {
+    if (pageNumberRef == NULL) {
       CFRelease(ret);
       return NULL;
     }
@@ -38,7 +38,7 @@ private:
     CFRelease(pageNumberRef);
 
     CFNumberRef usageNumberRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &usage);
-    if (!usageNumberRef) {
+    if (usageNumberRef == NULL) {
       CFRelease(ret);
       return NULL;
     }
@@ -151,7 +151,6 @@ public:
   }
 
   static void toggleCapslockState() {
-    kern_return_t kr;
     io_connect_t ioc;
     CFMutableDictionaryRef mdict = IOServiceMatching(kIOHIDSystemClass);
     io_connect_t ios = IOServiceGetMatchingService(kIOMasterPortDefault, (CFDictionaryRef) mdict);
@@ -159,7 +158,7 @@ public:
     // I had to keep track of capslock on a global variable.
     // When I was calling getModifierLockState and then toggling via setModifierLockState, it was working the first time, but subsequent get calls return the same state
     IOHIDManager::capslockState = !IOHIDManager::capslockState;
-    kr = IOServiceOpen(ios, mach_task_self(), kIOHIDParamConnectType, &ioc);
+    IOServiceOpen(ios, mach_task_self(), kIOHIDParamConnectType, &ioc);
     IOHIDSetModifierLockState(ioc, kIOHIDCapsLockState, IOHIDManager::capslockState);
     IOObjectRelease(ios);
   }

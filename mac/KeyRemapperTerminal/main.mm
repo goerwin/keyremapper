@@ -39,7 +39,7 @@ ushort getMacVKCode(short scanCode) {
 
 void setActiveApp(std::string activeApp) {
   Global::activeApp = activeApp;
-  Global::keyDispatcher->setAppName(Global::activeApp);
+  Global::keyRemapper->setAppName(Global::activeApp);
 }
 
 void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) {
@@ -145,9 +145,9 @@ void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
 void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int productId, std::string manufacturer, std::string product) {
   auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
 
-  Global::keyDispatcher->setKeyboard(keyboard, manufacturer + " | " + product);
+  Global::keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
 
-  auto keyEvents = Global::keyDispatcher->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
+  auto keyEvents = Global::keyRemapper->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
 
   auto keyEventsSize = keyEvents.size();
 
@@ -157,10 +157,10 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     auto isKeyDown = keyEvent.isKeyDown;
     auto vkCode = getMacVKCode(code);
 
-    if (vkCode == 246 && isKeyDown) return initializeKeyDispatcher(0);
-    if (vkCode == 247 && isKeyDown) return initializeKeyDispatcher(1);
-    if (vkCode == 248 && isKeyDown) return initializeKeyDispatcher(2);
-    if (vkCode == 249 && isKeyDown) return initializeKeyDispatcher(3);
+    if (vkCode == 246 && isKeyDown) return initKeyRemapper(0);
+    if (vkCode == 247 && isKeyDown) return initKeyRemapper(1);
+    if (vkCode == 248 && isKeyDown) return initKeyRemapper(2);
+    if (vkCode == 249 && isKeyDown) return initKeyRemapper(3);
 
     if (!isKeyDown) Global::shouldKeyRepeat = false;
 
@@ -208,7 +208,7 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
   }
 }
 
-void initializeKeyDispatcher(int mode) {
+void initKeyRemapper(int mode) {
   std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
 
   std::string selectedMode = modes[mode];
@@ -236,11 +236,11 @@ void initializeKeyDispatcher(int mode) {
     ? Global::keyRepeatInterval
     : rules["keyRepeatInterval"].get<int>();
 
-  delete Global::keyDispatcher;
-  Global::keyDispatcher = new KeyDispatcher(rules, Global::symbols);
-  Global::keyDispatcher->setAppName(Global::activeApp);
+  delete Global::keyRemapper;
+  Global::keyRemapper = new KeyRemapper(rules, Global::symbols);
+  Global::keyRemapper->setAppName(Global::activeApp);
 
-  Global::keyDispatcher->setApplyKeysCb([](std::string appName, std::string keyboardId, std::string keyboardDescription, std::string keys) {
+  Global::keyRemapper->setApplyKeysCb([](std::string appName, std::string keyboardId, std::string keyboardDescription, std::string keys) {
     Helpers::print(
       "App: " + appName + "\n" +
       "Keyboard (vendorId:productId): " + keyboardId + "\n" +
@@ -305,7 +305,7 @@ void toggleAppEnabled() {
 
   if (Global::isAppEnabled) {
     Global::reset();
-    initializeKeyDispatcher();
+    initKeyRemapper();
     IOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
     IOHIDManager::initialize();
     MouseHandler::initialize();

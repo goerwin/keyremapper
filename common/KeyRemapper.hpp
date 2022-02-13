@@ -7,7 +7,7 @@
 #include "./Helpers.hpp"
 #include "./vendors/json.hpp"
 
-class KeyDispatcher {
+class KeyRemapper {
   using json = nlohmann::json;
   typedef std::string String;
   typedef std::vector<String> Strings;
@@ -82,7 +82,7 @@ private:
   }
 
 public:
-  KeyDispatcher(json rulesEl, json symbolsEl) {
+  KeyRemapper(json rulesEl, json symbolsEl) {
     rules = rulesEl;
     symbols = symbolsEl;
     keybindings = rulesEl["keybindings"].get<JsonArray>();

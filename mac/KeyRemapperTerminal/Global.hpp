@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../common/KeyDispatcher.hpp"
+#include "../../common/KeyRemapper.hpp"
 
 namespace Global {
-  KeyDispatcher *keyDispatcher;
+  KeyRemapper *keyRemapper;
 
   bool isCmdDown = false;
   bool isShiftDown = false;
