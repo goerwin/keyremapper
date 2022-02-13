@@ -10,7 +10,7 @@
 #include "../../common/vendors/json.hpp"
 #include "../../common/Helpers.hpp"
 #include "../../common/TestHelpers.hpp"
-#include "../../common/KeyDispatcher.hpp"
+#include "../../common/KeyRemapper.hpp"
 
 InterceptionContext context;
 InterceptionDevice device;
@@ -23,7 +23,7 @@ int g_mode;
 int g_nCmdShow;
 HINSTANCE g_hInstance;
 std::string g_appName;
-KeyDispatcher *g_keyDispatcher;
+KeyRemapper *g_keyRemapper;
 nlohmann::json g_rules;
 std::string g_mainDirPath;
 nlohmann::json g_symbols;
@@ -74,7 +74,7 @@ void handleApplyKeysCb(std::string appName, std::string keyboard, std::string ke
   RedrawWindow(g_eventWindow, 0, 0, RDW_INVALIDATE | RDW_INTERNALPAINT);
 }
 
-void initializeKeyDispatcher(int mode = 0) {
+void initKeyRemapper(int mode = 0) {
   g_mainDirPath = WindowsHelpers::getMainDirPath();
 
   if (WindowsHelpers::fileExists(g_mainDirPath + "\\" + g_modes[mode])) g_mode = mode;
@@ -95,10 +95,10 @@ void initializeKeyDispatcher(int mode = 0) {
   g_interceptionRemapCodesStates = g_symbols["_interceptionRemapCodesStates"].get<std::vector<std::tuple<ushort, ushort, ushort, ushort>>>();
   g_interceptionRemapCodesStatesSize = g_interceptionRemapCodesStates.size();
 
-  delete g_keyDispatcher;
-  g_keyDispatcher = new KeyDispatcher(g_rules, g_symbols);
-  g_keyDispatcher->setApplyKeysCb(handleApplyKeysCb);
-  g_keyDispatcher->setAppName(g_appName);
+  delete g_keyRemapper;
+  g_keyRemapper = new KeyRemapper(g_rules, g_symbols);
+  g_keyRemapper->setApplyKeysCb(handleApplyKeysCb);
+  g_keyRemapper->setAppName(g_appName);
 }
 
 void toggleAppEnabled() {
@@ -106,7 +106,7 @@ void toggleAppEnabled() {
 
   if (g_isAppEnabled) {
     nid.hIcon = iconImage;
-    initializeKeyDispatcher();
+    initKeyRemapper();
   } else {
     nid.hIcon = iconImageDisabled;
   }
@@ -121,7 +121,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
   context = interception_create_context();
   interception_set_filter(context, interception_is_keyboard, INTERCEPTION_FILTER_KEY_ALL);
 
-  initializeKeyDispatcher();
+  initKeyRemapper();
 
   while (interception_receive(
     context,
@@ -138,7 +138,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     if (length > 0 && length < sizeof(hardwareId)) {
       std::wstring ws(hardwareId);
       std::string hardwareIdStr(ws.begin(), ws.end());
-      g_keyDispatcher->setKeyboard(hardwareIdStr, "Not available");
+      g_keyRemapper->setKeyboard(hardwareIdStr, "Not available");
     }
 
     ushort code = keyStroke.code;
@@ -158,7 +158,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 
     if (code == 0) continue;
 
-    auto keyEvents = g_keyDispatcher->applyKeys({{"", code, state, false}});
+    auto keyEvents = g_keyRemapper->applyKeys({{"", code, state, false}});
     auto keyEventsSize = keyEvents.size();
 
     for (size_t i = 0; i < keyEventsSize; i++) {
@@ -179,10 +179,10 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
         else mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
       } else if (code == 243 && isKeyDown) BrightnessHandler::Increment(-10);
       else if (code == 244 && isKeyDown) BrightnessHandler::Increment(10);
-      else if (code == 246 && !isKeyDown) initializeKeyDispatcher();
-      else if (code == 247 && !isKeyDown) initializeKeyDispatcher(1);
-      else if (code == 248 && !isKeyDown) initializeKeyDispatcher(2);
-      else if (code == 249 && !isKeyDown) initializeKeyDispatcher(3);
+      else if (code == 246 && !isKeyDown) initKeyRemapper();
+      else if (code == 247 && !isKeyDown) initKeyRemapper(1);
+      else if (code == 248 && !isKeyDown) initKeyRemapper(2);
+      else if (code == 249 && !isKeyDown) initKeyRemapper(3);
       else if (code == 400) {
         if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(1));
       } else if (code == 401) {
@@ -210,7 +210,7 @@ void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
     auto foregroundWindow = GetForegroundWindow();
     g_appName = WindowsHelpers::getActiveWindowProcessName(foregroundWindow);
-    g_keyDispatcher->setAppName(g_appName);
+    g_keyRemapper->setAppName(g_appName);
 }
 
 LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
@@ -327,16 +327,16 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       toggleAppEnabled();
       return 0;
     case IDM_MODE_1:
-      initializeKeyDispatcher();
+      initKeyRemapper();
       return 0;
     case IDM_MODE_2:
-      initializeKeyDispatcher(1);
+      initKeyRemapper(1);
       return 0;
     case IDM_MODE_3:
-      initializeKeyDispatcher(2);
+      initKeyRemapper(2);
       return 0;
     case IDM_MODE_4:
-      initializeKeyDispatcher(3);
+      initKeyRemapper(3);
       return 0;
     case IDM_RUN_MODE_TESTS: {
       auto rules = Helpers::getJsonFile(g_mainDirPath, g_modes[g_mode]);
