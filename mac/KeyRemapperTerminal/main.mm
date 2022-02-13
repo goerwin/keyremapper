@@ -153,15 +153,21 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
 
   for (size_t i = 0; i < keyEventsSize; i++) {
     auto keyEvent = keyEvents[i];
+    auto name = keyEvent.name;
+    
+    if (name == "SK:Mode1") return initKeyRemapper(0);
+    if (name == "SK:Mode2") return initKeyRemapper(1);
+    if (name == "SK:Mode3") return initKeyRemapper(2);
+    if (name == "SK:Mode4") return initKeyRemapper(3);
+    else if (name == "SK:Delay") {
+      std::this_thread::sleep_for(std::chrono::milliseconds(keyEvent.state));
+      continue;
+    }
+
     auto code = keyEvent.code;
     auto isKeyDown = keyEvent.isKeyDown;
     auto vkCode = getMacVKCode(code);
-
-    if (vkCode == 246 && isKeyDown) return initKeyRemapper(0);
-    if (vkCode == 247 && isKeyDown) return initKeyRemapper(1);
-    if (vkCode == 248 && isKeyDown) return initKeyRemapper(2);
-    if (vkCode == 249 && isKeyDown) return initKeyRemapper(3);
-
+    
     if (!isKeyDown) Global::shouldKeyRepeat = false;
 
     if (vkCode == 55 || vkCode == 54) {
@@ -188,16 +194,6 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
       threadObj.detach();
     } else if (vkCode == 242) {
       MouseHandler::handleMouseDownUp(isKeyDown, "right");
-    } else if (code == 400) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    } else if (code == 401) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    } else if (code == 402) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    } else if (code == 403) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    } else if (code == 404) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
     } else if (Global::isMediaVkKeyCode(vkCode)) {
       postDownUpMediaKey(vkCode, isKeyDown);
       handleKeyRepeat(vkCode, isKeyDown);

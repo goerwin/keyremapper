@@ -31,7 +31,7 @@ json runTests(json tests, json rules, json symbols) {
     while(ss.good()) {
       String item;
       getline(ss, item, ' ');
-      String delayKey = "delay:";
+      String delayKey = "test_delay:";
       String appNameKey = "appName:";
       String keyboardKey = "keyboard:";
       auto delayTokenIdx = item.find(delayKey);

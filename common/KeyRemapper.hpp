@@ -14,6 +14,7 @@ class KeyRemapper {
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
 
+public:
   struct KeyEvent {
     String name;
     ushort code;
@@ -30,6 +31,8 @@ private:
   json keyPresses;
   json remaps;
   short keyPressesDelay;
+  String SPECIAL_KEY = "SK";
+  ushort SPECIAL_KEY_CODE = 6969;
 
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
@@ -99,9 +102,14 @@ public:
 
     for (size_t i = 0; i < keyEvents.size(); i++) {
       KeyEvents localKeyEvents = {};
-
       auto keyEvent = keyEvents[i];
       auto code = keyEvent.code;
+
+      if (code == SPECIAL_KEY_CODE) {
+        newKeyEvents = Helpers::concatArrays(newKeyEvents, {{keyEvent}});
+        continue;
+      }
+
       auto state = keyEvent.state;
       auto parsedKeyEvent = getKeyEvent(code, state);
       auto remappedKeyEvent = getRemappedKeyEvent(parsedKeyEvent);
@@ -172,7 +180,11 @@ public:
       auto keyEvent = keyEvents[i];
       auto keyName = keyEvent.name;
       auto isKeyDown = keyEvent.isKeyDown;
-      result += keyName + (isKeyDown ? ":down" : ":up");
+
+      if (keyEvent.code == SPECIAL_KEY_CODE)
+        result += keyName + ":" + std::to_string(keyEvent.state);
+      else
+        result += keyName + (isKeyDown ? ":down" : ":up");
     }
 
     return result;
@@ -188,13 +200,22 @@ public:
     KeyEvents keyEvents = {};
 
     for (size_t i = 0; i < strKeysSize; i++) {
-      String keyStateStr;
       String strKey = strKeys[i];
       Strings keyDesc = Helpers::split(strKey, ':');
       String keyName = keyDesc[0];
       keyName = keyName == "currentKey" ? currentKey : keyName;
+
+      if (keyName == SPECIAL_KEY) {
+        ushort val = atoi(keyDesc[2].c_str());
+        keyEvents = Helpers::concatArrays(
+          keyEvents, {{keyName + ":" + keyDesc[1], SPECIAL_KEY_CODE, val, true}}
+        );
+        continue;
+      }
+
       KeyEvent keyEventDown = getKeyEvent(keyName, true);
       KeyEvent keyEventUp = getKeyEvent(keyName, false);
+      String keyStateStr;
 
       if (keyDesc.size() == 2) keyStateStr = keyDesc[1];
 

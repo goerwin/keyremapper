@@ -30,10 +30,10 @@
   ],
   "keybindings": [
     // TODO: These probably need to be enabled via global shortcuts, same as activate/deactivate
-    { "keys": ["1"], "if": { "Ctrl": true }, "send": [null, "AppMode1"] },
-    { "keys": ["2"], "if": { "Ctrl": true }, "send": [null, "AppMode2"] },
-    { "keys": ["3"], "if": { "Ctrl": true }, "send": [null, "AppMode3"] },
-    { "keys": ["4"], "if": { "Ctrl": true }, "send": [null, "AppMode4"] },
+    { "keys": ["1"], "if": { "Ctrl": true }, "send": ["SK:Mode1"] },
+    { "keys": ["2"], "if": { "Ctrl": true }, "send": ["SK:Mode2"] },
+    { "keys": ["3"], "if": { "Ctrl": true }, "send": ["SK:Mode3"] },
+    { "keys": ["4"], "if": { "Ctrl": true }, "send": ["SK:Mode4"] },
 
     // vim mode
 
@@ -84,7 +84,7 @@
       "if": { "Alt": true, "F18": true },
       "set": { "rightClickMode": true },
       "setOnKeyUp": { "rightClickMode": false },
-      "send": ["Alt:up RightClick:down", "RightClick:up Delay1 Alt:down"]
+      "send": ["Alt:up RightClick:down", "RightClick:up SK:Delay:1 Alt:down"]
     },
     {
       "keys": ["C"],
@@ -92,7 +92,7 @@
       "set": { "leftClickMode": true },
       "setOnKeyUp": { "leftClickMode": false },
       // small delay needed to avoid sending alt+down click
-      "send": ["Alt:up LeftClick:down", "LeftClick:up Delay1 Alt:down"]
+      "send": ["Alt:up LeftClick:down", "LeftClick:up SK:Delay:1 Alt:down"]
     },
     {
       "keys": ["Alt"],
@@ -117,12 +117,12 @@
   ],
   "tests": [
     ["Caps:down Caps:up", "Esc"],
-    ["Caps:down delay:100 Caps:up", "Esc"],
-    ["Caps:down delay:251 Caps:up", ""],
+    ["Caps:down test_delay:100 Caps:up", "Esc"],
+    ["Caps:down test_delay:251 Caps:up", ""],
     [
       "Shift:down Caps:down Caps:up Shift:up",
       "Shift:down Esc:down Esc:up Shift:up"
     ],
-    ["Shift:down Caps:down delay:251 Caps:up Shift:up", "Shift:down Shift:up"]
+    ["Shift:down Caps:down test_delay:251 Caps:up Shift:up", "Shift:down Shift:up"]
   ]
 }

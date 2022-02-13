@@ -1,0 +1,9 @@
+{
+  "description": ["Delays"],
+  "remaps": [],
+  "keyPresses": [],
+  "keybindings": [],
+  "tests": [[
+    "A SK:Delay:1234 B","A:down A:up SK:Delay:1234 B:down B:up"
+  ]]
+}

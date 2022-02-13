@@ -9,11 +9,12 @@
 #include "../common/vendors/json.hpp"
 #include "../common/Helpers.hpp"
 #include "../common/TestHelpers.hpp"
+#include "../common/KeyRemapper.hpp"
 
 void expect(bool value, std::string errorMsg = "") {
   if (value) return;
 
-  Helpers::print(!errorMsg.empty() ? errorMsg : "Error, expect condition failed");
+  Helpers::print(!errorMsg.empty() ? "Error: " + errorMsg : "Error, expect condition failed");
   exit(1);
 }
 
@@ -52,6 +53,7 @@ int main(int argc, const char *argv[]) {
     Helpers::getJsonFile(dirPath, "rules4.json"),
     Helpers::getJsonFile(dirPath, "rules5.json"),
     Helpers::getJsonFile(dirPath, "rules6.json"),
+    Helpers::getJsonFile(dirPath, "rules7.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {
@@ -67,6 +69,36 @@ int main(int argc, const char *argv[]) {
 
     expect(bool(results["ok"]) == true, results["message"]);
   }
+
+  // Test that Delays are properly parsed
+
+  auto t7_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t7_keyEvents = t7_keyRemapper->getKeyEventsFromString("A SK:Delay:1234 B");
+
+  std::vector<KeyRemapper::KeyEvent> t7_keyEvents2 = {
+    {"A", 30, 0, true},
+    {"A", 30, 1, false},
+    {"SK:Delay", 6969, 1234, true},
+    {"B", 48, 0, true},
+    {"B", 48, 1, false}
+  };
+
+  expect(t7_keyEvents.size() == 5, "Delays results wrong size");
+  expect(t7_keyEvents.size() == t7_keyEvents2.size(), "Delays results not same size");
+
+  for (size_t i = 0; i < t7_keyEvents.size(); i++) {
+    auto keyEvent = t7_keyEvents[i];
+    auto keyEvent2 = t7_keyEvents2[i];
+
+    expect(keyEvent.name == keyEvent2.name, "Delays results not same name");
+    expect(keyEvent.code == keyEvent2.code, "Delays results not same code");
+    expect(keyEvent.state == keyEvent2.state, "Delays results not same state");
+    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown, "Delays results not same isKeyDown");
+  }
+
+  expect(t7_keyRemapper->stringifyKeyEvents(t7_keyEvents2) == "A:down A:up SK:Delay:1234 B:down B:up", "Delays results for stringifyKeyEvents not equal");
+
+  Helpers::print("rules7.json: Delay tests passed");
 
   // Array Object JSON helpers
 
