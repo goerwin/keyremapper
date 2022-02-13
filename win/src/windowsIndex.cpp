@@ -163,8 +163,35 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 
     for (size_t i = 0; i < keyEventsSize; i++) {
       auto keyEvent = keyEvents[i];
-      auto code = keyEvent.code;
+      auto name = keyEvent.name;
       auto state = keyEvent.state;
+
+      if (name == "SK:Mode1") {
+        initKeyRemapper(0);
+        return 0;
+      }
+
+      if (name == "SK:Mode2") {
+        initKeyRemapper(1);
+        return 0;
+      }
+
+      if (name == "SK:Mode3") {
+        initKeyRemapper(2);
+        return 0;
+      }
+
+      if (name == "SK:Mode4") {
+        initKeyRemapper(3);
+        return 0;
+      }
+
+      if (name == "SK:Delay") {
+        std::this_thread::sleep_for(std::chrono::milliseconds(state));
+        continue;
+      }
+
+      auto code = keyEvent.code;
       auto isKeyDown = keyEvent.isKeyDown;
 
       if (code == 245) {
@@ -179,21 +206,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
         else mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
       } else if (code == 243 && isKeyDown) BrightnessHandler::Increment(-10);
       else if (code == 244 && isKeyDown) BrightnessHandler::Increment(10);
-      else if (code == 246 && !isKeyDown) initKeyRemapper();
-      else if (code == 247 && !isKeyDown) initKeyRemapper(1);
-      else if (code == 248 && !isKeyDown) initKeyRemapper(2);
-      else if (code == 249 && !isKeyDown) initKeyRemapper(3);
-      else if (code == 400) {
-        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      } else if (code == 401) {
-        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(2));
-      } else if (code == 402) {
-        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(5));
-      } else if (code == 403) {
-        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      } else if (code == 404) {
-        if (isKeyDown) std::this_thread::sleep_for(std::chrono::milliseconds(50));
-      } else {
+      else {
         auto newKeyStroke = InterceptionKeyStroke({code, state});
         interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
       }

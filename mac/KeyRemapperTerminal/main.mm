@@ -154,12 +154,13 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
   for (size_t i = 0; i < keyEventsSize; i++) {
     auto keyEvent = keyEvents[i];
     auto name = keyEvent.name;
-    
+
     if (name == "SK:Mode1") return initKeyRemapper(0);
     if (name == "SK:Mode2") return initKeyRemapper(1);
     if (name == "SK:Mode3") return initKeyRemapper(2);
     if (name == "SK:Mode4") return initKeyRemapper(3);
-    else if (name == "SK:Delay") {
+
+    if (name == "SK:Delay") {
       std::this_thread::sleep_for(std::chrono::milliseconds(keyEvent.state));
       continue;
     }
@@ -167,7 +168,7 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     auto code = keyEvent.code;
     auto isKeyDown = keyEvent.isKeyDown;
     auto vkCode = getMacVKCode(code);
-    
+
     if (!isKeyDown) Global::shouldKeyRepeat = false;
 
     if (vkCode == 55 || vkCode == 54) {

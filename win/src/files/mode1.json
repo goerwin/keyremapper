@@ -21,7 +21,7 @@
       "ifPressedNTimes": 1,
       "if": { "isAltTabMode": true },
       "set": { "isAltTabMode": false },
-      "send": "Esc Delay10 Alt:up Ctrl:down"
+      "send": "Esc SK:Delay:10 Alt:up Ctrl:down"
     },
     { "key": "Caps", "ifPressedNTimes": 1, "send": "Esc" },
     { "key": "Caps", "ifPressedNTimes": 2, "send": "Esc" },
@@ -52,7 +52,7 @@
       "keys": ["Esc", "Enter"],
       "if": { "isAltTabMode": true },
       "set": { "isAltTabMode": false },
-      "send": ["currentKey Delay10 Alt:up Ctrl:down", null]
+      "send": ["currentKey SK:Delay:10 Alt:up Ctrl:down", null]
     },
     { "keys": ["Q"], "if": { "isAltTabMode": true }, "send": ["Supr", null] },
     {
@@ -321,7 +321,7 @@
     ],
     [
       "Alt:down Tab Esc Alt:up",
-      "Ctrl:down Ctrl:up Alt:down Tab Esc Delay10 Alt:up Ctrl:down Ctrl:up"
+      "Ctrl:down Ctrl:up Alt:down Tab Esc SK:Delay:10 Alt:up Ctrl:down Ctrl:up"
     ],
     // Key
     ["A", "A"],
