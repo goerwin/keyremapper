@@ -123,17 +123,6 @@
   "LeftClick": [241, 0, 1],
   "RightClick": [242, 0, 1],
 
-  "AppMode1": [246, 0, 1],
-  "AppMode2": [247, 0, 1],
-  "AppMode3": [248, 0, 1],
-  "AppMode4": [249, 0, 1],
-
-  "Delay1": [400, 0, 1],
-  "Delay2": [401, 0, 1],
-  "Delay5": [402, 0, 1],
-  "Delay10": [403, 0, 1],
-  "Delay50": [404, 0, 1],
-
   /*
    - In Windows, some keys send different codes whether ctrl is pressed
       eg. prtScr sends [55,2,3] but if ctrl is down, it will send [84,0,1]
