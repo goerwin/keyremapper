@@ -70,12 +70,12 @@ int main(int argc, const char *argv[]) {
     expect(bool(results["ok"]) == true, results["message"]);
   }
 
-  // Test that Special Keys are properly parsed
+  // Test1: Special Keys are properly parsed
 
-  auto t7_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
-  auto t7_keyEvents = t7_keyRemapper->getKeyEventsFromString("A SK:kekw:1234 B");
+  auto t1_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t1_keyEvents = t1_keyRemapper->getKeyEventsFromString("A SK:kekw:1234 B");
 
-  std::vector<KeyRemapper::KeyEvent> t7_keyEvents2 = {
+  std::vector<KeyRemapper::KeyEvent> t1_keyEvents2 = {
     {"A", 30, 0, true},
     {"A", 30, 1, false},
     {"SK:kekw", 6969, 1234, true},
@@ -83,22 +83,62 @@ int main(int argc, const char *argv[]) {
     {"B", 48, 1, false}
   };
 
-  expect(t7_keyEvents.size() == 5, "SK results wrong size");
-  expect(t7_keyEvents.size() == t7_keyEvents2.size(), "SK results not same size");
+  expect(t1_keyEvents.size() == 5, "Test1: results wrong size");
+  expect(t1_keyEvents.size() == t1_keyEvents2.size(), "Test1: results not same size");
 
-  for (size_t i = 0; i < t7_keyEvents.size(); i++) {
-    auto keyEvent = t7_keyEvents[i];
-    auto keyEvent2 = t7_keyEvents2[i];
+  for (size_t i = 0; i < t1_keyEvents.size(); i++) {
+    auto keyEvent = t1_keyEvents[i];
+    auto keyEvent2 = t1_keyEvents2[i];
 
-    expect(keyEvent.name == keyEvent2.name, "SK results not same name");
-    expect(keyEvent.code == keyEvent2.code, "SK results not same code");
-    expect(keyEvent.state == keyEvent2.state, "SK results not same state");
-    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown, "SK results not same isKeyDown");
+    expect(keyEvent.name == keyEvent2.name, "Test1: results not same name");
+    expect(keyEvent.code == keyEvent2.code, "Test1: results not same code");
+    expect(keyEvent.state == keyEvent2.state, "Test1: results not same state");
+    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown, "Test1: results not same isKeyDown");
   }
 
-  expect(t7_keyRemapper->stringifyKeyEvents(t7_keyEvents2) == "A:down A:up SK:kekw:1234 B:down B:up", "SK results for stringifyKeyEvents not equal");
+  expect(t1_keyRemapper->stringifyKeyEvents(t1_keyEvents2) == "A:down A:up SK:kekw:1234 B:down B:up", "Test1: results for stringifyKeyEvents not equal");
 
-  Helpers::print("rules7.json: Special keys (SK:) tests passed");
+  Helpers::print("Test1: Special keys (SK:) tests passed");
+
+  // Test2: Unknown keyEvents passed to applyKeys are passed through
+
+  auto t2_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  std::vector<KeyRemapper::KeyEvent> t2_keyEvents = {
+    {"", 30, 0, false},
+    {"", 30, 1, false},
+    {"", 420, 0, false},
+    {"", 420, 1, false},
+  };
+  std::vector<std::tuple<std::string, ushort, ushort, bool>> t2_expectedResults = {
+    {"A", 30, 0, true},
+    {"A", 30, 1, false},
+    {"Unknown", 420, 0, false},
+    {"Unknown", 420, 1, false},
+  };
+
+  auto t2_keyEventsRes = t2_keyRemapper->applyKeys(t2_keyEvents);
+  expect(t2_keyEventsRes.size() == t2_keyEvents.size(), "Test2: wrong size");
+
+  for (size_t i = 0; i < t2_keyEventsRes.size(); i++) {
+    auto keyEvent = t2_keyEvents[i];
+    auto keyEvent2 = t2_keyEventsRes[i];
+
+    expect(keyEvent2.name == std::get<0>(t2_expectedResults[i]), "Test2: not same name");
+    expect(keyEvent2.code == std::get<1>(t2_expectedResults[i]), "Test2: not same code");
+    expect(keyEvent2.state == std::get<2>(t2_expectedResults[i]), "Test2: not same state");
+    expect(keyEvent2.isKeyDown == std::get<3>(t2_expectedResults[i]), "Test2: not same isKeyDown");
+  }
+
+  Helpers::print("Test2: Unknown keys not in symbols tests passed");
+
+  // Test3: Unknown keys passed through string are properly handled
+
+  auto t3_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t3_keyEvents = t3_keyRemapper->getKeyEventsFromString("A NoExist:down NoExist:up B");
+
+  expect(t3_keyRemapper->stringifyKeyEvents(t3_keyEvents) == "A:down A:up Unknown:up Unknown:up B:down B:up", "Test3: Not same string output");
+
+  Helpers::print("Test3: Unknown keys passed through string tests passed");
 
   // Array Object JSON helpers
 

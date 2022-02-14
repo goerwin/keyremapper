@@ -324,11 +324,12 @@ private:
       return {key, code, state, state == value[1]};
     }
 
-    return {};
+    return {"Unknown", code, state, false};
   }
 
   KeyEvent getKeyEvent(String keyName, bool isKeyDown) {
     auto symbol = symbols[keyName];
+    if (symbol.is_null()) return {"Unknown", 0, 0, false};
     return {keyName, symbol[0], isKeyDown ? symbol[1] : symbol[2], isKeyDown};
   }
 };
