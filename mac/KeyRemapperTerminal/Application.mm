@@ -12,8 +12,13 @@
   - (void)handleApplicationChange:(NSNotification*)notif {
     NSRunningApplication *frontmostApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
     NSString *bundleIdentifier = [frontmostApp bundleIdentifier];
-
-    if (self.activeApplicationChangeCb)
-      self.activeApplicationChangeCb(std::string([bundleIdentifier UTF8String]));
+    NSString *localizedName = [frontmostApp localizedName];
+    std::string appName = std::string(
+      bundleIdentifier != nil ?
+        [bundleIdentifier UTF8String] :
+        localizedName != nil ? [localizedName UTF8String] : "Unknown"
+    );
+    
+    if (self.activeApplicationChangeCb) self.activeApplicationChangeCb(appName);
   }
 @end
