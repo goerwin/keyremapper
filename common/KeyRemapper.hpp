@@ -33,6 +33,7 @@ private:
   short keyPressesDelay;
   String SPECIAL_KEY = "SK";
   ushort SPECIAL_KEY_CODE = 6969;
+  KeyEvents afterKeyUpKeyEvents = {};
 
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
@@ -101,7 +102,9 @@ public:
     KeyEvents newKeyEvents = {};
 
     for (size_t i = 0; i < keyEvents.size(); i++) {
-      KeyEvents localKeyEvents = {};
+      KeyEvents localKeyEvents = afterKeyUpKeyEvents;
+      afterKeyUpKeyEvents = {};
+
       auto keyEvent = keyEvents[i];
       auto code = keyEvent.code;
 
@@ -122,11 +125,19 @@ public:
       globals["isKeyDown"] = remappedKeyEvent.isKeyDown;
       globals[keyName] = remappedKeyEvent.isKeyDown;
 
-      auto send = getSendFromKeybindings(keyName, isKeyDown);
-      if (!send.is_null())
+      auto keybindingInfo = getKeybindingInfo(keyName, isKeyDown);
+      if (!keybindingInfo.is_null()) {
+        if (isKeyDown)
+          setValues(keybindingInfo["set"]);
+        else {
+          setValues(keybindingInfo["setOnKeyUp"]);
+          afterKeyUpKeyEvents = getKeyEventsFromString(keybindingInfo["afterKeyUp"]);
+        }
+
+        json send = keybindingInfo["send"];
         localKeyEvents = Helpers::concatArrays(localKeyEvents,
             getKeyEventsFromString(isKeyDown ? send[0] : send[1]));
-      else
+      } else
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
 
       setKeyPressesCount(keyName, isKeyDown);
@@ -136,7 +147,7 @@ public:
           getKeyEventsFromString(getSendFromKeyPresses(keyName))
         );
 
-      if (applyKeysCb) {
+      if (applyKeysCb)
         applyKeysCb(
           globals["appName"],
           globals["keyboard"],
@@ -150,7 +161,6 @@ public:
             stringifyKeyEvents({remappedKeyEvent}) + " -> " +
             stringifyKeyEvents(localKeyEvents)
         );
-      }
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -238,6 +248,7 @@ public:
     globals["currentKey"] = "";
     globals["isKeyDown"] = "";
 
+    afterKeyUpKeyEvents = {};
     lastKeyName = "";
     keyPressesCount = 0;
     keyDownTime = 0;
@@ -263,7 +274,7 @@ private:
     for (auto &[key, value] : values.items()) globals[key] = value;
   }
 
-  json getSendFromKeybindings(String key, bool isKeyDown) {
+  json getKeybindingInfo(String key, bool isKeyDown) {
     size_t keybindingsSize = keybindings.size();
 
     for (size_t i = 0; i < keybindingsSize; i++) {
@@ -275,10 +286,12 @@ private:
       for (size_t j = 0; j < keys.size(); j++) {
         if (key != keys[j]) continue;
 
-        if (isKeyDown) setValues(keybinding["set"]);
-        else setValues(keybinding["setOnKeyUp"]);
-
-        return keybinding["send"];
+        return {
+          { "send", keybinding["send"] },
+          { "afterKeyUp", keybinding["afterKeyUp"] },
+          { "set", keybinding["set"] },
+          { "setOnKeyUp", keybinding["setOnKeyUp"] }
+        };
       }
     }
 

@@ -8,9 +8,9 @@
     {
       "keys": ["C"],
       "set": { "RANDOM_STR": true },
-      "setOnKeyUp": { "RANDOM_STR": false }
+      "setOnKeyUp": { "RANDOM_STR": false },
+      "send": ["C:down", "C:up"]
     },
-    { "keys": ["C"], "if": { "C": false }, "set": { "RANDOM_STR": false } },
     {
       "keys": ["D"],
       "if": { "RANDOM_STR": true },

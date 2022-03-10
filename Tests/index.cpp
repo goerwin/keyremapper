@@ -54,6 +54,7 @@ int main(int argc, const char *argv[]) {
     Helpers::getJsonFile(dirPath, "rules5.json"),
     Helpers::getJsonFile(dirPath, "rules6.json"),
     Helpers::getJsonFile(dirPath, "rules7.json"),
+    Helpers::getJsonFile(dirPath, "rules8.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {
@@ -148,5 +149,6 @@ int main(int argc, const char *argv[]) {
       Helpers::getJsonFile(dirPath, "importsExpected.json");
   expect(jsonFile.dump() == expectedFile.dump(), "imports.json and importsExpected.json didn't match");
 
+  Helpers::print("SUCCESS!");
   return 0;
 }

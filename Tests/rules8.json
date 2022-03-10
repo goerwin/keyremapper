@@ -1,0 +1,36 @@
+{
+  "description": [
+    "afterKeyUp",
+    "it should send keys in the next triggered key down or up event"
+  ],
+  "remaps": [],
+  "keyPresses": [],
+  "keybindings": [
+    {
+      "keys": ["A"],
+      "send": ["B:down", "B:up"]
+    },
+    {
+      "keys": ["C"],
+      "send": ["A", "F"],
+      "afterKeyUp": "H I"
+    },
+    {
+      "keys": ["K"],
+      "send": [null, null],
+      "afterKeyUp": "A"
+    }
+  ],
+  "tests": [
+    ["A C", "B A F"],
+    ["A C D", "B A F H I D"],
+    ["X Y Z A C", "X Y Z B A F"],
+    ["X Y Z A C D", "X Y Z B A F H I D"],
+
+    ["A C C", "B A F H I A F"],
+    ["A C A", "B A F H I B"],
+    ["K", ""],
+    ["K K", "A"],
+    ["K L", "A L"]
+  ]
+}
