@@ -141,11 +141,12 @@ public:
         localKeyEvents = Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
 
       setKeyPressesCount(keyName, isKeyDown);
-      if (!isKeyDown)
-        localKeyEvents = Helpers::concatArrays(
-          localKeyEvents,
-          getKeyEventsFromString(getSendFromKeyPresses(keyName))
-        );
+      auto keyPressesInfo = getKeyPressesInfo(keyName, isKeyDown);
+      if (!keyPressesInfo.is_null()) {
+        setValues(keyPressesInfo["set"]);
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(keyPressesInfo["send"]));
+        afterKeyUpKeyEvents = Helpers::concatArrays(afterKeyUpKeyEvents, getKeyEventsFromString(keyPressesInfo["afterKeyUp"]));
+      }
 
       if (applyKeysCb)
         applyKeysCb(
@@ -298,8 +299,10 @@ private:
     return {};
   }
 
-  json getSendFromKeyPresses(String key) {
+  json getKeyPressesInfo(String key, bool isKeyDown) {
     size_t keyPressesSize = keyPresses.size();
+
+    if (isKeyDown) return {};
 
     for (size_t i = 0; i < keyPressesSize; i++) {
       auto keypress = keyPresses[i];
@@ -307,8 +310,12 @@ private:
       if (!ifConditions(keypress["if"])) continue;
       if (key != keypress["key"]) continue;
       if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
-      setValues(keypress["set"]);
-      return keypress["send"];
+
+      return {
+        { "send", keypress["send"] },
+        { "set", keypress["set"] },
+        { "afterKeyUp", keypress["afterKeyUp"] }
+      };
     }
 
     return {};

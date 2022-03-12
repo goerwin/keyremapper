@@ -4,7 +4,15 @@
     "it should send keys in the next triggered key down or up event"
   ],
   "remaps": [],
-  "keyPresses": [],
+  "keyPresses": [
+    {
+      "key": "Shift",
+      "ifPressedNTimes": 1,
+      "send": "Alt:down",
+      "afterKeyUp": "K E K W"
+    },
+    { "key": "N", "ifPressedNTimes": 2, "afterKeyUp": "K E K W" }
+  ],
   "keybindings": [
     {
       "keys": ["A"],
@@ -19,6 +27,11 @@
       "keys": ["K"],
       "send": [null, null],
       "afterKeyUp": "A"
+    },
+    {
+      "keys": ["N"],
+      "send": ["N:down", "N:up"],
+      "afterKeyUp": "O"
     }
   ],
   "tests": [
@@ -31,6 +44,10 @@
     ["A C A", "B A F H I B"],
     ["K", ""],
     ["K K", "A"],
-    ["K L", "A L"]
+    ["K L", "A L"],
+
+    ["Shift Shift:down", "Shift Alt:down K E K W Shift:down"],
+    ["N N Shift:down", "N O N O K E K W Shift:down"]
+    // ["Shift", "Shift Alt:down K E K W"]
   ]
 }
