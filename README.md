@@ -1,9 +1,10 @@
 ## Installation
 
-- Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
-- Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
-- Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
-- Rules (remaps, keybindings, tests) can be found in `mode1.json`
+- Windows
+  - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
+  - Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
+  - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
+  - Rules (remaps, keybindings, tests) can be found in `mode1.json`
 
 ## Build
 
@@ -29,6 +30,7 @@
 ### TODO
 
 - Windows
+
   - [ ] Add versioning
   - [x] Tests via popup message
   - [x] UI to debug events
@@ -63,7 +65,7 @@
   - [x] trigger media keys
     - brightnessDown/up, keyboardIlluminationDown/up, rewind/playPause/fastForward, mute, volumeDown/up
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
-  - [ ] exiting app from terminal (cmd+q) doesnt remove the process
+  - [x] exiting app from terminal (cmd+q) doesnt remove the process (it's expected to kill the keyRemapper process)
   - [ ] simple GUI
   - [ ] Fn key not working when app is disabled
   - [ ] Memory leaks
@@ -96,6 +98,7 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
 ### Notes
 
 - Windows
+
   - FakeShiftL is triggered when some special keys (left, right) are used with NumLock on. So I'm ignoring it.
   - Use Scan Codes to alter a specific hardware keyboard key. For example, the numeric keypad keys each have the same Scan Code, but different Virtual keys with NumLock either on or off (e.g. Numpad6 and NumpadRight). Using the Scan Code ignores the NumLock status. Use Scan Codes (if available) to alter that extra key on your keyboard. (While Scan Codes may be used to add missing keys, most likely the new Virtual Key will also be required.)
   - For unicode (accents, tildes, etc)
@@ -110,7 +113,7 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
   - When developing in XCode
     - make sure the schemas (debug/release) have the "Debug Process" as "root" instead so that it can actually capture all keyboard input from anywhere
     - Under properties of the project, `Signing & Capabilities -> Signing Certificate`, make sure is set to "Development" to avoid ticking/unticking the "Accesibility" and "Input Monitoring" permission checkboxes
-    - If running the executable from terminal, you must grant *Input Monitoring* and *Accesibility* permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
+    - If running the executable from terminal, you must grant _Input Monitoring_ and _Accesibility_ permissions to the terminal that runs it (eg. iTerm or Terminal). Also you should run it with root permissions (eg. `$ sudo /Users/erwin.gaitan/Library/Developer/Xcode/DerivedData/KeyRemapperTerminal-xxx/Build/Products/Debug/KeyRemapperTerminal ; exit;`
   - You can execute command line commands via system. eg.
     - `system("say hello world");`
     - `system("osascript -e \"set volume 5\"");`
