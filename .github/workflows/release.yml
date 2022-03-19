@@ -22,14 +22,15 @@ jobs:
 
           binPath=$(echo $(dirname $(readlink build/Release/KeyRemapperTerminal)))
 
-          cp -R $binPath ../KeyRemapperMac
+          cp -R $binPath ../macApp
 
       - uses: actions/upload-artifact@v3
         # echo "::set-output name=appBinPath::$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))"
         with:
           name: macArtifact
+          retention-days: 1
           path: |
-            KeyRemapperMac/**/*
+            macApp/**/*
 
   release:
     runs-on: ubuntu-latest
@@ -37,9 +38,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          # name: macArtifact
+          name: KeyRemapperMac
           path: macArtifact
-          retention-days: 1
 
       - name: Release
         uses: softprops/action-gh-release@v1
