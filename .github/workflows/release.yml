@@ -16,9 +16,9 @@ jobs:
       - run: echo YIKES2
       - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
       - run: echo YIKES3
-      - run: cd mac
-      - run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
+      - working-directory: ./mac
+        run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
       - run: echo YIKES4
 
       # copy this to the release folder
-      - run: cp build/Release/KeyRemapperTerminal
+      # - run: cp build/Release/KeyRemapperTerminal
