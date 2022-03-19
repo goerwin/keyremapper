@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-mac]
     steps:
-      - uses: actions/download-artifact@KeyRemapperMacv3
+      - uses: actions/download-artifact@v3
         with:
           name: macArtifact
           path: KeyRemapperMac
