@@ -20,11 +20,12 @@ jobs:
         run: |
           xcodebuild -target KeyRemapperTerminal archive -configuration Release
 
+          # Get the dirpath of the executable
           binPath=$(echo $(dirname $(readlink "build/Release/KeyRemapperTerminal")))
 
           cp -r "$binPath" KeyRemapperMac
-          zip mac.zip KeyRemapperMac/**/*
-          cp -R mac.zip ../
+          zip -r mac.zip KeyRemapperMac
+          cp -r mac.zip ../
 
       - uses: actions/upload-artifact@v3
         with:
