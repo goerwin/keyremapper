@@ -16,15 +16,16 @@ jobs:
       - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
 
       - working-directory: ./mac
-        run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
+        id: xcodebuildStep
+        run: |
+          xcodebuild -target KeyRemapperTerminal archive -configuration Release
+          echo "::set-output name=appBinPath::$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))"
 
       - uses: actions/upload-artifact@v3
-        env:
-          BIN_PATH: ${{ echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)) }}
         with:
           name: macArtifact
           path: |
-            ${{ env.BIN_PATH }}/**/*
+            ${{ steps.xcodebuildStep.outputs.appBinPath }}/**/*
 
   release:
     runs-on: ubuntu-latest
