@@ -17,14 +17,10 @@ jobs:
 
       - working-directory: ./mac
         run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
-        env:
-          BIN_PATH2: echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal))
-          BIN_PATH3: echo $(dirname $(readlink build/Release/KeyRemapperTerminal))
 
       - uses: actions/upload-artifact@v3
         env:
-          BIN_PATH: echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal))
-          BIN_PATH4: echo $(dirname $(readlink build/Release/KeyRemapperTerminal))
+          BIN_PATH: ${{ echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)) }}
         with:
           name: macArtifact
           path: |
