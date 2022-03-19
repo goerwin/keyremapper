@@ -1,6 +1,6 @@
 {
   "description": ["KeyPresses"],
-  "keyPressesDelay": 50,
+  "keyPressesDelay": 100,
   "keyPresses": [
     { "key": "Caps", "ifPressedNTimes": 1, "send": "Esc" },
     { "key": "Alt", "ifPressedNTimes": 1, "send": "Esc:down Esc:up" },
@@ -32,18 +32,18 @@
     // WITHOUT/WITH DELAY
     ["Alt:down Alt:up", "Esc"],
     ["Alt:down test_delay:10 Alt:up", "Esc"],
-    ["Alt:down test_delay:51 Alt:up", ""],
+    ["Alt:down test_delay:101 Alt:up", ""],
     ["Alt:down test_delay:10 Alt:down Alt:up", "Esc"],
-    ["Alt:down test_delay:51 Alt:down Alt:up", ""],
+    ["Alt:down test_delay:101 Alt:down Alt:up", ""],
     [
-      "Alt:down test_delay:51 Alt:down Alt:up Alt:down test_delay:10 Alt:up",
+      "Alt:down test_delay:101 Alt:down Alt:up Alt:down test_delay:10 Alt:up",
       "Esc"
     ],
     ["A Caps:down Caps:up", "B Caps Esc"],
     ["A Caps:down test_delay:10 Caps:up", "B Caps Esc"],
-    ["A Caps:down test_delay:51 Caps:up", "B Caps"],
+    ["A Caps:down test_delay:101 Caps:up", "B Caps"],
     ["Shift:down Win Shift:up", "Shift:down Shift:up"],
     ["A:down Alt:down test_delay:10 Alt:up A:up", "B:down Esc B:up"],
-    ["A:down Alt:down test_delay:51 Alt:up A:up", "B:down B:up"]
+    ["A:down Alt:down test_delay:101 Alt:up A:up", "B:down B:up"]
   ]
 }
