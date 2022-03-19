@@ -2,6 +2,8 @@ on:
   push:
     branches:
       - master
+    # tags:
+    #   - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build-mac:
@@ -11,14 +13,19 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: 13
+
       - uses: actions/checkout@v1
-      - run: echo YIKES
-      - run: echo YIKES2
       - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
-      - run: echo YIKES3
+
       - working-directory: ./mac
         run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
-      - run: echo YIKES4
 
-      # copy this to the release folder
-      # - run: cp build/Release/KeyRemapperTerminal
+      - name: Move app for mac to root folder
+      - run: mv build/Release/KeyRemapperTerminal KeyRemapper
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        # NO NEEDED IT SEEMS
+        # if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: KeyRemapper
