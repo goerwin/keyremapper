@@ -36,10 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-mac]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@KeyRemapperMacv3
         with:
-          name: KeyRemapperMac
-          path: macArtifact
+          name: macArtifact
+          path: KeyRemapperMac
 
       - name: Release
         uses: softprops/action-gh-release@v1
