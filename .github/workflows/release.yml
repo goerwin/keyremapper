@@ -23,16 +23,18 @@ jobs:
           # Get the dirpath of the executable
           binPath=$(echo $(dirname $(readlink "build/Release/KeyRemapperTerminal")))
 
-          cp -r "$binPath" KeyRemapperMac
-          zip -r mac.zip KeyRemapperMac
-          cp -r mac.zip ../
+          rm -rf output
+          mkdir output
+          cp -r "$binPath" output/mac
+          cd output
+          zip -r mac.zip mac
 
       - uses: actions/upload-artifact@v3
         with:
           name: macArtifact
           retention-days: 1
           path: |
-            mac.zip
+            mac/output/mac.zip
 
   release:
     runs-on: ubuntu-latest

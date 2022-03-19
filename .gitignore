@@ -1,3 +1,4 @@
 .DS_Store
 Tests/output
 Tests/output.*
+mac/output
