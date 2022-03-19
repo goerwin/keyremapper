@@ -22,7 +22,7 @@ jobs:
 
           binPath=$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))
 
-          cp -r $binPath ../KeyRemapperMac
+          cp -R $binPath ../KeyRemapperMac
 
       - uses: actions/upload-artifact@v3
         # echo "::set-output name=appBinPath::$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))"
