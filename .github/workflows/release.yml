@@ -20,7 +20,7 @@ jobs:
         run: |
           xcodebuild -target KeyRemapperTerminal archive -configuration Release
 
-          binPath=$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))
+          binPath=$(echo $(dirname $(readlink build/Release/KeyRemapperTerminal)))
 
           cp -R $binPath ../KeyRemapperMac
 
