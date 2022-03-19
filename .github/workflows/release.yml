@@ -20,18 +20,18 @@ jobs:
         run: |
           xcodebuild -target KeyRemapperTerminal archive -configuration Release
 
-          binPath=$(echo $(dirname $(readlink build/Release/KeyRemapperTerminal)))
+          binPath=$(echo $(dirname $(readlink "build/Release/KeyRemapperTerminal")))
 
-          zip KeyRemapperMac.zip $binPath/**/*
-          cp -R KeyRemapperMac.zip ../
+          cp -r "$binPath" KeyRemapperMac
+          zip mac.zip KeyRemapperMac/**/*
+          cp -R mac.zip ../
 
       - uses: actions/upload-artifact@v3
-        # echo "::set-output name=appBinPath::$(echo $(dirname $(readlink mac/build/Release/KeyRemapperTerminal)))"
         with:
           name: macArtifact
           retention-days: 1
           path: |
-            KeyRemapperMac.zip
+            mac.zip
 
   release:
     runs-on: ubuntu-latest
@@ -40,11 +40,11 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: macArtifact
-          path: KeyRemapperMac
+          path: buildMac
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            KeyRemapperMac/KeyRemapperMac.zip
+            buildMac/mac.zip
