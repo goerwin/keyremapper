@@ -20,7 +20,7 @@ jobs:
       - working-directory: ./mac
         run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
 
-      - name: Move app for mac to root folder
+      # Move app for mac to root folder
       - run: mv build/Release/KeyRemapperTerminal KeyRemapper
 
       - name: Release
