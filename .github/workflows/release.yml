@@ -21,11 +21,9 @@ jobs:
         run: xcodebuild -target KeyRemapperTerminal archive -configuration Release
 
       # Move app for mac to root folder
-      - run: mv build/Release/KeyRemapperTerminal KeyRemapper
+      - run: cp mac/build/Release/KeyRemapperTerminal KeyRemapper
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        # NO NEEDED IT SEEMS
-        # if: startsWith(github.ref, 'refs/tags/')
         with:
           files: KeyRemapper
