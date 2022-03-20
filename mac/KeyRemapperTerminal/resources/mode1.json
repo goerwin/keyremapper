@@ -29,12 +29,6 @@
     { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
   ],
   "keybindings": [
-    // TODO: These probably need to be enabled via global shortcuts, same as activate/deactivate
-    { "keys": ["1"], "if": { "Ctrl": true }, "send": ["SK:Mode1"] },
-    { "keys": ["2"], "if": { "Ctrl": true }, "send": ["SK:Mode2"] },
-    { "keys": ["3"], "if": { "Ctrl": true }, "send": ["SK:Mode3"] },
-    { "keys": ["4"], "if": { "Ctrl": true }, "send": ["SK:Mode4"] },
-
     // vim mode
 
     {

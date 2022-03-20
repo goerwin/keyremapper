@@ -114,13 +114,12 @@ void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
     if (threadIdx != Global::keyRepeatThreadCount || !Global::shouldKeyRepeat) return;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(Global::delayUntilRepeat));
+
     while (Global::keyRepeatThreadCount == threadIdx && Global::shouldKeyRepeat) {
       auto vkCode = (CGKeyCode)Global::repeatedKey;
 
       if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, true);
       else postKey(vkCode, true, true);
-      // TODO: LEL
-      Helpers::print("REPITELO PAPA");
       std::this_thread::sleep_for(std::chrono::milliseconds(Global::keyRepeatInterval));
     }
   },
@@ -152,38 +151,38 @@ void disableLogging() {
 
 - (KeyRemapperWrapper*) init:(NSString*)rootPath withMode:(int)mode {
   std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
-  
+
   std::string rootPathStr([rootPath UTF8String]);
-  
+
     std::string selectedMode = modes[mode];
     if (access((rootPathStr + "/" + selectedMode).c_str(), R_OK) < 0) {
       sendNotification(selectedMode + " file does not exist");
       return nil;
     }
-  
+
   auto rules = Helpers::getJsonFile(rootPathStr, selectedMode);
   Global::symbols = Helpers::getJsonFile(rootPathStr, "/symbols.json");
-  
+
   if (rules.is_null() || Global::symbols.is_null()) {
       sendNotification("No rules (" + selectedMode + ") or symbols.json files provided");
       return nil;
     }
-  
+
     delete Global::keyRemapper;
     Global::keyRemapper = new KeyRemapper(rules, Global::symbols);
-    
+
   Global::delayUntilRepeat = rules["delayUntilRepeat"].is_null()
   ? Global::delayUntilRepeat
     : rules["delayUntilRepeat"].get<int>();
   Global::keyRepeatInterval = rules["keyRepeatInterval"].is_null()
     ? Global::keyRepeatInterval
     : rules["keyRepeatInterval"].get<int>();
-  
+
     MouseHandler::initialize();
     MouseHandler::doubleClickSpeed = rules["doubleClickSpeed"].is_null()
     ? MouseHandler::doubleClickSpeed
     : rules["doubleClickSpeed"].get<double>();
-  
+
     // TODO: Only set it when logging by the user
     enableLogging();
 
@@ -196,7 +195,7 @@ void disableLogging() {
     }
 
     sendNotification(selectedMode + " selected" + testsResultsMsg + "\n" + "Config files in: " + rootPathStr);
-  
+
   return self; // return objc++ instance
 }
 
@@ -208,16 +207,10 @@ void disableLogging() {
   Global::keyRemapper->setKeyboard([kb UTF8String], [kbDesc UTF8String]);
   auto keyEvents = Global::keyRemapper->applyKeys({{"", ushort(scancode), ushort(state), false}});
   auto keyEventsSize = keyEvents.size();
-  
+
   for (size_t i = 0; i < keyEventsSize; i++) {
       auto keyEvent = keyEvents[i];
       auto name = keyEvent.name;
-
-    // TODO: do it on the UI side
-//      if (name == "SK:Mode1") return initKeyRemapper(0);
-//      if (name == "SK:Mode2") return initKeyRemapper(1);
-//      if (name == "SK:Mode3") return initKeyRemapper(2);
-//      if (name == "SK:Mode4") return initKeyRemapper(3);
 
       if (name == "SK:Delay") {
         std::this_thread::sleep_for(std::chrono::milliseconds(keyEvent.state));
@@ -248,10 +241,7 @@ void disableLogging() {
       } else if (vkCode == 57) {
         if (isKeyDown) [MyHIDManager toggleCapslockState];
       } else if (vkCode == 241) {
-        std::thread threadObj([](bool isKeyDown) {
-          MouseHandler::handleMouseDownUp(isKeyDown);
-        }, isKeyDown);
-        threadObj.detach();
+        MouseHandler::handleMouseDownUp(isKeyDown);
       } else if (vkCode == 242) {
         MouseHandler::handleMouseDownUp(isKeyDown, "right");
       } else if (Global::isMediaVkKeyCode(vkCode)) {
