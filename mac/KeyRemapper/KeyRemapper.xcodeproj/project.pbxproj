@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F93D8CB527E64D58006C2FD3 /* MyHIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F93D8CB427E64D58006C2FD3 /* MyHIDManager.swift */; };
+		F93D8CB927E67AF1006C2FD3 /* KeyRemapperWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = F93D8CB727E67AF1006C2FD3 /* KeyRemapperWrapper.mm */; };
+		F93D8CBD27E6B320006C2FD3 /* Global.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F93D8CBC27E6B320006C2FD3 /* Global.hpp */; };
+		F93D8CBF27E6B6E3006C2FD3 /* MouseHandler.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F93D8CBE27E6B6E3006C2FD3 /* MouseHandler.hpp */; };
+		F952449427E6D3EA009D4C15 /* Background.swift in Sources */ = {isa = PBXBuildFile; fileRef = F952449327E6D3EA009D4C15 /* Background.swift */; };
 		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
 		F9A8926227644E33009ACA0A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8926127644E33009ACA0A /* ContentView.swift */; };
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
@@ -14,6 +19,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F93D8CB427E64D58006C2FD3 /* MyHIDManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHIDManager.swift; sourceTree = "<group>"; };
+		F93D8CB627E67AF1006C2FD3 /* KeyRemapper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KeyRemapper-Bridging-Header.h"; sourceTree = "<group>"; };
+		F93D8CB727E67AF1006C2FD3 /* KeyRemapperWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KeyRemapperWrapper.mm; sourceTree = "<group>"; };
+		F93D8CB827E67AF1006C2FD3 /* KeyRemapperWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KeyRemapperWrapper.hpp; sourceTree = "<group>"; };
+		F93D8CBC27E6B320006C2FD3 /* Global.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Global.hpp; sourceTree = "<group>"; };
+		F93D8CBE27E6B6E3006C2FD3 /* MouseHandler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MouseHandler.hpp; sourceTree = "<group>"; };
+		F952449327E6D3EA009D4C15 /* Background.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Background.swift; sourceTree = "<group>"; };
 		F9A8925C27644E33009ACA0A /* KeyRemapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyRemapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; };
 		F9A8926127644E33009ACA0A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -39,6 +51,7 @@
 			children = (
 				F9A8925E27644E33009ACA0A /* KeyRemapper */,
 				F9A8925D27644E33009ACA0A /* Products */,
+				F93D8CB627E67AF1006C2FD3 /* KeyRemapper-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -53,12 +66,18 @@
 		F9A8925E27644E33009ACA0A /* KeyRemapper */ = {
 			isa = PBXGroup;
 			children = (
+				F93D8CB727E67AF1006C2FD3 /* KeyRemapperWrapper.mm */,
+				F93D8CB827E67AF1006C2FD3 /* KeyRemapperWrapper.hpp */,
 				F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */,
 				F9A8926127644E33009ACA0A /* ContentView.swift */,
 				F9A8926327644E35009ACA0A /* Assets.xcassets */,
 				F9A8926827644E35009ACA0A /* Info.plist */,
 				F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */,
 				F9A8926527644E35009ACA0A /* Preview Content */,
+				F93D8CB427E64D58006C2FD3 /* MyHIDManager.swift */,
+				F93D8CBC27E6B320006C2FD3 /* Global.hpp */,
+				F93D8CBE27E6B6E3006C2FD3 /* MouseHandler.hpp */,
+				F952449327E6D3EA009D4C15 /* Background.swift */,
 			);
 			path = KeyRemapper;
 			sourceTree = "<group>";
@@ -102,6 +121,7 @@
 				TargetAttributes = {
 					F9A8925B27644E33009ACA0A = {
 						CreatedOnToolsVersion = 12.5.1;
+						LastSwiftMigration = 1310;
 					};
 				};
 			};
@@ -140,8 +160,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F93D8CB527E64D58006C2FD3 /* MyHIDManager.swift in Sources */,
+				F952449427E6D3EA009D4C15 /* Background.swift in Sources */,
 				F9A8926227644E33009ACA0A /* ContentView.swift in Sources */,
+				F93D8CBF27E6B6E3006C2FD3 /* MouseHandler.hpp in Sources */,
+				F93D8CBD27E6B320006C2FD3 /* Global.hpp in Sources */,
 				F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */,
+				F93D8CB927E67AF1006C2FD3 /* KeyRemapperWrapper.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,7 +179,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -215,7 +240,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -268,6 +293,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -283,6 +309,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "KeyRemapper-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -292,6 +320,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -307,6 +336,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "KeyRemapper-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

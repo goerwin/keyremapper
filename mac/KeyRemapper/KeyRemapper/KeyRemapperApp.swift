@@ -1,14 +1,15 @@
-//
-//  KeyRemapperApp.swift
-//  KeyRemapper
-//
-//  Created by Erwin Gaitan Ospino on 10/12/21.
-//
-
 import SwiftUI
 
 @main
 struct KeyRemapperApp: App {
+  init() {
+    DispatchQueue.global(qos: .userInitiated).async {
+      var background: Background?
+
+      background = Background()
+    }
+  }
+  
     var body: some Scene {
         WindowGroup {
           ContentView().frame(minWidth: 200, idealWidth: 200, maxWidth: 200, minHeight: 500, idealHeight: 500, maxHeight: .infinity, alignment: .center)

@@ -56,6 +56,8 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
+  - [x] mouse callback events stop after you click the app's top menu bar
+  - [ ] if you use the gui version, if you type in the menu bar when the app is focused (eg. Help -> type something, it will not register the keys)
   - [x] Move files that are shared between OSs to a common place
   - [x] detect current application
   - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
@@ -123,6 +125,8 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
     - reproduce the error then in the llbd console:
       - (lldb) command script import lldb.macosx.heap
       - (lldb) malloc_info --stack-history 0xAAAAAAAAA
+  - For the Swift UI Version:
+    - `com.apple.security.app-sandbox` should be false in .entitlements
 
 ### Snippets Mac
 
@@ -145,7 +149,7 @@ auto myRunLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, myEven
 if (!myEventTap) {
   std::cout << "Couldn't create runLoopSource";
 }
-CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopDefaultMode);
+CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopCommonModes);
 ```
 
 ```cpp
