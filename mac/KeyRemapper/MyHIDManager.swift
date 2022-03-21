@@ -3,7 +3,7 @@ import IOKit
 
 @objc class MyHIDManager: NSObject {
   @objc static var capslockState = false
-  private static var ioHidManager: IOHIDManager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
+  private static var ioHidManager: IOHIDManager?
 
   private static let inputValueCb: IOHIDValueCallback = {
       (context, result, sender, value) in
@@ -40,31 +40,33 @@ import IOKit
   static var onIOHIDKeyboardInput: (_ scancode: UInt32, _ isKeyDown: Bool, _ vendorId: Int, _ productId: Int, _ manufacturer: String, _ product: String) -> Void = {_,_,_,_,_,_ in };
 
   static func start() {
+    ioHidManager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
+    
     if (CFGetTypeID(ioHidManager) != IOHIDManagerGetTypeID()) {
       return;
     }
-
+    
     let keyboard = [kIOHIDDeviceUsagePageKey: 0x01, kIOHIDDeviceUsageKey: 6] as CFDictionary
     let keypad = [kIOHIDDeviceUsagePageKey: 0x01, kIOHIDDeviceUsageKey: 7] as CFDictionary
 
     let devices = [keyboard, keypad] as CFArray
 
-    IOHIDManagerSetDeviceMatchingMultiple(ioHidManager, devices)
+    IOHIDManagerSetDeviceMatchingMultiple(ioHidManager!, devices)
 
-    IOHIDManagerRegisterInputValueCallback(ioHidManager, inputValueCb, nil);
+    IOHIDManagerRegisterInputValueCallback(ioHidManager!, inputValueCb, nil);
 
-    IOHIDManagerScheduleWithRunLoop(ioHidManager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
-    IOHIDManagerOpen(ioHidManager, IOOptionBits(kIOHIDOptionsTypeSeizeDevice));
+    IOHIDManagerScheduleWithRunLoop(ioHidManager!, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
+    IOHIDManagerOpen(ioHidManager!, IOOptionBits(kIOHIDOptionsTypeSeizeDevice));
 
     // Capslock state
     capslockState = getCapslockState()
   }
 
   static func stop() {
-    IOHIDManagerRegisterInputValueCallback(ioHidManager, nil, nil);
-    IOHIDManagerSetDeviceMatchingMultiple(ioHidManager, nil);
-    IOHIDManagerUnscheduleFromRunLoop(ioHidManager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue);
-    IOHIDManagerClose(ioHidManager, IOOptionBits(kIOHIDOptionsTypeSeizeDevice));
+    IOHIDManagerRegisterInputValueCallback(ioHidManager!, nil, nil);
+    IOHIDManagerSetDeviceMatchingMultiple(ioHidManager!, nil);
+    IOHIDManagerUnscheduleFromRunLoop(ioHidManager!, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue);
+    IOHIDManagerClose(ioHidManager!, IOOptionBits(kIOHIDOptionsTypeSeizeDevice));
   }
 
   static func getCapslockState() -> Bool {

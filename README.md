@@ -56,6 +56,8 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
+  - [ ] multiple configs
+  - [ ] press enter to disable/enable and see if the keyrepeat continues forever
   - [x] mouse callback events stop after you click the app's top menu bar
   - [ ] if you use the gui version, if you type in the menu bar when the app is focused (eg. Help -> type something, it will not register the keys)
   - [x] Move files that are shared between OSs to a common place

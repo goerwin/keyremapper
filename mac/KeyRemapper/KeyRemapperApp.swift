@@ -19,8 +19,12 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     var popover = NSPopover.init()
     var statusBarItem: NSStatusItem!
     var statusBarMenu: NSMenu!
-    var background: Background!
     var rootPath: String?
+    var configPath: String!
+    var configIdx = 1
+  var keyRemapperStarted: Bool?
+  var keyRemapperWrapper: KeyRemapperWrapper?
+
 
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
@@ -30,6 +34,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       guard let rootPath = getRootPath() else {
         return showCloseAlert("Error", "Config Folder invalid")
       }
+      
+      self.rootPath = rootPath
 
       if (!isAppAccesibilityEnabled()) {
         showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
@@ -37,23 +43,71 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         return;
       }
 
-      let symbolsPath = "\(rootPath)/symbols.json"
-      if (!fileExists(symbolsPath)) {
-        return showCloseAlert("File not found", "\(symbolsPath) not found")
-      }
-
-      let config1Path = "\(rootPath)/config1.json"
-      if (!fileExists(config1Path)) {
-        return showCloseAlert("File not found", "\(config1Path) not found")
-      }
-
-      showNotification("Config loaded from: \(config1Path)", nil)
-      // TODO: Show test results
-//      sendNotification(selectedConfig + " selected" + testsResultsMsg + "\n" + "Config files in: " + rootPathStr);
-      self.rootPath = rootPath
-      startBgProcess(configPath: config1Path, symbolsPath: symbolsPath)
+      NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil, using: handleAppChange)
+      
+      startKeyRemapper()
+    }
+  
+  func startKeyRemapper(configIdx: Int = 1) {
+    if (keyRemapperStarted == true) {
+      return
+    }
+    
+    self.configIdx = configIdx
+    let symbolsPath = "\(rootPath!)/symbols.json"
+    
+    if (!fileExists(symbolsPath)) {
+      return showCloseAlert("File not found", "\(symbolsPath) not found")
     }
 
+    configPath = "\(rootPath!)/config\(configIdx == 1 ? "" : String(configIdx)).json"
+    if (!fileExists(configPath)) {
+      return showCloseAlert("File not found", "\(configPath!) not found")
+    }
+
+    keyRemapperWrapper = KeyRemapperWrapper(configPath, withSymbolsPath: symbolsPath)
+    let testsResults = keyRemapperWrapper!.runTests(configPath, withSymbolsPath: symbolsPath)!
+    
+    let configName = getConfigName(configPath: configPath!)
+    
+    showNotification("\(testsResults)\nConfig name: \(configName)\nConfig file: \(configPath!)", nil)
+    
+    setFrontmostAppNameToKeyRemapper()
+    updateMenuBarTitle(configName)
+    
+    // NOTE: Run HIDManager in background to not block the main thread
+    DispatchQueue.global(qos: .background).async {
+      MyHIDManager.start()
+      MyHIDManager.onIOHIDKeyboardInput = self.handleIOHIDKeyboardInput
+    }
+
+    keyRemapperStarted = true
+    statusBarItem.button?.appearsDisabled = false
+  }
+  
+  func handleIOHIDKeyboardInput(_ scancode: UInt32, _ isKeyDown: Bool, _ vendorId: Int, _ productId: Int, _ manufacturer: String, _ product: String) {
+    let keyboard = String(productId) + ":" + String(vendorId)
+
+    keyRemapperWrapper?.applyKeyEvent(
+      Int32(scancode),
+      state: isKeyDown ? 0 : 1,
+      keyboard: keyboard,
+      keyboardDescription: manufacturer + " | " + product
+    );
+  }
+
+  func setFrontmostAppNameToKeyRemapper() {
+    let frontmostApp = NSWorkspace.shared.frontmostApplication
+    let bundleId = frontmostApp?.bundleIdentifier
+    let localizedName = frontmostApp?.localizedName
+
+    keyRemapperWrapper?.setAppName((bundleId != nil) ? bundleId : (localizedName != nil) ? localizedName : "Unknown")
+  }
+
+  func handleAppChange(notification: Notification) {
+    setFrontmostAppNameToKeyRemapper()
+  }
+  
   func fileExists(_ filePath: String) -> Bool {
       let fileManager = FileManager.default
       if fileManager.fileExists(atPath: filePath) {
@@ -71,10 +125,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
           let content = UNMutableNotificationContent()
           content.title = title ?? bundleName
           content.body = description
-
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false);
-
-          let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+          let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
 
           center.add(request)
         }
@@ -94,12 +145,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   func isAppAccesibilityEnabled() -> Bool {
     let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as NSString: false]
     return AXIsProcessTrustedWithOptions(options as CFDictionary)
-  }
-
-  func startBgProcess(configPath: String, symbolsPath: String) {
-    DispatchQueue.global(qos: .background).async {
-      self.background = Background(configPath: configPath, symbolsPath: symbolsPath)
-      }
   }
 
   func resizeImage(image: NSImage, w: Int, h: Int) -> NSImage? {
@@ -123,7 +168,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
     let menuButton = statusBarItem.button!
-    menuButton.title = " Config 1"
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
     menuButton.image = resizeImage(image: NSImage(named: "MenuBarIcon")!, w: 18, h: 18)
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
@@ -134,7 +178,22 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         withTitle: "Open Config Folder",
         action: #selector(AppDelegate.openConfigFolder),
         keyEquivalent: "")
+    statusBarMenu.addItem(
+        withTitle: "Disable/Enable",
+        action: #selector(AppDelegate.disableEnableKeyRemapper),
+        keyEquivalent: "")
 
+    statusBarMenu.addItem(.separator())
+    statusBarMenu.addItem(
+        withTitle: "Config 1",
+        action: #selector(AppDelegate.switchConfig(sender:)),
+        keyEquivalent: "")
+    
+    statusBarMenu.addItem(
+        withTitle: "Config 2",
+        action: #selector(AppDelegate.switchConfig),
+        keyEquivalent: "")
+    
     statusBarMenu.addItem(.separator())
     statusBarMenu.addItem(
         withTitle: "About \(bundleName)",
@@ -146,6 +205,15 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         withTitle: "Quit",
         action: #selector(AppDelegate.quit),
         keyEquivalent: "q")
+  }
+  
+  @objc func switchConfig(sender: Any) {
+    stopKeyRemapper()
+    startKeyRemapper(configIdx: 1)
+  }
+  
+  func updateMenuBarTitle(_ title: String) {
+    statusBarItem.button?.title = title
   }
 
 
@@ -168,6 +236,37 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     if currentLoggedInUser == nil { return nil }
 
     return "/Users/\(currentLoggedInUser!)/keyRemapperMac"
+  }
+  
+  func getConfigName(configPath: String) -> String {
+    do {
+        let data = try Data(contentsOf: URL(fileURLWithPath: configPath), options: .mappedIfSafe)
+      let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
+      if let jsonResult = jsonResult as? Dictionary<String, AnyObject>, let name = jsonResult["name"] as? String {
+
+          return name
+                    
+      }
+    } catch {}
+    
+    return ""
+  }
+  
+  func stopKeyRemapper() {
+    if (keyRemapperStarted != true) { return }
+    keyRemapperWrapper!.terminate()
+    MyHIDManager.stop();
+    keyRemapperWrapper = nil
+    statusBarItem.button?.appearsDisabled = true
+    keyRemapperStarted = false
+  }
+  
+  @objc func disableEnableKeyRemapper() {
+    if (keyRemapperStarted == true) {
+      return stopKeyRemapper()
+    }
+
+    startKeyRemapper(configIdx: configIdx)
   }
 
   @objc func openConfigFolder() {

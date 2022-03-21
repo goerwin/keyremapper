@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../common/KeyRemapper.hpp"
+#include "../../common/KeyRemapper.hpp"
 
 namespace Global {
   KeyRemapper *keyRemapper;

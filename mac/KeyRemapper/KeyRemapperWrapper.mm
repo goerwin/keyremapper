@@ -151,10 +151,9 @@ void disableLogging() {
 
 - (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
 
-  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
   auto config = Helpers::getJsonFile([configPath UTF8String]);
+  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
 
-    delete Global::keyRemapper;
     Global::keyRemapper = new KeyRemapper(config, Global::symbols);
 
   Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
@@ -172,15 +171,30 @@ void disableLogging() {
     // TODO: Only set it when logging by the user
     enableLogging();
 
-    auto tests = config["tests"];
-    std::string testsResultsMsg = "";
-    if (!tests.is_null()) {
-      auto testResults = TestHelpers::runTests(tests, config, Global::symbols);
-      testsResultsMsg = "\n" + std::string(!testResults.is_null() ?
-      testResults["message"] : "NO TESTS RAN");
-    }
-
   return self; // return objc++ instance
+}
+
+- (void)terminate {
+  delete Global::keyRemapper;
+  MouseHandler::terminate();
+}
+
+- (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath  {
+  auto config = Helpers::getJsonFile([configPath UTF8String]);
+  auto symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
+
+  auto tests = config["tests"];
+  
+  if (tests.is_null()) {
+    return @"No tests";
+  }
+
+  auto testResults = TestHelpers::runTests(tests, config, symbols);
+  auto testsResultsMsg = std::string(!testResults.is_null() ?
+  testResults["message"] : "No tests");
+  
+  return [NSString stringWithCString:testsResultsMsg.c_str()
+                                     encoding:[NSString defaultCStringEncoding]];
 }
 
 - (void)setAppName:(NSString*)appName {
