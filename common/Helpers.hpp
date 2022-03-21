@@ -62,8 +62,14 @@ void print(string str, string str2 = "\n") {
   std::cout << res << "";
 }
 
-json getJsonFile(String dirPath, String filename) {
-  std::ifstream file(dirPath + "/" + filename);
+json getJsonFile(String filePath) {
+  auto pathParts = split(filePath, '/');
+  String dirPath = "";
+  auto pathPartsSize = pathParts.size();
+  for (size_t i = 0; i < pathPartsSize - 1; i++)
+    dirPath = dirPath + "/" + pathParts[i];
+  
+  std::ifstream file(filePath);
   String fileStr((std::istreambuf_iterator<char>(file)),
                  std::istreambuf_iterator<char>());
 
@@ -95,7 +101,7 @@ json getJsonFile(String dirPath, String filename) {
         String innerFileStr = "";
 
         if (matches.size() == 2) {
-          innerFileStr = getJsonFile(dirPath, matches[1]).dump();
+          innerFileStr = getJsonFile(dirPath + "/" + std::string(matches[1])).dump();
 
           if (name == "dotdotdotArray" || name == "dotdotdotObject") {
             auto openingBracketIdx = name == "dotdotdotArray"

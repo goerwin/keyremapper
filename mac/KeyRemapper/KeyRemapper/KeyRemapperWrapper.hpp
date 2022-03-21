@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 
 @interface KeyRemapperWrapper : NSObject
-  - (KeyRemapperWrapper*)init:(NSString*)dirPath withMode:(int)mode;
+- (KeyRemapperWrapper*)init:(NSString*)dirPath withSymbolsPath:(NSString*)symbolsPath;
 
 - (void)setAppName:(NSString*)appName;
 - (void)applyKeyEvent:(int)scancode state:(int)state keyboard:(NSString*)kb keyboardDescription:(NSString*)kbDesc;

@@ -42,19 +42,19 @@ int main(int argc, const char *argv[]) {
     Helpers::print(dirPath);
   #endif
 
-  auto symbols = Helpers::getJsonFile(dirPath, "symbols.json");
+  auto symbols = Helpers::getJsonFile(dirPath + "/symbols.json");
 
   // TESTS
 
   auto ruleFiles = nlohmann::json::array({
-    Helpers::getJsonFile(dirPath, "rules1.json"),
-    Helpers::getJsonFile(dirPath, "rules2.json"),
-    Helpers::getJsonFile(dirPath, "rules3.json"),
-    Helpers::getJsonFile(dirPath, "rules4.json"),
-    Helpers::getJsonFile(dirPath, "rules5.json"),
-    Helpers::getJsonFile(dirPath, "rules6.json"),
-    Helpers::getJsonFile(dirPath, "rules7.json"),
-    Helpers::getJsonFile(dirPath, "rules8.json"),
+    Helpers::getJsonFile(dirPath + "/rules1.json"),
+    Helpers::getJsonFile(dirPath + "/rules2.json"),
+    Helpers::getJsonFile(dirPath + "/rules3.json"),
+    Helpers::getJsonFile(dirPath + "/rules4.json"),
+    Helpers::getJsonFile(dirPath + "/rules5.json"),
+    Helpers::getJsonFile(dirPath + "/rules6.json"),
+    Helpers::getJsonFile(dirPath + "/rules7.json"),
+    Helpers::getJsonFile(dirPath + "/rules8.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[]) {
 
   // Test1: Special Keys are properly parsed
 
-  auto t1_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t1_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
   auto t1_keyEvents = t1_keyRemapper->getKeyEventsFromString("A SK:kekw:1234 B");
 
   std::vector<KeyRemapper::KeyEvent> t1_keyEvents2 = {
@@ -103,7 +103,7 @@ int main(int argc, const char *argv[]) {
 
   // Test2: Unknown keyEvents passed to applyKeys are passed through
 
-  auto t2_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t2_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
   std::vector<KeyRemapper::KeyEvent> t2_keyEvents = {
     {"", 30, 0, false},
     {"", 30, 1, false},
@@ -134,7 +134,7 @@ int main(int argc, const char *argv[]) {
 
   // Test3: Unknown keys passed through string are properly handled
 
-  auto t3_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath, "rules7.json"), symbols);
+  auto t3_keyRemapper = new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
   auto t3_keyEvents = t3_keyRemapper->getKeyEventsFromString("A NoExist:down NoExist:up B");
 
   expect(t3_keyRemapper->stringifyKeyEvents(t3_keyEvents) == "A:down A:up Unknown:up Unknown:up B:down B:up", "Test3: Not same string output");
@@ -144,9 +144,9 @@ int main(int argc, const char *argv[]) {
   // Array Object JSON helpers
 
   auto jsonFile =
-      Helpers::getJsonFile(dirPath, "imports.json");
+      Helpers::getJsonFile(dirPath + "/imports.json");
   auto expectedFile =
-      Helpers::getJsonFile(dirPath, "importsExpected.json");
+      Helpers::getJsonFile(dirPath + "/importsExpected.json");
   expect(jsonFile.dump() == expectedFile.dump(), "imports.json and importsExpected.json didn't match");
 
   Helpers::print("SUCCESS!");

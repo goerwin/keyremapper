@@ -13,7 +13,7 @@
 #import "./Global.hpp"
 #import "./MouseHandler.hpp"
 
-void sendNotification(std::string message, std::string title = "KeyRemapper") {
+void sendNotification(std::string message, std::string title) {
   Helpers::print(message);
   system(("osascript -e 'display notification \"" + message + "\" with title \"" + title + "\"'").c_str());
 }
@@ -149,52 +149,36 @@ void disableLogging() {
     return nil;
 }
 
-- (KeyRemapperWrapper*) init:(NSString*)rootPath withMode:(int)mode {
-  std::vector<std::string> modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
-
-  std::string rootPathStr([rootPath UTF8String]);
-
-    std::string selectedMode = modes[mode];
-    if (access((rootPathStr + "/" + selectedMode).c_str(), R_OK) < 0) {
-      sendNotification(selectedMode + " file does not exist");
-      return nil;
-    }
-
-  auto rules = Helpers::getJsonFile(rootPathStr, selectedMode);
-  Global::symbols = Helpers::getJsonFile(rootPathStr, "/symbols.json");
-
-  if (rules.is_null() || Global::symbols.is_null()) {
-      sendNotification("No rules (" + selectedMode + ") or symbols.json files provided");
-      return nil;
-    }
-
+- (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
+  
+  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
+  auto config = Helpers::getJsonFile([configPath UTF8String]);
+  
     delete Global::keyRemapper;
-    Global::keyRemapper = new KeyRemapper(rules, Global::symbols);
+    Global::keyRemapper = new KeyRemapper(config, Global::symbols);
 
-  Global::delayUntilRepeat = rules["delayUntilRepeat"].is_null()
+  Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
   ? Global::delayUntilRepeat
-    : rules["delayUntilRepeat"].get<int>();
-  Global::keyRepeatInterval = rules["keyRepeatInterval"].is_null()
+    : config["delayUntilRepeat"].get<int>();
+  Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
     ? Global::keyRepeatInterval
-    : rules["keyRepeatInterval"].get<int>();
+    : config["keyRepeatInterval"].get<int>();
 
     MouseHandler::initialize();
-    MouseHandler::doubleClickSpeed = rules["doubleClickSpeed"].is_null()
+    MouseHandler::doubleClickSpeed = config["doubleClickSpeed"].is_null()
     ? MouseHandler::doubleClickSpeed
-    : rules["doubleClickSpeed"].get<double>();
+    : config["doubleClickSpeed"].get<double>();
 
     // TODO: Only set it when logging by the user
     enableLogging();
 
-    auto tests = rules["tests"];
+    auto tests = config["tests"];
     std::string testsResultsMsg = "";
     if (!tests.is_null()) {
-      auto testResults = TestHelpers::runTests(tests, rules, Global::symbols);
+      auto testResults = TestHelpers::runTests(tests, config, Global::symbols);
       testsResultsMsg = "\n" + std::string(!testResults.is_null() ?
       testResults["message"] : "NO TESTS RAN");
     }
-
-    sendNotification(selectedMode + " selected" + testsResultsMsg + "\n" + "Config files in: " + rootPathStr);
 
   return self; // return objc++ instance
 }

@@ -74,12 +74,6 @@ import IOKit
     let mdict: CFMutableDictionary = IOServiceMatching(kIOHIDSystemClass)
     let ios = IOServiceGetMatchingService(kIOMasterPortDefault, mdict)
 
-    // TODO: What to do?
-    if (ios == nil) {
-      print("IOServiceGetMatchingService() failed");
-      return false;
-    }
-
     kr = IOServiceOpen(ios, mach_task_self_, UInt32(kIOHIDParamConnectType), &ioc);
           IOObjectRelease(ios);
           if (kr != KERN_SUCCESS) {

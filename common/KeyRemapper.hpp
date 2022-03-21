@@ -26,7 +26,7 @@ public:
 private:
   json globals = {};
   json symbols;
-  json rules;
+  json config;
   json keybindings;
   json keyPresses;
   json remaps;
@@ -86,15 +86,15 @@ private:
   }
 
 public:
-  KeyRemapper(json rulesEl, json symbolsEl) {
-    rules = rulesEl;
+  KeyRemapper(json configEl, json symbolsEl) {
+    config = configEl;
     symbols = symbolsEl;
-    keybindings = rulesEl["keybindings"].get<JsonArray>();
-    keyPressesDelay = rulesEl["keyPressesDelay"].is_null()
+    keybindings = configEl["keybindings"].get<JsonArray>();
+    keyPressesDelay = configEl["keyPressesDelay"].is_null()
                       ? 200
-                      : rulesEl["keyPressesDelay"].get<short>();
-    remaps = rulesEl["remaps"];
-    keyPresses = rulesEl["keyPresses"];
+                      : configEl["keyPressesDelay"].get<short>();
+    remaps = configEl["remaps"];
+    keyPresses = configEl["keyPresses"];
     reset();
   }
 

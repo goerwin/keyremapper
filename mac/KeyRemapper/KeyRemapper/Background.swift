@@ -3,12 +3,9 @@ import AppKit
 class Background {
   var keyRemapperWrapper: KeyRemapperWrapper?
 
-  init() {
-    // TODO: KappaPride
-    let rootPath = "/Users/erwin.gaitan/keyRemapperMac";
+  init(configPath: String, symbolsPath: String) {
+    keyRemapperWrapper = KeyRemapperWrapper(configPath, withSymbolsPath: symbolsPath);
     setFrontmostAppNameToKeyRemapper()
-
-    keyRemapperWrapper = KeyRemapperWrapper(rootPath, withMode: 0);
     MyHIDManager.start()
     MyHIDManager.onIOHIDKeyboardInput = handleIOHIDKeyboardInput
 
