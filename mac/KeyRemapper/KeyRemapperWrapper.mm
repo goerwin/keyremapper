@@ -115,7 +115,7 @@ void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(Global::delayUntilRepeat));
 
-    while (Global::keyRepeatThreadCount == threadIdx && Global::shouldKeyRepeat) {
+    while (Global::isAppEnabled && Global::keyRepeatThreadCount == threadIdx && Global::shouldKeyRepeat) {
       auto vkCode = (CGKeyCode)Global::repeatedKey;
 
       if (Global::isMediaVkKeyCode(vkCode)) postDownUpMediaKey(vkCode, true);
@@ -152,6 +152,7 @@ void disableLogging() {
 - (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
 
   auto config = Helpers::getJsonFile([configPath UTF8String]);
+  Global::reset();
   Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
 
     Global::keyRemapper = new KeyRemapper(config, Global::symbols);
@@ -170,6 +171,8 @@ void disableLogging() {
 
     // TODO: Only set it when logging by the user
     enableLogging();
+  
+  Global::isAppEnabled = true;
 
   return self; // return objc++ instance
 }
@@ -177,6 +180,7 @@ void disableLogging() {
 - (void)terminate {
   delete Global::keyRemapper;
   MouseHandler::terminate();
+  Global::isAppEnabled = false;
 }
 
 - (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath  {

@@ -50,5 +50,6 @@ namespace Global {
     isAltDown = false;
     isCtrlDown = false;
     isFnDown= false;
+    shouldKeyRepeat = false;
   }
 }

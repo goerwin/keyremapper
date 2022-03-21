@@ -56,10 +56,14 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
-  - [ ] multiple configs
-  - [ ] press enter to disable/enable and see if the keyrepeat continues forever
+  - [ ] Memory leaks
+  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
+  - [ ] global shortcuts
+  - [x] versioning
+  - [x] multiple configs
+  - [x] press enter to disable/enable and see if the keyrepeat continues forever
   - [x] mouse callback events stop after you click the app's top menu bar
-  - [ ] if you use the gui version, if you type in the menu bar when the app is focused (eg. Help -> type something, it will not register the keys)
+  - [x] if you use the gui version, if you type in the menu bar when the app is focused (eg. Help -> type something, it will not register the keys)
   - [x] Move files that are shared between OSs to a common place
   - [x] detect current application
   - [x] shift + capslock = not triggering shift + esc at first time/ test on a youtube video
@@ -69,11 +73,9 @@
   - [x] multiple keyboards
   - [x] trigger media keys
     - brightnessDown/up, keyboardIlluminationDown/up, rewind/playPause/fastForward, mute, volumeDown/up
-  - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
   - [x] exiting app from terminal (cmd+q) doesnt remove the process (it's expected to kill the keyRemapper process)
   - [ ] simple GUI
   - [ ] Fn key not working when app is disabled
-  - [ ] Memory leaks
   - [ ] shortcuts for mission control, launchpad?
     - maybe via shell command
     ```sh
