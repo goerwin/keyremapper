@@ -87,10 +87,10 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     guard let testsResults = keyRemapperWrapper.runTests(configPath, withSymbolsPath: symbolsPath) else { return }
     
     let configName = getConfigName(configPath: configPath)
-    
+        
     showNotification("\(testsResults)\nConfig name: \(configName ?? "No name")\nConfig file: \(configPathWithTilde)", nil)
-    updateMenuBarTitle(configName ?? "")
     setFrontmostAppNameToKeyRemapper()
+    updateMenuBarTitle(configName)
     
     // NOTE: Run HIDManager in background to not block the main thread
     DispatchQueue.global(qos: .background).async {
@@ -190,7 +190,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     guard let iconImage = NSImage(named: "MenuBarIcon") else { return }
 
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
-    menuButton.image = resizeImage(image: iconImage, w: 18, h: 18)
+    menuButton.image = resizeImage(image: iconImage, w: 16, h: 16)
+    menuButton.image?.isTemplate = true
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
 
     let statusBarItemMenu = NSMenu(title: "Status Bar Item Menu")
@@ -244,8 +245,12 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     startKeyRemapper(configIdx: menuItem.tag)
   }
   
-  func updateMenuBarTitle(_ title: String) {
-    statusBarItem?.button?.title = title
+  func updateMenuBarTitle(_ title: String?) {
+    if let title = title {
+      statusBarItem?.button?.title = " \(title)"
+    } else {
+      statusBarItem?.button?.title = ""
+    }
   }
 
 

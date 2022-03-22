@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <title>Layer 1</title>
+    <!-- <rect height="400" width="400" y="0" x="0" /> -->
+
+    <!-- <path d="M 0,0 h400 v400 h-400 z -->
+    <path fill="black" d="
+      M50,0
+      h300 a50,50 0 0 1 50,50
+      v300 a50,50 0 0 1 -50,50
+      h-300 a50,50 0 0 1 -50,-50
+      v-300 a50,50 0 0 1 50,-50 z
+
+      M50,100
+      v200 a50,50 0 0 0 50,50
+      h200 a50,50 0 0 0 50,-50
+      v-200 a50,50 0 0 0 -50,-50
+      h-200 a50,50 0 0 0 -50,50 z
+      "
+      />
+  </g>
+
+  <g>
+   <rect fill="black" height="30" width="115" y="90" x="90"/>
+   <rect fill="black" height="100" width="40" y="120" x="90"/>
+   <rect fill="black" height="30" width="90" y="155" x="90"/>
+   <rect fill="black" height="30" width="115" y="220" x="90" />
+  </g>
+</svg>
