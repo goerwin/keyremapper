@@ -45,7 +45,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil, using: handleAppChange)
       
       startKeyRemapper(configIdx: 0)
-      reloadMenuBar()
     }
   
   func getConfigPathInfo(configIdx: Int) -> [String]? {
@@ -80,37 +79,23 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     if (!fileExists(configPath)) {
       return showCloseAlert("File not found", "\(configPath) not found")
     }
-
-    keyRemapperWrapper = KeyRemapperWrapper(configPath, withSymbolsPath: symbolsPath)
-    guard let keyRemapperWrapper = keyRemapperWrapper else { return }
  
-    guard let testsResults = keyRemapperWrapper.runTests(configPath, withSymbolsPath: symbolsPath) else { return }
-    
-    let configName = getConfigName(configPath: configPath)
-        
-    showNotification("\(testsResults)\nConfig name: \(configName ?? "No name")\nConfig file: \(configPathWithTilde)", nil)
-    setFrontmostAppNameToKeyRemapper()
-    updateMenuBarTitle(configName)
-    
-    // NOTE: Run HIDManager in background to not block the main thread
+    // NOTE: Run it in background to not block the main thread
     DispatchQueue.global(qos: .background).async {
-      MyHIDManager.start()
-      MyHIDManager.onIOHIDKeyboardInput = self.handleIOHIDKeyboardInput
+      self.keyRemapperWrapper = KeyRemapperWrapper(configPath, withSymbolsPath: symbolsPath)
+      guard let keyRemapperWrapper = self.keyRemapperWrapper else { return }
+      guard let testsResults = keyRemapperWrapper.runTests(configPath, withSymbolsPath: symbolsPath) else { return }
+      let configName = self.getConfigName(configPath: configPath)
+      self.keyRemapperStarted = true
+      self.setFrontmostAppNameToKeyRemapper()
+      self.showNotification("\(testsResults)\nConfig name: \(configName ?? "No name")\nConfig file: \(configPathWithTilde)", nil)
+
+      DispatchQueue.main.async {
+        self.reloadMenuBar()
+        self.updateMenuBarTitle(configName)
+        self.statusBarItem?.button?.appearsDisabled = false
+      }
     }
-
-    keyRemapperStarted = true
-    statusBarItem?.button?.appearsDisabled = false
-  }
-  
-  func handleIOHIDKeyboardInput(_ scancode: UInt32, _ isKeyDown: Bool, _ vendorId: Int, _ productId: Int, _ manufacturer: String, _ product: String) {
-    let keyboard = String(productId) + ":" + String(vendorId)
-
-    keyRemapperWrapper?.applyKeyEvent(
-      Int32(scancode),
-      state: isKeyDown ? 0 : 1,
-      keyboard: keyboard,
-      keyboardDescription: manufacturer + " | " + product
-    );
   }
 
   func setFrontmostAppNameToKeyRemapper() {
@@ -218,7 +203,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       let configPath = configPathInfo[0]
       if !fileExists(configPath) { break }
       let configIdxName = String(i + 1)
-      let configName = getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
+      var configName = getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
+      configName = i == configIdx ? "✔  \(configName)" : configName
       
       let menuItem = NSMenuItem(title: configName, action: #selector(AppDelegate.switchConfig(sender:)), keyEquivalent: configIdxName)
       menuItem.tag = i
@@ -292,7 +278,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   func stopKeyRemapper() {
     if (keyRemapperStarted != true) { return }
     keyRemapperWrapper?.terminate()
-    MyHIDManager.stop();
     keyRemapperWrapper = nil
     statusBarItem?.button?.appearsDisabled = true
     keyRemapperStarted = false

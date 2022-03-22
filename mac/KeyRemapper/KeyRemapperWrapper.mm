@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 #include <ApplicationServices/ApplicationServices.h>
-#import "KeyRemapper-Swift.h"
 
 #import <AppKit/AppKit.h>
 
@@ -10,6 +9,7 @@
 #import "../../common/Helpers.hpp"
 #import "../../common/TestHelpers.hpp"
 #import "./KeyRemapperWrapper.hpp"
+#import "./MyIOHIDManager.hpp"
 #import "./Global.hpp"
 #import "./MouseHandler.hpp"
 
@@ -35,7 +35,7 @@ void setModifierFlagsToKeyEvent(CGEventRef event, short vkCode, bool isKeyDown) 
   if (Global::isAltDown) flags = flags | kCGEventFlagMaskAlternate;
   if (Global::isCtrlDown) flags = flags | kCGEventFlagMaskControl;
   if (Global::isFnDown) flags = flags | kCGEventFlagMaskSecondaryFn;
-  if ([MyHIDManager capslockState]) flags = flags | kCGEventFlagMaskAlphaShift;
+  if (MyIOHIDManager::capslockState) flags = flags | kCGEventFlagMaskAlphaShift;
 
   if (Global::isArrowKeyVkCode(vkCode))
     flags = flags | kCGEventFlagMaskNumericPad | kCGEventFlagMaskSecondaryFn;
@@ -141,73 +141,11 @@ void disableLogging() {
   Global::keyRemapper->setApplyKeysCb(nil);
 }
 
-@implementation KeyRemapperWrapper
-- (id)init {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:@"-init is not a valid initializer for the class"
-                                 userInfo:nil];
-    return nil;
-}
-
-- (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
-
-  auto config = Helpers::getJsonFile([configPath UTF8String]);
-  Global::reset();
-  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
-
-    Global::keyRemapper = new KeyRemapper(config, Global::symbols);
-
-  Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
-  ? Global::delayUntilRepeat
-    : config["delayUntilRepeat"].get<int>();
-  Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
-    ? Global::keyRepeatInterval
-    : config["keyRepeatInterval"].get<int>();
-
-    MouseHandler::initialize();
-    MouseHandler::doubleClickSpeed = config["doubleClickSpeed"].is_null()
-    ? MouseHandler::doubleClickSpeed
-    : config["doubleClickSpeed"].get<double>();
-
-    // TODO: Only set it when logging by the user
-    enableLogging();
+void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int productId, std::string manufacturer, std::string product) {
+  auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
+  Global::keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
   
-  Global::isAppEnabled = true;
-
-  return self; // return objc++ instance
-}
-
-- (void)terminate {
-  delete Global::keyRemapper;
-  MouseHandler::terminate();
-  Global::isAppEnabled = false;
-}
-
-- (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath  {
-  auto config = Helpers::getJsonFile([configPath UTF8String]);
-  auto symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
-
-  auto tests = config["tests"];
-  
-  if (tests.is_null()) {
-    return @"No tests";
-  }
-
-  auto testResults = TestHelpers::runTests(tests, config, symbols);
-  auto testsResultsMsg = std::string(!testResults.is_null() ?
-  testResults["message"] : "No tests");
-  
-  return [NSString stringWithCString:testsResultsMsg.c_str()
-                                     encoding:[NSString defaultCStringEncoding]];
-}
-
-- (void)setAppName:(NSString*)appName {
-  Global::keyRemapper->setAppName([appName UTF8String]);
-}
-
-- (void)applyKeyEvent:(int)scancode state:(int)state keyboard:(NSString*)kb keyboardDescription:(NSString*)kbDesc {
-  Global::keyRemapper->setKeyboard([kb UTF8String], [kbDesc UTF8String]);
-  auto keyEvents = Global::keyRemapper->applyKeys({{"", ushort(scancode), ushort(state), false}});
+  auto keyEvents = Global::keyRemapper->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
   auto keyEventsSize = keyEvents.size();
 
   for (size_t i = 0; i < keyEventsSize; i++) {
@@ -241,7 +179,7 @@ void disableLogging() {
         Global::isFnDown = isKeyDown;
         postKey(vkCode, isKeyDown);
       } else if (vkCode == 57) {
-        if (isKeyDown) [MyHIDManager toggleCapslockState];
+        if (isKeyDown) MyIOHIDManager::toggleCapslockState();
       } else if (vkCode == 241) {
         MouseHandler::handleMouseDownUp(isKeyDown);
       } else if (vkCode == 242) {
@@ -255,4 +193,72 @@ void disableLogging() {
       }
     }
 }
+
+@implementation KeyRemapperWrapper
+- (id)init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:@"-init is not a valid initializer for the class"
+                                 userInfo:nil];
+    return nil;
+}
+
+- (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
+
+  auto config = Helpers::getJsonFile([configPath UTF8String]);
+  Global::reset();
+  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
+
+    Global::keyRemapper = new KeyRemapper(config, Global::symbols);
+
+  Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
+  ? Global::delayUntilRepeat
+    : config["delayUntilRepeat"].get<int>();
+  Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
+    ? Global::keyRepeatInterval
+    : config["keyRepeatInterval"].get<int>();
+
+    MouseHandler::initialize();
+    MyIOHIDManager::start();
+    MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
+    MouseHandler::doubleClickSpeed = config["doubleClickSpeed"].is_null()
+    ? MouseHandler::doubleClickSpeed
+    : config["doubleClickSpeed"].get<double>();
+
+    // TODO: Only set it when logging by the user
+    enableLogging();
+  
+  Global::isAppEnabled = true;
+
+  return self; // return objc++ instance
+}
+
+- (void)terminate {
+  delete Global::keyRemapper;
+  MouseHandler::terminate();
+  MyIOHIDManager::stop();
+  Global::isAppEnabled = false;
+}
+
+- (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath  {
+  auto config = Helpers::getJsonFile([configPath UTF8String]);
+  auto symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
+
+  auto tests = config["tests"];
+  
+  if (tests.is_null()) {
+    return @"No tests";
+  }
+
+  auto testResults = TestHelpers::runTests(tests, config, symbols);
+  auto testsResultsMsg = std::string(!testResults.is_null() ?
+  testResults["message"] : "No tests");
+  
+  return [NSString stringWithCString:testsResultsMsg.c_str()
+                                     encoding:[NSString defaultCStringEncoding]];
+}
+
+- (void)setAppName:(NSString*)appName {
+  Global::keyRemapper->setAppName([appName UTF8String]);
+}
+
 @end

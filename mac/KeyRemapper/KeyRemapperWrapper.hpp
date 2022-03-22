@@ -8,7 +8,6 @@
 - (void)terminate;
 
 - (void)setAppName:(NSString*)appName;
-- (void)applyKeyEvent:(int)scancode state:(int)state keyboard:(NSString*)kb keyboardDescription:(NSString*)kbDesc;
 - (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath;
 @end
 
