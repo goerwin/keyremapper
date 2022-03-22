@@ -57,6 +57,7 @@
 
 - Mac
   - [ ] Memory leaks
+  - [ ] run the hidiomanager as a daemon (root process), maybe follow https://github.com/CharlesJS/CSAuthSample
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
   - [ ] global shortcuts
   - [x] versioning

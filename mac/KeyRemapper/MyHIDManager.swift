@@ -46,15 +46,12 @@ import IOKit
       return;
     }
     
-    let keyboard = [kIOHIDDeviceUsagePageKey: 0x01, kIOHIDDeviceUsageKey: 6] as CFDictionary
-    let keypad = [kIOHIDDeviceUsagePageKey: 0x01, kIOHIDDeviceUsageKey: 7] as CFDictionary
-
+    let keyboard = [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Keyboard] as CFDictionary
+    let keypad = [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Keypad] as CFDictionary
     let devices = [keyboard, keypad] as CFArray
 
     IOHIDManagerSetDeviceMatchingMultiple(ioHidManager!, devices)
-
     IOHIDManagerRegisterInputValueCallback(ioHidManager!, inputValueCb, nil);
-
     IOHIDManagerScheduleWithRunLoop(ioHidManager!, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
     IOHIDManagerOpen(ioHidManager!, IOOptionBits(kIOHIDOptionsTypeSeizeDevice));
 
