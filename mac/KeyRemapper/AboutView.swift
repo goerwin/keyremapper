@@ -12,9 +12,9 @@ struct AboutView: View {
     VStack(spacing: 10) {
                 Image(nsImage: NSImage(named: "AppIcon")!)
                 
-                Text("\(bundleName)").font(.system(size: 20, weight: .bold))
+                Text("\(BUNDLE_NAME)").font(.system(size: 20, weight: .bold))
                 
-                Text("Version: \(version)")
+                Text("Version: \(VERSION)")
 
 //                Text(Bundle.main.copyright)
 //                    .font(.system(size: 10, weight: .thin))

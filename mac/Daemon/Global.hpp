@@ -1,5 +1,5 @@
 #pragma once
-
+#import <AppKit/AppKit.h>
 #include "../../common/KeyRemapper.hpp"
 
 namespace Global {
@@ -26,7 +26,6 @@ namespace Global {
   std::string activeApp;
   bool isAppEnabled = false;
   nlohmann::json symbols;
-  std::string resourcesParentDirPath;
 
   bool isArrowKeyVkCode(ushort vkCode) {
     return std::find(arrowKeyVkCodes.begin(), arrowKeyVkCodes.end(), vkCode) != arrowKeyVkCodes.end();
@@ -51,5 +50,11 @@ namespace Global {
     isCtrlDown = false;
     isFnDown= false;
     shouldKeyRepeat = false;
+    isAppEnabled = false;
+    symbols = NULL;
+    activeApp = {};
+    repeatedKey = NULL;
+    keyRepeatThreadCount = 0;
+    delete Global::keyRemapper;
   }
 }

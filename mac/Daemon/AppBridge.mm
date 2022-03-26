@@ -1,22 +1,20 @@
+// All about XPC
+// https://rderik.com/blog/xpc-services-on-macos-apps-using-swift/#the-idea-behind-xpc-and-its-uses
+
 #import <Foundation/Foundation.h>
-#include <ApplicationServices/ApplicationServices.h>
-
 #import <AppKit/AppKit.h>
+#import <AppKit/NSWorkspace.h>
 
-#include <IOKit/hidsystem/ev_keymap.h>
+#import <IOKit/hidsystem/ev_keymap.h>
 
 #import "../../common/KeyRemapper.hpp"
 #import "../../common/Helpers.hpp"
 #import "../../common/TestHelpers.hpp"
-#import "./KeyRemapperWrapper.hpp"
-#import "./MyIOHIDManager.hpp"
-#import "./Global.hpp"
-#import "./MouseHandler.hpp"
 
-void sendNotification(std::string message, std::string title) {
-  Helpers::print(message);
-  system(("osascript -e 'display notification \"" + message + "\" with title \"" + title + "\"'").c_str());
-}
+#import "./Global.hpp"
+#import "./MyIOHIDManager.hpp"
+#import "./MouseManager.hpp"
+#import "./AppBridge.h"
 
 // TODO: This is inefficient
 ushort getMacVKCode(short scanCode) {
@@ -181,9 +179,9 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
       } else if (vkCode == 57) {
         if (isKeyDown) MyIOHIDManager::toggleCapslockState();
       } else if (vkCode == 241) {
-        MouseHandler::handleMouseDownUp(isKeyDown);
+        MouseManager::handleMouseDownUp(isKeyDown);
       } else if (vkCode == 242) {
-        MouseHandler::handleMouseDownUp(isKeyDown, "right");
+        MouseManager::handleMouseDownUp(isKeyDown, "right");
       } else if (Global::isMediaVkKeyCode(vkCode)) {
         postDownUpMediaKey(vkCode, isKeyDown);
         handleKeyRepeat(vkCode, isKeyDown);
@@ -194,71 +192,66 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     }
 }
 
-@implementation KeyRemapperWrapper
-- (id)init {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:@"-init is not a valid initializer for the class"
-                                 userInfo:nil];
-    return nil;
-}
-
-- (KeyRemapperWrapper*) init:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
-
-  auto config = Helpers::getJsonFile([configPath UTF8String]);
+int start(std::string configPath, std::string symbolsPath) {
+  auto config = Helpers::getJsonFile(configPath);
   Global::reset();
-  Global::symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
-
+  Global::symbols = Helpers::getJsonFile(symbolsPath);
     Global::keyRemapper = new KeyRemapper(config, Global::symbols);
-
   Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
   ? Global::delayUntilRepeat
     : config["delayUntilRepeat"].get<int>();
   Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
     ? Global::keyRepeatInterval
     : config["keyRepeatInterval"].get<int>();
-
-    MouseHandler::initialize();
-    MyIOHIDManager::start();
-    MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
-    MouseHandler::doubleClickSpeed = config["doubleClickSpeed"].is_null()
-    ? MouseHandler::doubleClickSpeed
-    : config["doubleClickSpeed"].get<double>();
-
-    // TODO: Only set it when logging by the user
-    enableLogging();
-  
   Global::isAppEnabled = true;
 
-  return self; // return objc++ instance
+    auto mouseManagerStartRes = MouseManager::start();
+    if (mouseManagerStartRes == 1) return 1;
+    if (mouseManagerStartRes != 0) return 2;
+  
+  MouseManager::doubleClickSpeed = config["doubleClickSpeed"].is_null()
+  ? MouseManager::doubleClickSpeed
+  : config["doubleClickSpeed"].get<double>();
+  
+    MyIOHIDManager::start();
+    MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
+
+    // TODO: Only set it when logging by the user
+//    enableLogging();
+    
+    return 0;
 }
 
-- (void)terminate {
-  delete Global::keyRemapper;
-  MouseHandler::terminate();
+void stop() {
+  MouseManager::stop();
   MyIOHIDManager::stop();
-  Global::isAppEnabled = false;
+  Global::reset();
+  
 }
 
-- (NSString*)runTests:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath  {
-  auto config = Helpers::getJsonFile([configPath UTF8String]);
-  auto symbols = Helpers::getJsonFile([symbolsPath UTF8String]);
+void setFrontMostAppAsAsAppName() {
+  NSRunningApplication *frontmostApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
+          NSString *bundleIdentifier = [frontmostApp bundleIdentifier];
+          NSString *localizedName = [frontmostApp localizedName];
+          std::string appName = std::string(
+            bundleIdentifier != nil ?
+              [bundleIdentifier UTF8String] :
+              localizedName != nil ? [localizedName UTF8String] : "Unknown"
+          );
 
-  auto tests = config["tests"];
-  
-  if (tests.is_null()) {
-    return @"No tests";
-  }
+  Global::keyRemapper->setAppName(appName);
+}
 
-  auto testResults = TestHelpers::runTests(tests, config, symbols);
-  auto testsResultsMsg = std::string(!testResults.is_null() ?
-  testResults["message"] : "No tests");
-  
-  return [NSString stringWithCString:testsResultsMsg.c_str()
-                                     encoding:[NSString defaultCStringEncoding]];
+@implementation AppBridge
+- (int)start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
+  return start([configPath UTF8String], [symbolsPath UTF8String]);
+}
+
+- (void)stop {
+  stop();
 }
 
 - (void)setAppName:(NSString*)appName {
   Global::keyRemapper->setAppName([appName UTF8String]);
 }
-
 @end

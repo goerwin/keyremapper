@@ -2,10 +2,6 @@ import SwiftUI
 import SystemConfiguration
 import UserNotifications
 
-// TODO: MOVE THIS BRO
-let bundleName = Bundle.main.infoDictionary?["CFBundleName"] as! String
-let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
-
 @main
 struct KeyRemapperApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) fileprivate var appDelegate
@@ -20,31 +16,31 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     var rootPath: String?
   var rootPathWithTilde: String?
     var configIdx = 1
-  var keyRemapperStarted: Bool?
-  var keyRemapperWrapper: KeyRemapperWrapper?
-
+  var daemonStarted: Bool?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
 
       reloadMenuBar()
+      
+      guard let auth = Util.getPrivilegedHelperAuth() else {
+        return showCloseAlert("Error", "Auth not acquired for Daemon")
+      }
 
+      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: auth)
+      
+      if (!blessed) {
+        return showCloseAlert("Error", "Not Blessed to run the Daemon")
+      }
+      
       guard let rootPathInfo = getRootPathInfo() else {
         return showCloseAlert("Error", "Config Folder invalid")
       }
-      
+
       rootPath = rootPathInfo[0]
       rootPathWithTilde = rootPathInfo[1]
 
-      if (!isAppAccesibilityEnabled()) {
-        showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
-        IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
-        return;
-      }
-
-      NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil, using: handleAppChange)
-      
-      startKeyRemapper(configIdx: 0)
+      startDaemon(configIdx: 0)
     }
   
   func getConfigPathInfo(configIdx: Int) -> [String]? {
@@ -56,58 +52,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       "\(rootPath)/config\(idxStr).json",
       "\(rootPathWithTilde)/config\(idxStr).json"
     ]
-  }
-  
-  func startKeyRemapper(configIdx: Int) {
-    if (keyRemapperStarted == true) { return }
-    guard let rootPath = rootPath else { return }
-    
-    self.configIdx = configIdx
-    let symbolsPath = "\(rootPath)/symbols.json"
-    
-    if (!fileExists(symbolsPath)) {
-      return showCloseAlert("File not found", "\(symbolsPath) not found")
-    }
-
-    guard let configPathInfo = getConfigPathInfo(configIdx: configIdx) else {
-      return showCloseAlert("No config", "No config path constructed")
-    }
-    
-    let configPath = configPathInfo[0]
-    let configPathWithTilde = configPathInfo[1]
-    
-    if (!fileExists(configPath)) {
-      return showCloseAlert("File not found", "\(configPath) not found")
-    }
- 
-    // NOTE: Run it in background to not block the main thread
-    DispatchQueue.global(qos: .background).async {
-      self.keyRemapperWrapper = KeyRemapperWrapper(configPath, withSymbolsPath: symbolsPath)
-      guard let keyRemapperWrapper = self.keyRemapperWrapper else { return }
-      guard let testsResults = keyRemapperWrapper.runTests(configPath, withSymbolsPath: symbolsPath) else { return }
-      let configName = self.getConfigName(configPath: configPath)
-      self.keyRemapperStarted = true
-      self.setFrontmostAppNameToKeyRemapper()
-      self.showNotification("\(testsResults)\nConfig name: \(configName ?? "No name")\nConfig file: \(configPathWithTilde)", nil)
-
-      DispatchQueue.main.async {
-        self.reloadMenuBar()
-        self.updateMenuBarTitle(configName)
-        self.statusBarItem?.button?.appearsDisabled = false
-      }
-    }
-  }
-
-  func setFrontmostAppNameToKeyRemapper() {
-    let frontmostApp = NSWorkspace.shared.frontmostApplication
-    let bundleId = frontmostApp?.bundleIdentifier
-    let localizedName = frontmostApp?.localizedName
-
-    keyRemapperWrapper?.setAppName((bundleId != nil) ? bundleId : (localizedName != nil) ? localizedName : "Unknown")
-  }
-
-  func handleAppChange(notification: Notification) {
-    setFrontmostAppNameToKeyRemapper()
   }
   
   func fileExists(_ filePath: String) -> Bool {
@@ -125,7 +69,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     center.requestAuthorization(options: options) { (granted, error) in
         if granted {
           let content = UNMutableNotificationContent()
-          content.title = title ?? bundleName
+          content.title = title ?? BUNDLE_NAME
           content.body = description
           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
 
@@ -143,11 +87,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
           alert.addButton(withTitle: "OK")
     alert.runModal()
    }
-
-  func isAppAccesibilityEnabled() -> Bool {
-    let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as NSString: false]
-    return AXIsProcessTrustedWithOptions(options as CFDictionary)
-  }
 
   func resizeImage(image: NSImage, w: Int, h: Int) -> NSImage? {
     let frame = NSRect(x: 0, y: 0, width: w, height: h)
@@ -170,15 +109,17 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     }
     
+    
     guard let statusBarItem = statusBarItem else { return }
     guard let menuButton = statusBarItem.button else { return }
     guard let iconImage = NSImage(named: "MenuBarIcon") else { return }
-
+    
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
     menuButton.image = resizeImage(image: iconImage, w: 16, h: 16)
     menuButton.image?.isTemplate = true
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
-
+    
+    
     let statusBarItemMenu = NSMenu(title: "Status Bar Item Menu")
     statusBarItem.menu = statusBarItemMenu
     
@@ -188,11 +129,11 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         action: #selector(AppDelegate.openConfigFolder),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
-        withTitle: "Disable/Enable",
-        action: #selector(AppDelegate.disableEnableKeyRemapper),
+        withTitle: "Start/Stop",
+        action: #selector(AppDelegate.startOrStopDaemon),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
-        withTitle: "Reload Menu",
+        withTitle: "ReloadMenu",
         action: #selector(AppDelegate.reloadMenuBar),
         keyEquivalent: "")
 
@@ -213,7 +154,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
-        withTitle: "About \(bundleName)",
+        withTitle: "About \(BUNDLE_NAME)",
         action: #selector(AppDelegate.openAboutWindow),
         keyEquivalent: "")
 
@@ -227,8 +168,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func switchConfig(sender: Any) {
     guard let menuItem = sender as? NSMenuItem else { return }
     
-    stopKeyRemapper()
-    startKeyRemapper(configIdx: menuItem.tag)
+    stopDaemon()
+    startDaemon(configIdx: menuItem.tag)
   }
   
   func updateMenuBarTitle(_ title: String?) {
@@ -275,20 +216,80 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     return nil
   }
   
-  func stopKeyRemapper() {
-    if (keyRemapperStarted != true) { return }
-    keyRemapperWrapper?.terminate()
-    keyRemapperWrapper = nil
-    statusBarItem?.button?.appearsDisabled = true
-    keyRemapperStarted = false
-  }
-  
-  @objc func disableEnableKeyRemapper() {
-    if (keyRemapperStarted == true) {
-      return stopKeyRemapper()
+  func startDaemon(configIdx: Int) {
+    if (daemonStarted == true) { return }
+    guard let rootPath = rootPath else { return }
+    
+    self.configIdx = configIdx
+    let symbolsPath = "\(rootPath)/symbols.json"
+    
+    if (!fileExists(symbolsPath)) {
+      return showCloseAlert("File not found", "\(symbolsPath) not found")
     }
 
-    startKeyRemapper(configIdx: configIdx)
+    guard let configPathInfo = getConfigPathInfo(configIdx: configIdx) else {
+      return showCloseAlert("No config", "No config path constructed")
+    }
+    
+    let configPath = configPathInfo[0]
+    
+    if (!fileExists(configPath)) {
+      return showCloseAlert("File not found", "\(configPath) not found")
+    }
+    
+    
+//    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME)
+//        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
+//        connection.resume()
+//        let service = connection.remoteObjectProxyWithErrorHandler { error in
+//          print("Received error:", error)
+//        } as? ServiceProviderXPCProtocol
+//
+//        service!.getPublicIp() { (texto) in
+//          DispatchQueue.main.async {
+//            self.statusBarItem?.button?.title = "\(texto)"
+//          }
+//        }
+//
+    guard let daemonRemoteObject = daemonGetRemoteObject() else {
+      return showCloseAlert("Error", "No Daemon service remote object running")
+    }
+
+//    daemonRemoteObject.version { version in
+//      print(version)
+//    }
+    
+    daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath) { result in DispatchQueue.main.async {
+              if (result == 1) {
+                self.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
+                IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
+                return
+              }
+      
+              if (result != 0) {
+                return self.showCloseAlert("Error", "Couldn't start Daemon process")
+              }
+      
+              self.reloadMenuBar()
+              self.daemonStarted = true
+    }}
+  }
+  
+  func stopDaemon() {
+    if (daemonStarted != true) { return }
+    statusBarItem?.button?.appearsDisabled = true
+    // TODO:
+//    daemonGetRemoteObject()?.stop()
+    reloadMenuBar()
+    daemonStarted = false
+  }
+  
+  @objc func startOrStopDaemon() {
+    if (daemonStarted == true) {
+      return stopDaemon()
+    }
+
+    startDaemon(configIdx: configIdx)
   }
 
   @objc func openConfigFolder() {
@@ -302,7 +303,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
               let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
               let window = NSWindow()
               window.styleMask = styleMask
-              window.title = "About \(bundleName)"
+              window.title = "About \(BUNDLE_NAME)"
               window.contentView = NSHostingView(rootView: aboutView)
               aboutBoxWindowController = NSWindowController(window: window)
           }
@@ -313,7 +314,17 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
           aboutBoxWindowController?.showWindow(aboutBoxWindowController?.window)
       }
+  
+  @objc func daemonGetRemoteObject() -> ServiceProviderXPCProtocol? {
+    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME)
+        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
+        connection.resume()
 
+        return connection.remoteObjectProxyWithErrorHandler { error in
+          print("Error:", error)
+        } as? ServiceProviderXPCProtocol
+  }
+  
   @objc func quit() {
     NSApplication.shared.terminate(self)
   }

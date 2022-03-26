@@ -85,10 +85,10 @@ private:
   }
 
 public:
-  static void start() {
+  static int start() {
     hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
 
-    if (CFGetTypeID(hidManager) != IOHIDManagerGetTypeID()) return;
+    if (CFGetTypeID(hidManager) != IOHIDManagerGetTypeID()) return 1;
 
     capslockState = getCapslockState();
 
@@ -109,6 +109,8 @@ public:
     // kIOHIDOptionsTypeNone: listens to keyboard input and let it through the OS
     IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
     IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
+    
+    return 0;
   }
 
   static void stop() {
