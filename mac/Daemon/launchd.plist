@@ -4,6 +4,8 @@
 <dict>
 	<key>Label</key>
 	<string>co.goerwin.KeyRemapperDaemon</string>
+  <key>ProcessType</key>
+  <string>Interactive</string>
 	<key>MachServices</key>
 	<dict>
 		<key>co.goerwin.KeyRemapperDaemon</key>

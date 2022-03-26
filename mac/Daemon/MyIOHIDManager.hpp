@@ -74,7 +74,7 @@ private:
     CFTypeRef propertyRef = IOHIDDeviceGetProperty(ioHIDDeviceRef, CFSTR(kIOHIDProductKey));
     if (propertyRef) CFStringGetCString((CFStringRef)propertyRef, product, sizeof(product), kCFStringEncodingUTF8);
 
-    onIOHIDKeyboardInput(
+    MyIOHIDManager::onIOHIDKeyboardInput(
       scancode,
       isKeyDown,
       vendorId,
@@ -86,20 +86,20 @@ private:
 
 public:
   static int start() {
-    hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
+    MyIOHIDManager::hidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
 
-    if (CFGetTypeID(hidManager) != IOHIDManagerGetTypeID()) return 1;
+    if (CFGetTypeID(MyIOHIDManager::hidManager) != IOHIDManagerGetTypeID()) return 1;
 
-    capslockState = getCapslockState();
+    MyIOHIDManager::capslockState = getCapslockState();
 
     CFMutableDictionaryRef keyboard = getDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_Keyboard);
     CFMutableDictionaryRef keypad = getDeviceMatchDictionary(kHIDPage_GenericDesktop, kHIDUsage_GD_Keypad);
     CFMutableDictionaryRef matchesListRef[] = { keyboard, keypad };
     CFArrayRef matches = CFArrayCreate(kCFAllocatorDefault, (const void **)matchesListRef, 2, NULL);
 
-    IOHIDManagerSetDeviceMatchingMultiple(hidManager, matches);
+    IOHIDManagerSetDeviceMatchingMultiple(MyIOHIDManager::hidManager, matches);
 
-    IOHIDManagerRegisterInputValueCallback(hidManager, inputValueCb, NULL);
+    IOHIDManagerRegisterInputValueCallback(MyIOHIDManager::hidManager, MyIOHIDManager::inputValueCb, NULL);
 
     CFRelease(keyboard);
     CFRelease(keypad);
@@ -107,17 +107,17 @@ public:
 
     // kIOHIDOptionsTypeSeizeDevice: Used to open exclusive communication with the device. This will prevent the system and other clients from receiving events from the device.
     // kIOHIDOptionsTypeNone: listens to keyboard input and let it through the OS
-    IOHIDManagerScheduleWithRunLoop(hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-    IOHIDManagerOpen(hidManager, kIOHIDOptionsTypeSeizeDevice);
+    IOHIDManagerScheduleWithRunLoop(MyIOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+    IOHIDManagerOpen(MyIOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
     
     return 0;
   }
 
   static void stop() {
-    IOHIDManagerRegisterInputValueCallback(hidManager, NULL, NULL);
-    IOHIDManagerSetDeviceMatchingMultiple(hidManager, NULL);
-    IOHIDManagerUnscheduleFromRunLoop(hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-    IOHIDManagerClose(hidManager, kIOHIDOptionsTypeSeizeDevice);
+    IOHIDManagerRegisterInputValueCallback(MyIOHIDManager::hidManager, NULL, NULL);
+    IOHIDManagerSetDeviceMatchingMultiple(MyIOHIDManager::hidManager, NULL);
+    IOHIDManagerUnscheduleFromRunLoop(MyIOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+    IOHIDManagerClose(MyIOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
   }
 
   static bool getCapslockState() {
@@ -159,9 +159,9 @@ public:
 
     // I had to keep track of capslock on a global variable.
     // When I was calling getModifierLockState and then toggling via setModifierLockState, it was working the first time, but subsequent get calls return the same state
-    capslockState = !capslockState;
+    MyIOHIDManager::capslockState = !capslockState;
     IOServiceOpen(ios, mach_task_self(), kIOHIDParamConnectType, &ioc);
-    IOHIDSetModifierLockState(ioc, kIOHIDCapsLockState, capslockState);
+    IOHIDSetModifierLockState(ioc, kIOHIDCapsLockState, MyIOHIDManager::capslockState);
     IOObjectRelease(ios);
   }
 };

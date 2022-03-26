@@ -16,23 +16,34 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     var rootPath: String?
   var rootPathWithTilde: String?
     var configIdx = 1
-  var daemonStarted: Bool?
+  var daemonStarted = false
+  
+  lazy var daemonRemoteObject: ServiceProviderXPCProtocol? = {
+    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME, options: [.privileged])
+
+        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
+        connection.resume()
+
+    return connection.synchronousRemoteObjectProxyWithErrorHandler { error in
+          print("Error:", error)
+        } as? ServiceProviderXPCProtocol
+  }()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
 
       reloadMenuBar()
-      
+
       guard let auth = Util.getPrivilegedHelperAuth() else {
         return showCloseAlert("Error", "Auth not acquired for Daemon")
       }
 
       let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: auth)
-      
+
       if (!blessed) {
         return showCloseAlert("Error", "Not Blessed to run the Daemon")
       }
-      
+
       guard let rootPathInfo = getRootPathInfo() else {
         return showCloseAlert("Error", "Config Folder invalid")
       }
@@ -42,10 +53,10 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
       startDaemon(configIdx: 0)
     }
-  
+
   func getConfigPathInfo(configIdx: Int) -> [String]? {
     guard let rootPath = rootPath, let rootPathWithTilde = rootPathWithTilde else { return nil }
-    
+
     let idxStr = configIdx == 0 ? "" : String(configIdx + 1)
 
     return [
@@ -53,7 +64,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       "\(rootPathWithTilde)/config\(idxStr).json"
     ]
   }
-  
+
   func fileExists(_ filePath: String) -> Bool {
       let fileManager = FileManager.default
       if fileManager.fileExists(atPath: filePath) {
@@ -108,50 +119,50 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     if (statusBarItem == nil) {
       statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     }
-    
-    
+
+
     guard let statusBarItem = statusBarItem else { return }
     guard let menuButton = statusBarItem.button else { return }
     guard let iconImage = NSImage(named: "MenuBarIcon") else { return }
-    
+
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
     menuButton.image = resizeImage(image: iconImage, w: 16, h: 16)
     menuButton.image?.isTemplate = true
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
-    
-    
+
+
     let statusBarItemMenu = NSMenu(title: "Status Bar Item Menu")
     statusBarItem.menu = statusBarItemMenu
-    
+
     statusBarItemMenu.removeAllItems()
     statusBarItemMenu.addItem(
         withTitle: "Open Config Folder",
         action: #selector(AppDelegate.openConfigFolder),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
-        withTitle: "Start/Stop",
+        withTitle: daemonStarted ? "Stop Daemon" : "Start Daemon",
         action: #selector(AppDelegate.startOrStopDaemon),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
-        withTitle: "ReloadMenu",
+        withTitle: "Reload Menu",
         action: #selector(AppDelegate.reloadMenuBar),
         keyEquivalent: "")
 
     statusBarItemMenu.addItem(.separator())
     for i in 0...8 {
       guard let configPathInfo = getConfigPathInfo(configIdx: i) else { break }
-      
+
       let configPath = configPathInfo[0]
       if !fileExists(configPath) { break }
       let configIdxName = String(i + 1)
       var configName = getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
       configName = i == configIdx ? "✔  \(configName)" : configName
-      
+
       let menuItem = NSMenuItem(title: configName, action: #selector(AppDelegate.switchConfig(sender:)), keyEquivalent: configIdxName)
       menuItem.tag = i
       statusBarItemMenu.addItem(menuItem)
     }
-    
+
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
         withTitle: "About \(BUNDLE_NAME)",
@@ -164,14 +175,14 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         action: #selector(AppDelegate.quit),
         keyEquivalent: "q")
   }
-  
+
   @objc func switchConfig(sender: Any) {
     guard let menuItem = sender as? NSMenuItem else { return }
-    
+
     stopDaemon()
     startDaemon(configIdx: menuItem.tag)
   }
-  
+
   func updateMenuBarTitle(_ title: String?) {
     if let title = title {
       statusBarItem?.button?.title = " \(title)"
@@ -203,7 +214,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       "~/\(folderName)"
     ]
   }
-  
+
   func getConfigName(configPath: String) -> String? {
     do {
         let data = try Data(contentsOf: URL(fileURLWithPath: configPath), options: .mappedIfSafe)
@@ -212,17 +223,17 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
           return name
       }
     } catch {}
-    
+
     return nil
   }
-  
+
   func startDaemon(configIdx: Int) {
     if (daemonStarted == true) { return }
     guard let rootPath = rootPath else { return }
-    
+
     self.configIdx = configIdx
     let symbolsPath = "\(rootPath)/symbols.json"
-    
+
     if (!fileExists(symbolsPath)) {
       return showCloseAlert("File not found", "\(symbolsPath) not found")
     }
@@ -230,60 +241,52 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     guard let configPathInfo = getConfigPathInfo(configIdx: configIdx) else {
       return showCloseAlert("No config", "No config path constructed")
     }
-    
+
     let configPath = configPathInfo[0]
-    
+
     if (!fileExists(configPath)) {
       return showCloseAlert("File not found", "\(configPath) not found")
     }
-    
-    
-//    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME)
-//        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
-//        connection.resume()
-//        let service = connection.remoteObjectProxyWithErrorHandler { error in
-//          print("Received error:", error)
-//        } as? ServiceProviderXPCProtocol
-//
-//        service!.getPublicIp() { (texto) in
-//          DispatchQueue.main.async {
-//            self.statusBarItem?.button?.title = "\(texto)"
-//          }
-//        }
-//
-    guard let daemonRemoteObject = daemonGetRemoteObject() else {
+
+    guard let daemonRemoteObject = self.daemonRemoteObject else {
       return showCloseAlert("Error", "No Daemon service remote object running")
     }
 
-//    daemonRemoteObject.version { version in
-//      print(version)
-//    }
-    
-    daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath) { result in DispatchQueue.main.async {
-              if (result == 1) {
-                self.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
-                IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
-                return
-              }
-      
-              if (result != 0) {
-                return self.showCloseAlert("Error", "Couldn't start Daemon process")
-              }
-      
-              self.reloadMenuBar()
-              self.daemonStarted = true
-    }}
+   var daemonVersion: String?
+   daemonRemoteObject.getVersion { version in daemonVersion = version }
+
+   if (daemonVersion != VERSION) {
+     return showCloseAlert("Wrong Daemon version", "App and Daemon Mismatch, Reinstall the app")
+   }
+
+    var daemonStartResult: Int32?
+    daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath) {
+      result in daemonStartResult = result
+    }
+
+    if (daemonStartResult == 1) {
+      self.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
+      IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
+      return
+    }
+
+    if (daemonStartResult != 0) {
+      return self.showCloseAlert("Error", "Couldn't start Daemon process")
+    }
+
+    self.daemonStarted = true
+    statusBarItem?.button?.appearsDisabled = false
+    self.reloadMenuBar()
   }
-  
+
   func stopDaemon() {
     if (daemonStarted != true) { return }
     statusBarItem?.button?.appearsDisabled = true
-    // TODO:
-//    daemonGetRemoteObject()?.stop()
-    reloadMenuBar()
     daemonStarted = false
+    daemonRemoteObject?.stop()
+    reloadMenuBar()
   }
-  
+
   @objc func startOrStopDaemon() {
     if (daemonStarted == true) {
       return stopDaemon()
@@ -314,18 +317,10 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
           aboutBoxWindowController?.showWindow(aboutBoxWindowController?.window)
       }
-  
-  @objc func daemonGetRemoteObject() -> ServiceProviderXPCProtocol? {
-    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME)
-        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
-        connection.resume()
 
-        return connection.remoteObjectProxyWithErrorHandler { error in
-          print("Error:", error)
-        } as? ServiceProviderXPCProtocol
-  }
-  
+
   @objc func quit() {
+    daemonRemoteObject?.destroy()
     NSApplication.shared.terminate(self)
   }
 }

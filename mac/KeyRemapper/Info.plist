@@ -24,10 +24,10 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>LSUIElement</key>
 	<true/>
-  <key>SMPrivilegedExecutables</key>
+	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>co.goerwin.KeyRemapperDaemon</key>
-		<string>identifier &quot;co.goerwin.KeyRemapperDaemon&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Apple Development: erwingaitano@gmail.com (E2274VDXEZ)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		<string>identifier "co.goerwin.KeyRemapperDaemon" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: erwingaitano@gmail.com (E2274VDXEZ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</dict>
 </dict>
 </plist>

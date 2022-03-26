@@ -55,6 +55,10 @@ namespace Global {
     activeApp = {};
     repeatedKey = NULL;
     keyRepeatThreadCount = 0;
-    delete Global::keyRemapper;
+
+    if (Global::keyRemapper) {
+      delete Global::keyRemapper;
+      Global::keyRemapper = nil;
+    }
   }
 }

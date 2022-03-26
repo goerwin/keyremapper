@@ -14,6 +14,7 @@ import Foundation
       return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath))
     }
 
+
     appBridge.stop()
     return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath))
   }
@@ -22,8 +23,13 @@ import Foundation
   func stop() {
     Global.appBridge?.stop()
   }
-  
-  func version(withReply reply: @escaping (String) -> Void) {
+
+  func destroy() {
+    stop()
+    exit(0)
+  }
+
+  func getVersion(withReply reply: @escaping (String) -> Void) {
     reply(Global.VERSION)
   }
 }

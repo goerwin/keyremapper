@@ -6,9 +6,11 @@
 	<string>co.goerwin.KeyRemapperDaemon</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier &quot;co.goerwin.KeyRemapper&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Apple Development: erwingaitano@gmail.com (E2274VDXEZ)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		<string>identifier "co.goerwin.KeyRemapper" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: erwingaitano@gmail.com (E2274VDXEZ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</array>
 </dict>
 </plist>
