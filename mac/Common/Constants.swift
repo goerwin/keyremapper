@@ -1,10 +1,3 @@
-//
-//  Constants.swift
-//  KeyRemapper
-//
-//  Created by Erwin Gaitan Ospino on 26/03/22.
-//
-
 import Foundation
 
 let MACH_SERVICE_NAME = "co.goerwin.KeyRemapperDaemon"

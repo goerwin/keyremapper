@@ -12,7 +12,7 @@ struct KeyRemapperApp: App {
 
 fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   var rootPath: String?
-  var configIdx = 1
+  var configIdx = 0
   var daemonStarted = false
   
   lazy var statusBarItem: NSStatusItem? = { NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
