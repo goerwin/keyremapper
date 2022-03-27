@@ -114,10 +114,13 @@ public:
   }
 
   static void stop() {
+    if (MyIOHIDManager::hidManager == nil) return;
+
     IOHIDManagerRegisterInputValueCallback(MyIOHIDManager::hidManager, NULL, NULL);
     IOHIDManagerSetDeviceMatchingMultiple(MyIOHIDManager::hidManager, NULL);
     IOHIDManagerUnscheduleFromRunLoop(MyIOHIDManager::hidManager, CFRunLoopGetMain(), kCFRunLoopCommonModes);
     IOHIDManagerClose(MyIOHIDManager::hidManager, kIOHIDOptionsTypeSeizeDevice);
+    MyIOHIDManager::hidManager = nil;
   }
 
   static bool getCapslockState() {

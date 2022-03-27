@@ -192,12 +192,19 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     }
 }
 
-int start(std::string configPath, std::string symbolsPath, std::string appName) {
+int start(std::string configPath, std::string symbolsPath, int profileIdx, std::string appName) {
   auto config = Helpers::getJsonFile(configPath);
+
   Global::reset();
   Global::symbols = Helpers::getJsonFile(symbolsPath);
+  auto profiles = config["profiles"];
   
-  Global::keyRemapper = new KeyRemapper(config, Global::symbols);
+  if (!profiles.is_array()) return 5; // invalid profiles
+  auto activeProfile = profiles.at(profileIdx);
+  
+  if (!activeProfile.is_object()) return 6; // invalid profile
+  
+  Global::keyRemapper = new KeyRemapper(activeProfile, Global::symbols);
   Global::keyRemapper->setAppName(appName);
   
   Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
@@ -246,8 +253,8 @@ void setFrontMostAppAsAsAppName() {
 }
 
 @implementation AppBridge
-- (int)start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath withAppName:(NSString *)appName {
-  return start([configPath UTF8String], [symbolsPath UTF8String], [appName UTF8String]);
+- (int)start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath withProfileIdx:(int)profileIdx withAppName:(NSString *)appName {
+  return start([configPath UTF8String], [symbolsPath UTF8String], profileIdx, [appName UTF8String]);
 }
 
 - (void)stop {

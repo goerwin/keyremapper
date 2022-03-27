@@ -4,15 +4,15 @@
 import Foundation
 
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
-  func start(configPath: String, symbolsPath: String, withReply reply: @escaping (Int32) -> Void) {
-    guard let appBridge = Global.appBridge else {
-      let appBridge = AppBridge()
-      Global.appBridge = appBridge
-      return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath, withAppName: Global.getFrontmostAppName()))
+  func start(configPath: String, symbolsPath: String, profileIdx: Int, withReply reply: @escaping (Int) -> Void) {
+    if Global.appBridge == nil {
+      Global.appBridge = AppBridge()
     }
 
-    appBridge.stop()
-    return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath, withAppName: Global.getFrontmostAppName()))
+    Global.appBridge?.stop()
+    let startResult = Global.appBridge?.start(configPath, withSymbolsPath: symbolsPath, withProfileIdx: Int32(profileIdx), withAppName: Global.getFrontmostAppName())
+
+    return reply(Int(startResult ?? -1))
   }
 
   func stop() {

@@ -56,7 +56,7 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
-  - [ ] use only one file for configs
+  - [x] use only one file for configs
   - [ ] development license via command line?
   - [ ] easy way for versioning
   - [ ] automate build

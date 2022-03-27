@@ -65,33 +65,48 @@ struct Util {
     guard let currentLoggedInUser = getCurLoggedInUserFromRoot() else { return nil }
     return "/Users/\(currentLoggedInUser)/keyRemapperMac"
   }
-
-  static func getConfigName(configPath: String) -> String? {
+  
+  static func getJsonConfig() -> Dictionary<String, AnyObject>? {
+    guard let configPath = getConfigPath() else { return nil }
+    
     do {
         let data = try Data(contentsOf: URL(fileURLWithPath: configPath), options: .mappedIfSafe)
       let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-      if let jsonResult = jsonResult as? Dictionary<String, AnyObject>, let name = jsonResult["name"] as? String {
-          return name
-      }
+      
+      return jsonResult as? Dictionary<String, AnyObject>
     } catch {}
-
+    
     return nil
   }
   
-  static func getConfigPath(configIdx: Int) -> String? {
-    guard let rootPath = getRootPath() else { return nil }
-    let idxStr = configIdx == 0 ? "" : String(configIdx + 1)
-    return "\(rootPath)/config\(idxStr).json"
+  static func updateJsonConfigActiveProfileIdx(idx: Int) {
+    guard let configPath = getConfigPath() else { return }
+    guard var jsonConfig = getJsonConfig() else { return }
+    
+    do {
+      jsonConfig["activeProfileIdx"] = idx as AnyObject
+      let data = try JSONSerialization.data(withJSONObject: jsonConfig, options: .prettyPrinted)
+      FileManager.default.createFile(atPath: configPath, contents: data, attributes: nil)
+    } catch {}
   }
   
-  static func getSymbolsPath() -> String? {
+  static func getJsonConfigActiveProfileIdx() -> Int? {
+    guard let jsonConfig = getJsonConfig() else { return nil }
+    return jsonConfig["activeProfileIdx"] as? Int
+  }
+  
+  static func getConfigPath() -> String? {
     guard let rootPath = getRootPath() else { return nil }
-    return "\(rootPath)/symbols.json"
+    return "\(rootPath)/config.json"
+  }
+  
+  static func getResourceSymbolsPath() -> String? {
+    guard let resourcePath = Bundle.main.resourcePath else { return nil }
+    return "\(resourcePath)/symbols.json"
   }
   
   static func copyFile(srcPath filePath: String, to destPath: String) throws {
     let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-    let filemgr = FileManager.default
-    filemgr.createFile(atPath: destPath, contents: data, attributes: nil)
+    FileManager.default.createFile(atPath: destPath, contents: data, attributes: nil)
 }
 }

@@ -11,14 +11,12 @@ struct KeyRemapperApp: App {
 }
 
 fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
-  // TODO: Once you move all config to one file, u wont need this
-  var configIdx = 0
-
   var daemonStarted = false
   
   lazy var statusBarItem: NSStatusItem? = { NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
   }()
   
+  var activeProfileIdx: Int?
   lazy private var aboutBoxWindowController: NSWindowController? = {
     let aboutView = AboutView()
       let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
@@ -60,7 +58,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
 
-      startDaemon(configIdx: 0)
+      activeProfileIdx = Util.getJsonConfigActiveProfileIdx()
+      startDaemon()
     }
 
 
@@ -119,19 +118,29 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         action: #selector(AppDelegate.uninstallDaemon),
         keyEquivalent: "")
 
-    statusBarItemMenu.addItem(.separator())
-    for i in 0...8 {
-      guard let configPath = Util.getConfigPath(configIdx: i) else { break }
-
-      if !Util.fileExists(configPath) { break }
-      let configIdxName = String(i + 1)
-      var configName = Util.getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
-      configName = i == configIdx ? "✔  \(configName)" : configName
-
-      let menuItem = NSMenuItem(title: configName, action: #selector(AppDelegate.switchConfig(sender:)), keyEquivalent: configIdxName)
-      menuItem.tag = i
-      statusBarItemMenu.addItem(menuItem)
+    // add profiles to menu
+    if let jsonConfig = Util.getJsonConfig() {
+      let activeProfileIdx = activeProfileIdx ?? 0
+      let profiles = jsonConfig["profiles"] as? [Dictionary<String, AnyObject>] ?? []
+      
+      statusBarItemMenu.addItem(.separator())
+      for (idx, profile) in profiles.enumerated() {
+        let name = profile["name"] as? String
+        let itemName = name ?? "Profile \(idx + 1)"
+        let menuItem = NSMenuItem(
+          title: idx == activeProfileIdx ? "✔  \(itemName)" : itemName,
+          action: #selector(AppDelegate.switchProfile(sender:)),
+          keyEquivalent: String(idx + 1)
+        )
+        menuItem.tag = idx
+        
+        if activeProfileIdx == idx {
+          statusBarItem.button?.title = name != nil ? " \(itemName)" : ""
+        }
+        statusBarItemMenu.addItem(menuItem)
+      }
     }
+    
 
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
@@ -146,20 +155,12 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         keyEquivalent: "q")
   }
 
-  @objc func switchConfig(sender: Any) {
+  @objc func switchProfile(sender: Any) {
     guard let menuItem = sender as? NSMenuItem else { return }
 
-    startDaemon(configIdx: menuItem.tag)
+    activeProfileIdx = menuItem.tag
+    startDaemon(profileIdx: menuItem.tag)
   }
-
-  func updateMenuBarTitle(_ title: String?) {
-    if let title = title {
-      statusBarItem?.button?.title = " \(title)"
-    } else {
-      statusBarItem?.button?.title = ""
-    }
-  }
-
   
   var _authRef: AuthorizationRef?
   var authRef: AuthorizationRef? {
@@ -173,7 +174,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
   
-  func startDaemon(configIdx: Int) {
+  func startDaemon(profileIdx: Int? = nil) {
     if (daemonStarted == true) {
       stopDaemon()
     } else {
@@ -189,15 +190,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       if (!blessed) {
         return showCloseAlert("Error", "Not Blessed to run the Daemon")
       }
-
-    self.configIdx = configIdx
-    guard let symbolsPath = Util.getSymbolsPath() else { return }
-
-    if (!Util.fileExists(symbolsPath)) {
-      return showCloseAlert("File not found", "\(symbolsPath) not found")
-    }
-
-    guard let configPath = Util.getConfigPath(configIdx: configIdx) else {
+    
+    guard let configPath = Util.getConfigPath() else {
       return showCloseAlert("No config", "No config path constructed")
     }
 
@@ -216,8 +210,10 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
      return showCloseAlert("Wrong Daemon version", "App \(VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon")
    }
 
-    var daemonStartResult: Int32?
-    daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath) {
+    guard let symbolsPath = Util.getResourceSymbolsPath() else { return }
+
+    var daemonStartResult: Int?
+    daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath, profileIdx: profileIdx ?? activeProfileIdx ?? 0) {
       result in daemonStartResult = result
     }
 
@@ -229,7 +225,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     if (daemonStartResult != 0) {
-      return self.showCloseAlert("Error", "Couldn't start Daemon process")
+      return self.showCloseAlert("Error", "Couldn't start Daemon process. Error \(daemonStartResult ?? -1)")
     }
 
     self.daemonStarted = true
@@ -255,32 +251,23 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
       return stopDaemon()
     }
 
-    startDaemon(configIdx: configIdx)
+    startDaemon()
   }
-    
+  
   @objc func openConfigFolder() {
     guard let rootPath = Util.getRootPath() else { return }
-    
-    guard let resourcePath = Bundle.main.resourcePath else {
-      return
-    }
+    guard let resourcePath = Bundle.main.resourcePath else { return }
     
     do {
-      guard let configPath = Util.getConfigPath(configIdx: 0) else { return }
+      guard let configPath = Util.getConfigPath() else { return }
       let configFileExists = Util.fileExists(configPath)
       
       if (!configFileExists) {
         try Util.copyFile(srcPath: "\(resourcePath)/config.json", to: configPath)
       }
 
-      guard let symbolsPath = Util.getSymbolsPath() else { return }
-      let symbolFileExists = Util.fileExists(symbolsPath)
-
-      if (!symbolFileExists) {
-        try Util.copyFile(srcPath: "\(resourcePath)/symbols.json", to: symbolsPath)
-      }
     } catch let error {
-      print("Error creating files: ", error)
+      print("Error config file: ", error)
     }
     
     NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: rootPath)
