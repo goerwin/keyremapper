@@ -5,18 +5,14 @@ import Foundation
 
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
   func start(configPath: String, symbolsPath: String, withReply reply: @escaping (Int32) -> Void) {
-    // TODO: if start returns 3, version mismatch
-
     guard let appBridge = Global.appBridge else {
       let appBridge = AppBridge()
       Global.appBridge = appBridge
-//         TODO: Pass the appName in start
-      return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath))
+      return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath, withAppName: Global.getFrontmostAppName()))
     }
 
-
     appBridge.stop()
-    return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath))
+    return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath, withAppName: Global.getFrontmostAppName()))
   }
 
 
@@ -27,6 +23,10 @@ import Foundation
   func destroy() {
     stop()
     exit(0)
+  }
+  
+  func uninstall() {
+    Global.uninstall()
   }
 
   func getVersion(withReply reply: @escaping (String) -> Void) {

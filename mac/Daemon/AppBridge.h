@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 
 @interface AppBridge : NSObject
-- (int) start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath;
+- (int) start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath withAppName:(NSString*)appName;
 - (void) stop;
 - (void) setAppName:(NSString*)appName;
 @end

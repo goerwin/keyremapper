@@ -1,5 +1,4 @@
 import SwiftUI
-import SystemConfiguration
 import UserNotifications
 
 @main
@@ -12,67 +11,57 @@ struct KeyRemapperApp: App {
 }
 
 fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
-  var statusBarItem: NSStatusItem?
-    var rootPath: String?
-  var rootPathWithTilde: String?
-    var configIdx = 1
+  var rootPath: String?
+  var configIdx = 1
   var daemonStarted = false
   
-  lazy var daemonRemoteObject: ServiceProviderXPCProtocol? = {
-    let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME, options: [.privileged])
-
-        connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
-        connection.resume()
-
-    return connection.synchronousRemoteObjectProxyWithErrorHandler { error in
-          print("Error:", error)
-        } as? ServiceProviderXPCProtocol
+  lazy var statusBarItem: NSStatusItem? = { NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
   }()
+  
+  lazy private var aboutBoxWindowController: NSWindowController? = {
+    let aboutView = AboutView()
+      let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
+      let window = NSWindow()
+      window.styleMask = styleMask
+      window.title = "About \(BUNDLE_NAME)"
+      window.contentView = NSHostingView(rootView: aboutView)
+      return NSWindowController(window: window)
+  }()
+  
+  var _daemonRemoteObject: ServiceProviderXPCProtocol?
+  var daemonRemoteObject: ServiceProviderXPCProtocol? {
+    get {
+      if _daemonRemoteObject != nil {
+        return _daemonRemoteObject
+      }
+      
+      let connection = NSXPCConnection(machServiceName: MACH_SERVICE_NAME, options: [.privileged])
+
+          connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
+          connection.resume()
+
+      connection.interruptionHandler = {
+          print("Connection with Daemon interrupted")
+          self._daemonRemoteObject = nil
+      }
+      connection.invalidationHandler = {
+          print("Connection with Daemon invalidated")
+          self._daemonRemoteObject = nil
+      }
+      
+      _daemonRemoteObject = connection.synchronousRemoteObjectProxyWithErrorHandler { error in
+        print("Error:", error)
+      } as? ServiceProviderXPCProtocol
+      return _daemonRemoteObject
+    }
+  }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
 
-      reloadMenuBar()
-
-      guard let auth = Util.getPrivilegedHelperAuth() else {
-        return showCloseAlert("Error", "Auth not acquired for Daemon")
-      }
-
-      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: auth)
-
-      if (!blessed) {
-        return showCloseAlert("Error", "Not Blessed to run the Daemon")
-      }
-
-      guard let rootPathInfo = getRootPathInfo() else {
-        return showCloseAlert("Error", "Config Folder invalid")
-      }
-
-      rootPath = rootPathInfo[0]
-      rootPathWithTilde = rootPathInfo[1]
-
       startDaemon(configIdx: 0)
     }
 
-  func getConfigPathInfo(configIdx: Int) -> [String]? {
-    guard let rootPath = rootPath, let rootPathWithTilde = rootPathWithTilde else { return nil }
-
-    let idxStr = configIdx == 0 ? "" : String(configIdx + 1)
-
-    return [
-      "\(rootPath)/config\(idxStr).json",
-      "\(rootPathWithTilde)/config\(idxStr).json"
-    ]
-  }
-
-  func fileExists(_ filePath: String) -> Bool {
-      let fileManager = FileManager.default
-      if fileManager.fileExists(atPath: filePath) {
-        return true
-      }
-
-      return false
-  }
 
   func showNotification(_ description: String, _ title: String?) {
     let center = UNUserNotificationCenter.current()
@@ -99,34 +88,13 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     alert.runModal()
    }
 
-  func resizeImage(image: NSImage, w: Int, h: Int) -> NSImage? {
-    let frame = NSRect(x: 0, y: 0, width: w, height: h)
-    let newSize = NSSize(width: w, height: h)
-
-    guard let representation = image.bestRepresentation(for: frame, context: nil, hints: nil) else {
-        return nil
-    }
-    let image = NSImage(size: newSize, flipped: false, drawingHandler: { (_) -> Bool in
-        return representation.draw(in: frame)
-    })
-
-    return image
-  }
-
-  private var aboutBoxWindowController: NSWindowController?
-
   @objc func reloadMenuBar() {
-    if (statusBarItem == nil) {
-      statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    }
-
-
     guard let statusBarItem = statusBarItem else { return }
     guard let menuButton = statusBarItem.button else { return }
     guard let iconImage = NSImage(named: "MenuBarIcon") else { return }
 
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
-    menuButton.image = resizeImage(image: iconImage, w: 16, h: 16)
+    menuButton.image = Util.resizeImage(image: iconImage, w: 16, h: 16)
     menuButton.image?.isTemplate = true
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
 
@@ -140,22 +108,28 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         action: #selector(AppDelegate.openConfigFolder),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
+        withTitle: "Reload Menu",
+        action: #selector(AppDelegate.reloadMenuBar),
+        keyEquivalent: "")
+    
+    statusBarItemMenu.addItem(.separator())
+    statusBarItemMenu.addItem(
         withTitle: daemonStarted ? "Stop Daemon" : "Start Daemon",
         action: #selector(AppDelegate.startOrStopDaemon),
         keyEquivalent: "")
     statusBarItemMenu.addItem(
-        withTitle: "Reload Menu",
-        action: #selector(AppDelegate.reloadMenuBar),
+        withTitle: "Uninstall Daemon",
+        action: #selector(AppDelegate.uninstallDaemon),
         keyEquivalent: "")
 
     statusBarItemMenu.addItem(.separator())
     for i in 0...8 {
-      guard let configPathInfo = getConfigPathInfo(configIdx: i) else { break }
+      guard let configPathInfo = Util.getConfigPathInfo(configIdx: i) else { break }
 
       let configPath = configPathInfo[0]
-      if !fileExists(configPath) { break }
+      if !Util.fileExists(configPath) { break }
       let configIdxName = String(i + 1)
-      var configName = getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
+      var configName = Util.getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
       configName = i == configIdx ? "✔  \(configName)" : configName
 
       let menuItem = NSMenuItem(title: configName, action: #selector(AppDelegate.switchConfig(sender:)), keyEquivalent: configIdxName)
@@ -179,7 +153,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func switchConfig(sender: Any) {
     guard let menuItem = sender as? NSMenuItem else { return }
 
-    stopDaemon()
     startDaemon(configIdx: menuItem.tag)
   }
 
@@ -191,60 +164,45 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
+  func startDaemon(configIdx: Int) {
+    if (daemonStarted == true) {
+      stopDaemon()
+    }
+    
+    reloadMenuBar()
+    
+    guard let auth = Util.getPrivilegedHelperAuth() else {
+      return showCloseAlert("Error", "Auth not acquired for Daemon")
+      }
 
-  func getCurLoggedInUserFromRoot() -> String? {
-    var uid: uid_t = 0
-    var gid: gid_t = 0
+      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: auth)
 
-    guard let name = SCDynamicStoreCopyConsoleUser(nil, &uid, &gid) else {
-      return nil
+      if (!blessed) {
+        return showCloseAlert("Error", "Not Blessed to run the Daemon")
+      }
+
+    guard let rootPathInfo = Util.getRootPathInfo() else {
+      return showCloseAlert("Error", "Config Folder invalid")
     }
 
-    return name as String;
-  }
-
-  func getRootPathInfo() -> [String]? {
-    // Since we are running from root, the current user is root so
-    // I have to use this to get the actual logged in user
-    guard let currentLoggedInUser = getCurLoggedInUserFromRoot() else { return nil }
-    let folderName = "keyRemapperMac"
-
-    return [
-      "/Users/\(currentLoggedInUser)/\(folderName)",
-      "~/\(folderName)"
-    ]
-  }
-
-  func getConfigName(configPath: String) -> String? {
-    do {
-        let data = try Data(contentsOf: URL(fileURLWithPath: configPath), options: .mappedIfSafe)
-      let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-      if let jsonResult = jsonResult as? Dictionary<String, AnyObject>, let name = jsonResult["name"] as? String {
-          return name
-      }
-    } catch {}
-
-    return nil
-  }
-
-  func startDaemon(configIdx: Int) {
-    if (daemonStarted == true) { return }
+    rootPath = rootPathInfo[0]
+    
     guard let rootPath = rootPath else { return }
 
     self.configIdx = configIdx
     let symbolsPath = "\(rootPath)/symbols.json"
 
-    if (!fileExists(symbolsPath)) {
+    if (!Util.fileExists(symbolsPath)) {
       return showCloseAlert("File not found", "\(symbolsPath) not found")
     }
 
-    guard let configPathInfo = getConfigPathInfo(configIdx: configIdx) else {
+    guard let configPathInfo = Util.getConfigPathInfo(configIdx: configIdx) else {
       return showCloseAlert("No config", "No config path constructed")
     }
 
     let configPath = configPathInfo[0]
 
-    if (!fileExists(configPath)) {
+    if (!Util.fileExists(configPath)) {
       return showCloseAlert("File not found", "\(configPath) not found")
     }
 
@@ -254,9 +212,9 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
    var daemonVersion: String?
    daemonRemoteObject.getVersion { version in daemonVersion = version }
-
+    
    if (daemonVersion != VERSION) {
-     return showCloseAlert("Wrong Daemon version", "App and Daemon Mismatch, Reinstall the app")
+     return showCloseAlert("Wrong Daemon version", "App \(VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon")
    }
 
     var daemonStartResult: Int32?
@@ -283,8 +241,13 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     if (daemonStarted != true) { return }
     statusBarItem?.button?.appearsDisabled = true
     daemonStarted = false
-    daemonRemoteObject?.stop()
+    daemonRemoteObject?.destroy()
     reloadMenuBar()
+  }
+  
+  @objc func uninstallDaemon() {
+    stopDaemon()
+    daemonRemoteObject?.uninstall()
   }
 
   @objc func startOrStopDaemon() {
@@ -301,23 +264,11 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @objc func openAboutWindow() {
-          if aboutBoxWindowController == nil {
-            let aboutView = AboutView();
-              let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
-              let window = NSWindow()
-              window.styleMask = styleMask
-              window.title = "About \(BUNDLE_NAME)"
-              window.contentView = NSHostingView(rootView: aboutView)
-              aboutBoxWindowController = NSWindowController(window: window)
-          }
-
     NSApp.activate(ignoringOtherApps: true)
     aboutBoxWindowController?.window?.orderFrontRegardless()
     aboutBoxWindowController?.window?.center()
-
-          aboutBoxWindowController?.showWindow(aboutBoxWindowController?.window)
-      }
-
+      aboutBoxWindowController?.showWindow(aboutBoxWindowController?.window)
+  }
 
   @objc func quit() {
     daemonRemoteObject?.destroy()

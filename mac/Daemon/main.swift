@@ -5,7 +5,8 @@ var i = 0; // TODO: DELETE
 func quitIfNoClientRunning() {
 
   i = i + 1;
-  if (i > 1000) {
+
+  if (i > 10) {
 //    print("red light")
 //    Global.appBridge!.stop()
 //    exit(0);
@@ -25,7 +26,7 @@ func start() {
 
   // Listen for frontmost app changes
   NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil) { _ in
-    Global.setFrontmostAppNameToKeyRemapper()
+    Global.appBridge?.setAppName(Global.getFrontmostAppName())
   }
 }
 

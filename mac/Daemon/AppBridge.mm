@@ -192,11 +192,14 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
     }
 }
 
-int start(std::string configPath, std::string symbolsPath) {
+int start(std::string configPath, std::string symbolsPath, std::string appName) {
   auto config = Helpers::getJsonFile(configPath);
   Global::reset();
   Global::symbols = Helpers::getJsonFile(symbolsPath);
-    Global::keyRemapper = new KeyRemapper(config, Global::symbols);
+  
+  Global::keyRemapper = new KeyRemapper(config, Global::symbols);
+  Global::keyRemapper->setAppName(appName);
+  
   Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
   ? Global::delayUntilRepeat
     : config["delayUntilRepeat"].get<int>();
@@ -243,8 +246,8 @@ void setFrontMostAppAsAsAppName() {
 }
 
 @implementation AppBridge
-- (int)start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath {
-  return start([configPath UTF8String], [symbolsPath UTF8String]);
+- (int)start:(NSString*)configPath withSymbolsPath:(NSString*)symbolsPath withAppName:(NSString *)appName {
+  return start([configPath UTF8String], [symbolsPath UTF8String], [appName UTF8String]);
 }
 
 - (void)stop {
