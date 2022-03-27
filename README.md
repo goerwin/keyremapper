@@ -56,8 +56,13 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
+  - [ ] use only one file for configs
+  - [ ] development license via command line?
+  - [ ] easy way for versioning
+  - [ ] automate build
+  - [ ] logging support
   - [ ] Memory leaks
-  - [ ] run the hidiomanager as a daemon (root process), maybe follow https://github.com/CharlesJS/CSAuthSample
+  - [x] run the hidiomanager as a daemon (root process), follow https://github.com/CharlesJS/CSAuthSample or https://github.com/erikberglund/SwiftPrivilegedHelper
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
   - [ ] global shortcuts
   - [x] versioning
@@ -75,8 +80,8 @@
   - [x] trigger media keys
     - brightnessDown/up, keyboardIlluminationDown/up, rewind/playPause/fastForward, mute, volumeDown/up
   - [x] exiting app from terminal (cmd+q) doesnt remove the process (it's expected to kill the keyRemapper process)
-  - [ ] simple GUI
-  - [ ] Fn key not working when app is disabled
+  - [x] simple GUI
+  - [x] Fn key not working when app is disabled
   - [ ] shortcuts for mission control, launchpad?
     - maybe via shell command
     ```sh
