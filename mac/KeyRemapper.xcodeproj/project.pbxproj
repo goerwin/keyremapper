@@ -11,6 +11,8 @@
 		F95EC5BB27EF1DE000B370B2 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BA27EF1DE000B370B2 /* Global.swift */; };
 		F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BE27EF1F2900B370B2 /* Constants.swift */; };
 		F95EC5C027EF1F2900B370B2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BE27EF1F2900B370B2 /* Constants.swift */; };
+		F9600A3227F015250051BFE1 /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = F9600A3127F015250051BFE1 /* config.json */; };
+		F9600A3427F016780051BFE1 /* symbols.json in Resources */ = {isa = PBXBuildFile; fileRef = F9600A3327F016780051BFE1 /* symbols.json */; };
 		F99C5DF727E7CDB60080117D /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99C5DF627E7CDB60080117D /* AboutView.swift */; };
 		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
@@ -56,6 +58,8 @@
 		F95EC5B827EF174E00B370B2 /* AppBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppBridge.mm; sourceTree = "<group>"; };
 		F95EC5BA27EF1DE000B370B2 /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		F95EC5BE27EF1F2900B370B2 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F9600A3127F015250051BFE1 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
+		F9600A3327F016780051BFE1 /* symbols.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = symbols.json; sourceTree = "<group>"; };
 		F99C5DF627E7CDB60080117D /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		F9A8925C27644E33009ACA0A /* KeyRemapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyRemapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; };
@@ -99,6 +103,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F9600A3027F014D10051BFE1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F9600A3327F016780051BFE1 /* symbols.json */,
+				F9600A3127F015250051BFE1 /* config.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		F9A8925327644E33009ACA0A = {
 			isa = PBXGroup;
 			children = (
@@ -122,6 +135,7 @@
 		F9A8925E27644E33009ACA0A /* KeyRemapper */ = {
 			isa = PBXGroup;
 			children = (
+				F9600A3027F014D10051BFE1 /* Resources */,
 				F9A8926827644E35009ACA0A /* Info.plist */,
 				F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */,
 				F99C5DF627E7CDB60080117D /* AboutView.swift */,
@@ -259,7 +273,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */,
+				F9600A3427F016780051BFE1 /* symbols.json in Resources */,
 				F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */,
+				F9600A3227F015250051BFE1 /* config.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,7 +451,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -465,7 +481,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -489,7 +505,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.1.1;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,
@@ -522,7 +538,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.1.1;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,

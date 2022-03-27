@@ -14,7 +14,6 @@ struct Util {
     }
     
     static func blessHelper(label: String, authRef: AuthorizationRef) -> Bool {
-      
         var error: Unmanaged<CFError>?
         let blessStatus = SMJobBless(kSMDomainSystemLaunchd, label as CFString, authRef, &error)
         
@@ -59,29 +58,12 @@ struct Util {
 
     return name as String;
   }
-  
-  static var rootPathInfo: [String]? = {
+
+  static func getRootPath() -> String? {
     // Since we are running from root, the current user is root so
     // I have to use this to get the actual logged in user
     guard let currentLoggedInUser = getCurLoggedInUserFromRoot() else { return nil }
-    let folderName = "keyRemapperMac"
-
-    return [
-      "/Users/\(currentLoggedInUser)/\(folderName)",
-      "~/\(folderName)"
-    ]
-  }()
-
-  static func getRootPathInfo() -> [String]? {
-    // Since we are running from root, the current user is root so
-    // I have to use this to get the actual logged in user
-    guard let currentLoggedInUser = getCurLoggedInUserFromRoot() else { return nil }
-    let folderName = "keyRemapperMac"
-
-    return [
-      "/Users/\(currentLoggedInUser)/\(folderName)",
-      "~/\(folderName)"
-    ]
+    return "/Users/\(currentLoggedInUser)/keyRemapperMac"
   }
 
   static func getConfigName(configPath: String) -> String? {
@@ -96,16 +78,20 @@ struct Util {
     return nil
   }
   
-  static func getConfigPathInfo(configIdx: Int) -> [String]? {
-    guard let rootPathInfo = rootPathInfo else {
-      return nil
-    }
-
+  static func getConfigPath(configIdx: Int) -> String? {
+    guard let rootPath = getRootPath() else { return nil }
     let idxStr = configIdx == 0 ? "" : String(configIdx + 1)
-
-    return [
-      "\(rootPathInfo[0])/config\(idxStr).json",
-      "\(rootPathInfo[1])/config\(idxStr).json"
-    ]
+    return "\(rootPath)/config\(idxStr).json"
   }
+  
+  static func getSymbolsPath() -> String? {
+    guard let rootPath = getRootPath() else { return nil }
+    return "\(rootPath)/symbols.json"
+  }
+  
+  static func copyFile(srcPath filePath: String, to destPath: String) throws {
+    let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
+    let filemgr = FileManager.default
+    filemgr.createFile(atPath: destPath, contents: data, attributes: nil)
+}
 }

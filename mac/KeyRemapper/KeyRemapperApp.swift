@@ -11,8 +11,9 @@ struct KeyRemapperApp: App {
 }
 
 fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
-  var rootPath: String?
+  // TODO: Once you move all config to one file, u wont need this
   var configIdx = 0
+
   var daemonStarted = false
   
   lazy var statusBarItem: NSStatusItem? = { NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -120,9 +121,8 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
     statusBarItemMenu.addItem(.separator())
     for i in 0...8 {
-      guard let configPathInfo = Util.getConfigPathInfo(configIdx: i) else { break }
+      guard let configPath = Util.getConfigPath(configIdx: i) else { break }
 
-      let configPath = configPathInfo[0]
       if !Util.fileExists(configPath) { break }
       let configIdxName = String(i + 1)
       var configName = Util.getConfigName(configPath: configPath) ?? "Config \(configIdxName)"
@@ -160,43 +160,46 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
+  
+  var _authRef: AuthorizationRef?
+  var authRef: AuthorizationRef? {
+    get {
+      if _authRef != nil {
+        return _authRef
+      }
+      
+      _authRef = Util.getPrivilegedHelperAuth()
+      return _authRef
+    }
+  }
+  
   func startDaemon(configIdx: Int) {
     if (daemonStarted == true) {
       stopDaemon()
+    } else {
+      reloadMenuBar()
     }
     
-    reloadMenuBar()
-    
-    guard let auth = Util.getPrivilegedHelperAuth() else {
-      return showCloseAlert("Error", "Auth not acquired for Daemon")
+      guard let authRef = authRef else {
+        return showCloseAlert("Error", "Authorization required for Daemon")
       }
-
-      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: auth)
+      
+      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: authRef)
 
       if (!blessed) {
         return showCloseAlert("Error", "Not Blessed to run the Daemon")
       }
 
-    guard let rootPathInfo = Util.getRootPathInfo() else {
-      return showCloseAlert("Error", "Config Folder invalid")
-    }
-
-    rootPath = rootPathInfo[0]
-    
-    guard let rootPath = rootPath else { return }
-
     self.configIdx = configIdx
-    let symbolsPath = "\(rootPath)/symbols.json"
+    guard let symbolsPath = Util.getSymbolsPath() else { return }
 
     if (!Util.fileExists(symbolsPath)) {
       return showCloseAlert("File not found", "\(symbolsPath) not found")
     }
 
-    guard let configPathInfo = Util.getConfigPathInfo(configIdx: configIdx) else {
+    guard let configPath = Util.getConfigPath(configIdx: configIdx) else {
       return showCloseAlert("No config", "No config path constructed")
     }
-
-    let configPath = configPathInfo[0]
 
     if (!Util.fileExists(configPath)) {
       return showCloseAlert("File not found", "\(configPath) not found")
@@ -220,6 +223,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
     if (daemonStartResult == 1) {
       self.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
+
       IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
       return
     }
@@ -253,9 +257,32 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
     startDaemon(configIdx: configIdx)
   }
-
+    
   @objc func openConfigFolder() {
-    guard let rootPath = rootPath else { return }
+    guard let rootPath = Util.getRootPath() else { return }
+    
+    guard let resourcePath = Bundle.main.resourcePath else {
+      return
+    }
+    
+    do {
+      guard let configPath = Util.getConfigPath(configIdx: 0) else { return }
+      let configFileExists = Util.fileExists(configPath)
+      
+      if (!configFileExists) {
+        try Util.copyFile(srcPath: "\(resourcePath)/config.json", to: configPath)
+      }
+
+      guard let symbolsPath = Util.getSymbolsPath() else { return }
+      let symbolFileExists = Util.fileExists(symbolsPath)
+
+      if (!symbolFileExists) {
+        try Util.copyFile(srcPath: "\(resourcePath)/symbols.json", to: symbolsPath)
+      }
+    } catch let error {
+      print("Error creating files: ", error)
+    }
+    
     NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: rootPath)
   }
 
