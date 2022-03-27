@@ -5,11 +5,11 @@ class ServiceDelegateXPC : NSObject, NSXPCListenerDelegate {
         newConnection.exportedInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
 
       newConnection.interruptionHandler = {
-        
+        Global.kill()
       }
       
       newConnection.invalidationHandler = {
-        
+        Global.kill()
       }
       
         let exportedObject = ServiceProviderXPC()

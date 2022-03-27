@@ -26,11 +26,21 @@ struct Global {
     
     return "Unknown"
   }
+  
+  static func stop() {
+    appBridge?.stop()
+  }
+  
+  static func kill() {
+    stop()
+    runProcess("/usr/bin/sudo", args: ["/bin/launchctl", "remove", MACH_SERVICE_NAME])
+    CFRunLoopStop(CFRunLoopGetMain())
+  }
 
   static func uninstall() {
     runProcess("/usr/bin/sudo", args: ["/bin/rm", "-rf", "/Library/LaunchDaemons/\(MACH_SERVICE_NAME).plist"])
     runProcess("/usr/bin/sudo", args: ["/bin/rm", "-rf", "/Library/PrivilegedHelperTools/\(MACH_SERVICE_NAME)"])
     runProcess("/usr/bin/sudo", args: ["/bin/launchctl", "remove", MACH_SERVICE_NAME])
-    CFRunLoopStop(CFRunLoopGetMain())
+    kill()
   }
 }

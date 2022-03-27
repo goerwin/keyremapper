@@ -15,14 +15,12 @@ import Foundation
     return reply(appBridge.start(configPath, withSymbolsPath: symbolsPath, withAppName: Global.getFrontmostAppName()))
   }
 
-
   func stop() {
-    Global.appBridge?.stop()
+    Global.stop()
   }
 
-  func destroy() {
-    stop()
-    exit(0)
+  func kill() {
+    Global.kill()
   }
   
   func uninstall() {

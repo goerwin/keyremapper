@@ -107,10 +107,6 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         withTitle: "Open Config Folder",
         action: #selector(AppDelegate.openConfigFolder),
         keyEquivalent: "")
-    statusBarItemMenu.addItem(
-        withTitle: "Reload Menu",
-        action: #selector(AppDelegate.reloadMenuBar),
-        keyEquivalent: "")
     
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
@@ -241,7 +237,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     if (daemonStarted != true) { return }
     statusBarItem?.button?.appearsDisabled = true
     daemonStarted = false
-    daemonRemoteObject?.destroy()
+    daemonRemoteObject?.kill()
     reloadMenuBar()
   }
   
@@ -271,7 +267,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @objc func quit() {
-    daemonRemoteObject?.destroy()
+    daemonRemoteObject?.kill()
     NSApplication.shared.terminate(self)
   }
 }
