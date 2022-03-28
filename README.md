@@ -4,7 +4,7 @@
   - Download the latest version from `Releases`
   - On first time, it will ask you to install the Helper (Service that will listen to Keyboard input via IOKit)
   - Click the app icon in the menu bar and click `Open Config folder`. You'll find the config file `~/KeyRemapperMac/config.json`
-  - Edit it following the [Usage section](##Usage)
+  - Edit it following the [Usage section](#user-content-usage)
   - Reselect the profile from the app menu to reload it
 - Windows
   - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
@@ -113,9 +113,9 @@ Used for complex flows, once a keybinding meets criteria, others are skipped
 
 ### Shared
 
-`keyEvents` referenced in `send` properties can have keys found in `symbols.json` (check reference) and other reserved keys.
+`keyEvents` referenced in `send` properties can have keys found in `symbols.json` (see [reference](#user-content-reference)) and other reserved keys.
 
-Common key properties used for the above
+Common key properties used above
 
 ```jsonc
 {
@@ -145,28 +145,31 @@ Common key properties used for the above
 
 ### Reference
 
-- Current keyboard and app names can be found in the `Logger`
+- Current keyboard and app names can be found using the `Logger`
 - Mac's [symbols.json](mac/KeyRemapper/Resources/symbols.json)
 - Windows' [symbols.json](win/src/files/symbols.json)
 - My personal Mac's [config.json](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)
 
 ## Build
 
+- Mac
+  - Create a `mac/.env` file using `mac/.env.example` and fill up the values
+  - Open project `~mac/KeyRemapper.xcodeproj` with XCode
+  - Sign the 2 targets (KeyRemapper, Daemon)
+  - You should be able to run it on Xcode
 - Windows
   - In Visual Studio 2019+, run a batch build and mark all projects, they all should REBUILD successfully
   - Navigate to project's root folder and run `$ bash win/release.sh` in WSL Ubuntu's terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell)
   - File `win/output/KeyRemapper.zip` is generated
-- Mac
-  - Open project with Xcode
-  - Product -> Archive -> Distribute Content -> Built Products
 
 ## Tests
 
-- For Unix env run the tests in terminal
+- Mac
+  ```sh
+    $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
   ```
-  $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
-  ```
-- For Windows, open `Developer PowerShell for VS 2022` or similar run
-  ```
-  $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
+- Windows
+  ```sh
+    # open `Developer PowerShell for VS 2022` or similar
+    $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
   ```
