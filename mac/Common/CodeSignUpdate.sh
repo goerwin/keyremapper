@@ -1,4 +1,16 @@
-appType=$(/usr/libexec/PlistBuddy -c 'Print AppType' "${INFOPLIST_FILE}")
+#!/usr/bin/env zsh
+
+source .env 2> /dev/null || true
+
+if [ -z $SRCROOT ]; then printf "Error: no SRCROOT"; exit 1; fi
+if [ -z $APP_CERTIFICATE ]; then printf "Error: no APP_CERTIFICATE"; exit 1; fi
+
+sourceInfoPlistPath="$SRCROOT/$TARGET_NAME/Info.plist"
+buildPlistPath="$BUILD_DIR/$TARGET_NAME/Info.build.plist"
+
+appType=$(/usr/libexec/PlistBuddy -c 'Print AppType' "${sourceInfoPlistPath}")
+
+cp "$sourceInfoPlistPath" "$buildPlistPath"
 
 function replacePlaceholders {
   sed -i.bu 's/__QUOTE__/\"/g' "$1"
@@ -6,27 +18,26 @@ function replacePlaceholders {
 }
 
 function getCertificate {
-  certificate="certificate 1[field.1.2.840.113635.100.6.2.1]"
-  echo "identifier __QUOTE__"$1"__QUOTE__ and anchor apple generic and certificate leaf[subject.CN] = __QUOTE__"$EXPANDED_CODE_SIGN_IDENTITY_NAME"__QUOTE__ and "$certificate" /* exists */"
+  certificate=$(printf $APP_CERTIFICATE | sed -e "s/\"/__QUOTE__/g")
+  printf "identifier __QUOTE__"$1"__QUOTE__ and anchor apple generic and "$certificate""
 }
 
-if [ $appType == "Client" ]; then
-  daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print DaemonBundleIdentifier' "${INFOPLIST_FILE}")
+if [ $appType = "Client" ]; then
+  daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print DaemonBundleIdentifier' "${buildPlistPath}")
   certificate=$(getCertificate $daemonBundleIdentifier)
 
-  /usr/libexec/PlistBuddy -c 'Delete SMPrivilegedExecutables' "${INFOPLIST_FILE}"
-  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables dict' "${INFOPLIST_FILE}"
-  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables:'"${daemonBundleIdentifier}"' string '"$certificate"'' "${INFOPLIST_FILE}"
-  replacePlaceholders "${INFOPLIST_FILE}"
+  /usr/libexec/PlistBuddy -c 'Delete SMPrivilegedExecutables' "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables dict' "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables:'"${daemonBundleIdentifier}"' string '"$certificate"'' "${buildPlistPath}"
+  replacePlaceholders "${buildPlistPath}"
 fi
 
-if [ $appType == "Daemon" ]; then
-  clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print ClientBundleIdentifier' "${INFOPLIST_FILE}")
+if [ $appType = "Daemon" ]; then
+  clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print ClientBundleIdentifier' "${buildPlistPath}")
   certificate=$(getCertificate $clientBundleIdentifier)
 
-  # ClientBundleIdentifier
-  /usr/libexec/PlistBuddy -c 'Delete SMAuthorizedClients' "${INFOPLIST_FILE}"
-  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients array' "${INFOPLIST_FILE}"
-  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients: string '"$certificate"'' "${INFOPLIST_FILE}"
-  replacePlaceholders "${INFOPLIST_FILE}"
+  /usr/libexec/PlistBuddy -c 'Delete SMAuthorizedClients' "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients array' "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients: string '"$certificate"'' "${buildPlistPath}"
+  replacePlaceholders "${buildPlistPath}"
 fi

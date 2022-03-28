@@ -174,3 +174,11 @@ CFRunLoopAddSource(CFRunLoopGetMain(), myRunLoopSource, kCFRunLoopCommonModes);
  });
  threadObj.detach();
 ```
+
+```sh
+# read info.plist of a command line app
+otool -X -s __TEXT __info_plist /path/to/executable | xxd -r
+
+# read info.plist of an .app
+cat /path/to/app/Contents/Info.plist
+```

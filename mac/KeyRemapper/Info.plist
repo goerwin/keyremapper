@@ -31,7 +31,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>__replacedByScripts__</key>
-		<string></string>
+		<string>__replacedByScripts__</string>
 	</dict>
 </dict>
 </plist>

@@ -1,0 +1,4 @@
+3.1.5
+
+newVersion=4.6.9
+sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
