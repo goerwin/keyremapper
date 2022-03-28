@@ -52,7 +52,7 @@ jobs:
           # get new version to release from tag "vX.Y.Z"
           # and parse it to "X.Y.Z"
           newVersion=${{github.ref_name}}
-          newVersion=$(echo "${newVersion/v/""}")
+          newVersion=$(echo "${newVersion/v/}")
 
           sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
 
