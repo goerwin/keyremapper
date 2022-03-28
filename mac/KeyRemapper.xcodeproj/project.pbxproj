@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,6 +17,9 @@
 		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
 		F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926627644E35009ACA0A /* Preview Assets.xcassets */; };
+		F9B4D1A327F12D1F00FC513C /* CodeSignUpdate.sh in Resources */ = {isa = PBXBuildFile; fileRef = F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */; };
+		F9B4D1A827F1543A00FC513C /* CodeSignCleanUp.sh in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1A727F1543A00FC513C /* CodeSignCleanUp.sh */; };
+		F9B4D1A927F1543A00FC513C /* CodeSignCleanUp.sh in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1A727F1543A00FC513C /* CodeSignCleanUp.sh */; };
 		F9C759FC27ED7BE000F2E31C /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Util.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
 		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -67,6 +70,8 @@
 		F9A8926627644E35009ACA0A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F9A8926827644E35009ACA0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyRemapper.entitlements; sourceTree = "<group>"; };
+		F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = CodeSignUpdate.sh; sourceTree = "<group>"; };
+		F9B4D1A727F1543A00FC513C /* CodeSignCleanUp.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = CodeSignCleanUp.sh; sourceTree = "<group>"; };
 		F9C759FB27ED7BE000F2E31C /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -178,6 +183,8 @@
 			children = (
 				F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */,
 				F95EC5BE27EF1F2900B370B2 /* Constants.swift */,
+				F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */,
+				F9B4D1A727F1543A00FC513C /* CodeSignCleanUp.sh */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -198,10 +205,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F9A8926C27644E35009ACA0A /* Build configuration list for PBXNativeTarget "KeyRemapper" */;
 			buildPhases = (
+				F9B4D1A427F12D2F00FC513C /* ShellScript */,
 				F9A8925827644E33009ACA0A /* Sources */,
 				F9A8925927644E33009ACA0A /* Frameworks */,
 				F9A8925A27644E33009ACA0A /* Resources */,
 				F9C759F727ED785000F2E31C /* CopyFiles */,
+				F9B4D1AA27F154E600FC513C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -216,9 +225,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F9C75A2C27ED938700F2E31C /* Build configuration list for PBXNativeTarget "Daemon" */;
 			buildPhases = (
+				F9B4D1A527F14D2700FC513C /* ShellScript */,
 				F9C75A2427ED938700F2E31C /* Sources */,
 				F9C75A2527ED938700F2E31C /* Frameworks */,
 				F9C75A2627ED938700F2E31C /* CopyFiles */,
+				F9B4D1A627F153F300FC513C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -273,13 +284,89 @@
 			buildActionMask = 2147483647;
 			files = (
 				F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */,
-				F9600A3427F016780051BFE1 /* symbols.json in Resources */,
+				F9B4D1A327F12D1F00FC513C /* CodeSignUpdate.sh in Resources */,
 				F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */,
+				F9600A3427F016780051BFE1 /* symbols.json in Resources */,
 				F9600A3227F015250051BFE1 /* config.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F9B4D1A427F12D2F00FC513C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}\"/Common/CodeSignUpdate.sh\n";
+		};
+		F9B4D1A527F14D2700FC513C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}\"/Common/CodeSignUpdate.sh\n";
+		};
+		F9B4D1A627F153F300FC513C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}\"/Common/CodeSignCleanUp.sh\n";
+		};
+		F9B4D1AA27F154E600FC513C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}\"/Common/CodeSignCleanUp.sh\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F9A8925827644E33009ACA0A /* Sources */ = {
@@ -290,6 +377,7 @@
 				F9C759FC27ED7BE000F2E31C /* Util.swift in Sources */,
 				F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */,
 				F9C75A3B27EED49000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */,
+				F9B4D1A827F1543A00FC513C /* CodeSignCleanUp.sh in Sources */,
 				F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -302,6 +390,7 @@
 				F95EC5C027EF1F2900B370B2 /* Constants.swift in Sources */,
 				F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */,
 				F95EC5B927EF174E00B370B2 /* AppBridge.mm in Sources */,
+				F9B4D1A927F1543A00FC513C /* CodeSignCleanUp.sh in Sources */,
 				F9C75A4827EEEA3500F2E31C /* MyIOHIDManager.hpp in Sources */,
 				F9C75A5027EEFA8E00F2E31C /* MouseManager.hpp in Sources */,
 				F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */,
@@ -451,7 +540,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -481,7 +570,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -505,7 +594,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,
@@ -538,7 +627,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,

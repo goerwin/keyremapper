@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AppType</key>
+	<string>Client</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -18,6 +20,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>DaemonBundleIdentifier</key>
+	<string>co.goerwin.KeyRemapperDaemon</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
@@ -26,8 +30,8 @@
 	<true/>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>co.goerwin.KeyRemapperDaemon</key>
-		<string>identifier "co.goerwin.KeyRemapperDaemon" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: erwingaitano@gmail.com (E2274VDXEZ)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		<key>__replacedByScripts__</key>
+		<string></string>
 	</dict>
 </dict>
 </plist>

@@ -98,7 +98,6 @@ public:
     reset();
   }
 
-  // TODO: the argument should only receive code and state
   KeyEvents applyKeys(KeyEvents keyEvents) {
     KeyEvents newKeyEvents = {};
 

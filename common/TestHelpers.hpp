@@ -59,8 +59,8 @@ json runTests(json tests, json rules, json symbols) {
         continue;
       }
 
-      auto inputKey = keyRemapper->getKeyEventsFromString(item);
-      auto resKeyEvents = keyRemapper->applyKeys({inputKey});
+      auto inputKeys = keyRemapper->getKeyEventsFromString(item);
+      auto resKeyEvents = keyRemapper->applyKeys(inputKeys);
       resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
     }
 
