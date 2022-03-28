@@ -1,9 +1,15 @@
 #!/usr/bin/env zsh
 
-source .env 2> /dev/null || true
+source .env 2>/dev/null || true
 
-if [ -z $SRCROOT ]; then printf "Error: no SRCROOT"; exit 1; fi
-if [ -z $APP_CERTIFICATE ]; then printf "Error: no APP_CERTIFICATE"; exit 1; fi
+if [ -z $SRCROOT ]; then
+  printf "Error: no SRCROOT defined"
+  exit 1
+fi
+if [ -z $APP_CERTIFICATE ]; then
+  printf "Error: no APP_CERTIFICATE defined"
+  exit 1
+fi
 
 sourceInfoPlistPath="$SRCROOT/$TARGET_NAME/Info.plist"
 buildPlistPath="$BUILD_DIR/$TARGET_NAME/Info.build.plist"

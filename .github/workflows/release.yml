@@ -18,14 +18,22 @@ jobs:
       - working-directory: ./mac
         id: xcodebuildStep
         run: |
-          xcodebuild -target KeyRemapperTerminal archive -configuration Release
+          rm -rf build
 
-          # Get the dirpath of the executable
-          binPath=$(echo $(dirname $(readlink "build/Release/KeyRemapperTerminal")))
+          xcodebuild archive -target KeyRemapper -configuration Release
+
+          # get new version to release from tag "vX.Y.Z"
+          # and parse it to "X.Y.Z"
+          newVersion=${{github.ref_name}}
+          newVersion=$(echo "${newVersion/v/""}")
+
+          sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
+
+          appPath=$(echo $(dirname $(readlink "build/Release/KeyRemapper")))
 
           rm -rf output
           mkdir output
-          cp -r "$binPath" output/mac
+          cp -r "$appPath" output/mac
           cd output
           zip -r mac.zip mac
 
