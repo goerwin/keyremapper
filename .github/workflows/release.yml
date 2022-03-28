@@ -45,13 +45,10 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - working-directory: ./mac
+      - name: Archive the app and zip it
+        working-directory: ./mac
         id: xcodebuildStep
         run: |
-          rm -rf build
-
-          xcodebuild archive -target KeyRemapper -configuration Release
-
           # get new version to release from tag "vX.Y.Z"
           # and parse it to "X.Y.Z"
           newVersion=${{github.ref_name}}
@@ -59,7 +56,13 @@ jobs:
 
           sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
 
-          appPath=$(echo $(dirname $(readlink "build/Release/KeyRemapper.app")))
+          # Remove build folder to avoid cache issues
+          rm -rf build
+
+          # Run
+          xcodebuild archive -target KeyRemapper -configuration Release
+
+          appPath=$(readlink "build/Release/KeyRemapper.app")
 
           rm -rf output
           mkdir output
