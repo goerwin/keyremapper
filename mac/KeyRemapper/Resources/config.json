@@ -3,6 +3,10 @@
 {
   "profiles": [
     {
+      "doubleClickSpeed": 500,
+      "delayUntilRepeat": 300,
+      "keyRepeatInterval": 25,
+      "keyPressesDelay": 200,
       "name": "My Config",
       "remaps": [],
       "keyPresses": [],
