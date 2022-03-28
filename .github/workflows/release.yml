@@ -21,6 +21,7 @@ jobs:
           P12_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.MAC_DEVELOPER_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
+          APP_CERTIFICATE: ${{ secrets.MAC_APP_CERTIFICATE }}
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
