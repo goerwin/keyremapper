@@ -143,12 +143,37 @@ Common key properties used above
 }
 ```
 
-### Reference
+Also, sharing arrays and objects inside the `config.json` file can be achieved using the special helpers `%array`, `%dotdotdotArray`, `%object` and `%dotdotdotObject`. Check my personal config or the tests for this functionality (see [reference](#user-content-reference))
 
-- Current keyboard and app names can be found using the `Logger`
-- Mac's [symbols.json](mac/KeyRemapper/Resources/symbols.json)
-- Windows' [symbols.json](win/src/files/symbols.json)
-- My personal Mac's [config.json](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)
+```jsonc
+{
+  "profiles": [
+    {
+      "name": "Profile 1",
+      "remaps": "%array(_remaps.json)",
+      "keyBindings": [
+        "%dotdotdotArray(_vimMode.json)",
+        "%object(_sharedKeybinding)",
+        {
+          "%dotdotdotObject": "(_sharedKeybinding2.json)"
+        }
+      ]
+    },
+
+    {
+      "name": "Profile 2",
+      "remaps": "%array(_remaps.json)",
+      "keyBindings": [
+        "%dotdotdotArray(_vimMode.json)",
+        "%object(_sharedKeybinding)",
+        {
+          "%dotdotdotObject": "(_sharedKeybinding2.json)"
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Build
 
@@ -173,3 +198,12 @@ Common key properties used above
     # open `Developer PowerShell for VS 2022` or similar
     $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
   ```
+
+## Reference
+
+- Current keyboard and app names can be found using the `Logger`
+- Mac's [symbols.json](mac/KeyRemapper/Resources/symbols.json)
+- Windows' [symbols.json](win/src/files/symbols.json)
+- My personal Mac's [config.json](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)
+- [Json Helpers test example](Tests/imports.json)
+- [Notes](notes.md)
