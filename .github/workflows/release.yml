@@ -62,7 +62,7 @@ jobs:
           # Run
           xcodebuild archive -target KeyRemapper -configuration Release
 
-          appPath=$(readlink "build/Release/KeyRemapper.app")
+          appPath=$(dirname $(readlink "build/Release/KeyRemapper.app"))
 
           rm -rf output
           mkdir output
