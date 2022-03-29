@@ -2,7 +2,7 @@
   "indentation": {
     "spaces": 2
   },
-  "lineLength": 80,
+  "lineLength": 120,
   "maximumBlankLines": 1,
   "rules": {
     "AllPublicDeclarationsHaveDocumentation": false,

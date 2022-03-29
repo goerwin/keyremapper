@@ -317,7 +317,6 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     loggerViewController?.window?.orderFrontRegardless()
     loggerViewController?.window?.center()
     loggerViewController?.showWindow(loggerViewController?.window)
-
   }
 
   @objc func quit() {
