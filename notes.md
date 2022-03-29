@@ -27,8 +27,8 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
-  - [ ] prettify code
   - [ ] Memory leaks
+  - [x] prettify code
   - [x] handle daemon crash
   - [x] logging support
   - [x] update readme
