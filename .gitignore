@@ -3,3 +3,4 @@ Tests/output
 Tests/output.*
 mac/output
 .env
+.zip
