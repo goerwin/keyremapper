@@ -1,11 +1,11 @@
 // All about XPC
 // https://rderik.com/blog/xpc-services-on-macos-apps-using-swift/#the-idea-behind-xpc-and-its-uses
 
-#import < AppKit / AppKit.h >
-#import < AppKit / NSWorkspace.h >
-#import < Foundation / Foundation.h >
+#import "AppKit/AppKit.h"
+#import "AppKit/NSWorkspace.h"
+#import "Foundation/Foundation.h"
 
-#import < IOKit / hidsystem / ev_keymap.h >
+#import "IOKit/hidsystem/ev_keymap.h"
 #import "co_goerwin_KeyRemapperDaemon-Swift.h"
 
 #import "../../common/Helpers.hpp"
