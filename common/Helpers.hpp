@@ -1,10 +1,11 @@
 #pragma once
 
+#include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
-#include <fstream>
-#include <regex>
+
 #include "./vendors/json.hpp"
 
 namespace Helpers {
@@ -26,8 +27,8 @@ String replaceAll(String str, const String &from, const String &to) {
   size_t start_pos = 0;
   while ((start_pos = str.find(from, start_pos)) != String::npos) {
     str.replace(start_pos, from.length(), to);
-    start_pos +=
-        to.length(); // Handles case where 'to' is a substring of 'from'
+    // Handles case where 'to' is a substring of 'from'
+    start_pos += to.length();
   }
   return str;
 }
@@ -68,7 +69,7 @@ json getJsonFile(String filePath) {
   auto pathPartsSize = pathParts.size();
   for (size_t i = 0; i < pathPartsSize - 1; i++)
     dirPath = dirPath + "/" + pathParts[i];
-  
+
   std::ifstream file(filePath);
   String fileStr((std::istreambuf_iterator<char>(file)),
                  std::istreambuf_iterator<char>());
@@ -101,7 +102,8 @@ json getJsonFile(String filePath) {
         String innerFileStr = "";
 
         if (matches.size() == 2) {
-          innerFileStr = getJsonFile(dirPath + "/" + std::string(matches[1])).dump();
+          innerFileStr =
+              getJsonFile(dirPath + "/" + std::string(matches[1])).dump();
 
           if (name == "dotdotdotArray" || name == "dotdotdotObject") {
             auto openingBracketIdx = name == "dotdotdotArray"
@@ -124,13 +126,14 @@ json getJsonFile(String filePath) {
   return json::parse(fileStr, nullptr, false, true);
 }
 
-template <class T> class circular_buffer {
-private:
+template <class T>
+class circular_buffer {
+ private:
   int capacity;
   T *buf;
   int currSize;
 
-public:
+ public:
   circular_buffer(int _capacity)
       : currSize(0), buf(new T[_capacity]), capacity(_capacity) {}
 
@@ -150,4 +153,4 @@ public:
 
   T operator[](int idx) const { return buf[idx]; }
 };
-} // namespace Helpers
+}  // namespace Helpers

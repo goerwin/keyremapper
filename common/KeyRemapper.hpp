@@ -1,9 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <thread>
 #include <vector>
-#include <chrono>
+
 #include "./Helpers.hpp"
 #include "./vendors/json.hpp"
 
@@ -14,7 +15,7 @@ class KeyRemapper {
   typedef unsigned short ushort;
   typedef std::vector<json> JsonArray;
 
-public:
+ public:
   struct KeyEvent {
     String name;
     ushort code;
@@ -23,7 +24,7 @@ public:
   };
   typedef std::vector<KeyEvent> KeyEvents;
 
-private:
+ private:
   json globals = {};
   json symbols;
   json profile;
@@ -38,14 +39,12 @@ private:
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
 
-  double getTimeDifference(double time1, double time2) {
-      return time1 - time2;
-  }
+  double getTimeDifference(double time1, double time2) { return time1 - time2; }
 
   String lastKeyName;
   short keyPressesCount = 0;
-  double keyDownTime = 0; // in ms
-  double keyUpTime = 0; // in ms
+  double keyDownTime = 0;  // in ms
+  double keyUpTime = 0;    // in ms
 
   void setKeyPressesCount(String keyName, bool isKeyDown) {
     if (lastKeyName != keyName) {
@@ -63,18 +62,22 @@ private:
         return;
       }
 
-      keyDownTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+      keyDownTime = std::chrono::system_clock::now().time_since_epoch() /
+                    std::chrono::milliseconds(1);
 
-      if (!keyUpTime || getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
+      if (!keyUpTime ||
+          getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
         keyPressesCount = 0;
 
       keyUpTime = 0;
       return;
     }
 
-    keyUpTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+    keyUpTime = std::chrono::system_clock::now().time_since_epoch() /
+                std::chrono::milliseconds(1);
 
-    if (keyDownTime != 0 && getTimeDifference(keyUpTime, keyDownTime) < keyPressesDelay) {
+    if (keyDownTime != 0 &&
+        getTimeDifference(keyUpTime, keyDownTime) < keyPressesDelay) {
       keyDownTime = 0;
       keyPressesCount = lastKeyName == keyName ? keyPressesCount + 1 : 1;
       return;
@@ -85,14 +88,14 @@ private:
     keyUpTime = 0;
   }
 
-public:
+ public:
   KeyRemapper(json profileEl, json symbolsEl) {
     profile = profileEl;
     symbols = symbolsEl;
     keybindings = profileEl["keybindings"].get<JsonArray>();
     keyPressesDelay = profileEl["keyPressesDelay"].is_null()
-                      ? 200
-                      : profileEl["keyPressesDelay"].get<short>();
+                          ? 200
+                          : profileEl["keyPressesDelay"].get<short>();
     remaps = profileEl["remaps"];
     keyPresses = profileEl["keyPresses"];
     reset();
@@ -131,37 +134,40 @@ public:
           setValues(keybindingInfo["set"]);
         else {
           setValues(keybindingInfo["setOnKeyUp"]);
-          afterKeyUpKeyEvents = getKeyEventsFromString(keybindingInfo["afterKeyUp"]);
+          afterKeyUpKeyEvents =
+              getKeyEventsFromString(keybindingInfo["afterKeyUp"]);
         }
 
         json send = keybindingInfo["send"];
-        localKeyEvents = Helpers::concatArrays(localKeyEvents,
+        localKeyEvents = Helpers::concatArrays(
+            localKeyEvents,
             getKeyEventsFromString(isKeyDown ? send[0] : send[1]));
       } else
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
+        localKeyEvents =
+            Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
 
       setKeyPressesCount(keyName, isKeyDown);
       auto keyPressesInfo = getKeyPressesInfo(keyName, isKeyDown);
       if (!keyPressesInfo.is_null()) {
         setValues(keyPressesInfo["set"]);
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, getKeyEventsFromString(keyPressesInfo["send"]));
-        afterKeyUpKeyEvents = Helpers::concatArrays(afterKeyUpKeyEvents, getKeyEventsFromString(keyPressesInfo["afterKeyUp"]));
+        localKeyEvents = Helpers::concatArrays(
+            localKeyEvents, getKeyEventsFromString(keyPressesInfo["send"]));
+        afterKeyUpKeyEvents = Helpers::concatArrays(
+            afterKeyUpKeyEvents,
+            getKeyEventsFromString(keyPressesInfo["afterKeyUp"]));
       }
 
       if (applyKeysCb)
-        applyKeysCb(
-          globals["appName"],
-          globals["keyboard"],
-          globals["keyboardDescription"],
-          // inputCode:inputState -> remappedCode:remappedState -> parsedKeyEvent -> remappedKeyEvent -> keyEventsSent
-          std::to_string(code) + ":" +
-            std::to_string(state) + " -> " +
-            std::to_string(remappedCode) + ":" +
-            std::to_string(remappedState) + " -> " +
-            stringifyKeyEvents({parsedKeyEvent}) + " -> " +
-            stringifyKeyEvents({remappedKeyEvent}) + " -> " +
-            stringifyKeyEvents(localKeyEvents)
-        );
+        applyKeysCb(globals["appName"], globals["keyboard"],
+                    globals["keyboardDescription"],
+                    // inputCode:inputState -> remappedCode:remappedState ->
+                    // parsedKeyEvent -> remappedKeyEvent -> keyEventsSent
+                    std::to_string(code) + ":" + std::to_string(state) +
+                        " -> " + std::to_string(remappedCode) + ":" +
+                        std::to_string(remappedState) + " -> " +
+                        stringifyKeyEvents({parsedKeyEvent}) + " -> " +
+                        stringifyKeyEvents({remappedKeyEvent}) + " -> " +
+                        stringifyKeyEvents(localKeyEvents));
 
       newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
     }
@@ -169,16 +175,15 @@ public:
     return newKeyEvents;
   }
 
-  void setAppName(String appName) {
-    globals["appName"] = appName;
-  }
+  void setAppName(String appName) { globals["appName"] = appName; }
 
   void setKeyboard(String keyboard, String description) {
     globals["keyboard"] = keyboard;
     globals["keyboardDescription"] = description;
   }
 
-  void setApplyKeysCb(std::function<void(String, String, String, String)> _applyKeysCb) {
+  void setApplyKeysCb(
+      std::function<void(String, String, String, String)> _applyKeysCb) {
     applyKeysCb = _applyKeysCb;
   }
 
@@ -202,8 +207,7 @@ public:
   }
 
   KeyEvents getKeyEventsFromString(json str) {
-    if (str.is_null())
-      return {};
+    if (str.is_null()) return {};
 
     Strings strKeys = Helpers::split(str, ' ');
     auto strKeysSize = strKeys.size();
@@ -219,8 +223,8 @@ public:
       if (keyName == SPECIAL_KEY) {
         ushort val = atoi(keyDesc[2].c_str());
         keyEvents = Helpers::concatArrays(
-          keyEvents, {{keyName + ":" + keyDesc[1], SPECIAL_KEY_CODE, val, true}}
-        );
+            keyEvents,
+            {{keyName + ":" + keyDesc[1], SPECIAL_KEY_CODE, val, true}});
         continue;
       }
 
@@ -235,7 +239,8 @@ public:
       else if (keyStateStr == "up")
         keyEvents = Helpers::concatArrays(keyEvents, {keyEventUp});
       else
-        keyEvents = Helpers::concatArrays(keyEvents, {keyEventDown, keyEventUp});
+        keyEvents =
+            Helpers::concatArrays(keyEvents, {keyEventDown, keyEventUp});
     }
 
     return keyEvents;
@@ -256,7 +261,7 @@ public:
     keyUpTime = 0;
   }
 
-private:
+ private:
   bool ifConditions(json ifConds) {
     if (ifConds.is_null()) return true;
 
@@ -287,12 +292,10 @@ private:
       for (size_t j = 0; j < keys.size(); j++) {
         if (key != keys[j]) continue;
 
-        return {
-          { "send", keybinding["send"] },
-          { "afterKeyUp", keybinding["afterKeyUp"] },
-          { "set", keybinding["set"] },
-          { "setOnKeyUp", keybinding["setOnKeyUp"] }
-        };
+        return {{"send", keybinding["send"]},
+                {"afterKeyUp", keybinding["afterKeyUp"]},
+                {"set", keybinding["set"]},
+                {"setOnKeyUp", keybinding["setOnKeyUp"]}};
       }
     }
 
@@ -311,11 +314,9 @@ private:
       if (key != keypress["key"]) continue;
       if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
 
-      return {
-        { "send", keypress["send"] },
-        { "set", keypress["set"] },
-        { "afterKeyUp", keypress["afterKeyUp"] }
-      };
+      return {{"send", keypress["send"]},
+              {"set", keypress["set"]},
+              {"afterKeyUp", keypress["afterKeyUp"]}};
     }
 
     return {};

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vendors/json.hpp"
 #include "KeyRemapper.hpp"
+#include "vendors/json.hpp"
 
 using json = nlohmann::json;
 typedef std::string String;
@@ -9,8 +9,7 @@ typedef unsigned short ushort;
 
 namespace TestHelpers {
 json runTests(json tests, json rules, json symbols) {
-  if (tests.is_null())
-    return {};
+  if (tests.is_null()) return {};
 
   auto keyRemapper = new KeyRemapper(rules, symbols);
 
@@ -28,7 +27,7 @@ json runTests(json tests, json rules, json symbols) {
     auto resultKeyEvents = keyRemapper->getKeyEventsFromString("");
     std::stringstream ss(inputKeysStr);
 
-    while(ss.good()) {
+    while (ss.good()) {
       String item;
       getline(ss, item, ' ');
       String delayKey = "test_delay:";
@@ -78,4 +77,4 @@ json runTests(json tests, json rules, json symbols) {
 
   return {{"ok", ok}, {"testsSize", testsSize}, {"message", message}};
 }
-}
+}  // namespace TestHelpers

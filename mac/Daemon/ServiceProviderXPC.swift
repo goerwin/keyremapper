@@ -4,13 +4,19 @@
 import Foundation
 
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
-  func start(configPath: String, symbolsPath: String, profileIdx: Int, withReply reply: @escaping (Int) -> Void) {
+  func start(
+    configPath: String, symbolsPath: String, profileIdx: Int,
+    withReply reply: @escaping (Int) -> Void
+  ) {
     if GlobalSwift.appBridge == nil {
       GlobalSwift.appBridge = AppBridge()
     }
 
     GlobalSwift.appBridge?.stop()
-    let startResult = GlobalSwift.appBridge?.start(configPath, withSymbolsPath: symbolsPath, withProfileIdx: Int32(profileIdx), withAppName: GlobalSwift.getFrontmostAppName())
+    let startResult = GlobalSwift.appBridge?.start(
+      configPath, withSymbolsPath: symbolsPath,
+      withProfileIdx: Int32(profileIdx),
+      withAppName: GlobalSwift.getFrontmostAppName())
 
     return reply(Int(startResult ?? -1))
   }
@@ -22,15 +28,15 @@ import Foundation
   func kill() {
     GlobalSwift.kill()
   }
-  
+
   func uninstall() {
     GlobalSwift.uninstall()
   }
-  
+
   func startLogging() {
     GlobalSwift.appBridge?.startLogging()
   }
-  
+
   func stopLogging() {
     GlobalSwift.appBridge?.stopLogging()
   }

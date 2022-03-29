@@ -1,0 +1,8 @@
+# Script to format all clang-supported files
+# $ files=($(ls **/*.(c|cpp|h|hpp|m|mm) | egrep -v "/(build|vendors|windowsLibraries)/")); for file in $files; do clang-format -i "$file"; done
+
+# Format swift files in mac
+# $ ./swift-format format -i mac/**/*.swift
+
+ColumnLimit: 80
+BasedOnStyle: Google
