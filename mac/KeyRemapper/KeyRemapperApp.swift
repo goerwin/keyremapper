@@ -4,7 +4,6 @@ import UserNotifications
 @main
 struct KeyRemapperApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) fileprivate var appDelegate
-
     var body: some Scene {
       WindowGroup {}
     }
@@ -17,17 +16,39 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   }()
   
   var activeProfileIdx: Int?
-  lazy private var aboutBoxWindowController: NSWindowController? = {
-    let aboutView = AboutView()
+  lazy private var aboutViewController: NSWindowController? = {
+    let view = AboutView()
       let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
       let window = NSWindow()
       window.styleMask = styleMask
       window.title = "About \(BUNDLE_NAME)"
-      window.contentView = NSHostingView(rootView: aboutView)
+      window.contentView = NSHostingView(rootView: view)
       return NSWindowController(window: window)
   }()
   
-  var _daemonRemoteObject: ServiceProviderXPCProtocol?
+  lazy var loggerViewController: LoggerWindowController? = {
+    let view = LoggerView(state: Global.state)
+    let window = NSWindow()
+    let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .resizable]
+    window.styleMask = styleMask
+    window.title = "Logger"
+    window.contentView = NSHostingView(rootView: view)
+    let controller = LoggerWindowController(window: window)
+
+    controller.onWindowDidBecomeMain = {
+      self.daemonRemoteObject?.startLogging()
+    }
+    
+    controller.onWindowWillClose = {
+      self.daemonRemoteObject?.stopLogging()
+      Global.state.resetLogStr()
+    }
+        
+    window.delegate = controller
+    return controller
+  }()
+  
+  private var _daemonRemoteObject: ServiceProviderXPCProtocol?
   var daemonRemoteObject: ServiceProviderXPCProtocol? {
     get {
       if _daemonRemoteObject != nil {
@@ -48,6 +69,9 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
           self._daemonRemoteObject = nil
       }
       
+      connection.exportedInterface = NSXPCInterface(with: AppProviderXPCProtocol.self)
+      connection.exportedObject = AppProviderXPC()
+      
       _daemonRemoteObject = connection.synchronousRemoteObjectProxyWithErrorHandler { error in
         print("Error:", error)
       } as? ServiceProviderXPCProtocol
@@ -58,7 +82,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
       if let window = NSApplication.shared.windows.first { window.close() }
 
-      activeProfileIdx = Util.getJsonConfigActiveProfileIdx()
+      activeProfileIdx = Global.getJsonConfigActiveProfileIdx()
       startDaemon()
     }
 
@@ -76,17 +100,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
           center.add(request)
         }
     }
-
   }
-
-  func showCloseAlert(_ title: String, _ description: String) {
-          let alert = NSAlert()
-          alert.messageText = title
-          alert.informativeText = description
-        alert.alertStyle = NSAlert.Style.warning
-          alert.addButton(withTitle: "OK")
-    alert.runModal()
-   }
 
   @objc func reloadMenuBar() {
     guard let statusBarItem = statusBarItem else { return }
@@ -94,7 +108,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     guard let iconImage = NSImage(named: "MenuBarIcon") else { return }
 
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
-    menuButton.image = Util.resizeImage(image: iconImage, w: 16, h: 16)
+    menuButton.image = Global.resizeImage(image: iconImage, w: 16, h: 16)
     menuButton.image?.isTemplate = true
     menuButton.frame = CGRect(x: 0.0, y: 3, width: menuButton.frame.width, height: menuButton.frame.height)
 
@@ -106,6 +120,10 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     statusBarItemMenu.addItem(
         withTitle: "Open Config Folder",
         action: #selector(AppDelegate.openConfigFolder),
+        keyEquivalent: "")
+    statusBarItemMenu.addItem(
+        withTitle: "Logger",
+        action: #selector(AppDelegate.openLoggerWindow),
         keyEquivalent: "")
     
     statusBarItemMenu.addItem(.separator())
@@ -119,7 +137,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         keyEquivalent: "")
 
     // add profiles to menu
-    if let jsonConfig = Util.getJsonConfig() {
+    if let jsonConfig = Global.getJsonConfig() {
       let activeProfileIdx = activeProfileIdx ?? 0
       let profiles = jsonConfig["profiles"] as? [Dictionary<String, AnyObject>] ?? []
       
@@ -169,7 +187,7 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
         return _authRef
       }
       
-      _authRef = Util.getPrivilegedHelperAuth()
+      _authRef = Global.getPrivilegedHelperAuth()
       return _authRef
     }
   }
@@ -182,35 +200,35 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
       guard let authRef = authRef else {
-        return showCloseAlert("Error", "Authorization required for Daemon")
+        return Global.showCloseAlert("Error", "Authorization required for Daemon")
       }
       
-      let blessed = Util.blessHelper(label: MACH_SERVICE_NAME, authRef: authRef)
+      let blessed = Global.blessHelper(label: MACH_SERVICE_NAME, authRef: authRef)
 
       if (!blessed) {
-        return showCloseAlert("Error", "Not Blessed to run the Daemon")
+        return Global.showCloseAlert("Error", "Not Blessed to run the Daemon")
       }
     
-    guard let configPath = Util.getConfigPath() else {
-      return showCloseAlert("No config", "No config path constructed")
+    guard let configPath = Global.getConfigPath() else {
+      return Global.showCloseAlert("No config", "No config path constructed")
     }
 
-    if (!Util.fileExists(configPath)) {
-      return showCloseAlert("File not found", "\(configPath) not found")
+    if (!Global.fileExists(configPath)) {
+      return Global.showCloseAlert("File not found", "\(configPath) not found")
     }
 
     guard let daemonRemoteObject = self.daemonRemoteObject else {
-      return showCloseAlert("Error", "No Daemon service remote object running")
+      return Global.showCloseAlert("Error", "No Daemon service remote object running")
     }
 
    var daemonVersion: String?
    daemonRemoteObject.getVersion { version in daemonVersion = version }
     
    if (daemonVersion != VERSION) {
-     return showCloseAlert("Wrong Daemon version", "App \(VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon")
+     return Global.showCloseAlert("Wrong Daemon version", "App \(VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon")
    }
 
-    guard let symbolsPath = Util.getResourceSymbolsPath() else { return }
+    guard let symbolsPath = Global.getResourceSymbolsPath() else { return }
 
     var daemonStartResult: Int?
     daemonRemoteObject.start(configPath: configPath, symbolsPath: symbolsPath, profileIdx: profileIdx ?? activeProfileIdx ?? 0) {
@@ -218,14 +236,14 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     if (daemonStartResult == 1) {
-      self.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
+      Global.showCloseAlert("Enable Accesibility", "Enable Accesibility for this app")
 
       IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
       return
     }
 
     if (daemonStartResult != 0) {
-      return self.showCloseAlert("Error", "Couldn't start Daemon process. Error \(daemonStartResult ?? -1)")
+      return Global.showCloseAlert("Error", "Couldn't start Daemon process. Error \(daemonStartResult ?? -1)")
     }
 
     self.daemonStarted = true
@@ -255,15 +273,15 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
   }
   
   @objc func openConfigFolder() {
-    guard let rootPath = Util.getRootPath() else { return }
+    guard let rootPath = Global.getRootPath() else { return }
     guard let resourcePath = Bundle.main.resourcePath else { return }
     
     do {
-      guard let configPath = Util.getConfigPath() else { return }
-      let configFileExists = Util.fileExists(configPath)
+      guard let configPath = Global.getConfigPath() else { return }
+      let configFileExists = Global.fileExists(configPath)
       
       if (!configFileExists) {
-        try Util.copyFile(srcPath: "\(resourcePath)/config.json", to: configPath)
+        try Global.copyFile(srcPath: "\(resourcePath)/config.json", to: configPath)
       }
 
     } catch let error {
@@ -275,9 +293,17 @@ fileprivate class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func openAboutWindow() {
     NSApp.activate(ignoringOtherApps: true)
-    aboutBoxWindowController?.window?.orderFrontRegardless()
-    aboutBoxWindowController?.window?.center()
-      aboutBoxWindowController?.showWindow(aboutBoxWindowController?.window)
+    aboutViewController?.window?.orderFrontRegardless()
+    aboutViewController?.window?.center()
+    aboutViewController?.showWindow(aboutViewController?.window)
+  }
+  
+  @objc func openLoggerWindow() {
+    NSApp.activate(ignoringOtherApps: true)
+    loggerViewController?.window?.orderFrontRegardless()
+    loggerViewController?.window?.center()
+    loggerViewController?.showWindow(loggerViewController?.window)
+    
   }
 
   @objc func quit() {

@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F95EC5B927EF174E00B370B2 /* AppBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5B827EF174E00B370B2 /* AppBridge.mm */; };
-		F95EC5BB27EF1DE000B370B2 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BA27EF1DE000B370B2 /* Global.swift */; };
+		F95EC5BB27EF1DE000B370B2 /* GlobalSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */; };
 		F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BE27EF1F2900B370B2 /* Constants.swift */; };
 		F95EC5C027EF1F2900B370B2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BE27EF1F2900B370B2 /* Constants.swift */; };
 		F9600A3227F015250051BFE1 /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = F9600A3127F015250051BFE1 /* config.json */; };
@@ -18,7 +18,11 @@
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
 		F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926627644E35009ACA0A /* Preview Assets.xcassets */; };
 		F9B4D1AB27F1591400FC513C /* CodeSignUpdate.sh in Resources */ = {isa = PBXBuildFile; fileRef = F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */; };
-		F9C759FC27ED7BE000F2E31C /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Util.swift */; };
+		F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B127F2754300FC513C /* LoggerView.swift */; };
+		F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */; };
+		F9B4D1B627F292B400FC513C /* AppProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */; };
+		F9B4D1BA27F2B10E00FC513C /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B927F2B10E00FC513C /* State.swift */; };
+		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
 		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */; };
@@ -68,7 +72,7 @@
 
 /* Begin PBXFileReference section */
 		F95EC5B827EF174E00B370B2 /* AppBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppBridge.mm; sourceTree = "<group>"; };
-		F95EC5BA27EF1DE000B370B2 /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSwift.swift; sourceTree = "<group>"; };
 		F95EC5BE27EF1F2900B370B2 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F9600A3127F015250051BFE1 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		F9600A3327F016780051BFE1 /* symbols.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = symbols.json; sourceTree = "<group>"; };
@@ -80,7 +84,11 @@
 		F9A8926827644E35009ACA0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyRemapper.entitlements; sourceTree = "<group>"; };
 		F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = CodeSignUpdate.sh; sourceTree = "<group>"; };
-		F9C759FB27ED7BE000F2E31C /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
+		F9B4D1B127F2754300FC513C /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
+		F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerWindowController.swift; sourceTree = "<group>"; };
+		F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProviderXPC.swift; sourceTree = "<group>"; };
+		F9B4D1B927F2B10E00FC513C /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		F9C759FB27ED7BE000F2E31C /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F9C75A2F27ED93BC00F2E31C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -148,13 +156,17 @@
 		F9A8925E27644E33009ACA0A /* KeyRemapper */ = {
 			isa = PBXGroup;
 			children = (
-				F9600A3027F014D10051BFE1 /* Resources */,
 				F9A8926827644E35009ACA0A /* Info.plist */,
 				F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */,
+				F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */,
 				F99C5DF627E7CDB60080117D /* AboutView.swift */,
-				F9C759FB27ED7BE000F2E31C /* Util.swift */,
+				F9B4D1B127F2754300FC513C /* LoggerView.swift */,
+				F9B4D1B927F2B10E00FC513C /* State.swift */,
+				F9C759FB27ED7BE000F2E31C /* Global.swift */,
+				F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */,
 				F9A8926327644E35009ACA0A /* Assets.xcassets */,
 				F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */,
+				F9600A3027F014D10051BFE1 /* Resources */,
 				F9A8926527644E35009ACA0A /* Preview Content */,
 			);
 			path = KeyRemapper;
@@ -173,7 +185,7 @@
 			children = (
 				F9C75A2F27ED93BC00F2E31C /* Info.plist */,
 				F9C75A2A27ED938700F2E31C /* main.swift */,
-				F95EC5BA27EF1DE000B370B2 /* Global.swift */,
+				F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */,
 				F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */,
 				F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */,
 				F9C75A5827EF125800F2E31C /* AppBridge.h */,
@@ -346,9 +358,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				F99C5DF727E7CDB60080117D /* AboutView.swift in Sources */,
-				F9C759FC27ED7BE000F2E31C /* Util.swift in Sources */,
+				F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */,
+				F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */,
+				F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */,
 				F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */,
+				F9B4D1BA27F2B10E00FC513C /* State.swift in Sources */,
 				F9C75A3B27EED49000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */,
+				F9B4D1B627F292B400FC513C /* AppProviderXPC.swift in Sources */,
 				F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -366,7 +382,7 @@
 				F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */,
 				F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */,
 				F9C75A5927EF125800F2E31C /* AppBridge.h in Sources */,
-				F95EC5BB27EF1DE000B370B2 /* Global.swift in Sources */,
+				F95EC5BB27EF1DE000B370B2 /* GlobalSwift.swift in Sources */,
 				F9C75A2B27ED938700F2E31C /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

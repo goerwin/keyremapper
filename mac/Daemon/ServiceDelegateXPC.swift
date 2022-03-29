@@ -2,19 +2,20 @@ import Foundation
 
 class ServiceDelegateXPC : NSObject, NSXPCListenerDelegate {
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection newConnection: NSXPCConnection) -> Bool {
-        newConnection.exportedInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
-
       newConnection.interruptionHandler = {
-        Global.kill()
+        GlobalSwift.kill()
       }
       
       newConnection.invalidationHandler = {
-        Global.kill()
+        GlobalSwift.kill()
       }
       
-        let exportedObject = ServiceProviderXPC()
-        newConnection.exportedObject = exportedObject
-        newConnection.resume()
+      newConnection.remoteObjectInterface = NSXPCInterface(with: AppProviderXPCProtocol.self)
+      newConnection.exportedInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
+      newConnection.exportedObject = ServiceProviderXPC()
+      newConnection.resume()
+      
+      GlobalSwift.connection = newConnection
         return true
     }
 }

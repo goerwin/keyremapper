@@ -5,29 +5,37 @@ import Foundation
 
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
   func start(configPath: String, symbolsPath: String, profileIdx: Int, withReply reply: @escaping (Int) -> Void) {
-    if Global.appBridge == nil {
-      Global.appBridge = AppBridge()
+    if GlobalSwift.appBridge == nil {
+      GlobalSwift.appBridge = AppBridge()
     }
 
-    Global.appBridge?.stop()
-    let startResult = Global.appBridge?.start(configPath, withSymbolsPath: symbolsPath, withProfileIdx: Int32(profileIdx), withAppName: Global.getFrontmostAppName())
+    GlobalSwift.appBridge?.stop()
+    let startResult = GlobalSwift.appBridge?.start(configPath, withSymbolsPath: symbolsPath, withProfileIdx: Int32(profileIdx), withAppName: GlobalSwift.getFrontmostAppName())
 
     return reply(Int(startResult ?? -1))
   }
 
   func stop() {
-    Global.stop()
+    GlobalSwift.stop()
   }
 
   func kill() {
-    Global.kill()
+    GlobalSwift.kill()
   }
   
   func uninstall() {
-    Global.uninstall()
+    GlobalSwift.uninstall()
+  }
+  
+  func startLogging() {
+    GlobalSwift.appBridge?.startLogging()
+  }
+  
+  func stopLogging() {
+    GlobalSwift.appBridge?.stopLogging()
   }
 
   func getVersion(withReply reply: @escaping (String) -> Void) {
-    reply(Global.VERSION)
+    reply(GlobalSwift.VERSION)
   }
 }

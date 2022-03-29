@@ -9,7 +9,7 @@ func start() {
 
   // Listen for frontmost app changes
   NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil) { _ in
-    Global.appBridge?.setAppName(Global.getFrontmostAppName())
+    GlobalSwift.appBridge?.setAppName(GlobalSwift.getFrontmostAppName())
   }
 }
 

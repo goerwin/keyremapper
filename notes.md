@@ -27,9 +27,10 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
-  - [ ] logging support
-  - [ ] handle daemon crash
+  - [ ] prettify code
   - [ ] Memory leaks
+  - [x] handle daemon crash
+  - [x] logging support
   - [x] update readme
   - [x] use only one file for configs
   - [x] development license via command line?

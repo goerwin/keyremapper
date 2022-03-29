@@ -6,6 +6,7 @@
 #import <AppKit/NSWorkspace.h>
 
 #import <IOKit/hidsystem/ev_keymap.h>
+#import "co_goerwin_KeyRemapperDaemon-Swift.h"
 
 #import "../../common/KeyRemapper.hpp"
 #import "../../common/Helpers.hpp"
@@ -21,7 +22,6 @@ ushort getMacVKCode(short scanCode) {
   for (auto &[key, value] : Global::symbols.items()) {
     if (value[0] == scanCode) return value[3];
   }
-
   return {};
 }
 
@@ -125,17 +125,29 @@ void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
   threadObj.detach();
 }
 
-void enableLogging() {
-  Global::keyRemapper->setApplyKeysCb([](std::string appName, std::string keyboardId, std::string keyboardDescription, std::string keys) {
-    Helpers::print(
-      "App: " + appName + "\n" +
-      "Keyboard (vendorId:productId): " + keyboardId + "\n" +
-      "KeyboardDescription: " + keyboardDescription + "\n" +
-      "Keys: " + keys + "\n");
+void startLogging() {
+  Global::keyRemapper->setApplyKeysCb([](std::string appName, std::string kbId, std::string kbDesc, std::string keys) {
+    
+    NSMutableString *keyEventsLog = [NSMutableString stringWithString:@"AppName: "];
+    NSString *nsAppName = [NSString stringWithUTF8String:appName.c_str()];
+    NSString *nsKbId = [NSString stringWithUTF8String:kbId.c_str()];
+    NSString *nsKbDesc = [NSString stringWithUTF8String:kbDesc.c_str()];
+    NSString *nsKeys = [NSString stringWithUTF8String:keys.c_str()];
+
+    [keyEventsLog appendString:nsAppName];
+    [keyEventsLog appendString:@"\nKeyboard (vendorId:productId): "];
+    [keyEventsLog appendString:nsKbId];
+    [keyEventsLog appendString:@"\nKeyboardDescription: "];
+    [keyEventsLog appendString:nsKbDesc];
+    [keyEventsLog appendString:@"\nKeys: "];
+    [keyEventsLog appendString:nsKeys];
+    [keyEventsLog appendString:@"\n"];
+
+    [GlobalSwift sendKeyEventLogsToClient:(keyEventsLog)];
   });
 }
 
-void disableLogging() {
+void stopLogging() {
   Global::keyRemapper->setApplyKeysCb(nil);
 }
 
@@ -143,92 +155,129 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId, int
   auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
   Global::keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
   
-  auto keyEvents = Global::keyRemapper->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
-  auto keyEventsSize = keyEvents.size();
+  try {
+    auto keyEvents = Global::keyRemapper->applyKeys({{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
+    auto keyEventsSize = keyEvents.size();
 
-  for (size_t i = 0; i < keyEventsSize; i++) {
-      auto keyEvent = keyEvents[i];
-      auto name = keyEvent.name;
+    for (size_t i = 0; i < keyEventsSize; i++) {
+        auto keyEvent = keyEvents[i];
+        auto name = keyEvent.name;
 
-      if (name == "SK:Delay") {
-        std::this_thread::sleep_for(std::chrono::milliseconds(keyEvent.state));
-        continue;
+        if (name == "SK:Delay") {
+          std::this_thread::sleep_for(std::chrono::milliseconds(keyEvent.state));
+          continue;
+        }
+
+        auto code = keyEvent.code;
+        auto isKeyDown = keyEvent.isKeyDown;
+        auto vkCode = getMacVKCode(code);
+
+        if (!isKeyDown) Global::shouldKeyRepeat = false;
+
+        if (vkCode == 55 || vkCode == 54) {
+          Global::isCmdDown = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 56 || vkCode == 60) {
+          Global::isShiftDown = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 58 || vkCode == 61) {
+          Global::isAltDown = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 59 || vkCode == 62) {
+          Global::isCtrlDown = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 63) {
+          Global::isFnDown = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 57) {
+          if (isKeyDown) MyIOHIDManager::toggleCapslockState();
+        } else if (vkCode == 241) {
+          MouseManager::handleMouseDownUp(isKeyDown);
+        } else if (vkCode == 242) {
+          MouseManager::handleMouseDownUp(isKeyDown, "right");
+        } else if (Global::isMediaVkKeyCode(vkCode)) {
+          postDownUpMediaKey(vkCode, isKeyDown);
+          handleKeyRepeat(vkCode, isKeyDown);
+        } else {
+          postKey(vkCode, isKeyDown);
+          handleKeyRepeat(vkCode, isKeyDown);
+        }
       }
-
-      auto code = keyEvent.code;
-      auto isKeyDown = keyEvent.isKeyDown;
-      auto vkCode = getMacVKCode(code);
-
-      if (!isKeyDown) Global::shouldKeyRepeat = false;
-
-      if (vkCode == 55 || vkCode == 54) {
-        Global::isCmdDown = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 56 || vkCode == 60) {
-        Global::isShiftDown = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 58 || vkCode == 61) {
-        Global::isAltDown = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 59 || vkCode == 62) {
-        Global::isCtrlDown = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 63) {
-        Global::isFnDown = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 57) {
-        if (isKeyDown) MyIOHIDManager::toggleCapslockState();
-      } else if (vkCode == 241) {
-        MouseManager::handleMouseDownUp(isKeyDown);
-      } else if (vkCode == 242) {
-        MouseManager::handleMouseDownUp(isKeyDown, "right");
-      } else if (Global::isMediaVkKeyCode(vkCode)) {
-        postDownUpMediaKey(vkCode, isKeyDown);
-        handleKeyRepeat(vkCode, isKeyDown);
-      } else {
-        postKey(vkCode, isKeyDown);
-        handleKeyRepeat(vkCode, isKeyDown);
-      }
-    }
+  } catch(const std::runtime_error& err) {
+      // speciffic handling for runtime_error
+    std::string errStr = err.what();
+    NSString *nsErr = [NSString stringWithUTF8String:errStr.c_str()];
+    NSMutableString *errorMsg = [NSMutableString stringWithString:@"ApplyKeysError: "];
+    [errorMsg appendString:nsErr];
+    [GlobalSwift notifyError:errorMsg];
+  } catch(const std::exception& err) {
+      // speciffic handling for all exceptions extending std::exception, except
+      // std::runtime_error which is handled explicitly
+    std::string errStr = err.what();
+    NSString *nsErr = [NSString stringWithUTF8String:errStr.c_str()];
+    NSMutableString *errorMsg = [NSMutableString stringWithString:@"ApplyKeysError: "];
+    [errorMsg appendString:nsErr];
+    [GlobalSwift notifyError:errorMsg];
+  } catch(...) {
+    NSString *nsErr = @"ApplyKeysError: Unknown error";
+    [GlobalSwift notifyError:nsErr];
+  }
 }
 
 int start(std::string configPath, std::string symbolsPath, int profileIdx, std::string appName) {
-  auto config = Helpers::getJsonFile(configPath);
+  try {
+    auto config = Helpers::getJsonFile(configPath);
 
-  Global::reset();
-  Global::symbols = Helpers::getJsonFile(symbolsPath);
-  auto profiles = config["profiles"];
-  
-  if (!profiles.is_array()) return 5; // invalid profiles
-  auto activeProfile = profiles.at(profileIdx);
-  
-  if (!activeProfile.is_object()) return 6; // invalid profile
-  
-  Global::keyRemapper = new KeyRemapper(activeProfile, Global::symbols);
-  Global::keyRemapper->setAppName(appName);
-  
-  Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
-  ? Global::delayUntilRepeat
-    : config["delayUntilRepeat"].get<int>();
-  Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
-    ? Global::keyRepeatInterval
-    : config["keyRepeatInterval"].get<int>();
-  Global::isAppEnabled = true;
-
-    auto mouseManagerStartRes = MouseManager::start();
-    if (mouseManagerStartRes == 1) return 1;
-    if (mouseManagerStartRes != 0) return 2;
-  
-  MouseManager::doubleClickSpeed = config["doubleClickSpeed"].is_null()
-  ? MouseManager::doubleClickSpeed
-  : config["doubleClickSpeed"].get<double>();
-  
-    MyIOHIDManager::start();
-    MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
-
-    // TODO: Only set it when logging by the user
-//    enableLogging();
+    Global::reset();
+    Global::symbols = Helpers::getJsonFile(symbolsPath);
+    auto profiles = config["profiles"];
     
+    if (!profiles.is_array()) return 5; // invalid profiles
+    auto activeProfile = profiles.at(profileIdx);
+    
+    if (!activeProfile.is_object()) return 6; // invalid profile
+    
+    Global::keyRemapper = new KeyRemapper(activeProfile, Global::symbols);
+    Global::keyRemapper->setAppName(appName);
+    
+    Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
+    ? Global::delayUntilRepeat
+      : config["delayUntilRepeat"].get<int>();
+    Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
+      ? Global::keyRepeatInterval
+      : config["keyRepeatInterval"].get<int>();
+    Global::isAppEnabled = true;
+
+      auto mouseManagerStartRes = MouseManager::start();
+      if (mouseManagerStartRes == 1) return 1;
+      if (mouseManagerStartRes != 0) return 2;
+    
+    MouseManager::doubleClickSpeed = config["doubleClickSpeed"].is_null()
+    ? MouseManager::doubleClickSpeed
+    : config["doubleClickSpeed"].get<double>();
+    
+      MyIOHIDManager::start();
+      MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
+  } catch(const std::runtime_error& err) {
+      // speciffic handling for runtime_error
+    std::string errStr = err.what();
+    NSString *nsErr = [NSString stringWithUTF8String:errStr.c_str()];
+    NSMutableString *errorMsg = [NSMutableString stringWithString:@"StartError: "];
+    [errorMsg appendString:nsErr];
+    [GlobalSwift notifyError:errorMsg];
+  } catch(const std::exception& err) {
+      // speciffic handling for all exceptions extending std::exception, except
+      // std::runtime_error which is handled explicitly
+    std::string errStr = err.what();
+    NSString *nsErr = [NSString stringWithUTF8String:errStr.c_str()];
+    NSMutableString *errorMsg = [NSMutableString stringWithString:@"StartError: "];
+    [errorMsg appendString:nsErr];
+    [GlobalSwift notifyError:errorMsg];
+  } catch(...) {
+    NSString *nsErr = @"StartError: Unknown error";
+    [GlobalSwift notifyError:nsErr];
+  }
+  
     return 0;
 }
 
@@ -236,20 +285,6 @@ void stop() {
   MouseManager::stop();
   MyIOHIDManager::stop();
   Global::reset();
-  
-}
-
-void setFrontMostAppAsAsAppName() {
-  NSRunningApplication *frontmostApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
-          NSString *bundleIdentifier = [frontmostApp bundleIdentifier];
-          NSString *localizedName = [frontmostApp localizedName];
-          std::string appName = std::string(
-            bundleIdentifier != nil ?
-              [bundleIdentifier UTF8String] :
-              localizedName != nil ? [localizedName UTF8String] : "Unknown"
-          );
-
-  Global::keyRemapper->setAppName(appName);
 }
 
 @implementation AppBridge
@@ -259,6 +294,14 @@ void setFrontMostAppAsAsAppName() {
 
 - (void)stop {
   stop();
+}
+
+-(void)startLogging {
+  startLogging();
+}
+
+-(void)stopLogging {
+  stopLogging();
 }
 
 - (void)setAppName:(NSString*)appName {

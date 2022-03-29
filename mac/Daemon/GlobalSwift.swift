@@ -1,7 +1,7 @@
 import Foundation
 import AppKit
 
-struct Global {
+@objc class GlobalSwift: NSObject {
   static let CHECK_CLIENT_INTERVAL = 1.0
     static let VERSION = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
     static var appBridge: AppBridge?
@@ -11,6 +11,18 @@ struct Global {
     process.launchPath = path
     process.arguments = args
     process.launch()
+  }
+  
+  static var connection: NSXPCConnection?
+  
+  @objc static func sendKeyEventLogsToClient(_ keyEventLogs: String) {
+    guard let remoteObject = GlobalSwift.connection?.remoteObjectProxy() as? AppProviderXPCProtocol else { return }
+    remoteObject.logKeyEvents(keyEventLogs)
+  }
+  
+  @objc static func notifyError(_ err: String) {
+    guard let remoteObject = GlobalSwift.connection?.remoteObjectProxy() as? AppProviderXPCProtocol else { return }
+    remoteObject.notifyClientErrorInDaemon(err)
   }
 
   static func getFrontmostAppName() -> String {
