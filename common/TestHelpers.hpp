@@ -8,10 +8,10 @@ typedef std::string String;
 typedef unsigned short ushort;
 
 namespace TestHelpers {
-json runTests(json tests, json rules, json symbols) {
+json runTests(json tests, json profile, json symbols) {
   if (tests.is_null()) return {};
 
-  auto keyRemapper = new KeyRemapper(rules, symbols);
+  auto keyRemapper = new KeyRemapper(profile, symbols);
 
   bool ok = true;
   auto testsSize = tests.size();

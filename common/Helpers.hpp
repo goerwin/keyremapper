@@ -65,9 +65,9 @@ void print(string str, string str2 = "\n") {
 
 json getJsonFile(String filePath) {
   auto pathParts = split(filePath, '/');
-  String dirPath = "";
+  String dirPath = pathParts[0];
   auto pathPartsSize = pathParts.size();
-  for (size_t i = 0; i < pathPartsSize - 1; i++)
+  for (size_t i = 1; i < pathPartsSize - 1; i++)
     dirPath = dirPath + "/" + pathParts[i];
 
   std::ifstream file(filePath);

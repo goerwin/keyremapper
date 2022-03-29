@@ -1,30 +1,18 @@
 projectName="KeyRemapper"
 
-filesx86=(
-  "win/x86/$projectName/Release/$projectName.exe"
-  "win/x86/$projectName/Release/interception.dll"
-  "win/x86/$projectName/Release/*.json"
-)
-
-filesx64=(
-  "win/x64/$projectName/Release/$projectName.exe"
-  "win/x64/$projectName/Release/interception.dll"
-  "win/x64/$projectName/Release/*.json"
-)
+archs=("x86" "x64")
 
 tmpDir=$(mktemp -d)
 
-folder86="$projectName""_x86"
-folder64="$projectName""_x64"
-mkdir $tmpDir/$folder86
-mkdir $tmpDir/$folder64
+for arch in "${archs[@]}"; do
+  archFolder="$projectName""_$arch"
+  mkdir -p $tmpDir/$archFolder/winKeyRemapperWin
+  # mkdir "win/$arch/$projectName/Release/keyRemapperWin"
 
-for entry in "${filesx86[@]}"; do
-  cp $entry $tmpDir/$folder86
-done
-
-for entry in "${filesx64[@]}"; do
-  cp $entry $tmpDir/$folder64
+  cp "win/$arch/$projectName/Release/$projectName.exe" $tmpDir/$archFolder
+  cp "win/$arch/$projectName/Release/interception.dll" $tmpDir/$archFolder
+  cp "win/$arch/$projectName/Release/config.json" $tmpDir/$archFolder/winKeyRemapperWin
+  cp "win/$arch/$projectName/Release/symbols.json" $tmpDir/$archFolder/winKeyRemapperWin
 done
 
 # Since zip always includes the parent dir, in this case

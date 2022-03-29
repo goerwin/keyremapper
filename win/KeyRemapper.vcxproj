@@ -162,7 +162,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="src\windowsImages.rc" />
+    <ResourceCompile Include="src\resources.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\images\letter-e-red.ico" />
@@ -174,7 +174,7 @@
     <CopyFileToFolders Include="src\files\symbols.json">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="src\files\mode1.json">
+    <CopyFileToFolders Include="src\files\config.json">
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
@@ -197,6 +197,9 @@
     <CopyFileToFolders Include="src\windowsLibraries\Interception\x64\interception.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\resource.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

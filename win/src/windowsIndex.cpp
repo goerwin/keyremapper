@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "./windowsBrightness.h"
 #include "./windowsHelpers.hpp"
-#include "./windowsImages.h"
+#include "./resources.h"
 #include "./windowsLibraries/Interception/interception.h"
 #include "./windowsLibraries/Interception/utils.h"
 #include "../../common/vendors/json.hpp"
@@ -18,15 +18,14 @@ InterceptionKeyStroke keyStroke;
 
 const auto APP_TITLE = L"KeyRemapper";
 bool g_isAppEnabled = true;
-std::vector<std::string> g_modes = {"mode1.json", "mode2.json", "mode3.json", "mode4.json"};
-int g_mode;
 int g_nCmdShow;
 HINSTANCE g_hInstance;
-std::string g_appName;
-KeyRemapper *g_keyRemapper;
-nlohmann::json g_rules;
-std::string g_mainDirPath;
-nlohmann::json g_symbols;
+auto g_mainDirPath = WindowsHelpers::getMainDirPath();
+json g_symbolsJson;
+json g_activeProfile;
+json g_activeProfileIdx;
+json g_profiles;
+KeyRemapper *g_keyRemapper = NULL;
 std::vector<std::tuple<ushort, ushort, ushort, ushort>> g_interceptionRemapCodesStates;
 size_t g_interceptionRemapCodesStatesSize;
 
@@ -36,12 +35,9 @@ Helpers::circular_buffer<std::string> g_EventsInfo(60);
 
 const int IDM_EXIT = 5;
 const int IDM_ENABLE = 6;
-const int IDM_MODE_1 = 11;
-const int IDM_MODE_2 = 12;
-const int IDM_MODE_3 = 13;
-const int IDM_MODE_4 = 14;
+const int IDM_PROFILE_SELECTED = 20; // 20 to 29 reserved for profiles
 const int IDM_OPEN_EVENT_WINDOW = 15;
-const int IDM_RUN_MODE_TESTS = 16;
+const int IDM_RUN_PROFILE_TESTS = 16;
 const int IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD = 17;
 const int IDM_OPEN_MAIN_FOLDER = 18;
 
@@ -74,31 +70,49 @@ void handleApplyKeysCb(std::string appName, std::string keyboard, std::string ke
   RedrawWindow(g_eventWindow, 0, 0, RDW_INVALIDATE | RDW_INTERNALPAINT);
 }
 
-void initKeyRemapper(int mode = 0) {
-  g_mainDirPath = WindowsHelpers::getMainDirPath();
+void exitAppWithMessage(std::string title, std::string message) {
+  WindowsHelpers::sendNotification(title, message);
+  exit(0);
+}
 
-  if (WindowsHelpers::fileExists(g_mainDirPath + "\\" + g_modes[mode])) g_mode = mode;
-  else g_mode = 0;
+void initKeyRemapper(int profileIdx = 0) {
+  try {
+  auto configJsonPath = g_mainDirPath + "/config.json";
+  auto symbolsJsonPath = g_mainDirPath + "/symbols.json";
 
-  g_rules = Helpers::getJsonFile(g_mainDirPath, g_modes[g_mode]);
-  g_symbols = Helpers::getJsonFile(g_mainDirPath, "symbols.json");
+  if (!WindowsHelpers::fileExists(configJsonPath) ||
+      !WindowsHelpers::fileExists(configJsonPath))
+    throw std::runtime_error(
+        configJsonPath + " and " + symbolsJsonPath + " required");
 
-  if (g_rules.is_null() || g_symbols.is_null()) {
-    // TODO: MessageBoxA in WindowsHelpers::sendNotification does not work
-    WindowsHelpers::print(
-      "Error",
-      g_mainDirPath + "\\mode1.json and " + g_mainDirPath + "\\symbols.json files are required"
-    );
-    exit(1);
-  }
+  auto configJson = Helpers::getJsonFile(configJsonPath);
+  g_symbolsJson = Helpers::getJsonFile(symbolsJsonPath);
 
-  g_interceptionRemapCodesStates = g_symbols["_interceptionRemapCodesStates"].get<std::vector<std::tuple<ushort, ushort, ushort, ushort>>>();
+  if (configJson.is_null() || g_symbolsJson.is_null())
+    throw std::runtime_error(configJsonPath + " or" + symbolsJsonPath +
+                                " invalid");
+
+  g_interceptionRemapCodesStates =
+      g_symbolsJson["_interceptionRemapCodesStates"]
+          .get<std::vector<std::tuple<ushort, ushort, ushort, ushort>>>();
   g_interceptionRemapCodesStatesSize = g_interceptionRemapCodesStates.size();
 
-  delete g_keyRemapper;
-  g_keyRemapper = new KeyRemapper(g_rules, g_symbols);
+  g_profiles = configJson["profiles"].get<std::vector<json>>();
+  g_activeProfile = g_profiles[profileIdx];
+  g_activeProfileIdx = profileIdx;
+
+  if (g_keyRemapper) delete g_keyRemapper;
+
+  g_keyRemapper = new KeyRemapper(g_activeProfile, g_symbolsJson);
   g_keyRemapper->setApplyKeysCb(handleApplyKeysCb);
-  g_keyRemapper->setAppName(g_appName);
+  g_keyRemapper->setAppName(WindowsHelpers::getActiveWindowProcessName());
+  } catch (const std::runtime_error &err) {
+    exitAppWithMessage("RuntimeError", err.what());
+  } catch (const std::exception &err) {
+    exitAppWithMessage("GeneralError", err.what());
+  } catch (...) {
+    exitAppWithMessage("GeneralError", "Unknown Error");
+  }
 }
 
 void toggleAppEnabled() {
@@ -128,10 +142,9 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     device = interception_wait(context),
     (InterceptionStroke*)&keyStroke, 1) > 0
   ) {
-    // TODO: It should return immediately but since I'm not using global shortcuts,
-    // I have to use this until I implement global shortcuts
+    try {
     if (!g_isAppEnabled)
-      interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
+      return interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
 
     wchar_t hardwareId[500];
     size_t length = interception_get_hardware_id(context, device, hardwareId, sizeof(hardwareId));
@@ -166,26 +179,6 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       auto name = keyEvent.name;
       auto state = keyEvent.state;
 
-      if (name == "SK:Mode1") {
-        initKeyRemapper(0);
-        return 0;
-      }
-
-      if (name == "SK:Mode2") {
-        initKeyRemapper(1);
-        return 0;
-      }
-
-      if (name == "SK:Mode3") {
-        initKeyRemapper(2);
-        return 0;
-      }
-
-      if (name == "SK:Mode4") {
-        initKeyRemapper(3);
-        return 0;
-      }
-
       if (name == "SK:Delay") {
         std::this_thread::sleep_for(std::chrono::milliseconds(state));
         continue;
@@ -194,11 +187,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
       auto code = keyEvent.code;
       auto isKeyDown = keyEvent.isKeyDown;
 
-      if (code == 245) {
-        toggleAppEnabled();
-        break;
-      } else if (!g_isAppEnabled) continue;
-      else if (code == 241) {
+      if (code == 241) {
         if (isKeyDown) mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
         else mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
       } else if (code == 242) {
@@ -211,6 +200,14 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
         interception_send(context, device, (InterceptionStroke *)&newKeyStroke, 1);
       }
     }
+    } catch (const std::runtime_error &err) {
+      exitAppWithMessage("RuntimeError", err.what());
+    } catch (const std::exception &err) {
+      exitAppWithMessage("GeneralError", err.what());
+    } catch (...) {
+      exitAppWithMessage("GeneralError", "Unknown Error");
+    }
+
   }
 
   interception_destroy_context(context);
@@ -221,9 +218,7 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
 void CALLBACK handleWindowChange(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
                                  HWND hwnd, LONG idObject, LONG idChild,
                                  DWORD dwEventThread, DWORD dwmsEventTime) {
-    auto foregroundWindow = GetForegroundWindow();
-    g_appName = WindowsHelpers::getActiveWindowProcessName(foregroundWindow);
-    g_keyRemapper->setAppName(g_appName);
+    if (g_keyRemapper) g_keyRemapper->setAppName(WindowsHelpers::getActiveWindowProcessName());
 }
 
 LRESULT CALLBACK eventWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
@@ -319,48 +314,69 @@ LRESULT CALLBACK systemTrayWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam,
       SetForegroundWindow(hWnd);
 
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_EXIT, L"Exit");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_RUN_MODE_TESTS, L"Run mode tests");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_MAIN_FOLDER, L"Open Main Folder");
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_RUN_PROFILE_TESTS, L"Run profile tests");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD, L"Copy latest Events to Clipboard");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_EVENT_WINDOW, L"Open Events Window");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_4, g_mode == 3 ? L"# Mode 4" : L"Mode 4");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_3, g_mode == 2 ? L"# Mode 3" : L"Mode 3");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_2, g_mode == 1 ? L"# Mode 2" : L"Mode 2");
-      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_MODE_1, g_mode == 0 ? L"# Mode 1" : L"Mode 1");
+      InsertMenu(hPopMenu, 0, MF_SEPARATOR | MF_BYPOSITION, 0, NULL);
+
+      try {
+        auto profiles = g_profiles.get<std::vector<json>>();
+        auto profilesSize = profiles.size();
+
+        // Max 10 profiles
+        for (int i = 0; i < profilesSize && i <= 9; i++) {
+          std::string newProfileName = "profile " + std::to_string(i + 1);
+          auto profileName = profiles[i]["name"];
+
+          if (profileName.is_string()) newProfileName = profileName;
+          if (g_activeProfileIdx == i) newProfileName = "# " + newProfileName;
+          std::wstring newProfileNameW =
+              std::wstring(newProfileName.begin(), newProfileName.end());
+          LPCWSTR profileNameW = newProfileNameW.c_str();
+
+          InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING,
+                     IDM_PROFILE_SELECTED + i, profileNameW);
+        }
+      } catch (...) {
+        exitAppWithMessage("Error", "Error reading the config.json profiles");
+      }
+
+      InsertMenu(hPopMenu, 0, MF_SEPARATOR | MF_BYPOSITION, 0, NULL);
+      InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_OPEN_MAIN_FOLDER,
+                 L"Open Config Folder");
       InsertMenu(hPopMenu, 0, MF_BYPOSITION | MF_STRING, IDM_ENABLE, L"On/Off");
       TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_BOTTOMALIGN, pt.x, pt.y, 0, hWnd, NULL);
       return 0;
     };
   case WM_COMMAND:
-    switch (LOWORD(wParam)) {
+    auto command = LOWORD(wParam);
+
+    if (command >= IDM_PROFILE_SELECTED &&
+        command < IDM_PROFILE_SELECTED + 10) {
+      initKeyRemapper(command - IDM_PROFILE_SELECTED);
+      return 0;
+    }
+    switch (command) {
     case IDM_EXIT:
       exit(0);
       return 0;
     case IDM_ENABLE:
       toggleAppEnabled();
       return 0;
-    case IDM_MODE_1:
-      initKeyRemapper();
-      return 0;
-    case IDM_MODE_2:
-      initKeyRemapper(1);
-      return 0;
-    case IDM_MODE_3:
-      initKeyRemapper(2);
-      return 0;
-    case IDM_MODE_4:
-      initKeyRemapper(3);
-      return 0;
-    case IDM_RUN_MODE_TESTS: {
-      auto rules = Helpers::getJsonFile(g_mainDirPath, g_modes[g_mode]);
-      auto tests = rules["tests"];
-      auto symbols = Helpers::getJsonFile(g_mainDirPath, "symbols.json");
-
-      auto testResults = TestHelpers::runTests(tests, rules, symbols);
+    case IDM_RUN_PROFILE_TESTS: {
+      try {
+        auto a = g_profiles;
+        auto b = g_symbolsJson;
+        auto tests = g_activeProfile["tests"];
+      auto testResults =
+          TestHelpers::runTests(g_activeProfile["tests"], g_activeProfile, g_symbolsJson);
       std::string testResultsStr =
           testResults.is_null() ? "NO TESTS RUN" : testResults["message"];
 
       WindowsHelpers::sendNotification("Tests Results", testResultsStr);
+      } catch (...) {
+        WindowsHelpers::sendNotification("Error", "There were some errors running the tests");
+      }
       return 0;
     }
     case IDM_COPY_LAST_5_INPUTS_TO_CLIPBOARD: {

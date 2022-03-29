@@ -1,94 +1,114 @@
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - master
+    # tags:
+    #   - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  build-mac:
-    # TODO: if new version then run this
-    runs-on: macos-11
-    env:
-      BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64 }}
-      P12_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
-      BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.MAC_DEVELOPER_PROFILE_BASE64 }}
-      KEYCHAIN_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
-      APP_CERTIFICATE: ${{ secrets.MAC_APP_CERTIFICATE }}
+  build-win:
+    runs-on: windows-latest
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 13
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
 
-      - uses: actions/checkout@v2
-      - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
-
-      - name: Install the Apple certificate and provisioning profile
-        run: |
-          # create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-          # import certificate and provisioning profile from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
-
-          # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-
-          # apply provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Checkout to the repo
+        uses: actions/checkout@v2
 
       - name: Archive the app and zip it
-        working-directory: ./mac
-        id: xcodebuildStep
+        working-directory: ./win
         run: |
-          # get new version to release from tag "vX.Y.Z"
-          # and parse it to "X.Y.Z"
-          newVersion=${{github.ref_name}}
-          newVersion=$(echo "${newVersion/v/}")
+          msbuild /target:Rebuild /p:Configuration=Release /p:Platform="x86" .\KeyRemapper.vcxproj
+          msbuild /target:Rebuild /p:Configuration=Release /p:Platform="x64" .\KeyRemapper.vcxproj
 
-          sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
+      # - name: Build app for release
+      #   run: msbuild src\YourProjectFile.csproj -t:rebuild -verbosity:diag -property:Configuration=Release
 
-          # Remove build folder to avoid cache issues
-          rm -rf build
+  # build-mac:
+  #   # TODO: if new version then run this
+  #   runs-on: macos-11
+  #   env:
+  #     BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64 }}
+  #     P12_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
+  #     BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.MAC_DEVELOPER_PROFILE_BASE64 }}
+  #     KEYCHAIN_PASSWORD: ${{ secrets.MAC_BUILD_CERTIFICATE_BASE64_PASSWORD }}
+  #     APP_CERTIFICATE: ${{ secrets.MAC_APP_CERTIFICATE }}
+  #   steps:
+  #     - uses: maxim-lobanov/setup-xcode@v1
+  #       with:
+  #         xcode-version: 13
 
-          # Run
-          xcodebuild archive -target KeyRemapper -configuration Release
+  #     - uses: actions/checkout@v2
+  #     - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
 
-          appPath=$(dirname $(readlink "build/Release/KeyRemapper.app"))
+  #     - name: Install the Apple certificate and provisioning profile
+  #       run: |
+  #         # create variables
+  #         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+  #         PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+  #         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          rm -rf output
-          mkdir output
-          cp -r "$appPath" output/mac
-          cd output
-          zip -r mac.zip mac
+  #         # import certificate and provisioning profile from secrets
+  #         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+  #         echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: macArtifact
-          retention-days: 1
-          path: |
-            mac/output/mac.zip
+  #         # create temporary keychain
+  #         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+  #         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-  release:
-    runs-on: ubuntu-latest
-    needs: [build-mac]
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: macArtifact
-          path: buildMac
+  #         # import certificate to keychain
+  #         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+  #         security list-keychain -d user -s $KEYCHAIN_PATH
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            buildMac/mac.zip
+  #         # apply provisioning profile
+  #         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+  #         cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+  #     - name: Archive the app and zip it
+  #       working-directory: ./mac
+  #       id: xcodebuildStep
+  #       run: |
+  #         # get new version to release from tag "vX.Y.Z"
+  #         # and parse it to "X.Y.Z"
+  #         newVersion=${{github.ref_name}}
+  #         newVersion=$(echo "${newVersion/v/}")
+
+  #         sed -i '' -e 's/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = '$newVersion';/' KeyRemapper.xcodeproj/project.pbxproj
+
+  #         # Remove build folder to avoid cache issues
+  #         rm -rf build
+
+  #         # Run
+  #         xcodebuild archive -target KeyRemapper -configuration Release
+
+  #         appPath=$(dirname $(readlink "build/Release/KeyRemapper.app"))
+
+  #         rm -rf output
+  #         mkdir output
+  #         cp -r "$appPath" output/mac
+  #         cd output
+  #         zip -r mac.zip mac
+
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: macArtifact
+  #         retention-days: 1
+  #         path: |
+  #           mac/output/mac.zip
+
+  # release:
+  #   runs-on: ubuntu-latest
+  #   needs: [build-mac]
+  #   steps:
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: macArtifact
+  #         path: buildMac
+
+  #     - name: Release
+  #       uses: softprops/action-gh-release@v1
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         files: |
+  #           buildMac/mac.zip

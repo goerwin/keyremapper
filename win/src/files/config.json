@@ -1,0 +1,396 @@
+{
+  "profiles": [
+    {
+      "remaps": [
+        {
+          "from": "A",
+          "to": "B",
+          "if": { "keyboard": "HID\\VID_0B05&PID_19B6&REV_0002&EXAMPLE" }
+        },
+        {
+          "from": "PrtScr",
+          "to": "Win",
+          "if": { "keyboard": "HID\\VID_0B05&PID_19B6&REV_0002&MI_02" }
+        },
+        { "from": "CtrlR", "to": "Win" },
+        { "from": "AltR", "to": "Alt" },
+        { "from": "ShiftR", "to": "Shift" },
+        { "from": "NonUSBackslash", "to": "Shift" }
+      ],
+      "keyPresses": [
+        {
+          "key": "Caps",
+          "ifPressedNTimes": 1,
+          "if": { "isAltTabMode": true },
+          "set": { "isAltTabMode": false },
+          "send": "Esc SK:Delay:10 Alt:up Ctrl:down"
+        },
+        { "key": "Caps", "ifPressedNTimes": 1, "send": "Esc" },
+        { "key": "Caps", "ifPressedNTimes": 2, "send": "Esc" },
+        { "key": "Caps", "ifPressedNTimes": 3, "send": "Esc" },
+        { "key": "Caps", "ifPressedNTimes": 4, "send": "Esc" },
+        { "key": "Caps", "ifPressedNTimes": 5, "send": "Esc" },
+        { "key": "Esc", "ifPressedNTimes": 2, "send": "ToggleAppEnabled" },
+        { "key": "Shift", "ifPressedNTimes": 2, "send": "Caps" }
+      ],
+      "keybindings": [
+        // switch modes
+
+        { "keys": ["1"], "if": { "Esc": true }, "send": [null, "AppMode1"] },
+        { "keys": ["2"], "if": { "Esc": true }, "send": [null, "AppMode2"] },
+        { "keys": ["3"], "if": { "Esc": true }, "send": [null, "AppMode3"] },
+        { "keys": ["4"], "if": { "Esc": true }, "send": [null, "AppMode4"] },
+
+        // altTab mode
+
+        {
+          "keys": ["Tab"],
+          "if": { "Alt": true, "isAltTabMode": false },
+          "set": { "isAltTabMode": true },
+          "send": ["Ctrl:up Alt:down Tab", null]
+        },
+        {
+          "keys": ["Tab"],
+          "if": { "isAltTabMode": true },
+          "send": ["Tab", null]
+        },
+        {
+          "keys": ["Esc", "Enter"],
+          "if": { "isAltTabMode": true },
+          "set": { "isAltTabMode": false },
+          "send": ["currentKey SK:Delay:10 Alt:up Ctrl:down", null]
+        },
+        {
+          "keys": ["Q"],
+          "if": { "isAltTabMode": true },
+          "send": ["Supr", null]
+        },
+        {
+          "keys": ["Alt"],
+          "if": { "isAltTabMode": true },
+          "setOnKeyUp": { "isAltTabMode": false },
+          "send": [null, "Alt:up"]
+        },
+        {
+          "keys": ["H"],
+          "if": { "Caps": true, "isAltTabMode": true },
+          "send": ["LeftArrow", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "Caps": true, "isAltTabMode": true },
+          "send": ["RightArrow", null]
+        },
+        {
+          "keys": ["J"],
+          "if": { "Caps": true, "isAltTabMode": true },
+          "send": ["DownArrow", null]
+        },
+        {
+          "keys": ["K"],
+          "if": { "Caps": true, "isAltTabMode": true },
+          "send": ["UpArrow", null]
+        },
+        { "keys": ["Alt"], "send": ["Ctrl:down", "Ctrl:up"] },
+
+        // Vim mode
+
+        {
+          "keys": ["Caps"],
+          "if": { "isKeyDown": false, "vimMode": true, "vimModeShift": true },
+          "setOnKeyUp": { "vimMode": false, "vimModeShift": false },
+          "send": [null, "Shift:up"]
+        },
+        {
+          "keys": ["Caps"],
+          "send": [null, null],
+          "set": { "vimMode": true },
+          "setOnKeyUp": { "vimMode": false }
+        },
+        {
+          "keys": ["J"],
+          "if": { "vimMode": true, "Alt": true },
+          "send": ["End", null]
+        },
+        {
+          "keys": ["K"],
+          "if": { "vimMode": true, "Alt": true },
+          "send": ["Home", null]
+        },
+        {
+          "keys": ["H"],
+          "if": { "vimMode": true, "Win": true },
+          "send": ["Ctrl:down LeftArrow Ctrl:up", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "vimMode": true, "Win": true },
+          "send": ["Ctrl:down RightArrow Ctrl:up", null]
+        },
+        {
+          "keys": ["H"],
+          "if": { "vimMode": true, "Alt": true, "isAltTabMode": false },
+          "send": ["Ctrl:up Home Ctrl:down", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "vimMode": true, "Alt": true, "isAltTabMode": false },
+          "send": ["Ctrl:up End Ctrl:down", null]
+        },
+        {
+          "keys": ["H"],
+          "if": { "vimMode": true },
+          "send": ["LeftArrow", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "vimMode": true },
+          "send": ["RightArrow", null]
+        },
+        {
+          "keys": ["J"],
+          "if": { "vimMode": true },
+          "send": ["DownArrow", null]
+        },
+        { "keys": ["K"], "if": { "vimMode": true }, "send": ["UpArrow", null] },
+        {
+          "keys": ["F"],
+          "if": { "vimMode": true },
+          "set": { "vimModeShift": true },
+          "setOnKeyUp": { "vimModeShift": false },
+          "send": ["Shift:down", "Shift:up"]
+        },
+
+        // Clicks mode
+
+        {
+          "keys": ["C"],
+          "if": { "isKeyDown": true, "rightClickMode": true },
+          "send": [null, null]
+        },
+        {
+          "keys": ["C"],
+          "if": { "isKeyDown": true, "leftClickMode": true },
+          "send": [null, null]
+        },
+        {
+          "keys": ["C"],
+          "if": { "Win": true, "Caps": true },
+          "set": { "rightClickMode": true },
+          "setOnKeyUp": { "rightClickMode": false },
+          "send": ["RightClick:down", "RightClick:up"]
+        },
+        {
+          "keys": ["C"],
+          "if": { "Win": true },
+          "set": { "leftClickMode": true },
+          "setOnKeyUp": { "leftClickMode": false },
+          "send": ["LeftClick:down", "LeftClick:up"]
+        },
+        {
+          "keys": ["Win"],
+          "if": { "isKeyDown": false, "leftClickMode": true },
+          "setOnKeyUp": { "leftClickMode": false },
+          "send": [null, "LeftClick:up"]
+        },
+        {
+          "keys": ["Win"],
+          "if": { "isKeyDown": false, "rightClickMode": true },
+          "setOnKeyUp": { "rightClickMode": false },
+          "send": [null, "RightClick:up"]
+        },
+        { "keys": ["Win"], "send": [null, null] },
+
+        // Apps
+
+        {
+          "keys": ["H"],
+          "if": { "appName": "chrome.exe", "Alt": true, "Win": false },
+          "send": ["Shift:down Tab Shift:up", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "appName": "chrome.exe", "Alt": true, "Win": false },
+          "send": ["Tab", null]
+        },
+        {
+          "keys": ["Semicolon"],
+          "if": { "appName": "chrome.exe", "Alt": true },
+          "send": ["L", null]
+        },
+
+        // Global
+
+        { "keys": ["Ctrl"], "send": ["Alt:down", "Alt:up"] },
+        { "keys": ["Win"], "send": [null, null] },
+        {
+          "keys": ["V"],
+          "if": { "Caps": true, "Alt": true },
+          "send": ["Ctrl:up Win:down V Win:up Ctrl:down", null]
+        },
+        {
+          "keys": ["C"],
+          "if": { "Caps": true },
+          "send": ["Ctrl:down C Ctrl:up", null]
+        },
+        {
+          "keys": ["Tab"],
+          "if": { "Caps": true },
+          "send": ["Ctrl:down Tab Ctrl:up", null]
+        },
+        {
+          "keys": ["Tab"],
+          "if": { "Ctrl": true },
+          "send": ["Alt:up Ctrl:down Tab Ctrl:up Alt:down", null]
+        },
+        {
+          "keys": ["Space"],
+          "if": { "Caps": true },
+          "send": ["Ctrl:down Space Ctrl:up", null]
+        },
+        {
+          "keys": ["H"],
+          "if": { "Win": true, "Alt": true },
+          "send": ["Ctrl:up Win:down LeftArrow Win:up", "Ctrl:down"]
+        },
+        {
+          "keys": ["L"],
+          "if": { "Win": true, "Alt": true },
+          "send": ["Ctrl:up Win:down RightArrow Win:up", "Ctrl:down"]
+        },
+        {
+          "keys": ["J"],
+          "if": { "Win": true, "Alt": true },
+          "send": ["Ctrl:up Win:down DownArrow Win:up", "Ctrl:down"]
+        },
+        {
+          "keys": ["K"],
+          "if": { "Win": true, "Alt": true },
+          "send": ["Ctrl:up Win:down UpArrow Win:up", "Ctrl:down"]
+        },
+        {
+          "keys": ["F", "J", "K"],
+          "if": { "Win": true },
+          "send": ["Alt:down currentKey Alt:up", null]
+        },
+        {
+          "keys": ["D"],
+          "if": { "Win": true },
+          "send": ["Win:down D Win:up", null]
+        },
+        {
+          "keys": ["Backspace"],
+          "if": { "Win": true },
+          "send": ["Ctrl:down Backspace Ctrl:up", null]
+        },
+        { "keys": ["Space"], "if": { "Alt": true }, "send": ["Win", null] },
+        {
+          "keys": ["H"],
+          "if": { "Win": true },
+          "send": ["Alt:down LeftArrow Alt:up", null]
+        },
+        {
+          "keys": ["L"],
+          "if": { "Win": true },
+          "send": ["Alt:down RightArrow Alt:up", null]
+        },
+        {
+          "keys": ["Backspace"],
+          "if": { "Alt": true },
+          "send": ["Ctrl:up Shift:down Home Shift:up Backspace Ctrl:down", null]
+        },
+        { "keys": ["Esc"], "if": { "Alt": true }, "send": [null, null] },
+        {
+          "keys": ["Q"],
+          "if": { "Alt": true },
+          "send": ["Ctrl:up Alt:down F4 Alt:up Ctrl:down", null]
+        },
+        {
+          "keys": ["J"],
+          "if": { "Alt": true },
+          "send": ["Ctrl:up PageDown Ctrl:down", null]
+        },
+        {
+          "keys": ["K"],
+          "if": { "Alt": true },
+          "send": ["Ctrl:up PageUp Ctrl:down", null]
+        },
+        {
+          "keys": ["F1", "F2", "F10", "F11", "F12"],
+          "if": { "Alt": true },
+          "send": ["Ctrl:up currentKey Ctrl:down", null]
+        },
+        { "keys": ["F1"], "send": ["BrightnessDown", null] },
+        { "keys": ["F2"], "send": ["BrightnessUp", null] },
+        { "keys": ["F10"], "send": ["Mute", null] },
+        {
+          "keys": ["F11"],
+          "send": ["VolumeDown VolumeDown VolumeDown VolumeDown", null]
+        },
+        {
+          "keys": ["F12"],
+          "send": ["VolumeUp VolumeUp VolumeUp VolumeUp", null]
+        }
+      ],
+      "tests": [
+        //Alt Tab Mode
+        ["Alt:down Tab Alt:up", "Ctrl:down Ctrl:up Alt:down Tab Alt:up"],
+        [
+          "Alt:down Tab Tab Alt:up",
+          "Ctrl:down Ctrl:up Alt:down Tab Tab Alt:up"
+        ],
+        [
+          "Alt:down Shift:down Tab Shift:up Alt:up",
+          "Ctrl:down Shift:down Ctrl:up Alt:down Tab Shift:up Alt:up"
+        ],
+        [
+          "Alt:down Shift:down Tab Tab Shift:up Alt:up",
+          "Ctrl:down Shift:down Ctrl:up Alt:down Tab Tab Shift:up Alt:up"
+        ],
+        [
+          "Alt:down Tab Esc Alt:up",
+          "Ctrl:down Ctrl:up Alt:down Tab Esc SK:Delay:10 Alt:up Ctrl:down Ctrl:up"
+        ],
+        // Key
+        ["A", "A"],
+        // Key - Down
+        ["H:down H:down H:down", "H:down H:down H:down"],
+        // Key - Down then Up
+        ["H:down H:down H:up", "H:down H:down H:up"],
+        // Key - 2 Keys In Order
+        ["H:down J H:up", "H:down J:down J:up H:up"],
+        // Key - 2 Keys In No Order
+        ["H:down J:down H:up J:up", "H:down J:down H:up J:up"],
+        // Key - 3 Keys In Order
+        ["H:down J:down K J:up H:up", "H:down J:down K:down K:up J:up H:up"],
+        // Key - 3 Keys No Order
+        ["H:down J:down K H:up J:up", "H:down J:down K:down K:up H:up J:up"],
+
+        ["Alt", "Ctrl"],
+
+        // VIM MODE
+        ["Caps", "Esc"],
+        ["Caps:down A Caps:up", "A"],
+        ["Caps:down H Caps:up", "LeftArrow"],
+        ["Caps:down L Caps:up", "RightArrow"],
+        ["Caps:down J Caps:up", "DownArrow"],
+        ["Caps:down K Caps:up", "UpArrow"],
+        ["Caps:down Alt:down H Alt:up Caps:up", "Ctrl Home Ctrl"],
+        ["Caps:down Alt:down L Alt:up Caps:up", "Ctrl End Ctrl"],
+        ["Caps:down F:down H F:up Caps:up", "Shift:down LeftArrow Shift:up"],
+
+        // VIM MODE: When Caps is not the first pressed key
+        ["T:down Caps:down T:up Caps:up", "T"],
+        ["Alt:down Caps:down H Caps:up Alt:up", "Ctrl Home Ctrl"],
+        ["Alt:down Caps:down L Caps:up Alt:up", "Ctrl End Ctrl"],
+
+        // Clicks
+        ["Win:down C Win:up", "LeftClick"],
+        ["Win:down C:down C:down C Win:up", "LeftClick"],
+        ["Win:down C:down Win:up C:up", "LeftClick C:up"],
+        ["Win:down Caps:down C Caps:up Win:up", "RightClick"],
+        ["Win:down Caps:down C:down C:down C Caps:up Win:up", "RightClick"]
+      ]
+    }
+  ]
+}

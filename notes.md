@@ -3,6 +3,8 @@
 - Windows
 
   - [ ] Add versioning
+  - [ ] Embed interception.dll in .exe
+  - [ ] keybindings for toggling app and changing modes should be global from the system and not the app
   - [x] Tests via popup message
   - [x] UI to debug events
   - [x] multiple modes
@@ -22,8 +24,7 @@
   - [x] rethink alghoritm to be more general so it can be used in any OS
   - [x] validate if keycode doesnt exist
   - [x] general Key (currentKey)
-  - [ ] better error log for debug/release
-  - [ ] keybindings for toggling app and changing modes should be global from the system and not the app
+  - [x] better error log for debug/release
   - [x] afterKeyUp in keypresses
 
 - Mac

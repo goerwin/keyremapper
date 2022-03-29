@@ -52,7 +52,9 @@ String getMainDirPath() {
   #endif
 }
 
-String getActiveWindowProcessName(HWND hwnd) {
+String getActiveWindowProcessName() {
+  auto hwnd = GetForegroundWindow();
+
   if (!hwnd) {
     return {};
   }
