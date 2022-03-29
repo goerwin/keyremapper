@@ -4,9 +4,6 @@
     "noice": false,
     "%dotdotdotObject": "(importsObject.json)"
   },
-  "array": [
-    "noice",
-    "%dotdotdotArray(importsArray.json)"
-  ],
+  "array": ["noice", "%dotdotdotArray(importsArray.json)"],
   "array2": "%array(importsArray.json)"
 }
