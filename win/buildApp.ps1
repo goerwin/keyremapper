@@ -21,9 +21,11 @@ for ($i = 0; $i -le ($archs.length - 1); $i += 1) {
   Remove-Item -Force -Recurse -ErrorAction SilentlyContinue $arch
   New-Item -Path $distPath -Type Directory -Name $outputFolderName
 
-  # TODO: CHANGE THIS TO msbuild
-  $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe"
-  . $msbuild /target:Rebuild /p:Configuration=Release /p:Platform=$arch .\KeyRemapper.vcxproj
+  # Note: To test locally, use this instead
+  # $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe"
+  # . $msbuild /target:Rebuild /p:Configuration=Release /p:Platform=$arch .\KeyRemapper.vcxproj
+
+  msbuild /target:Rebuild /p:Configuration=Release /p:Platform=$arch .\KeyRemapper.vcxproj
 
   cp ($arch + "/" + $projectName + "/Release/" + $projectName + ".exe") -Destination $outputAbsPath
   cp ($arch + "/" + $projectName + "/Release/interception.dll") -Destination $outputAbsPath
