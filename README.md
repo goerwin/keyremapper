@@ -206,5 +206,6 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
 - Mac's [symbols.json](mac/KeyRemapper/Resources/symbols.json)
 - Windows' [symbols.json](win/src/files/symbols.json)
 - My personal Mac's [config.json](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)
+- My personal Window's [config.json](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperWin/config.json)
 - [Json Helpers test example](Tests/imports.json)
 - [Notes](notes.md)
