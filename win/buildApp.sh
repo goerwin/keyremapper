@@ -24,8 +24,8 @@ for arch in "${archs[@]}"; do
   # Remove previous builds
   rm -rf "$arch"
 
-  msbuild /target:Rebuild /p:Configuration=Release /p:Platform="$arch" .\KeyRemapper.vcxproj
-  msbuild /target:Rebuild /p:Configuration=Release /p:Platform="$arch" .\KeyRemapper.vcxproj
+  msbuild /target:Rebuild /p:Configuration=Release /p:Platform="$arch" ./KeyRemapper.vcxproj
+  msbuild /target:Rebuild /p:Configuration=Release /p:Platform="$arch" ./KeyRemapper.vcxproj
 
   cp "$arch/$projectName/Release/$projectName.exe" $tmpDir/$archFolder
   cp "$arch/$projectName/Release/interception.dll" $tmpDir/$archFolder

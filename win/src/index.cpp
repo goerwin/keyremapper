@@ -120,7 +120,6 @@ void toggleAppEnabled() {
 
   if (g_isAppEnabled) {
     nid.hIcon = iconImage;
-    initKeyRemapper();
   } else {
     nid.hIcon = iconImageDisabled;
   }
@@ -143,8 +142,9 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     (InterceptionStroke*)&keyStroke, 1) > 0
   ) {
     try {
-    if (!g_isAppEnabled)
-      return interception_send(context, device, (InterceptionStroke*)&keyStroke, 1);
+      if (!g_isAppEnabled) {interception_send(context, device, (InterceptionStroke *)&keyStroke, 1);
+        continue;
+      }
 
     wchar_t hardwareId[500];
     size_t length = interception_get_hardware_id(context, device, hardwareId, sizeof(hardwareId));
@@ -207,7 +207,6 @@ DWORD WINAPI keyboardThreadFunc(void *data) {
     } catch (...) {
       exitAppWithMessage("GeneralError", "Unknown Error");
     }
-
   }
 
   interception_destroy_context(context);

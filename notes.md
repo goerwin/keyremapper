@@ -113,7 +113,7 @@ VIM mode should work like this for both win/mac (To match same layout keyboaord 
   - For the Swift UI Version:
     - `com.apple.security.app-sandbox` should be false in .entitlements
 
-### Snippets Mac
+### Snippets
 
 ```cpp
 // Capture media key events in init main.mm
@@ -159,4 +159,9 @@ cat /path/to/app/Contents/Info.plist
 
 # push a new version (change the tag variable)
 tag=v1.1.1 && git tag $tag && git push origin $tag
+
+# path to msbuild (use a dot at begining to run it on powershell)
+. "C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe" ...args
+# to run it from bash, the path changes to
+"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Msbuild/Current/Bin/MSBuild.exe" ...args
 ```

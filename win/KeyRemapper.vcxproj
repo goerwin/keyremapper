@@ -156,7 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src/windowsIndex.cpp" />
+    <ClCompile Include="src/index.cpp" />
     <ClCompile Include="src/windowsLibraries/Interception/utils.c">
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
