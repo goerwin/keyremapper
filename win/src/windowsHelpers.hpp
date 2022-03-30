@@ -1,9 +1,11 @@
 #pragma once
 
+#include <windows.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <windows.h>
+
 #include "../../common/vendors/json.hpp"
 
 namespace WindowsHelpers {
@@ -45,11 +47,11 @@ String getHomeDirPath() {
 }
 
 String getMainDirPath() {
-  #if defined(_DEBUG)
-    return WindowsHelpers::getAbsDirPath();
-  #else
-    return WindowsHelpers::getHomeDirPath() + "\\" + "keyRemapperWin";
-  #endif
+#if defined(_DEBUG)
+  return WindowsHelpers::getAbsDirPath();
+#else
+  return WindowsHelpers::getHomeDirPath() + "\\" + "keyRemapperWin";
+#endif
 }
 
 String getActiveWindowProcessName() {
@@ -93,4 +95,4 @@ bool fileExists(String path) {
 void sendNotification(std::string title, std::string message) {
   MessageBoxA(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
 }
-} // namespace WindowsHelpers
+}  // namespace WindowsHelpers
