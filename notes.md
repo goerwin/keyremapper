@@ -28,6 +28,7 @@
   - [x] afterKeyUp in keypresses
 
 - Mac
+  - [ ] global shortcuts
   - [ ] Memory leaks
   - [x] prettify code
   - [x] handle daemon crash
@@ -39,7 +40,6 @@
   - [x] automate build
   - [x] run the hidiomanager as a daemon (root process), follow https://github.com/CharlesJS/CSAuthSample or https://github.com/erikberglund/SwiftPrivilegedHelper
   - [ ] bug keyboard can become unresponsive after going to sleep/long time inactivity
-  - [ ] global shortcuts
   - [x] versioning
   - [x] multiple configs
   - [x] press enter to disable/enable and see if the keyrepeat continues forever
