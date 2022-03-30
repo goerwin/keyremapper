@@ -1,7 +1,5 @@
 projectName="KeyRemapper"
-
 archs=("x86" "x64")
-
 tmpDir=$(mktemp -d)
 
 for arch in "${archs[@]}"; do

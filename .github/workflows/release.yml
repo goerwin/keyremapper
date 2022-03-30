@@ -50,7 +50,7 @@ jobs:
         working-directory: ./mac
         run: |
           # TODO: Use a script that receives the version
-          # bash zipBuild ${{github.ref_name}}
+          # bash buildSetVersion.sh ${{github.ref_name}}
 
 
           # get new version to release from tag "vX.Y.Z"
@@ -66,8 +66,8 @@ jobs:
           # Run
           xcodebuild archive -target KeyRemapper -configuration Release
 
+          # bash buildAppZip.sh
           appPath=$(dirname $(readlink "build/Release/KeyRemapper.app"))
-
           rm -rf output
           mkdir output
           cp -r "$appPath" output
@@ -92,11 +92,12 @@ jobs:
       - name: Build and zip the app
         working-directory: ./win
         run: |
+          bash buildSetVersion.sh ${{github.ref_name}}
+
           msbuild /target:Rebuild /p:Configuration=Release /p:Platform="x86" .\KeyRemapper.vcxproj
           msbuild /target:Rebuild /p:Configuration=Release /p:Platform="x64" .\KeyRemapper.vcxproj
 
-          bash zipBuild.sh
-
+          bash buildAppZip.sh
       - name: Upload zip
         uses: actions/upload-artifact@v3
         with:
