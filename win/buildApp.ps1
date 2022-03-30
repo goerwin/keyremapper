@@ -17,9 +17,11 @@ for ($i = 0; $i -le ($archs.length - 1); $i += 1) {
   $arch = $archs[$i]
   $outputFolderName = ($projectName + "_" + $arch)
   $outputAbsPath = ($distPath + "\" + $outputFolderName)
+  $outputConfigFolderAbsPath = ($outputAbsPath + "\keyRemapperWin")
 
   Remove-Item -Force -Recurse -ErrorAction SilentlyContinue $arch
   New-Item -Path $distPath -Type Directory -Name $outputFolderName
+  New-Item -Path $outputAbsPath -Type Directory -Name "keyRemapperWin"
 
   # Note: To test locally, use this instead
   # $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe"
@@ -27,10 +29,11 @@ for ($i = 0; $i -le ($archs.length - 1); $i += 1) {
 
   msbuild /target:Rebuild /p:Configuration=Release /p:Platform=$arch .\KeyRemapper.vcxproj
 
-  cp ($arch + "/" + $projectName + "/Release/" + $projectName + ".exe") -Destination $outputAbsPath
-  cp ($arch + "/" + $projectName + "/Release/interception.dll") -Destination $outputAbsPath
-  cp ($arch + "/" + $projectName + "/Release/config.json") -Destination $outputAbsPath
-  cp ($arch + "/" + $projectName + "/Release/symbols.json") -Destination $outputAbsPath
+  $releaseFolderPath = ($arch + "/" + $projectName + "/Release")
+  cp ($releaseFolderPath + "/" + $projectName + ".exe") -Destination $outputAbsPath
+  cp ($releaseFolderPath + "/interception.dll") -Destination $outputAbsPath
+  cp ($releaseFolderPath + "/config.json") -Destination $outputConfigFolderAbsPath
+  cp ($releaseFolderPath + "/symbols.json") -Destination $outputConfigFolderAbsPath
 
   # Cleanup
   Remove-Item -Force -Recurse -ErrorAction SilentlyContinue $arch
