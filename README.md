@@ -4,13 +4,14 @@
   - Download the latest version from `Releases`
   - On first time, it will ask you to install the Helper (Service that will listen to Keyboard input via IOKit)
   - Click the app icon in the menu bar and click `Open Config folder`. You'll find the config file `~/KeyRemapperMac/config.json`
-  - Edit it following the [Usage section](#user-content-usage)
+  - Config usage in [Usage section](#user-content-usage)
   - Reselect the profile from the app menu to reload it
 - Windows
   - Install Interception driver following https://github.com/oblitum/Interception (it requires restart)
-  - Download `win/output/KeyRemapper.zip` and there will be versions for x86 and x64 Windows.
+  - Download the latest version from `Releases`
+  - Copy the `keyRemapperWin` folder to your home directory (eg. `C:\Users\me`)
   - Run the .exe with Administrator Rights (It is not necessary but to be able to run inside eg. Task Admin or some other privileged app, admin rights are needed)
-  - Rules (remaps, keybindings, tests) can be found in `config.json`
+  - Config usage in [Usage section](#user-content-usage)
 
 ## Usage
 

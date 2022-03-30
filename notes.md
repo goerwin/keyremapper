@@ -2,9 +2,10 @@
 
 - Windows
 
-  - [ ] Add versioning
   - [ ] Embed interception.dll in .exe
   - [ ] keybindings for toggling app and changing modes should be global from the system and not the app
+  - [ ] memory leaks
+  - [x] Add versioning
   - [x] Tests via popup message
   - [x] UI to debug events
   - [x] multiple modes
