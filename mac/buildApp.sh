@@ -14,15 +14,13 @@ rm -rf mac
 xcodebuild archive -target KeyRemapper -configuration Release
 
 # Zip
-distFolderName="dist"
 appPath=$(readlink "build/Release/KeyRemapper.app")
 
-mkdir $distFolderName
-cp -r "$appPath" $distFolderName
-# zip -r mac.zip $distFolderName
+mkdir -p "dist/mac"
+cp -r "$appPath" "dist/mac"
+(cd "dist"; zip -r mac.zip .)
 
 # Cleanup
-# rm -rf mac
-# rm -rf build
+rm -rf build
 
 echo "mac.zip created!"

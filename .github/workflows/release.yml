@@ -56,7 +56,7 @@ jobs:
           name: macArtifact
           retention-days: 1
           path: |
-            mac/mac.zip
+            mac/dist/mac.zip
 
   build-win:
     runs-on: windows-latest
@@ -69,6 +69,8 @@ jobs:
       # TODO:
       # - name: Tests
       # - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+      # open `Developer PowerShell for VS 2022` or similar
+      # $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
 
       - name: Build and zip the app
         working-directory: ./win
