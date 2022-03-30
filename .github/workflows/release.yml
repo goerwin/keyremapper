@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Tests
-      - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+        run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
 
       - name: Install the Apple certificate and provisioning profile
         run: |
@@ -69,6 +69,7 @@ jobs:
       - name: Build and zip the app
         working-directory: ./win
         run: bash buildApp.sh ${{github.ref_name}}
+
       - name: Upload zip
         uses: actions/upload-artifact@v3
         with:
