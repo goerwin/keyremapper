@@ -184,9 +184,7 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
   - Sign the 2 targets (KeyRemapper, Daemon)
   - You should be able to run it on Xcode
 - Windows
-  - In Visual Studio 2019+, run a batch build and mark all projects, they all should REBUILD successfully
-  - Navigate to project's root folder and run `$ bash win/release.sh` in WSL Ubuntu's terminal to generate the KeyRemapper.zip file with .exes for x86 and x64. (You need zip installed in terminal, also not sure if this works with Powershell)
-  - File `win/output/KeyRemapper.zip` is generated
+  - You should be able to run it in Visual Studio 2019+
 
 ## Tests
 
