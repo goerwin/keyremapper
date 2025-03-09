@@ -81,6 +81,8 @@
   "Period": [55, 0, 1, 47],
   "Equal": [46, 0, 1, 24],
 
+  "Insert": [73, 0, 1, 114],
+  "Delete": [76, 0, 1, 117],
   "Home": [74, 0, 1, 115],
   "End": [77, 0, 1, 119],
   "PageDown": [78, 0, 1, 121],
@@ -124,6 +126,11 @@
   "Mute": [309, 0, 1, 309],
   "VolumeDown": [310, 0, 1, 310],
   "VolumeUp": [311, 0, 1, 311],
+
+  // MS Windows keys (do not exist in mac)
+  "PrtScr": [70, 0, 1, 320],
+  "PauseRec": [71, 0, 1, 321],
+  "ScrollLock": [72, 0, 1, 322],
 
   "LeftClick": [241, 0, 1, 241],
   "RightClick": [242, 0, 1, 242]
