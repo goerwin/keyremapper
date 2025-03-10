@@ -75,6 +75,7 @@ security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $K
 security list-keychain -d user -s $KEYCHAIN_PATH
 
 security find-identity -v -p codesigning
+security find-certificate -c "Apple Development: erwingaitano@gmail.com" -p | openssl x509 -text -noout
 echo "TESTING BB"
 
 ###
