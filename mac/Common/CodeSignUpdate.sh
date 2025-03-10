@@ -34,23 +34,23 @@ appType=$(/usr/libexec/PlistBuddy -c "Print AppType" "$sourceInfoPlistPath")
 
 cp "$sourceInfoPlistPath" "$buildPlistPath"
 
-if [ $appType = "Client" ]; then
-  daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print DaemonBundleIdentifier" "$buildPlistPath")
-  certificate=$(getCertificateStr $daemonBundleIdentifier)
+# if [ $appType = "Client" ]; then
+#   daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print DaemonBundleIdentifier" "$buildPlistPath")
+#   certificate=$(getCertificateStr $daemonBundleIdentifier)
 
-  /usr/libexec/PlistBuddy -c "Delete SMPrivilegedExecutables" "$buildPlistPath"
-  /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables dict" "$buildPlistPath"
-  /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables:${daemonBundleIdentifier} string $certificate" "${buildPlistPath}"
-fi
+#   /usr/libexec/PlistBuddy -c "Delete SMPrivilegedExecutables" "$buildPlistPath"
+#   /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables dict" "$buildPlistPath"
+#   /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables:${daemonBundleIdentifier} string $certificate" "${buildPlistPath}"
+# fi
 
-if [ $appType = "Daemon" ]; then
-  clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print ClientBundleIdentifier" "$buildPlistPath")
-  certificate=$(getCertificateStr $clientBundleIdentifier)
+# if [ $appType = "Daemon" ]; then
+#   clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print ClientBundleIdentifier" "$buildPlistPath")
+#   certificate=$(getCertificateStr $clientBundleIdentifier)
 
-  /usr/libexec/PlistBuddy -c "Delete SMAuthorizedClients" "$buildPlistPath"
-  /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients array" "$buildPlistPath"
-  /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients: string $certificate" "$buildPlistPath"
-fi
+#   /usr/libexec/PlistBuddy -c "Delete SMAuthorizedClients" "$buildPlistPath"
+#   /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients array" "$buildPlistPath"
+#   /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients: string $certificate" "$buildPlistPath"
+# fi
 
-replaceQuotePlaceholdersInFile "$buildPlistPath"
+# replaceQuotePlaceholdersInFile "$buildPlistPath"
 
