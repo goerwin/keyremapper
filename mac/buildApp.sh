@@ -32,9 +32,6 @@ throw_if_empty() {
 # Load environment variables
 if [ -f .env ]; then
   source .env
-else
-  echo "Error: .env file not found" >&2
-  exit 1
 fi
 
 # Check required variables
