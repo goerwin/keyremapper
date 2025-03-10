@@ -176,16 +176,6 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
 }
 ```
 
-## Build
-
-- Mac
-  - Create a `mac/.env` file using `mac/.env.example` and fill up the values
-  - Open project `~mac/KeyRemapper.xcodeproj` with XCode
-  - Sign the 2 targets (KeyRemapper, Daemon)
-  - You should be able to run it on Xcode
-- Windows
-  - You should be able to run it in Visual Studio 2019+
-
 ## Tests
 
 - Mac
@@ -197,6 +187,16 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
     # open `Developer PowerShell for VS 2022` or similar
     $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
   ```
+
+## Build
+
+- Mac
+  - Create a `mac/.env` file using `mac/.env.example` and fill up the values
+  - Open project `~mac/KeyRemapper.xcodeproj` with XCode
+  - Sign the 2 targets for development (KeyRemapper, Daemon)
+  - You should be able to run it on Xcode
+- Windows
+  - You should be able to run it in Visual Studio 2019+
 
 ## Deploy and Release
 

@@ -30,7 +30,12 @@ throw_if_empty() {
 }
 
 # Load environment variables
-source .env 2>/dev/null || true
+if [ -f .env ]; then
+  source .env
+else
+  echo "Error: .env file not found" >&2
+  exit 1
+fi
 
 # Check required variables
 throw_if_empty "versionStr"
