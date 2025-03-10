@@ -203,7 +203,9 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     guard let authRef = authRef else {
-      return Global.showCloseAlert("Error", "Authorization required for Daemon")
+      Global.showCloseAlert("Error", "Authorization required for Daemon")
+      quit()
+      return
     }
 
     let blessed = Global.blessHelper(label: MACH_SERVICE_NAME, authRef: authRef)
