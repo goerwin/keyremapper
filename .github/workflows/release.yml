@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 13
+          xcode-version: 15
 
       - uses: actions/checkout@v2
 
@@ -58,47 +58,14 @@ jobs:
           path: |
             mac/dist/mac.zip
 
-  build-win:
-    runs-on: windows-latest
-    steps:
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
-
-      - uses: actions/checkout@v2
-
-      # TODO:
-      # - name: Tests
-      # - run: g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
-      # open `Developer PowerShell for VS 2022` or similar
-      # $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
-
-      - name: Build and zip the app
-        working-directory: ./win
-        run: |
-          bash buildSetVersion.sh ${{github.ref_name}}
-          powershell .\buildApp.ps1
-
-      - name: Upload zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: winArtifact
-          retention-days: 1
-          path: |
-            win/dist/win.zip
-
   release:
     runs-on: ubuntu-latest
-    needs: [build-mac, build-win]
+    needs: [build-mac]
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: macArtifact
           path: buildMac
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: winArtifact
-          path: buildWin
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -106,4 +73,3 @@ jobs:
         with:
           files: |
             buildMac/mac.zip
-            buildWin/win.zip
