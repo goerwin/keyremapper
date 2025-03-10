@@ -14,7 +14,7 @@
 	<string>co.goerwin.KeyRemapper</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier "co.goerwin.KeyRemapper" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: erwingaitano@gmail.com (E2274VDXEZ)"</string>
+		<string>__replacedByScripts__</string>
 	</array>
 </dict>
 </plist>

@@ -74,10 +74,6 @@ security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KE
 security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 security list-keychain -d user -s $KEYCHAIN_PATH
 
-security find-identity -v -p codesigning
-security find-certificate -c "Apple Development: erwingaitano@gmail.com" -p | openssl x509 -text -noout
-echo "TESTING BB"
-
 ###
 #######################################################################
 # BUILD APP

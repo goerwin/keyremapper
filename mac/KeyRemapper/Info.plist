@@ -30,8 +30,8 @@
 	<true/>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-    <key>co.goerwin.KeyRemapperDaemon</key>
-    <string>identifier "co.goerwin.KeyRemapperDaemon" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: erwingaitano@gmail.com (E2274VDXEZ)"</string>
+    <key>__Replaced By CodeSignUpdate.sh__</key>
+    <string>__Replaced By CodeSignUpdate.sh__</string>
 	</dict>
 </dict>
 </plist>
