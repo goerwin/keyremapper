@@ -37,6 +37,7 @@ fi
 # Check required variables
 throw_if_empty "versionStr"
 throw_if_empty "BUILD_CERTIFICATE_BASE64"
+throw_if_empty "APP_CERTIFICATE"
 throw_if_empty "P12_PASSWORD"
 throw_if_empty "KEYCHAIN_PASSWORD"
 
