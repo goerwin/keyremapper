@@ -30,8 +30,8 @@
 	<true/>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>__replacedByScripts__</key>
-		<string>__replacedByScripts__</string>
+    <key>__Replaced By CodeSignUpdate.sh__</key>
+    <string>__Replaced By CodeSignUpdate.sh__</string>
 	</dict>
 </dict>
 </plist>

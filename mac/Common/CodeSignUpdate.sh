@@ -1,5 +1,21 @@
 #!/usr/bin/env zsh
 
+#
+# Replaces {qt} with " in the file passed $1
+# Using this because PlistBuddy doesn't like/strips quotes in the string
+#
+function replaceQuotePlaceholdersInFile() {
+  sed -i'' -e 's/{qt}/\"/g' "$1"
+}
+
+#
+# gets the certificate string for the given bundle identifier $1
+#
+function getCertificateStr {
+  printf "identifier {qt}"$1"{qt} and anchor apple generic and certificate leaf[subject.CN] = {qt}"$APP_CERTIFICATE"{qt}"
+}
+
+
 source .env 2>/dev/null || true
 
 if [ -z $SRCROOT ]; then
@@ -14,36 +30,27 @@ fi
 sourceInfoPlistPath="$SRCROOT/$TARGET_NAME/Info.plist"
 buildPlistPath="$BUILD_DIR/$TARGET_NAME/Info.build.plist"
 
-appType=$(/usr/libexec/PlistBuddy -c 'Print AppType' "${sourceInfoPlistPath}")
+appType=$(/usr/libexec/PlistBuddy -c "Print AppType" "$sourceInfoPlistPath")
 
 cp "$sourceInfoPlistPath" "$buildPlistPath"
 
-function replacePlaceholders {
-  sed -i.bu 's/__QUOTE__/\"/g' "$1"
-  rm -rf "$1.bu"
-}
-
-function getCertificate {
-  certificate=$(printf $APP_CERTIFICATE | sed -e "s/\"/__QUOTE__/g")
-  printf "identifier __QUOTE__"$1"__QUOTE__ and anchor apple generic and "$certificate""
-}
-
 if [ $appType = "Client" ]; then
-  daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print DaemonBundleIdentifier' "${buildPlistPath}")
-  certificate=$(getCertificate $daemonBundleIdentifier)
+  daemonBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print DaemonBundleIdentifier" "$buildPlistPath")
+  certificate=$(getCertificateStr $daemonBundleIdentifier)
 
-  /usr/libexec/PlistBuddy -c 'Delete SMPrivilegedExecutables' "${buildPlistPath}"
-  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables dict' "${buildPlistPath}"
-  /usr/libexec/PlistBuddy -c 'Add SMPrivilegedExecutables:'"${daemonBundleIdentifier}"' string '"$certificate"'' "${buildPlistPath}"
-  replacePlaceholders "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c "Delete SMPrivilegedExecutables" "$buildPlistPath"
+  /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables dict" "$buildPlistPath"
+  /usr/libexec/PlistBuddy -c "Add SMPrivilegedExecutables:${daemonBundleIdentifier} string $certificate" "${buildPlistPath}"
 fi
 
 if [ $appType = "Daemon" ]; then
-  clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c 'Print ClientBundleIdentifier' "${buildPlistPath}")
-  certificate=$(getCertificate $clientBundleIdentifier)
+  clientBundleIdentifier=$(/usr/libexec/PlistBuddy -c "Print ClientBundleIdentifier" "$buildPlistPath")
+  certificate=$(getCertificateStr $clientBundleIdentifier)
 
-  /usr/libexec/PlistBuddy -c 'Delete SMAuthorizedClients' "${buildPlistPath}"
-  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients array' "${buildPlistPath}"
-  /usr/libexec/PlistBuddy -c 'Add SMAuthorizedClients: string '"$certificate"'' "${buildPlistPath}"
-  replacePlaceholders "${buildPlistPath}"
+  /usr/libexec/PlistBuddy -c "Delete SMAuthorizedClients" "$buildPlistPath"
+  /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients array" "$buildPlistPath"
+  /usr/libexec/PlistBuddy -c "Add SMAuthorizedClients: string $certificate" "$buildPlistPath"
 fi
+
+replaceQuotePlaceholdersInFile "$buildPlistPath"
+

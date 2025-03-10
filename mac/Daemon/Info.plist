@@ -14,7 +14,7 @@
 	<string>co.goerwin.KeyRemapper</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>__replacedByScripts__</string>
+		<string>__Replaced By CodeSignUpdate.sh__</string>
 	</array>
 </dict>
 </plist>
