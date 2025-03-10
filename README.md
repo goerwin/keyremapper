@@ -198,6 +198,20 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
     $ cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe
   ```
 
+## Deploy and Release
+
+To trigger a release, you should push a tag. Eg:
+
+```sh
+$ TAG=v1.0.0 && git tag $TAG && git push origin $TAG
+```
+
+For completeness, to remove a tag:
+
+```sh
+$ TAG=v1.0.0 && git tag -d $TAG && git push origin --delete $TAG
+```
+
 ## Reference
 
 - Current keyboard and app names can be found using the `Logger`
