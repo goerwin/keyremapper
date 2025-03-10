@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -ex
 
 #
 # Installs the Apple certificate to sign the app and builds the macOS App using xcodebuild.
