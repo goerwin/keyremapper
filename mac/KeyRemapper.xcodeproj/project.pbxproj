@@ -17,7 +17,6 @@
 		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
 		F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926627644E35009ACA0A /* Preview Assets.xcassets */; };
-		F9B4D1AB27F1591400FC513C /* CodeSignUpdate.sh in Resources */ = {isa = PBXBuildFile; fileRef = F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */; };
 		F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B127F2754300FC513C /* LoggerView.swift */; };
 		F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */; };
 		F9B4D1B627F292B400FC513C /* AppProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */; };
@@ -73,17 +72,16 @@
 /* Begin PBXFileReference section */
 		F95EC5B827EF174E00B370B2 /* AppBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppBridge.mm; sourceTree = "<group>"; };
 		F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSwift.swift; sourceTree = "<group>"; };
-		F95EC5BE27EF1F2900B370B2 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F95EC5BE27EF1F2900B370B2 /* Constants.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; tabWidth = 2; };
 		F9600A3127F015250051BFE1 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		F9600A3327F016780051BFE1 /* symbols.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = symbols.json; sourceTree = "<group>"; };
-		F99C5DF627E7CDB60080117D /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		F99C5DF627E7CDB60080117D /* AboutView.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; tabWidth = 2; };
 		F9A8925C27644E33009ACA0A /* KeyRemapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyRemapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; };
+		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; tabWidth = 2; };
 		F9A8926327644E35009ACA0A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F9A8926627644E35009ACA0A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F9A8926827644E35009ACA0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyRemapper.entitlements; sourceTree = "<group>"; };
-		F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = CodeSignUpdate.sh; sourceTree = "<group>"; };
 		F9B4D1B127F2754300FC513C /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerWindowController.swift; sourceTree = "<group>"; };
 		F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProviderXPC.swift; sourceTree = "<group>"; };
@@ -203,7 +201,6 @@
 			children = (
 				F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */,
 				F95EC5BE27EF1F2900B370B2 /* Constants.swift */,
-				F9B4D1A227F12D1F00FC513C /* CodeSignUpdate.sh */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -304,7 +301,6 @@
 			files = (
 				F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */,
 				F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */,
-				F9B4D1AB27F1591400FC513C /* CodeSignUpdate.sh in Resources */,
 				F9600A3427F016780051BFE1 /* symbols.json in Resources */,
 				F9600A3227F015250051BFE1 /* config.json in Resources */,
 			);
@@ -541,7 +537,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -573,7 +569,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -602,7 +598,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 4.4.5;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,
@@ -641,7 +637,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.6;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 4.4.5;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
 					__TEXT,

@@ -22,7 +22,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
     let window = NSWindow()
     window.styleMask = styleMask
-    window.title = "About \(BUNDLE_NAME)"
+    window.title = "About \(Constants.BUNDLE_NAME)"
     window.contentView = NSHostingView(rootView: view)
     return NSWindowController(window: window)
   }()
@@ -58,7 +58,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     let connection = NSXPCConnection(
-      machServiceName: MACH_SERVICE_NAME, options: [.privileged])
+      machServiceName: Constants.MACH_SERVICE_NAME, options: [.privileged])
 
     connection.remoteObjectInterface = NSXPCInterface(
       with: ServiceProviderXPCProtocol.self)
@@ -97,7 +97,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     center.requestAuthorization(options: options) { (granted, error) in
       if granted {
         let content = UNMutableNotificationContent()
-        content.title = title ?? BUNDLE_NAME
+        content.title = title ?? Constants.BUNDLE_NAME
         content.body = description
         let request = UNNotificationRequest(
           identifier: UUID().uuidString, content: content, trigger: nil)
@@ -167,7 +167,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
 
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
-      withTitle: "About \(BUNDLE_NAME)",
+      withTitle: "About \(Constants.BUNDLE_NAME)",
       action: #selector(AppDelegate.openAboutWindow),
       keyEquivalent: "")
 
@@ -208,7 +208,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
       return
     }
 
-    let blessed = Global.blessHelper(label: MACH_SERVICE_NAME, authRef: authRef)
+    let blessed = Global.blessHelper(label: Constants.MACH_SERVICE_NAME, authRef: authRef)
 
     if !blessed {
       return Global.showCloseAlert("Error", "Not Blessed to run the Daemon")
@@ -230,10 +230,10 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     var daemonVersion: String?
     daemonRemoteObject.getVersion { version in daemonVersion = version }
 
-    if daemonVersion != VERSION {
+    if daemonVersion != Constants.VERSION {
       return Global.showCloseAlert(
         "Wrong Daemon version",
-        "App \(VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon"
+        "App \(Constants.VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon"
       )
     }
 

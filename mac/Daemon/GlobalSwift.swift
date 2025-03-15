@@ -53,7 +53,7 @@ import Foundation
   static func kill() {
     stop()
     runProcess(
-      "/usr/bin/sudo", args: ["/bin/launchctl", "remove", MACH_SERVICE_NAME])
+        "/usr/bin/sudo", args: ["/bin/launchctl", "remove", Constants.MACH_SERVICE_NAME])
     CFRunLoopStop(CFRunLoopGetMain())
   }
 
@@ -61,15 +61,15 @@ import Foundation
     runProcess(
       "/usr/bin/sudo",
       args: [
-        "/bin/rm", "-rf", "/Library/LaunchDaemons/\(MACH_SERVICE_NAME).plist",
+        "/bin/rm", "-rf", "/Library/LaunchDaemons/\(Constants.MACH_SERVICE_NAME).plist",
       ])
     runProcess(
       "/usr/bin/sudo",
       args: [
-        "/bin/rm", "-rf", "/Library/PrivilegedHelperTools/\(MACH_SERVICE_NAME)",
+        "/bin/rm", "-rf", "/Library/PrivilegedHelperTools/\(Constants.MACH_SERVICE_NAME)",
       ])
     runProcess(
-      "/usr/bin/sudo", args: ["/bin/launchctl", "remove", MACH_SERVICE_NAME])
+        "/usr/bin/sudo", args: ["/bin/launchctl", "remove", Constants.MACH_SERVICE_NAME])
     kill()
   }
 }

@@ -28,10 +28,14 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>Owner</key>
+	<string>@goerwin/keyremapper</string>
+	<key>OwnerWebsite</key>
+	<string>https://github.com/goerwin/keyremapper</string>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-    <key>__Replaced By CodeSignUpdate.sh__</key>
-    <string>__Replaced By CodeSignUpdate.sh__</string>
+		<key>__Replaced By CodeSignUpdate.sh__</key>
+		<string>__Replaced By CodeSignUpdate.sh__</string>
 	</dict>
 </dict>
 </plist>
