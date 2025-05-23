@@ -87,6 +87,14 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ notification: Notification) {
     if let window = NSApplication.shared.windows.first { window.close() }
 
+    // Add observer for frontmost app changes
+    NSWorkspace.shared.notificationCenter.addObserver(
+      self,
+      selector: #selector(handleFrontMostAppChange(_:)),
+      name: NSWorkspace.didActivateApplicationNotification,
+      object: nil
+    )
+
     activeProfileIdx = Global.getJsonConfigActiveProfileIdx()
     startDaemon()
   }
@@ -104,6 +112,12 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
 
         center.add(request)
       }
+    }
+  }
+
+  @objc func handleFrontMostAppChange(_ notification: Notification) {
+    if let app = NSWorkspace.shared.frontmostApplication {
+      self.daemonRemoteObject?.setAppName(app.bundleIdentifier ?? "")
     }
   }
 
