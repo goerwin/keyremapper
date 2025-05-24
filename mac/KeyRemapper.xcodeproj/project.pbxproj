@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D0185C52DE18E5E005D1CC6 /* co.goerwin.KeyRemapperDaemon.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6D0185C42DE18DA5005D1CC6 /* co.goerwin.KeyRemapperDaemon.plist */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		6D0185C82DE191A9005D1CC6 /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F95EC5B927EF174E00B370B2 /* AppBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5B827EF174E00B370B2 /* AppBridge.mm */; };
 		F95EC5BB27EF1DE000B370B2 /* GlobalSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */; };
 		F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95EC5BE27EF1F2900B370B2 /* Constants.swift */; };
@@ -23,7 +25,6 @@
 		F9B4D1BA27F2B10E00FC513C /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B927F2B10E00FC513C /* State.swift */; };
 		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
-		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */; };
 		F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */; };
 		F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */; };
@@ -47,13 +48,23 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F9C759F727ED785000F2E31C /* CopyFiles */ = {
+		6D0185C22DE18CD0005D1CC6 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = Contents/Library/LaunchServices;
 			dstSubfolderSpec = 1;
 			files = (
-				F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */,
+				6D0185C82DE191A9005D1CC6 /* co.goerwin.KeyRemapperDaemon in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9C759F727ED785000F2E31C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchDaemons;
+			dstSubfolderSpec = 1;
+			files = (
+				6D0185C52DE18E5E005D1CC6 /* co.goerwin.KeyRemapperDaemon.plist in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +81,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6D0185C42DE18DA5005D1CC6 /* co.goerwin.KeyRemapperDaemon.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = co.goerwin.KeyRemapperDaemon.plist; sourceTree = "<group>"; };
 		F95EC5B827EF174E00B370B2 /* AppBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppBridge.mm; sourceTree = "<group>"; };
 		F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSwift.swift; sourceTree = "<group>"; };
 		F95EC5BE27EF1F2900B370B2 /* Constants.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; tabWidth = 2; };
@@ -181,6 +193,7 @@
 		F9C75A2927ED938700F2E31C /* Daemon */ = {
 			isa = PBXGroup;
 			children = (
+				6D0185C42DE18DA5005D1CC6 /* co.goerwin.KeyRemapperDaemon.plist */,
 				F9C75A2F27ED93BC00F2E31C /* Info.plist */,
 				F9C75A2A27ED938700F2E31C /* main.swift */,
 				F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */,
@@ -226,6 +239,7 @@
 				F9A8925927644E33009ACA0A /* Frameworks */,
 				F9A8925A27644E33009ACA0A /* Resources */,
 				F9C759F727ED785000F2E31C /* CopyFiles */,
+				6D0185C22DE18CD0005D1CC6 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -263,7 +277,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					F9A8925B27644E33009ACA0A = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -536,7 +550,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 4.4.8;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -568,7 +582,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 4.4.8;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -603,7 +617,7 @@
 					"-sectcreate",
 					__TEXT,
 					__launchd_plist,
-					"$(SRCROOT)/$(TARGET_NAME)/launchd.plist",
+					"$(SRCROOT)/$(TARGET_NAME)/co.goerwin.KeyRemapperDaemon.plist",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
@@ -642,7 +656,7 @@
 					"-sectcreate",
 					__TEXT,
 					__launchd_plist,
-					"$(SRCROOT)/$(TARGET_NAME)/launchd.plist",
+					"$(SRCROOT)/$(TARGET_NAME)/co.goerwin.KeyRemapperDaemon.plist",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";

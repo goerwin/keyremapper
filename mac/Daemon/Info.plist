@@ -10,6 +10,11 @@
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+  <key>SMPrivilegedExecutables</key>
+  <dict>
+    <key>co.goerwin.KeyRemapperDaemon</key>
+    <string>identifier com.apple.xpc.launchd; label = co.goerwin.KeyRemapperDaemon; path = /Library/PrivilegedHelperTools/co.goerwin.KeyRemapperDaemon</string>
+  </dict>
 	<key>ClientBundleIdentifier</key>
 	<string>co.goerwin.KeyRemapper</string>
 	<key>SMAuthorizedClients</key>

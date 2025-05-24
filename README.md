@@ -393,4 +393,12 @@ tag=v1.1.1 && git tag $tag && git push origin $tag
 "/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/Msbuild/Current/Bin/MSBuild.exe" ...args
 ```
 
+### Troubleshooting
+
+To run a clean build on XCode, you need to:
+  - Kill the App
+  - Kill the he deamon process (co.goerwin.KeyRemapperDaemon)
+  - Go to: Product -> Clean Build Folder (Cmd + Shift + K)
+  - Go to: Product -> Build (Cmd + Shift + B)
+
 </details>

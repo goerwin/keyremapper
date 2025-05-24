@@ -52,20 +52,21 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
   }()
 
   private var _daemonRemoteObject: ServiceProviderXPCProtocol?
+
   var daemonRemoteObject: ServiceProviderXPCProtocol? {
     if _daemonRemoteObject != nil {
       return _daemonRemoteObject
     }
 
-    let connection = NSXPCConnection(
-      machServiceName: Constants.MACH_SERVICE_NAME, options: [.privileged])
+    let connection = NSXPCConnection(machServiceName: Constants.MACH_SERVICE_NAME, options: [.privileged])
 
-    connection.remoteObjectInterface = NSXPCInterface(
-      with: ServiceProviderXPCProtocol.self)
+    connection.remoteObjectInterface = NSXPCInterface(with: ServiceProviderXPCProtocol.self)
     connection.resume()
 
     connection.interruptionHandler = {
       print("Connection with Daemon interrupted")
+      // todo: kill the daemon from here (app) since the communication has failed
+      // and cant run the kill process on the deamon which actually should be here in the APP!!
       self._daemonRemoteObject = nil
     }
     connection.invalidationHandler = {
@@ -80,7 +81,10 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     _daemonRemoteObject =
       connection.synchronousRemoteObjectProxyWithErrorHandler { error in
         print("Error:", error)
+        Global.showCloseAlert("Error", error.localizedDescription)
+        self.quit()
       } as? ServiceProviderXPCProtocol
+
     return _daemonRemoteObject
   }
 
@@ -237,42 +241,54 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     guard let daemonRemoteObject = self.daemonRemoteObject else {
-      return Global.showCloseAlert(
-        "Error", "No Daemon service remote object running")
+      return Global.showCloseAlert("Error", "No Daemon service remote object running")
     }
 
-    var daemonVersion: String?
-    daemonRemoteObject.getVersion { version in daemonVersion = version }
+    // can't refactor this into a function because it will break due to
+    // ServiceProviderXPCProtocol not liking it 🤷‍♂️
+    var daemonVersion = "Null"
+    let semaphore = DispatchSemaphore(value: 0)
+    daemonRemoteObject.getVersion { version in
+      daemonVersion = version
+      semaphore.signal()
+    }
+    semaphore.wait()
 
-    if daemonVersion != Constants.VERSION {
+    if Constants.VERSION != daemonVersion {
       return Global.showCloseAlert(
-        "Wrong Daemon version",
-        "App \(Constants.VERSION) and Daemon \(daemonVersion ?? "(unknown)") Version Mismatch, Restart the Daemon"
+        "Version Mismatch",
+        "App \(Constants.VERSION) and Daemon \(daemonVersion) Version Mismatch, Restart the Daemon"
       )
     }
 
-    guard let symbolsPath = Global.getResourceSymbolsPath() else { return }
+    // start the daemon
+    do {
+      guard let symbolsPath = Global.getResourceSymbolsPath() else { return }
 
-    var daemonStartResult: Int?
-    daemonRemoteObject.start(
-      configPath: configPath, symbolsPath: symbolsPath,
-      profileIdx: profileIdx ?? activeProfileIdx ?? 0
-    ) {
-      result in daemonStartResult = result
-    }
+      var daemonStartResult: Int?
+      let semaphore2 = DispatchSemaphore(value: 0)
+      daemonRemoteObject.start(
+        configPath: configPath, symbolsPath: symbolsPath,
+        profileIdx: profileIdx ?? activeProfileIdx ?? 0
+      ) { result in
+        daemonStartResult = result
+        semaphore2.signal()
+      }
+      semaphore2.wait()
 
-    if daemonStartResult == 1 {
-      Global.showCloseAlert(
-        "Enable Accesibility", "Enable Accesibility for this app")
+      if daemonStartResult == 1 {
+        Global.showCloseAlert(
+          "Enable Accesibility", "Enable Accesibility for this app")
 
-      IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
-      return
-    }
+        IOHIDRequestAccess(kIOHIDRequestTypePostEvent)
+        return
+      }
 
-    if daemonStartResult != 0 {
-      return Global.showCloseAlert(
-        "Error",
-        "Couldn't start Daemon process. Error \(daemonStartResult ?? -1)")
+      if daemonStartResult != 0 {
+        return Global.showCloseAlert(
+          "Error",
+          "Couldn't start Daemon process. Error \(daemonStartResult ?? -1)")
+      }
     }
 
     self.daemonStarted = true
