@@ -40,10 +40,6 @@ import Foundation
   func stopLogging() {
     GlobalSwift.appBridge?.stopLogging()
   }
-  
-  func setAppName(_ appName: String) {
-    GlobalSwift.appBridge?.setAppName(appName)
-  }
 
   func getVersion(withReply reply: @escaping (String) -> Void) {
     reply(GlobalSwift.VERSION)

@@ -9,7 +9,6 @@ import Foundation
   func uninstall()
   func startLogging()
   func stopLogging()
-  func setAppName(_ appName: String)
   func getVersion(withReply reply: @escaping (String) -> Void)
 }
 
