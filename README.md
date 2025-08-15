@@ -396,9 +396,25 @@ tag=v1.1.1 && git tag $tag && git push origin $tag
 ### Troubleshooting
 
 To run a clean build on XCode, you need to:
-  - Kill the App
-  - Kill the he deamon process (co.goerwin.KeyRemapperDaemon)
-  - Go to: Product -> Clean Build Folder (Cmd + Shift + K)
-  - Go to: Product -> Build (Cmd + Shift + B)
+
+- Kill the App
+- Kill the the deamon process (co.goerwin.KeyRemapperDaemon)
+- Go to: Product -> Clean Build Folder (Cmd + Shift + K)
+- Go to: Product -> Build (Cmd + Shift + B)
+
+#### Does not work on local Solución 1:
+
+remove the Daemons and privileged helper tools
+
+```sh
+sudo rm -rf /Library/LaunchDaemons/co.goerwin.KeyRemapperDaemon.plist
+sudo rm -rf /Library/PrivilegedHelperTools/co.goerwin.KeyRemapperDaemon
+sudo rm -rf ~/Library/Developer/Xcode/DerivedData
+sudo launchctl remove co.goerwin.KeyRemapperDaemon
+sudo pkill -f KeyRemapperDaemon
+```
+
+delete the build folder and recreate it. Also, go to "Allow in the background" settings, then "Allow in the background"
+and look for "Erwin Gaitan" (TODO: probably try to change that name!) try disabling it, enabling it multiple times and run the project until it works.
 
 </details>
