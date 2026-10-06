@@ -29,9 +29,9 @@
 		F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */; };
 		F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */; };
 		F9C75A3B27EED49000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */; };
-		F9C75A4827EEEA3500F2E31C /* MyIOHIDManager.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4727EEEA3500F2E31C /* MyIOHIDManager.hpp */; };
-		F9C75A4A27EEEB7000F2E31C /* Global.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4927EEEB7000F2E31C /* Global.hpp */; };
-		F9C75A5027EEFA8E00F2E31C /* MouseManager.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4F27EEFA8E00F2E31C /* MouseManager.hpp */; };
+		F9C75A4827EEEA3500F2E31C /* Keyboards.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4727EEEA3500F2E31C /* Keyboards.hpp */; };
+		F9C75A4A27EEEB7000F2E31C /* Keys.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4927EEEB7000F2E31C /* Keys.hpp */; };
+		F9C75A5027EEFA8E00F2E31C /* Mouse.hpp in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A4F27EEFA8E00F2E31C /* Mouse.hpp */; };
 		F9C75A5327EEFDEA00F2E31C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C75A5227EEFDEA00F2E31C /* AppKit.framework */; };
 		F9C75A5527EEFE1800F2E31C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C75A5427EEFE1800F2E31C /* IOKit.framework */; };
 		F9C75A5927EF125800F2E31C /* AppBridge.h in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A5827EF125800F2E31C /* AppBridge.h */; };
@@ -106,9 +106,9 @@
 		F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDelegateXPC.swift; sourceTree = "<group>"; };
 		F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProviderXPCProtocol.swift; sourceTree = "<group>"; };
 		F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProviderXPC.swift; sourceTree = "<group>"; };
-		F9C75A4727EEEA3500F2E31C /* MyIOHIDManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MyIOHIDManager.hpp; sourceTree = "<group>"; };
-		F9C75A4927EEEB7000F2E31C /* Global.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Global.hpp; sourceTree = "<group>"; };
-		F9C75A4F27EEFA8E00F2E31C /* MouseManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MouseManager.hpp; sourceTree = "<group>"; };
+		F9C75A4727EEEA3500F2E31C /* Keyboards.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Keyboards.hpp; sourceTree = "<group>"; };
+		F9C75A4927EEEB7000F2E31C /* Keys.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Keys.hpp; sourceTree = "<group>"; };
+		F9C75A4F27EEFA8E00F2E31C /* Mouse.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mouse.hpp; sourceTree = "<group>"; };
 		F9C75A5227EEFDEA00F2E31C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		F9C75A5427EEFE1800F2E31C /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		F9C75A5827EF125800F2E31C /* AppBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppBridge.h; sourceTree = "<group>"; };
@@ -201,9 +201,9 @@
 				F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */,
 				F9C75A5827EF125800F2E31C /* AppBridge.h */,
 				F95EC5B827EF174E00B370B2 /* AppBridge.mm */,
-				F9C75A4927EEEB7000F2E31C /* Global.hpp */,
-				F9C75A4727EEEA3500F2E31C /* MyIOHIDManager.hpp */,
-				F9C75A4F27EEFA8E00F2E31C /* MouseManager.hpp */,
+				F9C75A4927EEEB7000F2E31C /* Keys.hpp */,
+				F9C75A4727EEEA3500F2E31C /* Keyboards.hpp */,
+				F9C75A4F27EEFA8E00F2E31C /* Mouse.hpp */,
 				F9C75A3327EEC9A900F2E31C /* Daemon-Bridging-Header.h */,
 			);
 			path = Daemon;
@@ -341,12 +341,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9C75A4A27EEEB7000F2E31C /* Global.hpp in Sources */,
+				F9C75A4A27EEEB7000F2E31C /* Keys.hpp in Sources */,
 				F95EC5C027EF1F2900B370B2 /* Constants.swift in Sources */,
 				F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */,
 				F95EC5B927EF174E00B370B2 /* AppBridge.mm in Sources */,
-				F9C75A4827EEEA3500F2E31C /* MyIOHIDManager.hpp in Sources */,
-				F9C75A5027EEFA8E00F2E31C /* MouseManager.hpp in Sources */,
+				F9C75A4827EEEA3500F2E31C /* Keyboards.hpp in Sources */,
+				F9C75A5027EEFA8E00F2E31C /* Mouse.hpp in Sources */,
 				F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */,
 				F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */,
 				F9C75A5927EF125800F2E31C /* AppBridge.h in Sources */,

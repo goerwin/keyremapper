@@ -5,7 +5,7 @@ import Foundation
   static let CHECK_CLIENT_INTERVAL = 1.0
   static let VERSION =
     Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
-  static var appBridge: AppBridge?
+  static let appBridge = AppBridge()
 
   static var connection: NSXPCConnection?
 
@@ -40,7 +40,7 @@ import Foundation
   }
 
   static func stop() {
-    appBridge?.stop()
+    appBridge.stop()
   }
 
   static func kill() {

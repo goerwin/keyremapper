@@ -7,6 +7,8 @@
 
 #import "../Daemon/Runtime.hpp"
 
+static Runtime runtime;
+
 std::string getFrontmostAppName() {
   NSRunningApplication* app = NSWorkspace.sharedWorkspace.frontmostApplication;
   if (app.bundleIdentifier) return [app.bundleIdentifier UTF8String];
@@ -20,7 +22,7 @@ void stopOnSignal(int sig) {
       dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, sig, 0,
                              dispatch_get_main_queue());
   dispatch_source_set_event_handler(source, ^{
-    Runtime::stop();
+    runtime.stop();
     Helpers::print("\nStopped");
     exit(0);
   });
@@ -63,18 +65,18 @@ int main(int argc, const char* argv[]) {
     }
 
     static bool hasErrors = false;
-    Runtime::onError = [](std::string err) {
+    runtime.onError = [](std::string err) {
       hasErrors = true;
       std::cerr << err << std::endl;
     };
 
     auto startResult =
-        Runtime::start(configPath, symbolsPath, profileIdx,
+        runtime.start(configPath, symbolsPath, profileIdx,
                        getFrontmostAppName());
 
     // start() reports exceptions through onError and still returns 0
     if (hasErrors) {
-      Runtime::stop();
+      runtime.stop();
       return 1;
     }
 
@@ -91,14 +93,14 @@ int main(int argc, const char* argv[]) {
     }
 
     if (shouldLog)
-      Runtime::startLogging([](std::string log) { Helpers::print(log); });
+      runtime.startLogging([](std::string log) { Helpers::print(log); });
 
     [NSWorkspace.sharedWorkspace.notificationCenter
         addObserverForName:NSWorkspaceDidActivateApplicationNotification
                     object:nil
                      queue:nil
                 usingBlock:^(NSNotification* notification) {
-                  Global::keyRemapper->setAppName(getFrontmostAppName());
+                  runtime.setAppName(getFrontmostAppName());
                 }];
 
     stopOnSignal(SIGINT);

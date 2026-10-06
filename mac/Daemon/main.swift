@@ -12,7 +12,7 @@ func start() {
     forName: NSWorkspace.didActivateApplicationNotification, object: nil,
     queue: nil
   ) { _ in
-    GlobalSwift.appBridge?.setAppName(GlobalSwift.getFrontmostAppName())
+    GlobalSwift.appBridge.setAppName(GlobalSwift.getFrontmostAppName())
   }
 }
 
