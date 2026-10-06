@@ -20,8 +20,8 @@ auto arrowKeyVkCodes = {123, 124, 125, 126};
 auto mediaVkCodes = {300, 301, 302, 303, 304, 305,
                      306, 307, 308, 309, 310, 311};
 
-int delayUntilRepeat = 250;
-int keyRepeatInterval = 25;
+int delayUntilRepeat;
+int keyRepeatInterval;
 bool shouldKeyRepeat = false;
 int keyRepeatThreadCount = 0;
 CGKeyCode repeatedKey;

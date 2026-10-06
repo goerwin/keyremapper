@@ -168,6 +168,6 @@ std::string MouseManager::status = "";
 std::string MouseManager::mouseType;
 int MouseManager::clickCount = 0;
 double MouseManager::lastPressTime = 0;
-double MouseManager::doubleClickSpeed = 500;
+double MouseManager::doubleClickSpeed;
 CFMachPortRef MouseManager::myEventTap;
 CFRunLoopSourceRef MouseManager::myRunLoopSource;

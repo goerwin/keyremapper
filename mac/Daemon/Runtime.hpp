@@ -242,12 +242,8 @@ int start(std::string configPath, std::string symbolsPath, int profileIdx,
     Global::keyRemapper = new KeyRemapper(activeProfile, Global::symbols);
     Global::keyRemapper->setAppName(appName);
 
-    Global::delayUntilRepeat = config["delayUntilRepeat"].is_null()
-                                   ? Global::delayUntilRepeat
-                                   : config["delayUntilRepeat"].get<int>();
-    Global::keyRepeatInterval = config["keyRepeatInterval"].is_null()
-                                    ? Global::keyRepeatInterval
-                                    : config["keyRepeatInterval"].get<int>();
+    Global::delayUntilRepeat = activeProfile.value("delayUntilRepeat", 250);
+    Global::keyRepeatInterval = activeProfile.value("keyRepeatInterval", 25);
     Global::isAppEnabled = true;
 
     auto mouseManagerStartRes = MouseManager::start();
@@ -255,9 +251,7 @@ int start(std::string configPath, std::string symbolsPath, int profileIdx,
     if (mouseManagerStartRes != 0) return 2;
 
     MouseManager::doubleClickSpeed =
-        config["doubleClickSpeed"].is_null()
-            ? MouseManager::doubleClickSpeed
-            : config["doubleClickSpeed"].get<double>();
+        activeProfile.value("doubleClickSpeed", 500.0);
 
     MyIOHIDManager::start();
     MyIOHIDManager::onIOHIDKeyboardInput = handleIOHIDKeyboardInput;
