@@ -2,7 +2,7 @@ CONFIG ?= $(HOME)/KeyRemapperMac/config.json
 PROFILE ?= 0
 SYMBOLS := mac/KeyRemapper/Resources/symbols.json
 
-.PHONY: test test-config build dev-build dev
+.PHONY: test test-config build dev-build dev release-patch release-minor release-major
 
 test:
 	g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
@@ -18,3 +18,6 @@ dev-build:
 
 dev: dev-build
 	sudo mac/build/keyremapper-dev "$(CONFIG)" $(SYMBOLS) --profile $(PROFILE) $(if $(LOG),--log)
+
+release-patch release-minor release-major:
+	./release.sh $(@:release-%=%)
