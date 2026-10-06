@@ -8,7 +8,14 @@
 
 static nlohmann::json symbols;
 static std::vector<std::string> posted;
+static std::vector<std::chrono::steady_clock::time_point> repeatTimes;
 static int failures = 0;
+
+long msSince(std::chrono::steady_clock::time_point from,
+             std::chrono::steady_clock::time_point to) {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(to - from)
+      .count();
+}
 
 ushort scancode(std::string key) { return symbols[key][0]; }
 ushort vkCode(std::string key) { return symbols[key][3]; }
@@ -98,7 +105,11 @@ int main(int argc, const char* argv[]) {
   std::vector<bool> capslockStates;
 
   Runtime runtime;
-  runtime.postEvent = [](CGEventRef event) { posted.push_back(describe(event)); };
+  runtime.postEvent = [](CGEventRef event) {
+    posted.push_back(describe(event));
+    if (CGEventGetIntegerValueField(event, kCGKeyboardEventAutorepeat))
+      repeatTimes.push_back(std::chrono::steady_clock::now());
+  };
   runtime.setCapslock = [&](bool state) { capslockStates.push_back(state); };
   runtime.onError = [&](std::string err) { errors.push_back(err); };
 
@@ -114,21 +125,22 @@ int main(int argc, const char* argv[]) {
   expect("adds the held modifiers to the keys",
          {"mod:55+cmd", key("V", "down+cmd"), key("V", "up+cmd"), "mod:55"});
 
-  // Slow machines can wait longer, so the repeats expected come from the time
-  // that really passed
+  // Timers fire late on slow machines (CI) but never early, so only the
+  // minimum times are checked. The default delay (250) wouldn't repeat here
+  repeatTimes.clear();
   auto pressTime = std::chrono::steady_clock::now();
   press(runtime, "A", true);
-  wait(100 + 20 * 3 + 10);
-  auto heldMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now() - pressTime)
-                    .count();
-  long expectedRepeats = (heldMs - 100) / 20 + 1;
-  long repeats =
-      std::count(posted.begin(), posted.end(), key("B", "down:repeat"));
-  check("repeats after delayUntilRepeat, every keyRepeatInterval (" +
-            std::to_string(repeats) + " repeats in " + std::to_string(heldMs) +
-            "ms)",
-        repeats >= 2 && std::abs(repeats - expectedRepeats) <= 1);
+  wait(100 + 20 * 5);
+  std::string times;
+  bool isOnTime = !repeatTimes.empty() && msSince(pressTime, repeatTimes[0]) >= 100;
+  for (size_t i = 0; i < repeatTimes.size(); i++) {
+    times += std::to_string(msSince(pressTime, repeatTimes[i])) + "ms ";
+    if (i > 0 && msSince(repeatTimes[i - 1], repeatTimes[i]) < 20 / 2)
+      isOnTime = false;
+  }
+  check("repeats after delayUntilRepeat, every keyRepeatInterval (" + times +
+            ")",
+        isOnTime);
   posted.clear();
   press(runtime, "A", false);
   wait(100);
