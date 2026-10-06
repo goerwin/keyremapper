@@ -142,7 +142,7 @@ void startLogging(std::function<void(std::string)> onLog) {
   Global::keyRemapper->setApplyKeysCb(
       [onLog](std::string appName, std::string kbId, std::string kbDesc,
               std::string keys) {
-        onLog("AppName: " + appName + "\nKeyboard (vendorId:productId): " +
+        onLog("AppName: " + appName + "\nKeyboard (productId:vendorId): " +
               kbId + "\nKeyboardDescription: " + kbDesc + "\nKeys: " + keys +
               "\n");
       });
