@@ -116,6 +116,15 @@ class MouseManager {
             CGEventMaskBit(kCGEventMouseMoved),
         [](CGEventTapProxy proxy, CGEventType type, CGEventRef event,
            void *refcon) {
+          // macOS disables the tap when the main thread is too slow to
+          // answer and it doesn't come back on its own
+          if (type == kCGEventTapDisabledByTimeout ||
+              type == kCGEventTapDisabledByUserInput) {
+            if (MouseManager::myEventTap)
+              CGEventTapEnable(MouseManager::myEventTap, true);
+            return event;
+          }
+
           auto userData =
               CGEventGetDoubleValueField(event, kCGEventSourceUserData);
 
