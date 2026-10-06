@@ -111,43 +111,31 @@ void postDownUpMediaKey(ushort vkCode, bool isKeyDown) {
   CFRelease(cgUpEvent);
 }
 
+dispatch_source_t keyRepeatTimer = nil;
+
+void stopKeyRepeat() {
+  if (!keyRepeatTimer) return;
+  dispatch_source_cancel(keyRepeatTimer);
+  keyRepeatTimer = nil;
+}
+
 void handleKeyRepeat(CGKeyCode vkCode, bool isKeyDown) {
-  if (!isKeyDown) {
-    Global::shouldKeyRepeat = false;
-    Global::repeatedKey = {};
-    return;
-  }
+  stopKeyRepeat();
+  if (!isKeyDown) return;
 
-  Global::shouldKeyRepeat = true;
-  Global::repeatedKey = vkCode;
-  Global::keyRepeatThreadCount = Global::keyRepeatThreadCount > 9999
-                                     ? 0
-                                     : Global::keyRepeatThreadCount + 1;
-
-  std::thread threadObj(
-      [](int threadIdx) {
-        if (threadIdx != Global::keyRepeatThreadCount ||
-            !Global::shouldKeyRepeat)
-          return;
-
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(Global::delayUntilRepeat));
-
-        while (Global::isAppEnabled &&
-               Global::keyRepeatThreadCount == threadIdx &&
-               Global::shouldKeyRepeat) {
-          auto vkCode = (CGKeyCode)Global::repeatedKey;
-
-          if (Global::isMediaVkKeyCode(vkCode))
-            postDownUpMediaKey(vkCode, true);
-          else
-            postKey(vkCode, true, true);
-          std::this_thread::sleep_for(
-              std::chrono::milliseconds(Global::keyRepeatInterval));
-        }
-      },
-      Global::keyRepeatThreadCount);
-  threadObj.detach();
+  keyRepeatTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                          dispatch_get_main_queue());
+  dispatch_source_set_timer(
+      keyRepeatTimer,
+      dispatch_time(DISPATCH_TIME_NOW, Global::delayUntilRepeat * NSEC_PER_MSEC),
+      Global::keyRepeatInterval * NSEC_PER_MSEC, 0);
+  dispatch_source_set_event_handler(keyRepeatTimer, ^{
+    if (Global::isMediaVkKeyCode(vkCode))
+      postDownUpMediaKey(vkCode, true);
+    else
+      postKey(vkCode, true, true);
+  });
+  dispatch_resume(keyRepeatTimer);
 }
 
 void startLogging(std::function<void(std::string)> onLog) {
@@ -186,7 +174,7 @@ void handleIOHIDKeyboardInput(ushort scancode, bool isKeyDown, int vendorId,
       auto isKeyDown = keyEvent.isKeyDown;
       auto vkCode = getMacVKCode(code);
 
-      if (!isKeyDown) Global::shouldKeyRepeat = false;
+      if (!isKeyDown) stopKeyRepeat();
 
       if (vkCode == 55 || vkCode == 54) {
         Global::isCmdDown = isKeyDown;
@@ -244,7 +232,6 @@ int start(std::string configPath, std::string symbolsPath, int profileIdx,
 
     Global::delayUntilRepeat = activeProfile.value("delayUntilRepeat", 250);
     Global::keyRepeatInterval = activeProfile.value("keyRepeatInterval", 25);
-    Global::isAppEnabled = true;
 
     auto mouseManagerStartRes = MouseManager::start();
     if (mouseManagerStartRes == 1) return 1;
@@ -265,6 +252,7 @@ int start(std::string configPath, std::string symbolsPath, int profileIdx,
 }
 
 void stop() {
+  stopKeyRepeat();
   MouseManager::stop();
   MyIOHIDManager::stop();
   Global::reset();

@@ -22,12 +22,8 @@ auto mediaVkCodes = {300, 301, 302, 303, 304, 305,
 
 int delayUntilRepeat;
 int keyRepeatInterval;
-bool shouldKeyRepeat = false;
-int keyRepeatThreadCount = 0;
-CGKeyCode repeatedKey;
 
 std::string activeApp;
-bool isAppEnabled = false;
 nlohmann::json symbols;
 
 bool isArrowKeyVkCode(ushort vkCode) {
@@ -56,12 +52,8 @@ void reset() {
   isAltDown = false;
   isCtrlDown = false;
   isFnDown = false;
-  shouldKeyRepeat = false;
-  isAppEnabled = false;
   symbols = NULL;
   activeApp = {};
-  repeatedKey = 0;
-  keyRepeatThreadCount = 0;
 
   if (Global::keyRemapper) {
     delete Global::keyRemapper;
