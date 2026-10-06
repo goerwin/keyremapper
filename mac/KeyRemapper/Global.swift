@@ -8,14 +8,18 @@ struct Global {
 
   //https://ja.stackoverflow.com/questions/73580/authorizationenvironment%E3%82%92%E7%94%9F%E6%88%90%E3%81%99%E3%82%8Bobjective-c%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E3%82%92swift%E3%81%A7%E6%9B%B8%E3%81%8F%E6%96%B9%E6%B3%95%E3%82%92%E3%81%8A%E3%81%97%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84
   static func getPrivilegedHelperAuth() -> AuthorizationRef? {
-    var authItem = AuthorizationItem(
-      name: kSMRightBlessPrivilegedHelper, valueLength: 0,
-      value: UnsafeMutableRawPointer(bitPattern: 0), flags: 0)
-    var rights = AuthorizationRights(count: 1, items: &authItem)
     var authRef: AuthorizationRef?
-    AuthorizationCreate(
-      &rights, nil, [.interactionAllowed, .extendRights, .preAuthorize],
-      &authRef)
+
+    kSMRightBlessPrivilegedHelper.withCString { name in
+      var authItem = AuthorizationItem(
+        name: name, valueLength: 0, value: nil, flags: 0)
+      withUnsafeMutablePointer(to: &authItem) { authItemPointer in
+        var rights = AuthorizationRights(count: 1, items: authItemPointer)
+        AuthorizationCreate(
+          &rights, nil, [.interactionAllowed, .extendRights, .preAuthorize],
+          &authRef)
+      }
+    }
 
     return authRef
   }
