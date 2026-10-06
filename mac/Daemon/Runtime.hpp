@@ -32,15 +32,17 @@ class Runtime {
   ~Runtime() { stop(); }
 
   // 1: no Accessibility permission, 2: couldn't listen to the mouse,
-  // 5: invalid profiles, 6: invalid profile. Exceptions go to onError
+  // 3: error sent to onError (eg. invalid config), 5: invalid profiles,
+  // 6: invalid profile. It stays stopped when it fails
   int start(std::string configPath, std::string symbolsPath, int profileIdx,
             std::string appName) {
     try {
-      auto loadResult = load(configPath, symbolsPath, profileIdx, appName);
-      if (loadResult != 0) return loadResult;
-
-      auto mouseStartResult = mouse.start();
-      if (mouseStartResult != 0) return mouseStartResult;
+      auto result = load(configPath, symbolsPath, profileIdx, appName);
+      if (result == 0) result = mouse.start();
+      if (result != 0) {
+        stop();
+        return result;
+      }
 
       capslock = Capslock::getState();
       keyboards.onInput = [this](ushort scancode, bool isKeyDown, int vendorId,
@@ -50,13 +52,15 @@ class Runtime {
                     product);
       };
       keyboards.start();
+      return 0;
     } catch (const std::exception& err) {
       onError("StartError: " + std::string(err.what()));
     } catch (...) {
       onError("StartError: Unknown error");
     }
 
-    return 0;
+    stop();
+    return 3;
   }
 
   // Loads the profile without touching the keyboards or the mouse. Throws on

@@ -202,8 +202,12 @@ int main(int argc, const char* argv[]) {
 
   for (auto& err : errors) Helpers::print("  error: " + err);
   check("reports no errors", errors.empty());
-  runtime.start(argv[1], argv[2], 99, "");
-  check("reports an invalid profile index", errors.size() == 1);
+  runtime.start(argv[1], argv[2], 0, "");
+  auto startResult = runtime.start(argv[1], argv[2], 99, "");
+  check("reports an invalid profile index",
+        startResult == 3 && errors.size() == 1);
+  tap(runtime, "A");
+  expect("stays stopped after a failed start", {});
 
   Helpers::print(failures ? std::to_string(failures) + " FAILED" : "SUCCESS!");
   return failures ? 1 : 0;

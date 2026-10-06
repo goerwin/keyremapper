@@ -64,21 +64,13 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
 
-    static bool hasErrors = false;
-    runtime.onError = [](std::string err) {
-      hasErrors = true;
-      std::cerr << err << std::endl;
-    };
+    runtime.onError = [](std::string err) { std::cerr << err << std::endl; };
 
     auto startResult =
         runtime.start(configPath, symbolsPath, profileIdx,
                        getFrontmostAppName());
 
-    // start() reports exceptions through onError and still returns 0
-    if (hasErrors) {
-      runtime.stop();
-      return 1;
-    }
+    if (startResult == 3) return 1;
 
     if (startResult == 1) {
       Helpers::print(
