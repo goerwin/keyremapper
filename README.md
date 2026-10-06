@@ -180,7 +180,10 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
 
 - Mac
   ```sh
-    $ g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
+    # engine tests with the fixtures in Tests/
+    $ make test
+    # "tests" of each profile in a config (defaults to ~/KeyRemapperMac/config.json)
+    $ make test-config CONFIG=path/to/config.json
   ```
 - Windows
   ```sh
@@ -191,6 +194,7 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
 ## Build
 
 - Mac
+  - `make build` does an unsigned Debug build (in `mac/build`) to check that everything compiles
   - Create a `mac/.env` file using `mac/.env.example` and fill up the values
   - Open project `~mac/KeyRemapper.xcodeproj` with XCode
   - Sign the 2 targets for development (KeyRemapper, Daemon)

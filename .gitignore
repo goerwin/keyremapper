@@ -2,6 +2,7 @@
 Tests/output
 Tests/output.*
 mac/output
+mac/build
 .env
 .zip
 dist
