@@ -11,6 +11,9 @@ app=/Applications/KeyRemapper.app
 build=/tmp/keyremapper-test-app
 process='application process "KeyRemapper"'
 menu="menu 1 of menu bar item 1 of menu bar 2 of $process"
+alerts="every window of $process whose subrole is \"AXDialog\""
+config="$HOME/keyRemapperMac/config.json"
+configBackup=$(mktemp)
 failures=0
 
 ui() { osascript -e "tell application \"System Events\" to $1"; }
@@ -27,7 +30,10 @@ daemonRuns() { [[ -n "$(daemonPid)" ]]; }
 daemonStopped() { [[ -z "$(daemonPid)" ]]; }
 hasWindow() { ui "exists window \"$1\" of $process" | grep -q true; }
 hasNoWindow() { ! hasWindow "$1"; }
-hasNoAlerts() { [[ -z "$(ui "get name of every window of $process whose subrole is \"AXDialog\"")" ]]; }
+# Alerts have no title, so they're counted
+hasNoAlerts() { [[ "$(ui "count ($alerts)")" == 0 ]]; }
+hasAlert() { ! hasNoAlerts; }
+dismissAlert() { ui "click button \"OK\" of item 1 of ($alerts)" >/dev/null || true; sleep 1; }
 daemonNotInDock() { ! lsappinfo list | grep -A4 '"co.goerwin.KeyRemapperDaemon"' | grep -q Foreground; }
 
 check() {
@@ -86,6 +92,20 @@ while read -r profile; do
 done <<< "$profiles"
 clickMenu "$active"
 check "survives switching profiles" daemonIs "$pid"
+
+cp -p "$config" "$configBackup"
+trap 'cp -p "$configBackup" "$config"' EXIT
+echo '{' > "$config"
+check "reloads the config when it's saved, reporting errors" waitFor hasAlert
+dismissAlert
+check "stops remapping with an invalid config" menuHas Resume
+cp -p "$configBackup" "$config"
+check "resumes when the config is fixed" waitFor menuHas Pause
+check "shows no alerts after fixing the config" hasNoAlerts
+clickMenu Pause
+touch "$config" && sleep 1.5
+check "stays paused when the config is saved" menuHas Resume
+clickMenu Resume
 
 clickMenu Logger
 check "opens the Logger" hasWindow Logger

@@ -21,6 +21,9 @@
 		F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */; };
 		F9B4D1B627F292B400FC513C /* AppProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */; };
 		F9B4D1BA27F2B10E00FC513C /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B927F2B10E00FC513C /* State.swift */; };
+		F9D1A0022E00000000000002 /* DaemonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000001 /* DaemonClient.swift */; };
+		F9D1A0022E00000000000004 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000003 /* ConfigStore.swift */; };
+		F9D1A0022E00000000000006 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000005 /* StatusBarController.swift */; };
 		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
 		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -97,6 +100,9 @@
 		F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerWindowController.swift; sourceTree = "<group>"; };
 		F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProviderXPC.swift; sourceTree = "<group>"; };
 		F9B4D1B927F2B10E00FC513C /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		F9D1A0022E00000000000001 /* DaemonClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonClient.swift; sourceTree = "<group>"; };
+		F9D1A0022E00000000000003 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
+		F9D1A0022E00000000000005 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		F9C759FB27ED7BE000F2E31C /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -173,6 +179,9 @@
 				F9B4D1B127F2754300FC513C /* LoggerView.swift */,
 				F9B4D1B927F2B10E00FC513C /* State.swift */,
 				F9C759FB27ED7BE000F2E31C /* Global.swift */,
+				F9D1A0022E00000000000005 /* StatusBarController.swift */,
+				F9D1A0022E00000000000003 /* ConfigStore.swift */,
+				F9D1A0022E00000000000001 /* DaemonClient.swift */,
 				F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */,
 				F9A8926327644E35009ACA0A /* Assets.xcassets */,
 				F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */,
@@ -327,6 +336,9 @@
 			files = (
 				F99C5DF727E7CDB60080117D /* AboutView.swift in Sources */,
 				F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */,
+				F9D1A0022E00000000000006 /* StatusBarController.swift in Sources */,
+				F9D1A0022E00000000000004 /* ConfigStore.swift in Sources */,
+				F9D1A0022E00000000000002 /* DaemonClient.swift in Sources */,
 				F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */,
 				F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */,
 				F95EC5BF27EF1F2900B370B2 /* Constants.swift in Sources */,

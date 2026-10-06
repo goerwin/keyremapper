@@ -8,7 +8,7 @@ Keyboard remapper for macOS and Windows, configured with a JSON file. On macOS i
   1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
   2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
   3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_. Updating from 4.x asks for your password once, to remove the old helper
-  4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_) and reselect the profile to reload it
+  4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
 
 _Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
 - Windows
@@ -147,7 +147,7 @@ make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 ```
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
-- `make test-app` replaces the installed app and needs _Accessibility_ for the terminal app. Physical keystrokes can't be automated (it would need a virtual HID driver), so try a few keys after it
+- `make test-app` replaces the installed app and needs _Accessibility_ for the terminal app. It briefly saves an invalid config to check reloading, and restores yours after. Physical keystrokes can't be automated (it would need a virtual HID driver), so try a few keys after it
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
 - Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version
