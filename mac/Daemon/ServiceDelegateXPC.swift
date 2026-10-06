@@ -18,11 +18,11 @@ class ServiceDelegateXPC: NSObject, NSXPCListenerDelegate {
     newConnection.setCodeSigningRequirement(requirement)
 
     newConnection.interruptionHandler = {
-      GlobalSwift.kill()
+      DispatchQueue.main.async { GlobalSwift.kill() }
     }
 
     newConnection.invalidationHandler = {
-      GlobalSwift.kill()
+      DispatchQueue.main.async { GlobalSwift.kill() }
     }
 
     newConnection.remoteObjectInterface = NSXPCInterface(

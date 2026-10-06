@@ -3,42 +3,46 @@
 
 import Foundation
 
+// XPC calls arrive on a background queue, but the runtime (keyboard and mouse callbacks)
+// lives on the main run loop, so every call that touches it runs on main
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
   func start(
     configPath: String, symbolsPath: String, profileIdx: Int,
     withReply reply: @escaping (Int) -> Void
   ) {
-    if GlobalSwift.appBridge == nil {
-      GlobalSwift.appBridge = AppBridge()
-    }
+    let startResult = DispatchQueue.main.sync {
+      if GlobalSwift.appBridge == nil {
+        GlobalSwift.appBridge = AppBridge()
+      }
 
-    GlobalSwift.appBridge?.stop()
-    let startResult = GlobalSwift.appBridge?.start(
-      configPath, withSymbolsPath: symbolsPath,
-      withProfileIdx: Int32(profileIdx),
-      withAppName: GlobalSwift.getFrontmostAppName())
+      GlobalSwift.appBridge?.stop()
+      return GlobalSwift.appBridge?.start(
+        configPath, withSymbolsPath: symbolsPath,
+        withProfileIdx: Int32(profileIdx),
+        withAppName: GlobalSwift.getFrontmostAppName())
+    }
 
     return reply(Int(startResult ?? -1))
   }
 
   func stop() {
-    GlobalSwift.stop()
+    DispatchQueue.main.sync { GlobalSwift.stop() }
   }
 
   func kill() {
-    GlobalSwift.kill()
+    DispatchQueue.main.async { GlobalSwift.kill() }
   }
 
   func uninstall() {
-    GlobalSwift.uninstall()
+    DispatchQueue.main.async { GlobalSwift.uninstall() }
   }
 
   func startLogging() {
-    GlobalSwift.appBridge?.startLogging()
+    DispatchQueue.main.sync { GlobalSwift.appBridge?.startLogging() }
   }
 
   func stopLogging() {
-    GlobalSwift.appBridge?.stopLogging()
+    DispatchQueue.main.sync { GlobalSwift.appBridge?.stopLogging() }
   }
 
   func getVersion(withReply reply: @escaping (String) -> Void) {
