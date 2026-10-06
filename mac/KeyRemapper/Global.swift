@@ -1,27 +1,33 @@
 import AppKit
-import SecurityFoundation
-import ServiceManagement
 import SystemConfiguration
 
 struct Global {
   static let state: State = State()
 
-  //https://ja.stackoverflow.com/questions/73580/authorizationenvironment%E3%82%92%E7%94%9F%E6%88%90%E3%81%99%E3%82%8Bobjective-c%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E3%82%92swift%E3%81%A7%E6%9B%B8%E3%81%8F%E6%96%B9%E6%B3%95%E3%82%92%E3%81%8A%E3%81%97%E3%81%88%E3%81%A6%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84
-  static func getPrivilegedHelperAuth() -> AuthorizationRef? {
-    var authRef: AuthorizationRef?
+  // Versions up to 4.x installed the daemon with SMJobBless. It uses the same label, so it has
+  // to be removed (as admin, once) before registering the daemon bundled in the app
+  static func removeLegacyDaemon() -> Bool {
+    let label = Constants.MACH_SERVICE_NAME
+    let paths = [
+      "/Library/LaunchDaemons/\(label).plist", "/Library/PrivilegedHelperTools/\(label)",
+    ].filter(fileExists)
 
-    kSMRightBlessPrivilegedHelper.withCString { name in
-      var authItem = AuthorizationItem(
-        name: name, valueLength: 0, value: nil, flags: 0)
-      withUnsafeMutablePointer(to: &authItem) { authItemPointer in
-        var rights = AuthorizationRights(count: 1, items: authItemPointer)
-        AuthorizationCreate(
-          &rights, nil, [.interactionAllowed, .extendRights, .preAuthorize],
-          &authRef)
-      }
-    }
+    if paths.isEmpty { return true }
 
-    return authRef
+    let command = "launchctl bootout system/\(label); rm -f \(paths.joined(separator: " "))"
+    var error: NSDictionary?
+    NSAppleScript(source: "do shell script \"\(command)\" with administrator privileges")?
+      .executeAndReturnError(&error)
+
+    return error == nil
+  }
+
+  static func runProcess(_ path: String, args: [String]) {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: path)
+    process.arguments = args
+    try? process.run()
+    process.waitUntilExit()
   }
 
   static func showCloseAlert(_ title: String, _ description: String) {
@@ -31,20 +37,6 @@ struct Global {
     alert.alertStyle = NSAlert.Style.warning
     alert.addButton(withTitle: "OK")
     alert.runModal()
-  }
-
-  static func blessHelper(label: String, authRef: AuthorizationRef) -> Bool {
-    var error: Unmanaged<CFError>?
-    let blessStatus = SMJobBless(
-      kSMDomainSystemLaunchd, label as CFString, authRef, &error)
-
-    if !blessStatus {
-      NSLog(
-        "[SMJBS]: Helper bless failed with error \(error!.takeUnretainedValue())"
-      )
-    }
-
-    return blessStatus
   }
 
   static func fileExists(_ filePath: String) -> Bool {

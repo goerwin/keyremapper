@@ -11,8 +11,7 @@ class ServiceDelegateXPC: NSObject, NSXPCListenerDelegate {
     // Only the signed KeyRemapper app can drive this root daemon. The pid check rejects
     // others upfront, setCodeSigningRequirement (audit token based) guards every message
     guard
-      let clients = Bundle.main.infoDictionary?["SMAuthorizedClients"] as? [String],
-      let requirement = clients.first,
+      let requirement = Self.clientRequirement,
       Self.isClientValid(pid: newConnection.processIdentifier, requirement: requirement)
     else { return false }
     newConnection.setCodeSigningRequirement(requirement)
@@ -35,6 +34,25 @@ class ServiceDelegateXPC: NSObject, NSXPCListenerDelegate {
     GlobalSwift.connection = newConnection
     return true
   }
+
+  // The app must be signed by the same team as this daemon
+  static let clientRequirement: String? = {
+    var code: SecCode?
+    var staticCode: SecStaticCode?
+    var info: CFDictionary?
+
+    guard
+      let clientId = Bundle.main.infoDictionary?["ClientBundleIdentifier"] as? String,
+      SecCodeCopySelf([], &code) == errSecSuccess, let code,
+      SecCodeCopyStaticCode(code, [], &staticCode) == errSecSuccess, let staticCode,
+      SecCodeCopySigningInformation(
+        staticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
+      let teamId = (info as? [String: Any])?[kSecCodeInfoTeamIdentifier as String] as? String
+    else { return nil }
+
+    return
+      "anchor apple generic and identifier \"\(clientId)\" and certificate leaf[subject.OU] = \"\(teamId)\""
+  }()
 
   static func isClientValid(pid: pid_t, requirement: String) -> Bool {
     var code: SecCode?

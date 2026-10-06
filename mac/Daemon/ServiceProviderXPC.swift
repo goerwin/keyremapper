@@ -33,10 +33,6 @@ import Foundation
     DispatchQueue.main.async { GlobalSwift.kill() }
   }
 
-  func uninstall() {
-    DispatchQueue.main.async { GlobalSwift.uninstall() }
-  }
-
   func startLogging() {
     DispatchQueue.main.sync { GlobalSwift.appBridge?.startLogging() }
   }

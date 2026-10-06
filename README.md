@@ -7,8 +7,10 @@ Keyboard remapper for macOS and Windows, configured with a JSON file. On macOS i
 - Mac
   1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
   2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
-  3. Enter your password to install the helper (the root service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_
+  3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_. Updating from 4.x asks for your password once, to remove the old helper
   4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_) and reselect the profile to reload it
+
+_Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
 - Windows
   1. Install the [Interception driver](https://github.com/oblitum/Interception) and restart
   2. Download `win.zip` from [Releases](https://github.com/goerwin/keyremapper/releases) and copy the `keyRemapperWin` folder to your home directory (eg. `C:\Users\me`)
@@ -144,8 +146,8 @@ make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
-- Xcode: create `mac/.env` from `mac/.env.example`, open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate
-- The app only reinstalls the helper when its version changes, so after changing the daemon bump the version or use _Uninstall Daemon_ from the menu
+- Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
+- The app only restarts the daemon when its version changes, so after changing the daemon bump the version
 - Windows: open the solution with Visual Studio 2019+. Tests: `cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe` from a Developer PowerShell
 
 More dev notes in [NOTES.md](NOTES.md).

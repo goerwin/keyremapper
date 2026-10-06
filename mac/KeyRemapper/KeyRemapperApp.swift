@@ -1,3 +1,4 @@
+import ServiceManagement
 import SwiftUI
 import UserNotifications
 
@@ -115,6 +116,8 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     menuButton.imagePosition = NSControl.ImagePosition.imageLeft
     menuButton.image = Global.resizeImage(image: iconImage, w: 16, h: 16)
     menuButton.image?.isTemplate = true
+    // Grayed out whenever it isn't remapping (paused, missing permissions, errors)
+    menuButton.appearsDisabled = !daemonStarted
     menuButton.frame = CGRect(
       x: 0.0, y: 3, width: menuButton.frame.width,
       height: menuButton.frame.height)
@@ -134,12 +137,8 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
 
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
-      withTitle: daemonStarted ? "Stop Daemon" : "Start Daemon",
+      withTitle: daemonStarted ? "Pause" : "Resume",
       action: #selector(AppDelegate.startOrStopDaemon),
-      keyEquivalent: "")
-    statusBarItemMenu.addItem(
-      withTitle: "Uninstall Daemon",
-      action: #selector(AppDelegate.uninstallDaemon),
       keyEquivalent: "")
 
     // add profiles to menu
@@ -167,8 +166,17 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
 
     statusBarItemMenu.addItem(.separator())
     statusBarItemMenu.addItem(
+      withTitle: "Launch at Login",
+      action: #selector(AppDelegate.toggleLaunchAtLogin),
+      keyEquivalent: ""
+    ).state = SMAppService.mainApp.status == .enabled ? .on : .off
+    statusBarItemMenu.addItem(
       withTitle: "About \(Constants.BUNDLE_NAME)",
       action: #selector(AppDelegate.openAboutWindow),
+      keyEquivalent: "")
+    statusBarItemMenu.addItem(
+      withTitle: "Uninstall \(Constants.BUNDLE_NAME)…",
+      action: #selector(AppDelegate.uninstall),
       keyEquivalent: "")
 
     statusBarItemMenu.addItem(.separator())
@@ -185,14 +193,60 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     startDaemon(profileIdx: menuItem.tag)
   }
 
-  var _authRef: AuthorizationRef?
-  var authRef: AuthorizationRef? {
-    if _authRef != nil {
-      return _authRef
+  let daemonService = SMAppService.daemon(
+    plistName: "\(Constants.MACH_SERVICE_NAME).plist")
+  var approvalTimer: Timer?
+
+  // Returns whether the daemon can run. The first time it has to be allowed in System Settings
+  func registerDaemon(profileIdx: Int?) -> Bool {
+    if !Global.removeLegacyDaemon() {
+      Global.showCloseAlert("Error", "Couldn't remove the previous Daemon")
+      return false
     }
 
-    _authRef = Global.getPrivilegedHelperAuth()
-    return _authRef
+    if daemonService.status != .enabled && daemonService.status != .requiresApproval {
+      do {
+        try daemonService.register()
+      } catch {
+        // register also throws when the daemon is registered but still needs approval
+        if daemonService.status != .requiresApproval {
+          Global.showCloseAlert(
+            "Error", "Couldn't register the Daemon: \(error.localizedDescription)")
+          return false
+        }
+      }
+    }
+
+    if daemonService.status == .requiresApproval {
+      Global.showCloseAlert(
+        "Allow \(Constants.BUNDLE_NAME)",
+        "Turn on \(Constants.BUNDLE_NAME) in System Settings > General > Login Items & Extensions"
+      )
+      SMAppService.openSystemSettingsLoginItems()
+
+      approvalTimer?.invalidate()
+      approvalTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) {
+        [weak self] timer in
+        guard let self, self.daemonService.status == .enabled else { return }
+        timer.invalidate()
+        self.startDaemon(profileIdx: profileIdx)
+      }
+      return false
+    }
+
+    return true
+  }
+
+  // After an app update, the daemon from the previous version can still be running.
+  // Once it quits, launchd starts the new one on the next connection
+  func restartDaemon() {
+    daemonRemoteObject?.kill()
+
+    for _ in 0..<20 {
+      _daemonRemoteObject = nil
+      if getDaemonVersion() == Constants.VERSION { return }
+      Thread.sleep(forTimeInterval: 0.1)
+    }
   }
 
   func startDaemon(profileIdx: Int? = nil) {
@@ -202,22 +256,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
       reloadMenuBar()
     }
 
-    // Installing the daemon asks for the admin password, so only do it when it's missing or outdated
-    if getDaemonVersion() != Constants.VERSION {
-      guard let authRef = authRef else {
-        Global.showCloseAlert("Error", "Authorization required for Daemon")
-        quit()
-        return
-      }
-
-      let blessed = Global.blessHelper(label: Constants.MACH_SERVICE_NAME, authRef: authRef)
-
-      if !blessed {
-        return Global.showCloseAlert("Error", "Not Blessed to run the Daemon")
-      }
-
-      _daemonRemoteObject = nil
-    }
+    if !registerDaemon(profileIdx: profileIdx) { return }
 
     guard let configPath = Global.getConfigPath() else {
       return Global.showCloseAlert("No config", "No config path constructed")
@@ -226,6 +265,8 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     if !Global.fileExists(configPath) {
       return Global.showCloseAlert("File not found", "\(configPath) not found")
     }
+
+    if getDaemonVersion() != Constants.VERSION { restartDaemon() }
 
     guard let daemonRemoteObject = self.daemonRemoteObject else {
       return Global.showCloseAlert(
@@ -266,7 +307,6 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     self.daemonStarted = true
-    statusBarItem?.button?.appearsDisabled = false
     self.reloadMenuBar()
   }
 
@@ -278,15 +318,55 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
 
   func stopDaemon() {
     if daemonStarted != true { return }
-    statusBarItem?.button?.appearsDisabled = true
     daemonStarted = false
     daemonRemoteObject?.stop()
     reloadMenuBar()
   }
 
-  @objc func uninstallDaemon() {
+  @objc func toggleLaunchAtLogin() {
+    do {
+      if SMAppService.mainApp.status == .enabled {
+        try SMAppService.mainApp.unregister()
+      } else {
+        try SMAppService.mainApp.register()
+      }
+    } catch {
+      Global.showCloseAlert(
+        "Error", "Couldn't change Launch at Login: \(error.localizedDescription)")
+    }
+
+    reloadMenuBar()
+  }
+
+  // Leaves the app as if it was never opened (the config folder is kept)
+  @objc func uninstall() {
+    NSApp.activate(ignoringOtherApps: true)
+    let alert = NSAlert()
+    alert.messageText = "Uninstall \(Constants.BUNDLE_NAME)?"
+    alert.informativeText =
+      "This removes its background service, login item and permissions, and quits. Your config folder is kept. Then move the app to the Trash, or open it again to set it up from scratch."
+    alert.addButton(withTitle: "Uninstall")
+    alert.addButton(withTitle: "Cancel")
+    if alert.runModal() != .alertFirstButtonReturn { return }
+
     stopDaemon()
-    daemonRemoteObject?.uninstall()
+    approvalTimer?.invalidate()
+
+    for service in [daemonService, SMAppService.mainApp]
+    where service.status != .notRegistered && service.status != .notFound {
+      do {
+        try service.unregister()
+      } catch {
+        Global.showCloseAlert("Error", "Couldn't uninstall: \(error.localizedDescription)")
+        return
+      }
+    }
+
+    for bundleId in [Bundle.main.bundleIdentifier ?? "", Constants.MACH_SERVICE_NAME] {
+      Global.runProcess("/usr/bin/tccutil", args: ["reset", "All", bundleId])
+    }
+
+    NSApplication.shared.terminate(self)
   }
 
   @objc func startOrStopDaemon() {

@@ -12,9 +12,7 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>ClientBundleIdentifier</key>
 	<string>co.goerwin.KeyRemapper</string>
-	<key>SMAuthorizedClients</key>
-	<array>
-		<string>__replacedByScripts__</string>
-	</array>
+	<key>LSBackgroundOnly</key>
+	<true/>
 </dict>
 </plist>

@@ -6,7 +6,6 @@ import Foundation
     withReply reply: @escaping (Int) -> Void)
   func stop()
   func kill()
-  func uninstall()
   func startLogging()
   func stopLogging()
   func getVersion(withReply reply: @escaping (String) -> Void)

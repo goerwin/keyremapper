@@ -24,6 +24,7 @@
 		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
 		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F9D1A0012E00000000000002 /* co.goerwin.KeyRemapperDaemon.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9D1A0012E00000000000001 /* co.goerwin.KeyRemapperDaemon.plist */; };
 		F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */; };
 		F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */; };
 		F9C75A3927EED2F700F2E31C /* ServiceProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */; };
@@ -50,10 +51,20 @@
 		F9C759F727ED785000F2E31C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = Contents/Library/LaunchServices;
-			dstSubfolderSpec = 1;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
 				F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9D1A0012E00000000000003 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchDaemons;
+			dstSubfolderSpec = 1;
+			files = (
+				F9D1A0012E00000000000002 /* co.goerwin.KeyRemapperDaemon.plist in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +100,7 @@
 		F9C759FB27ED7BE000F2E31C /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		F9D1A0012E00000000000001 /* co.goerwin.KeyRemapperDaemon.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = co.goerwin.KeyRemapperDaemon.plist; sourceTree = "<group>"; };
 		F9C75A2F27ED93BC00F2E31C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9C75A3327EEC9A900F2E31C /* Daemon-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Daemon-Bridging-Header.h"; sourceTree = "<group>"; };
 		F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDelegateXPC.swift; sourceTree = "<group>"; };
@@ -182,6 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				F9C75A2F27ED93BC00F2E31C /* Info.plist */,
+				F9D1A0012E00000000000001 /* co.goerwin.KeyRemapperDaemon.plist */,
 				F9C75A2A27ED938700F2E31C /* main.swift */,
 				F95EC5BA27EF1DE000B370B2 /* GlobalSwift.swift */,
 				F9C75A3827EED2F700F2E31C /* ServiceProviderXPC.swift */,
@@ -221,11 +234,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F9A8926C27644E35009ACA0A /* Build configuration list for PBXNativeTarget "KeyRemapper" */;
 			buildPhases = (
-				F9B4D1A427F12D2F00FC513C /* ShellScript */,
 				F9A8925827644E33009ACA0A /* Sources */,
 				F9A8925927644E33009ACA0A /* Frameworks */,
 				F9A8925A27644E33009ACA0A /* Resources */,
 				F9C759F727ED785000F2E31C /* CopyFiles */,
+				F9D1A0012E00000000000003 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -241,7 +254,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F9C75A2C27ED938700F2E31C /* Build configuration list for PBXNativeTarget "Daemon" */;
 			buildPhases = (
-				F9B4D1A527F14D2700FC513C /* ShellScript */,
 				F9C75A2427ED938700F2E31C /* Sources */,
 				F9C75A2527ED938700F2E31C /* Frameworks */,
 				F9C75A2627ED938700F2E31C /* Copy Files */,
@@ -307,47 +319,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		F9B4D1A427F12D2F00FC513C /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/zsh;
-			shellScript = "\"${SRCROOT}\"/Common/CodeSignUpdate.sh\n";
-		};
-		F9B4D1A527F14D2700FC513C /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}\"/Common/CodeSignUpdate.sh\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F9A8925827644E33009ACA0A /* Sources */ = {
@@ -531,7 +502,7 @@
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist";
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -563,7 +534,7 @@
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = "$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist";
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -591,7 +562,7 @@
 				DONT_GENERATE_INFOPLIST_FILE = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist";
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -599,12 +570,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 4.4.5;
-				OTHER_LDFLAGS = (
-					"-sectcreate",
-					__TEXT,
-					__launchd_plist,
-					"$(SRCROOT)/$(TARGET_NAME)/launchd.plist",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;
@@ -630,7 +595,7 @@
 				DONT_GENERATE_INFOPLIST_FILE = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "$(BUILD_DIR)/$(TARGET_NAME)/Info.build.plist";
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -638,12 +603,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 4.4.5;
-				OTHER_LDFLAGS = (
-					"-sectcreate",
-					__TEXT,
-					__launchd_plist,
-					"$(SRCROOT)/$(TARGET_NAME)/launchd.plist",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;

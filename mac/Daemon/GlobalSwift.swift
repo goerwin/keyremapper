@@ -7,13 +7,6 @@ import Foundation
     Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
   static var appBridge: AppBridge?
 
-  static func runProcess(_ path: String, args: [String]?) {
-    let process = Process()
-    process.launchPath = path
-    process.arguments = args
-    process.launch()
-  }
-
   static var connection: NSXPCConnection?
 
   @objc static func sendKeyEventLogsToClient(_ keyEventLogs: String) {
@@ -50,26 +43,8 @@ import Foundation
     appBridge?.stop()
   }
 
-  // The launchd job stays registered so the app can reach the daemon again without
-  // reinstalling it (which asks for the admin password)
   static func kill() {
     stop()
     CFRunLoopStop(CFRunLoopGetMain())
-  }
-
-  static func uninstall() {
-    runProcess(
-      "/usr/bin/sudo",
-      args: [
-        "/bin/rm", "-rf", "/Library/LaunchDaemons/\(Constants.MACH_SERVICE_NAME).plist",
-      ])
-    runProcess(
-      "/usr/bin/sudo",
-      args: [
-        "/bin/rm", "-rf", "/Library/PrivilegedHelperTools/\(Constants.MACH_SERVICE_NAME)",
-      ])
-    runProcess(
-        "/usr/bin/sudo", args: ["/bin/launchctl", "remove", Constants.MACH_SERVICE_NAME])
-    kill()
   }
 }
