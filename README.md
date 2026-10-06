@@ -139,12 +139,15 @@ Each profile can have `tests`: pairs of input key events and the expected events
 
 ```sh
 make test                            # engine tests (Tests/)
+make test-runtime                    # Mac runtime tests: key events in, posted events out (mac/Tests/runtime.mm)
+make test-app                        # builds, installs and drives the signed app's menu (mac/Tests/app.sh)
 make test-config [CONFIG=...]        # tests of each profile (default ~/KeyRemapperMac/config.json)
 make build                           # unsigned Debug build of the Mac app
 make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 ```
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
+- `make test-app` replaces the installed app and needs _Accessibility_ for the terminal app. Physical keystrokes can't be automated (it would need a virtual HID driver), so try a few keys after it
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
 - Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version

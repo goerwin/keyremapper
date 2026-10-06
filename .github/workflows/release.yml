@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Tests
-        run: make test
+        run: make test test-runtime
 
       - name: Build app
         working-directory: ./mac

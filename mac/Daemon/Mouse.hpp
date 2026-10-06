@@ -3,6 +3,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 
 #include <chrono>
+#include <functional>
 
 #include "./Keys.hpp"
 
@@ -12,7 +13,9 @@ class Mouse {
  public:
   double doubleClickSpeed = 500;
 
-  explicit Mouse(const Modifiers& modifiers) : modifiers(modifiers) {}
+  Mouse(const Modifiers& modifiers,
+        const std::function<void(CGEventRef)>& postEvent)
+      : modifiers(modifiers), postEvent(postEvent) {}
   ~Mouse() { stop(); }
 
   // 1: no Accessibility permission, 2: couldn't add the event tap
@@ -91,7 +94,7 @@ class Mouse {
     CGEventSetIntegerValueField(event, kCGMouseEventClickState, clickCount);
     CGEventSetDoubleValueField(event, kCGEventSourceUserData, postedEventMark);
     CGEventSetFlags(event, modifiers.flags());
-    CGEventPost(kCGHIDEventTap, event);
+    postEvent(event);
     CFRelease(event);
   }
 
@@ -102,6 +105,7 @@ class Mouse {
   static constexpr double postedEventMark = 69;
 
   const Modifiers& modifiers;
+  const std::function<void(CGEventRef)>& postEvent;
   CFMachPortRef eventTap = NULL;
   CFRunLoopSourceRef runLoopSource = NULL;
 

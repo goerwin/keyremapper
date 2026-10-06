@@ -1,0 +1,16 @@
+{
+  "profiles": [
+    {
+      "delayUntilRepeat": 100,
+      "keyRepeatInterval": 20,
+      "remaps": [{ "from": "A", "to": "B" }],
+      "keybindings": [
+        { "keys": ["C"], "send": ["CmdL:down V CmdL:up", null] },
+        { "keys": ["D"], "send": ["Tab SK:Delay:60 Tab", null] },
+        { "keys": ["E"], "send": ["VolumeUp", null] },
+        { "keys": ["F"], "send": ["LeftClick:down", "LeftClick:up"] },
+        { "keys": ["G"], "if": { "appName": "com.test.app" }, "send": ["H", null] }
+      ]
+    }
+  ]
+}

@@ -23,33 +23,21 @@ class Runtime {
  public:
   std::function<void(std::string)> onError = [](std::string) {};
 
+  // Replaceable so the tests can record what would reach the OS
+  std::function<void(CGEventRef)> postEvent = [](CGEventRef event) {
+    CGEventPost(kCGHIDEventTap, event);
+  };
+  std::function<void(bool)> setCapslock = Capslock::setState;
+
   ~Runtime() { stop(); }
 
   // 1: no Accessibility permission, 2: couldn't listen to the mouse,
   // 5: invalid profiles, 6: invalid profile. Exceptions go to onError
   int start(std::string configPath, std::string symbolsPath, int profileIdx,
             std::string appName) {
-    stop();
-
     try {
-      auto config = Helpers::getJsonFile(configPath);
-      auto symbols = Helpers::getJsonFile(symbolsPath);
-      auto profiles = config["profiles"];
-
-      if (!profiles.is_array()) return 5;
-      auto profile = profiles.at(profileIdx);
-      if (!profile.is_object()) return 6;
-
-      // { "keyName": [scanCode, keyDownState, keyUpState, vkCode] }
-      for (auto& [key, value] : symbols.items())
-        vkCodes[value[0].get<ushort>()] = value[3].get<ushort>();
-
-      keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
-      keyRemapper->setAppName(appName);
-
-      delayUntilRepeat = profile.value("delayUntilRepeat", 250);
-      keyRepeatInterval = profile.value("keyRepeatInterval", 25);
-      mouse.doubleClickSpeed = profile.value("doubleClickSpeed", 500.0);
+      auto loadResult = load(configPath, symbolsPath, profileIdx, appName);
+      if (loadResult != 0) return loadResult;
 
       auto mouseStartResult = mouse.start();
       if (mouseStartResult != 0) return mouseStartResult;
@@ -58,8 +46,8 @@ class Runtime {
       keyboards.onInput = [this](ushort scancode, bool isKeyDown, int vendorId,
                                  int productId, std::string manufacturer,
                                  std::string product) {
-        handleKeyboardInput(scancode, isKeyDown, vendorId, productId,
-                            manufacturer, product);
+        handleInput(scancode, isKeyDown, vendorId, productId, manufacturer,
+                    product);
       };
       keyboards.start();
     } catch (const std::exception& err) {
@@ -68,6 +56,33 @@ class Runtime {
       onError("StartError: Unknown error");
     }
 
+    return 0;
+  }
+
+  // Loads the profile without touching the keyboards or the mouse. Throws on
+  // invalid files
+  int load(std::string configPath, std::string symbolsPath, int profileIdx,
+           std::string appName) {
+    stop();
+
+    auto config = Helpers::getJsonFile(configPath);
+    auto symbols = Helpers::getJsonFile(symbolsPath);
+    auto profiles = config["profiles"];
+
+    if (!profiles.is_array()) return 5;
+    auto profile = profiles.at(profileIdx);
+    if (!profile.is_object()) return 6;
+
+    // { "keyName": [scanCode, keyDownState, keyUpState, vkCode] }
+    for (auto& [key, value] : symbols.items())
+      vkCodes[value[0].get<ushort>()] = value[3].get<ushort>();
+
+    keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
+    keyRemapper->setAppName(appName);
+
+    delayUntilRepeat = profile.value("delayUntilRepeat", 250);
+    keyRepeatInterval = profile.value("keyRepeatInterval", 25);
+    mouse.doubleClickSpeed = profile.value("doubleClickSpeed", 500.0);
     return 0;
   }
 
@@ -97,6 +112,66 @@ class Runtime {
     if (keyRemapper) keyRemapper->setApplyKeysCb(nullptr);
   }
 
+  void handleInput(ushort scancode, bool isKeyDown, int vendorId,
+                   int productId, std::string manufacturer,
+                   std::string product) {
+    if (!keyRemapper) return;
+
+    auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
+    keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
+
+    try {
+      auto keyEvents = keyRemapper->applyKeys(
+          {{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
+
+      for (auto& keyEvent : keyEvents) {
+        if (keyEvent.name == "SK:Delay") {
+          std::this_thread::sleep_for(
+              std::chrono::milliseconds(keyEvent.state));
+          continue;
+        }
+
+        auto isKeyDown = keyEvent.isKeyDown;
+        auto vkCode = getVkCode(keyEvent.code);
+
+        if (!isKeyDown) stopKeyRepeat();
+
+        if (vkCode == 55 || vkCode == 54) {
+          modifiers.cmd = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 56 || vkCode == 60) {
+          modifiers.shift = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 58 || vkCode == 61) {
+          modifiers.alt = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 59 || vkCode == 62) {
+          modifiers.ctrl = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 63) {
+          modifiers.fn = isKeyDown;
+          postKey(vkCode, isKeyDown);
+        } else if (vkCode == 57) {
+          if (isKeyDown) setCapslock(capslock = !capslock);
+        } else if (vkCode == 241) {
+          mouse.postClick(isKeyDown);
+        } else if (vkCode == 242) {
+          mouse.postClick(isKeyDown, true);
+        } else if (Keys::isMedia(vkCode)) {
+          if (isKeyDown) postMediaKey(vkCode);
+          handleKeyRepeat(vkCode, isKeyDown);
+        } else {
+          postKey(vkCode, isKeyDown);
+          handleKeyRepeat(vkCode, isKeyDown);
+        }
+      }
+    } catch (const std::exception& err) {
+      onError("ApplyKeysError: " + std::string(err.what()));
+    } catch (...) {
+      onError("ApplyKeysError: Unknown error");
+    }
+  }
+
  private:
   std::unique_ptr<KeyRemapper> keyRemapper;
   std::unordered_map<ushort, ushort> vkCodes;  // scancode -> vkCode
@@ -105,7 +180,7 @@ class Runtime {
   int delayUntilRepeat = 250;
   int keyRepeatInterval = 25;
   dispatch_source_t keyRepeatTimer = nil;
-  Mouse mouse{modifiers};
+  Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
 
   ushort getVkCode(ushort scancode) {
@@ -160,7 +235,7 @@ class Runtime {
 
     if (isRepeat)
       CGEventSetIntegerValueField(event, kCGKeyboardEventAutorepeat, 1);
-    CGEventPost(kCGHIDEventTap, event);
+    postEvent(event);
     CFRelease(eventSource);
     CFRelease(event);
   }
@@ -169,8 +244,8 @@ class Runtime {
     auto downEvent = createMediaKeyEvent(vkCode, true);
     auto upEvent = createMediaKeyEvent(vkCode, false);
 
-    CGEventPost(kCGHIDEventTap, downEvent);
-    CGEventPost(kCGHIDEventTap, upEvent);
+    postEvent(downEvent);
+    postEvent(upEvent);
     CFRelease(downEvent);
     CFRelease(upEvent);
   }
@@ -199,65 +274,5 @@ class Runtime {
         postKey(vkCode, true, true);
     });
     dispatch_resume(keyRepeatTimer);
-  }
-
-  void handleKeyboardInput(ushort scancode, bool isKeyDown, int vendorId,
-                           int productId, std::string manufacturer,
-                           std::string product) {
-    if (!keyRemapper) return;
-
-    auto keyboard = std::to_string(productId) + ":" + std::to_string(vendorId);
-    keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
-
-    try {
-      auto keyEvents = keyRemapper->applyKeys(
-          {{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
-
-      for (auto& keyEvent : keyEvents) {
-        if (keyEvent.name == "SK:Delay") {
-          std::this_thread::sleep_for(
-              std::chrono::milliseconds(keyEvent.state));
-          continue;
-        }
-
-        auto isKeyDown = keyEvent.isKeyDown;
-        auto vkCode = getVkCode(keyEvent.code);
-
-        if (!isKeyDown) stopKeyRepeat();
-
-        if (vkCode == 55 || vkCode == 54) {
-          modifiers.cmd = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 56 || vkCode == 60) {
-          modifiers.shift = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 58 || vkCode == 61) {
-          modifiers.alt = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 59 || vkCode == 62) {
-          modifiers.ctrl = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 63) {
-          modifiers.fn = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 57) {
-          if (isKeyDown) Capslock::setState(capslock = !capslock);
-        } else if (vkCode == 241) {
-          mouse.postClick(isKeyDown);
-        } else if (vkCode == 242) {
-          mouse.postClick(isKeyDown, true);
-        } else if (Keys::isMedia(vkCode)) {
-          if (isKeyDown) postMediaKey(vkCode);
-          handleKeyRepeat(vkCode, isKeyDown);
-        } else {
-          postKey(vkCode, isKeyDown);
-          handleKeyRepeat(vkCode, isKeyDown);
-        }
-      }
-    } catch (const std::exception& err) {
-      onError("ApplyKeysError: " + std::string(err.what()));
-    } catch (...) {
-      onError("ApplyKeysError: Unknown error");
-    }
   }
 };
