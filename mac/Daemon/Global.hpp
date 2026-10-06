@@ -60,7 +60,7 @@ void reset() {
   isAppEnabled = false;
   symbols = NULL;
   activeApp = {};
-  repeatedKey = NULL;
+  repeatedKey = 0;
   keyRepeatThreadCount = 0;
 
   if (Global::keyRemapper) {

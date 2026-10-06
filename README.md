@@ -195,6 +195,9 @@ Also, sharing arrays and objects inside the `config.json` file can be achieved u
 
 - Mac
   - `make build` does an unsigned Debug build (in `mac/build`) to check that everything compiles
+  - `make dev` runs the remapping from the terminal (no app, helper or signing needed). Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app
+    - `make dev CONFIG=path/to/config.json PROFILE=1 LOG=1` to use another config/profile and print the key events
+    - Stop it with Ctrl+C or by closing the terminal
   - Create a `mac/.env` file using `mac/.env.example` and fill up the values
   - Open project `~mac/KeyRemapper.xcodeproj` with XCode
   - Sign the 2 targets for development (KeyRemapper, Daemon)

@@ -149,7 +149,7 @@ class MyIOHIDManager {
     kern_return_t kr;
     io_connect_t ioc;
     CFMutableDictionaryRef mdict = IOServiceMatching(kIOHIDSystemClass);
-    io_connect_t ios = IOServiceGetMatchingService(kIOMasterPortDefault,
+    io_connect_t ios = IOServiceGetMatchingService(kIOMainPortDefault,
                                                    (CFDictionaryRef)mdict);
 
     if (!ios) {
@@ -184,7 +184,7 @@ class MyIOHIDManager {
   static void toggleCapslockState() {
     io_connect_t ioc;
     CFMutableDictionaryRef mdict = IOServiceMatching(kIOHIDSystemClass);
-    io_connect_t ios = IOServiceGetMatchingService(kIOMasterPortDefault,
+    io_connect_t ios = IOServiceGetMatchingService(kIOMainPortDefault,
                                                    (CFDictionaryRef)mdict);
 
     // I had to keep track of capslock on a global
