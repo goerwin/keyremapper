@@ -202,16 +202,21 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
       reloadMenuBar()
     }
 
-    guard let authRef = authRef else {
-      Global.showCloseAlert("Error", "Authorization required for Daemon")
-      quit()
-      return
-    }
+    // Installing the daemon asks for the admin password, so only do it when it's missing or outdated
+    if getDaemonVersion() != Constants.VERSION {
+      guard let authRef = authRef else {
+        Global.showCloseAlert("Error", "Authorization required for Daemon")
+        quit()
+        return
+      }
 
-    let blessed = Global.blessHelper(label: Constants.MACH_SERVICE_NAME, authRef: authRef)
+      let blessed = Global.blessHelper(label: Constants.MACH_SERVICE_NAME, authRef: authRef)
 
-    if !blessed {
-      return Global.showCloseAlert("Error", "Not Blessed to run the Daemon")
+      if !blessed {
+        return Global.showCloseAlert("Error", "Not Blessed to run the Daemon")
+      }
+
+      _daemonRemoteObject = nil
     }
 
     guard let configPath = Global.getConfigPath() else {
@@ -227,8 +232,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
         "Error", "No Daemon service remote object running")
     }
 
-    var daemonVersion: String?
-    daemonRemoteObject.getVersion { version in daemonVersion = version }
+    let daemonVersion = getDaemonVersion()
 
     if daemonVersion != Constants.VERSION {
       return Global.showCloseAlert(
@@ -266,11 +270,17 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     self.reloadMenuBar()
   }
 
+  func getDaemonVersion() -> String? {
+    var version: String?
+    daemonRemoteObject?.getVersion { version = $0 }
+    return version
+  }
+
   func stopDaemon() {
     if daemonStarted != true { return }
     statusBarItem?.button?.appearsDisabled = true
     daemonStarted = false
-    daemonRemoteObject?.kill()
+    daemonRemoteObject?.stop()
     reloadMenuBar()
   }
 

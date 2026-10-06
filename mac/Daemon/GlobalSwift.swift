@@ -50,10 +50,10 @@ import Foundation
     appBridge?.stop()
   }
 
+  // The launchd job stays registered so the app can reach the daemon again without
+  // reinstalling it (which asks for the admin password)
   static func kill() {
     stop()
-    runProcess(
-        "/usr/bin/sudo", args: ["/bin/launchctl", "remove", Constants.MACH_SERVICE_NAME])
     CFRunLoopStop(CFRunLoopGetMain())
   }
 

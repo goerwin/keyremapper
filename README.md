@@ -145,6 +145,7 @@ make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
 - Xcode: create `mac/.env` from `mac/.env.example`, open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate
+- The app only reinstalls the helper when its version changes, so after changing the daemon bump the version or use _Uninstall Daemon_ from the menu
 - Windows: open the solution with Visual Studio 2019+. Tests: `cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe` from a Developer PowerShell
 
 More dev notes in [NOTES.md](NOTES.md).
