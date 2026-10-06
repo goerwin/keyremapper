@@ -41,6 +41,6 @@ NSString* toNSString(std::string str) {
 }
 
 - (void)setAppName:(NSString*)appName {
-  Global::keyRemapper->setAppName([appName UTF8String]);
+  if (Global::keyRemapper) Global::keyRemapper->setAppName([appName UTF8String]);
 }
 @end
