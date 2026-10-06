@@ -1,0 +1,20 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/checkout@v7
+
+      - name: Tests
+        run: make test test-runtime
+
+      - name: Build
+        run: make build dev-build
