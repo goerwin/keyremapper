@@ -114,20 +114,27 @@ int main(int argc, const char* argv[]) {
   expect("adds the held modifiers to the keys",
          {"mod:55+cmd", key("V", "down+cmd"), key("V", "up+cmd"), "mod:55"});
 
+  // Slow machines can wait longer, so the repeats expected come from the time
+  // that really passed
+  auto pressTime = std::chrono::steady_clock::now();
   press(runtime, "A", true);
   wait(100 + 20 * 3 + 10);
-  auto repeats = std::count(posted.begin(), posted.end(),
-                            key("B", "down:repeat"));
+  auto heldMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - pressTime)
+                    .count();
+  long expectedRepeats = (heldMs - 100) / 20 + 1;
+  long repeats =
+      std::count(posted.begin(), posted.end(), key("B", "down:repeat"));
   check("repeats after delayUntilRepeat, every keyRepeatInterval (" +
-            std::to_string(repeats) + " repeats)",
-        repeats >= 2 && repeats <= 5);
+            std::to_string(repeats) + " repeats in " + std::to_string(heldMs) +
+            "ms)",
+        repeats >= 2 && std::abs(repeats - expectedRepeats) <= 1);
   posted.clear();
   press(runtime, "A", false);
   wait(100);
   expect("stops repeating on key up", {key("B", "up")});
 
   press(runtime, "A", true);
-  wait(50);
   runtime.stop();
   wait(150);
   expect("stops repeating on stop", {key("B", "down")});
