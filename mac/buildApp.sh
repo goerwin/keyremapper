@@ -90,13 +90,14 @@ rm -rf build
 rm -rf dist
 
 # Build
-xcodebuild archive -target KeyRemapper -configuration Release
+# Manual signing because there is no Apple account on the CI to sign automatically
+xcodebuild archive -target KeyRemapper -configuration Release \
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$APP_CERTIFICATE"
 
 # Zip
-appPath=$(readlink "build/Release/KeyRemapper.app")
-
+# build/Release/KeyRemapper.app is a symlink to the archived app, -H follows it
 mkdir -p "dist/mac"
-cp -r "$appPath" "dist/mac"
+cp -RH "build/Release/KeyRemapper.app" "dist/mac"
 (
   cd "dist"
   zip -r mac.zip .
