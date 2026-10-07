@@ -8,16 +8,17 @@ Keyboard remapper for macOS, configured with a JSON file. It seizes the keyboard
 
 ## Installation
 
-1. Download `KeyRemapper-<version>.dmg` from the [latest release](https://github.com/goerwin/keyremapper/releases/latest), open it and drag `KeyRemapper.app` to Applications
-2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
-3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_
-4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
+Requires macOS 26 or later. Download `KeyRemapper-<version>.dmg` from the [latest release](https://github.com/goerwin/key-remapper/releases/latest), open it, and drag `KeyRemapper.app` to `/Applications`.
 
-_Check for Updates…_ in the menu downloads and installs the latest release.
+Releases are signed with an Apple Development certificate but are not notarized. If macOS blocks the first launch, choose **Open Anyway** in **System Settings > Privacy & Security**. Use **Check for Updates…** in the menu to install new releases.
 
-_Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
+## Permissions
+
+On first launch, allow KeyRemapper in **System Settings > General > Login Items & Extensions**, then enable **Accessibility** and **Input Monitoring** under **System Settings > Privacy & Security**. These permissions let KeyRemapper remap keys system-wide.
 
 ## Config
+
+Choose **Open Config folder** from the menu to edit `~/KeyRemapperMac/config.json`. Saving any JSON file there reloads the active profile.
 
 ```jsonc
 {
@@ -185,3 +186,7 @@ The Mac build is signed with these repository secrets:
 And the updates with:
 
 - `SPARKLE_PRIVATE_KEY`: the private EdDSA key whose public key is `SUPublicEDKey` in `KeyRemapper/Info.plist`. Sparkle's `generate_keys` keeps it in the login keychain (account `keyremapper`), `generate_keys --account keyremapper -x key.txt` exports it
+
+## License
+
+KeyRemapper's source code is licensed under the [MIT License](LICENSE). The KeyRemapper name, logo, app icon, menu bar icon, and artwork in `images/` and `KeyRemapper/Assets.xcassets/` are not covered by that license and are all rights reserved. Unofficial forks and redistributions must use their own branding and must not imply endorsement or affiliation.
