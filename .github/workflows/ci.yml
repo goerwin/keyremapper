@@ -3,6 +3,10 @@ on:
     branches: [main]
   pull_request:
 
+# Shared with release.yml, which cancels this run when it builds the same commit
+concurrency:
+  group: mac-${{ github.sha }}
+
 jobs:
   test-mac:
     runs-on: macos-latest

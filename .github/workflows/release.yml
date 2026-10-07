@@ -5,6 +5,12 @@ on:
   # builds without releasing, to check the signing secrets
   workflow_dispatch:
 
+# scripts/release.sh pushes the tag right after its commit is pushed to main. This run tests that
+# commit too, so it cancels the one of ci.yml instead of running two macOS runners
+concurrency:
+  group: mac-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
   build-mac:
     runs-on: macos-latest
