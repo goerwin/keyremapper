@@ -21,6 +21,11 @@ inline bool isFunction(ushort vkCode) {
 }
 
 inline bool isMedia(ushort vkCode) { return vkCode >= 300 && vkCode <= 311; }
+
+// Like the Mac keys: brightness, keyboard illumination and volume
+inline bool isRepeatingMedia(ushort vkCode) {
+  return contains({300, 301, 304, 305, 310, 311}, vkCode);
+}
 }  // namespace Keys
 
 // Modifiers held through the remapped events

@@ -1,0 +1,36 @@
+// to: the first rule that matches replaces the key, keys without a rule pass
+// through. The last key of to is held until the key is released
+{
+  "rules": [
+    { "from": ["A"], "to": "B" },
+    { "from": ["A"], "to": "C" },
+    { "from": ["D"], "to": "CmdL+W" },
+    { "from": ["E"], "to": "ShiftL+Tab" },
+    { "from": ["G"], "to": "Tab delay:25 Tab" },
+    { "from": ["H"], "to": "X currentKey" },
+    { "from": ["I"] },
+    { "from": ["J"], "optional": ["any"], "to": "CmdL" },
+    { "from": ["K"], "to": "X delay:25" }
+  ],
+  "tests": [
+    ["A", "B"],
+    ["A:down", "B:down"],
+    ["A:down A:down A:up", "B"],
+    ["Z", "Z"],
+    ["Z:down Y Z:up", "Z:down Y Z:up"],
+    ["D", "CmdL+W"],
+    ["D:down Y D:up", "CmdL:down W:down Y W:up CmdL:up"],
+    ["E", "ShiftL+Tab"],
+    ["E:down Tab:down E:up Tab:up", "ShiftL:down Tab:down Tab:down ShiftL:up Tab:up"],
+    ["G:down", "Tab delay:25 Tab:down"],
+    ["G", "Tab delay:25 Tab"],
+    ["H:down", "X H:down"],
+    ["I", ""],
+    ["K:down", "X delay:25"],
+
+    // A key the user holds is released when the user releases it
+    ["CmdL:down J CmdL:up", "CmdL:down CmdL:down CmdL:up"],
+    ["J:down CmdL:down J:up CmdL:up", "CmdL:down CmdL:down CmdL:up"],
+    ["J:down Y J:up", "CmdL:down Y CmdL:up"]
+  ]
+}

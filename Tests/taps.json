@@ -1,14 +1,14 @@
 // tap: on release, if it was pressed less than tapDelay and no key was pressed
 // meanwhile. doubleTap: on the second tap, when it starts less than tapDelay
-// after the first one
+// after the first one. Their keys are tapped
 {
   "tapDelay": 100,
   "rules": [
-    { "keys": ["Caps"], "tap": "Esc" },
-    { "keys": ["ShiftR"], "send": "ShiftR:down", "tap": "Caps" },
-    { "keys": ["Fn"], "send": "Fn:down", "doubleTap": "F11" },
-    { "keys": ["Q"], "send": "Q", "doubleTap": "W" },
-    { "keys": ["R"], "tap": "A", "doubleTap": "B" }
+    { "from": ["Caps"], "tap": "Esc" },
+    { "from": ["ShiftR"], "to": "ShiftR", "tap": "Caps" },
+    { "from": ["Fn"], "to": "Fn", "doubleTap": "F11" },
+    { "from": ["Q"], "to": "Q", "doubleTap": "W" },
+    { "from": ["R"], "tap": "A", "doubleTap": "B" }
   ],
   "tests": [
     ["Caps", "Esc"],

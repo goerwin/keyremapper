@@ -39,7 +39,7 @@ int main(int argc, const char *argv[]) {
   auto symbols = Helpers::getJsonFile(
       dirPath + "/../KeyRemapper/Resources/symbols.json");
 
-  for (auto name : {"send", "modifiers", "conditions", "taps", "holds", "keys",
+  for (auto name : {"to", "modifiers", "conditions", "taps", "holds", "keys",
                     "vim"}) {
     auto profile = Helpers::getJsonFile(dirPath + "/" + name + ".json");
     auto results = TestHelpers::runTests(profile["tests"], profile, symbols);
@@ -55,10 +55,10 @@ int main(int argc, const char *argv[]) {
 
   KeyRemapper keyRemapper(json::object(), symbols);
   auto keyEvents = keyRemapper.getKeyEventsFromString(
-      "A CmdL+B:down CmdL+B:up delay:25 currentKey NoExist", "C");
+      "A CmdL+B:down CmdL+B:up delay:25 NoExist");
   expect(keyRemapper.stringifyKeyEvents(keyEvents) ==
-             "A:down A:up CmdL:down B:down B:up CmdL:up delay:25 C:down C:up "
-             "Unknown:down Unknown:up",
+             "A:down A:up CmdL:down B:down B:up CmdL:up delay:25 Unknown:down "
+             "Unknown:up",
          "getKeyEventsFromString/stringifyKeyEvents");
   expect(keyEvents[2].code == 227 && keyEvents[2].state == 0 &&
              keyEvents[3].code == 5 && keyEvents[4].state == 1,
@@ -70,6 +70,20 @@ int main(int argc, const char *argv[]) {
              1,
          "applyKeys with an unknown key code");
 
+  // Only the keys of a hold don't repeat
+
+  KeyRemapper holdKeyRemapper(
+      json::parse(R"({ "rules": [{ "from": ["A"], "to": "B", "hold": "C" }] })"),
+      symbols);
+  auto toEvents = holdKeyRemapper.applyKeys(
+      holdKeyRemapper.getKeyEventsFromString("A:down"));
+  auto holdEvents = holdKeyRemapper.applyHold();
+  expect(holdKeyRemapper.stringifyKeyEvents(toEvents) == "B:down" &&
+             toEvents[0].repeats &&
+             holdKeyRemapper.stringifyKeyEvents(holdEvents) == "C:down" &&
+             !holdEvents[0].repeats,
+         "repeats of to and hold");
+
   Helpers::print("Key events tests passed");
 
   // Invalid profiles fail when they load
@@ -78,18 +92,20 @@ int main(int argc, const char *argv[]) {
            R"({ "keybindings": [] })",
            R"({ "tapDelay": "100" })",
            R"({ "rules": {} })",
-           R"({ "rules": [{ "send": "A" }] })",
-           R"({ "rules": [{ "keys": [] }] })",
-           R"({ "rules": [{ "keys": ["NoExist"] }] })",
-           R"({ "rules": [{ "keys": ["A"], "if": {} }] })",
-           R"({ "rules": [{ "keys": ["A"], "modifiers": ["NoExist"] }] })",
-           R"({ "rules": [{ "keys": ["A"], "optional": ["NoExist"] }] })",
-           R"({ "rules": [{ "keys": ["A"], "app": 1 }] })",
-           R"({ "rules": [{ "keys": ["A"], "send": "NoExist" }] })",
-           R"({ "rules": [{ "keys": ["A"], "send": "A:up" }] })",
-           R"({ "rules": [{ "keys": ["A"], "tap": "delay:x" }] })",
-           R"({ "rules": [{ "keys": ["A", "B"], "hold": ["C"] }] })",
-           R"({ "rules": [{ "keys": ["A"], "send": ["C", 1] }] })",
+           R"({ "rules": [{ "to": "A" }] })",
+           R"({ "rules": [{ "from": [] }] })",
+           R"({ "rules": [{ "from": ["NoExist"] }] })",
+           R"({ "rules": [{ "keys": ["A"] }] })",
+           R"({ "rules": [{ "from": ["A"], "send": "B" }] })",
+           R"({ "rules": [{ "from": ["A"], "modifiers": ["NoExist"] }] })",
+           R"({ "rules": [{ "from": ["A"], "optional": ["NoExist"] }] })",
+           R"({ "rules": [{ "from": ["A"], "app": 1 }] })",
+           R"({ "rules": [{ "from": ["A"], "to": "NoExist" }] })",
+           R"({ "rules": [{ "from": ["A"], "to": "B:down" }] })",
+           R"({ "rules": [{ "from": ["A"], "to": "B:up" }] })",
+           R"({ "rules": [{ "from": ["A"], "tap": "delay:x" }] })",
+           R"({ "rules": [{ "from": ["A", "B"], "hold": ["C"] }] })",
+           R"({ "rules": [{ "from": ["A"], "to": ["C", 1] }] })",
            R"({ "remaps": [{ "from": "A" }] })",
            R"({ "remaps": [{ "from": "A", "to": "NoExist" }] })",
            R"({ "remaps": [{ "from": "A", "to": "B", "if": {} }] })",
@@ -105,11 +121,11 @@ int main(int argc, const char *argv[]) {
              "holdDelay": 300,
              "remaps": [{ "from": "A", "to": "B", "app": ["com.app"] }],
              "rules": [{
-               "keys": ["A", "B"],
+               "from": ["A", "B"],
                "modifiers": ["CmdL", "F"],
                "optional": ["any"],
                "keyboard": "1",
-               "send": ["CmdL+C:down delay:5 currentKey", "D"]
+               "to": ["CmdL+C delay:5 currentKey", "D"]
              }]
            })"),
                        symbols);

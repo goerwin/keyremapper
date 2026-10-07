@@ -259,6 +259,19 @@ int main(int argc, const char* argv[]) {
          {"media:" + std::to_string(NX_KEYTYPE_SOUND_UP) + ":down",
           "media:" + std::to_string(NX_KEYTYPE_SOUND_UP) + ":up"});
 
+  press(runtime, "E", true);
+  wait(100 + 20 * 5);
+  press(runtime, "E", false);
+  check("repeats the volume keys", posted.size() > 2);
+  posted.clear();
+
+  press(runtime, "PlayPause", true);
+  wait(100 + 20 * 5);
+  press(runtime, "PlayPause", false);
+  expect("doesn't repeat Play/Pause, like the Mac keys",
+         {"media:" + std::to_string(NX_KEYTYPE_PLAY) + ":down",
+          "media:" + std::to_string(NX_KEYTYPE_PLAY) + ":up"});
+
   // Wide margins, since timers fire late on slow machines (CI)
   press(runtime, "I", true);
   wait(50);
@@ -268,11 +281,12 @@ int main(int argc, const char* argv[]) {
   wait(300);
   expect("cancels the hold on release", {});
 
+  // Past the hold (300) and the repeat delay (100)
   press(runtime, "I", true);
-  wait(400);
-  expect("sends the hold while the key is held", {key("K", "down"), key("K", "up")});
+  wait(550);
+  expect("holds the key of the hold, without repeating it", {key("K", "down")});
   press(runtime, "I", false);
-  expect("doesn't tap after a hold", {});
+  expect("releases it on key up, without a tap", {key("K", "up")});
 
   press(runtime, "I", true);
   tap(runtime, "Z");
@@ -341,7 +355,7 @@ int main(int argc, const char* argv[]) {
             errors.back() == "StartError: The config has no \"profiles\" array");
 
   startResult = runtime.start(
-      R"({"profiles": [{"rules": [{"keys": ["A"], "send": "NoExist"}]}]})",
+      R"({"profiles": [{"rules": [{"from": ["A"], "to": "NoExist"}]}]})",
       symbolsJson, 0, "");
   check("reports an invalid rule when it starts",
         startResult == StartResultReportedError &&

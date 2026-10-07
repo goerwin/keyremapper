@@ -1,12 +1,12 @@
-// hold: after holdDelay, if no key event came meanwhile. Its keys sent down are
-// released with the key
+// hold: after holdDelay, if no key event came meanwhile. Like to, its last key
+// is held until the key is released
 {
   "holdDelay": 400,
   "rules": [
-    { "keys": ["H"], "tap": "T", "hold": "W" },
-    { "keys": ["M"], "hold": "CtrlL:down A" },
-    { "keys": ["Mute"], "tap": "CtrlL+Tab", "hold": "CmdL:down ShiftL:down Tab" },
-    { "keys": ["N"], "send": "N:down", "hold": "X" }
+    { "from": ["H"], "tap": "T", "hold": "W" },
+    { "from": ["M"], "hold": "CtrlL+A" },
+    { "from": ["Mute"], "tap": "CtrlL+Tab", "hold": "CmdL+ShiftL+Tab" },
+    { "from": ["N"], "to": "N", "hold": "X" }
   ],
   "tests": [
     ["H", "T"],
@@ -17,10 +17,11 @@
     ["H:down A delay:400 H:up", "A"],
     ["A:down H:down A:up delay:400 H:up", "A"],
     ["H:down delay:400 H:up H", "W T"],
-    ["M:down delay:400 M:up", "CtrlL:down A CtrlL:up"],
+    ["M:down delay:400", "CtrlL:down A:down"],
+    ["M:down delay:400 M:up", "CtrlL+A"],
     ["Mute", "CtrlL+Tab"],
-    ["Mute:down delay:400 Mute:up", "CmdL:down ShiftL:down Tab ShiftL:up CmdL:up"],
-    ["N:down delay:400 N:up", "N:down X N:up"],
+    ["Mute:down delay:400 Mute:up", "CmdL+ShiftL+Tab"],
+    ["N:down delay:400 N:up", "N:down X:down X:up N:up"],
     ["Z:down delay:400 Z:up", "Z"],
     ["delay:400", ""]
   ]

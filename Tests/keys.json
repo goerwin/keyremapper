@@ -1,13 +1,13 @@
-// A rule for several keys, with an action for all of them or one per key
+// A rule from several keys, with an action for all of them or one per key
 {
   "rules": [
     {
-      "keys": ["H", "J", "K", "L"],
+      "from": ["H", "J", "K", "L"],
       "modifiers": ["Caps"],
-      "send": ["LeftArrow:down", "DownArrow:down", "UpArrow:down", "RightArrow:down"]
+      "to": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"]
     },
-    { "keys": ["A", "B"], "tap": ["X", "Y"], "hold": "Z" },
-    { "keys": ["Caps"] }
+    { "from": ["A", "B"], "tap": ["X", "Y"], "hold": "Z" },
+    { "from": ["Caps"] }
   ],
   "tests": [
     ["Caps:down H Caps:up", "LeftArrow"],

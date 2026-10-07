@@ -278,10 +278,11 @@ class Runtime {
       mouse.postClick(isKeyDown, true);
     } else if (Keys::isMedia(vkCode)) {
       if (isKeyDown) postMediaKey(vkCode);
-      handleKeyRepeat(vkCode, isKeyDown);
+      handleKeyRepeat(vkCode, isKeyDown && keyEvent.repeats &&
+                                  Keys::isRepeatingMedia(vkCode));
     } else {
       postKey(vkCode, isKeyDown);
-      handleKeyRepeat(vkCode, isKeyDown);
+      handleKeyRepeat(vkCode, isKeyDown && keyEvent.repeats);
     }
   }
 
@@ -368,9 +369,10 @@ class Runtime {
     timer = nil;
   }
 
-  void handleKeyRepeat(ushort vkCode, bool isKeyDown) {
+  // Like a keyboard, a key event stops the repeat of the previous key
+  void handleKeyRepeat(ushort vkCode, bool shouldRepeat) {
     stopTimer(keyRepeatTimer);
-    if (!isKeyDown) return;
+    if (!shouldRepeat) return;
 
     keyRepeatTimer = startTimer(delayUntilRepeat, keyRepeatInterval, ^{
       if (Keys::isMedia(vkCode))

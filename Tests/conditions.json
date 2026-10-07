@@ -6,9 +6,9 @@
     { "from": "O", "to": "P", "app": "com.app" }
   ],
   "rules": [
-    { "keys": ["D"], "app": ["com.app1", "com.app2"], "send": "E" },
-    { "keys": ["D"], "keyboard": "1", "send": "F" },
-    { "keys": ["X"], "send": "Y" }
+    { "from": ["D"], "app": ["com.app1", "com.app2"], "to": "E" },
+    { "from": ["D"], "keyboard": "1", "to": "F" },
+    { "from": ["X"], "to": "Y" }
   ],
   "tests": [
     ["app:com.app1 D", "E"],

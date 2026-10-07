@@ -10,13 +10,13 @@
         { "from": "Back", "to": "Enter" }
       ],
       "rules": [
-        { "keys": ["I"], "tap": "J", "hold": "K" },
-        { "keys": ["C"], "send": "CmdL+V" },
-        { "keys": ["D"], "send": "Tab delay:60 Tab" },
-        { "keys": ["E"], "send": "VolumeUp" },
-        { "keys": ["F"], "send": "LeftClick:down" },
-        { "keys": ["G"], "app": "com.test.app", "send": "H" },
-        { "keys": ["M"], "send": "Back" }
+        { "from": ["I"], "tap": "J", "hold": "K" },
+        { "from": ["C"], "to": "CmdL+V" },
+        { "from": ["D"], "to": "Tab delay:60 Tab" },
+        { "from": ["E"], "to": "VolumeUp" },
+        { "from": ["F"], "to": "LeftClick" },
+        { "from": ["G"], "app": "com.test.app", "to": "H" },
+        { "from": ["M"], "to": "Back" }
       ]
     }
   ]

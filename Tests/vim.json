@@ -2,22 +2,22 @@
 // + Alt clicks
 {
   "rules": [
-    { "keys": ["F18"], "optional": ["any"], "tap": "Esc" },
+    { "from": ["F18"], "optional": ["any"], "tap": "Esc" },
     {
-      "keys": ["H", "J", "K", "L"],
+      "from": ["H", "J", "K", "L"],
       "modifiers": ["F18", "F"],
       "optional": ["any"],
-      "send": ["ShiftL+LeftArrow:down", "ShiftL+DownArrow:down", "ShiftL+UpArrow:down", "ShiftL+RightArrow:down"]
+      "to": ["ShiftL+LeftArrow", "ShiftL+DownArrow", "ShiftL+UpArrow", "ShiftL+RightArrow"]
     },
     {
-      "keys": ["H", "J", "K", "L"],
+      "from": ["H", "J", "K", "L"],
       "modifiers": ["F18"],
       "optional": ["any"],
-      "send": ["LeftArrow:down", "DownArrow:down", "UpArrow:down", "RightArrow:down"]
+      "to": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"]
     },
-    { "keys": ["F"], "modifiers": ["F18"], "optional": ["any"] },
-    { "keys": ["C"], "modifiers": ["AltL", "F18"], "send": "RightClick:down" },
-    { "keys": ["C"], "modifiers": ["AltL"], "send": "LeftClick:down" }
+    { "from": ["F"], "modifiers": ["F18"], "optional": ["any"] },
+    { "from": ["C"], "modifiers": ["AltL", "F18"], "to": "RightClick" },
+    { "from": ["C"], "modifiers": ["AltL"], "to": "LeftClick" }
   ],
   "tests": [
     ["F18", "Esc"],
@@ -30,6 +30,7 @@
     ["CmdL:down F18:down L F18:up CmdL:up", "CmdL:down RightArrow CmdL:up"],
     ["F", "F"],
     ["AltL:down C AltL:up", "AltL:down AltL:up LeftClick AltL:down AltL:up"],
+    ["AltL:down C:down AltL:up C:up", "AltL:down AltL:up LeftClick"],
     ["AltL:down F18:down C F18:up AltL:up", "AltL:down AltL:up RightClick AltL:down AltL:up"]
   ]
 }

@@ -57,13 +57,13 @@ The first rule that matches the pressed key replaces it, until it's released. Ke
 ```jsonc
 [
   {
-    "keys": ["H"], // any of these keys
+    "from": ["H"], // any of these keys
     "modifiers": ["CmdL"], // held, the others can't be (optional)
     "optional": ["ShiftL"], // can also be held, ["any"] for all (optional)
     "app": "com.google.Chrome", // or ["com.google.Chrome", "com.apple.finder"] (optional)
     "keyboard": "50475:1133", // productId:vendorId, a string or array too (optional)
 
-    "send": "LeftArrow:down", // on key down, without it the key is silenced
+    "to": "LeftArrow", // on key down, without it the key is silenced
     "tap": "Esc", // released within tapDelay, without pressing other keys
     "doubleTap": "CmdL+F", // tapped twice
     "hold": "CmdL+W" // held for holdDelay, without other key events
@@ -71,26 +71,25 @@ The first rule that matches the pressed key replaces it, until it's released. Ke
 ]
 ```
 
-Only `keys` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`.
+Only `from` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`.
 
-Each action is space separated:
+Each action is space separated. Like Karabiner, the last key of `to` and `hold` is held until the key is released, the others are tapped. `tap` and `doubleTap` come on release, so all their keys are tapped. The keys of `hold` don't repeat.
 
 ```jsonc
-"send": "C"                    // tap
-"send": "CmdL+ShiftL+C"        // with modifiers
-"send": "LeftArrow:down"       // kept down until the key is released
-"send": "Tab delay:250 Tab"    // waits 250ms
-"send": "currentKey"           // the pressed key
+"to": "C"                      // C, held
+"to": "CmdL+ShiftL+C"          // with modifiers
+"to": "Tab delay:250 Tab"      // waits 250ms
+"to": "currentKey"             // the pressed key
 ```
 
 With several keys, an action can also have one item per key:
 
 ```jsonc
 {
-  "keys": ["H", "J", "K", "L"],
+  "from": ["H", "J", "K", "L"],
   "modifiers": ["F18"],
   "optional": ["any"],
-  "send": ["LeftArrow:down", "DownArrow:down", "UpArrow:down", "RightArrow:down"]
+  "to": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"]
 }
 ```
 
@@ -101,7 +100,7 @@ With several keys, an action can also have one item per key:
 ```jsonc
 {
   "remaps": "%import(_remaps.json)",
-  "rules": ["%import(_vimMode.json)", { "keys": ["A"], "send": "B" }]
+  "rules": ["%import(_vimMode.json)", { "from": ["A"], "to": "B" }]
 }
 ```
 
