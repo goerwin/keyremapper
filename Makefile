@@ -37,4 +37,4 @@ icon:
 	cp $(MENUBAR_ICON_SVG) $(MENUBAR_IMAGESET)/icon.svg
 
 release-patch release-minor release-major:
-	./release.sh $(@:release-%=%)
+	scripts/release.sh $(@:release-%=%)
