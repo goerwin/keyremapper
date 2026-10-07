@@ -1,4 +1,5 @@
 import ServiceManagement
+import Sparkle
 import SwiftUI
 
 @main
@@ -19,6 +20,9 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
   private var isPaused = false
   private var activeProfileIdx = 0
   private var approvalTimer: Timer?
+  // Checks the appcast of the latest GitHub release, only from the menu
+  private let updater = SPUStandardUpdaterController(
+    startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
   private lazy var aboutWindowController: NSWindowController = {
     let window = NSWindow()
@@ -55,6 +59,10 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     statusBar.onOpenLogger = { [unowned self] in self.show(self.loggerWindowController) }
     statusBar.onToggleLaunchAtLogin = { [unowned self] in self.toggleLaunchAtLogin() }
     statusBar.onOpenAbout = { [unowned self] in self.show(self.aboutWindowController) }
+    statusBar.onCheckForUpdates = { [unowned self] in
+      NSApp.activate(ignoringOtherApps: true)
+      self.updater.checkForUpdates(nil)
+    }
     statusBar.onUninstall = { [unowned self] in self.uninstall() }
     statusBar.onQuit = { [unowned self] in self.quit() }
 

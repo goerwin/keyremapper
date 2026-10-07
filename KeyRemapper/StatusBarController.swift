@@ -15,6 +15,7 @@ final class StatusBarController: NSObject {
   var onOpenLogger: () -> Void = {}
   var onToggleLaunchAtLogin: () -> Void = {}
   var onOpenAbout: () -> Void = {}
+  var onCheckForUpdates: () -> Void = {}
   var onUninstall: () -> Void = {}
   var onQuit: () -> Void = {}
 
@@ -55,6 +56,7 @@ final class StatusBarController: NSObject {
     addItem(to: menu, "Launch at Login", #selector(toggleLaunchAtLogin)).state =
       state.launchesAtLogin ? .on : .off
     addItem(to: menu, "About \(Constants.BUNDLE_NAME)", #selector(openAbout))
+    addItem(to: menu, "Check for Updates…", #selector(checkForUpdates))
     addItem(to: menu, "Uninstall \(Constants.BUNDLE_NAME)…", #selector(uninstall))
 
     menu.addItem(.separator())
@@ -78,6 +80,7 @@ final class StatusBarController: NSObject {
   @objc private func openLogger() { onOpenLogger() }
   @objc private func toggleLaunchAtLogin() { onToggleLaunchAtLogin() }
   @objc private func openAbout() { onOpenAbout() }
+  @objc private func checkForUpdates() { onCheckForUpdates() }
   @objc private func uninstall() { onUninstall() }
   @objc private func quit() { onQuit() }
 }

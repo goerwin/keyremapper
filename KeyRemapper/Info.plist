@@ -32,5 +32,11 @@
 	<string>@goerwin/keyremapper</string>
 	<key>OwnerWebsite</key>
 	<string>https://github.com/goerwin/keyremapper</string>
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/goerwin/keyremapper/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>T7cl4Bn07ZZ+yjhtYJMHWob5sijJ4bgK6/vX3Niw508=</string>
 </dict>
 </plist>

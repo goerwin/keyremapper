@@ -38,6 +38,7 @@
 		F9C75A5327EEFDEA00F2E31C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C75A5227EEFDEA00F2E31C /* AppKit.framework */; };
 		F9C75A5527EEFE1800F2E31C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C75A5427EEFE1800F2E31C /* IOKit.framework */; };
 		F9C75A5927EF125800F2E31C /* AppBridge.h in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A5827EF125800F2E31C /* AppBridge.h */; };
+		F9E5A0012F00000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = F9E5A0012F00000000000002 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -129,6 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9E5A0012F00000000000001 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,6 +257,9 @@
 				F9B4D1AD27F15AF000FC513C /* PBXTargetDependency */,
 			);
 			name = KeyRemapper;
+			packageProductDependencies = (
+				F9E5A0012F00000000000002 /* Sparkle */,
+			);
 			productName = KeyRemapper;
 			productReference = F9A8925C27644E33009ACA0A /* KeyRemapper.app */;
 			productType = "com.apple.product-type.application";
@@ -305,6 +310,9 @@
 				Base,
 			);
 			mainGroup = F9A8925327644E33009ACA0A;
+			packageReferences = (
+				F9E5A0012F00000000000003 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = F9A8925D27644E33009ACA0A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -648,6 +656,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F9E5A0012F00000000000003 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F9E5A0012F00000000000002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F9E5A0012F00000000000003 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F9A8925427644E33009ACA0A /* Project object */;
 }

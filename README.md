@@ -8,10 +8,12 @@ Keyboard remapper for macOS, configured with a JSON file. It seizes the keyboard
 
 ## Installation
 
-1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
+1. Download `KeyRemapper-<version>.dmg` from the [latest release](https://github.com/goerwin/keyremapper/releases/latest), open it and drag `KeyRemapper.app` to Applications
 2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
 3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_
 4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
+
+_Check for Updates…_ in the menu downloads and installs the latest release.
 
 _Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
 
@@ -139,7 +141,7 @@ More dev notes in [NOTES.md](NOTES.md).
 
 ## Release
 
-Push to `main`, then run `make release-patch`, `make release-minor` or `make release-major`. It previews the new version and its commits and, after confirmation, pushes an annotated tag. The [release workflow](.github/workflows/release.yml) builds the app and publishes it, using the commits as release notes.
+Push to `main`, then run `make release-patch`, `make release-minor` or `make release-major`. It previews the new version and its commits and, after confirmation, pushes an annotated tag. The [release workflow](.github/workflows/release.yml) builds the app and publishes its DMG, using the commits as release notes, and the `appcast.xml` that the installed apps check for updates ([Sparkle](https://sparkle-project.org)).
 
 The workflow can also be run manually (_Actions > Run workflow_) to build without releasing.
 
@@ -148,3 +150,7 @@ The Mac build is signed with these repository secrets:
 - `MAC_BUILD_CERTIFICATE_BASE64`: the Apple Development certificate (`.p12`) in base64 (`base64 -i certificate.p12`)
 - `MAC_BUILD_CERTIFICATE_BASE64_PASSWORD`: its password
 - `MAC_APP_CERTIFICATE`: its name, eg. `Apple Development: me@email.com (XXXXXXXXXX)`
+
+And the updates with:
+
+- `SPARKLE_PRIVATE_KEY`: the private EdDSA key whose public key is `SUPublicEDKey` in `KeyRemapper/Info.plist`. Sparkle's `generate_keys` keeps it in the login keychain (account `keyremapper`), `generate_keys --account keyremapper -x key.txt` exports it
