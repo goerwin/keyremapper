@@ -5,7 +5,14 @@
     { "key": "Caps", "ifPressedNTimes": 1, "send": "Esc" },
     { "key": "Alt", "ifPressedNTimes": 1, "send": "Esc:down Esc:up" },
     { "key": "Win", "ifPressedNTimes": 2, "send": "Shift" },
-    { "key": "R", "ifPressedNTimes": 1, "send": "A" }
+    { "key": "R", "send": "A" },
+    { "key": "Q", "send": "W" },
+    {
+      "key": "Q",
+      "if": { "keyboard": "1234" },
+      "ifPressedNTimes": 2,
+      "send": "E"
+    }
   ],
   "keybindings": [
     {
@@ -28,6 +35,14 @@
     ["Caps:down Win:down Caps:up Win:up", "Caps"],
 
     ["R", "R A"],
+
+    // the count starts over after the highest ifPressedNTimes
+    ["R R R", "R A R A R A"],
+    ["Caps Caps", "Caps Esc Caps Esc"],
+    ["Win Win Win Win", "Shift Shift"],
+    ["Win Win Win", "Shift"],
+    ["keyboard:1234 Q Q Q", "Q W Q E Q W"],
+    ["keyboard:_ Q Q", "Q W Q W"],
 
     // WITHOUT/WITH DELAY
     ["Alt:down Alt:up", "Esc"],

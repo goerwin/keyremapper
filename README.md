@@ -54,7 +54,7 @@ One to one remaps. The first one that matches wins.
 
 ### KeyPresses
 
-Fire when a key is tapped N times within `keyPressesDelay`.
+Fire when a key is tapped N times within `keyPressesDelay` (`ifPressedNTimes`, 1 by default). After the highest `ifPressedNTimes` of the key, the count starts over, so a single tap rule fires on every tap, however fast.
 
 ```jsonc
 [
@@ -71,7 +71,7 @@ With `ifHeldFor` (ms) instead, they fire while the key is held, unless another k
 
 ```jsonc
 [
-  { "key": "Backspace", "ifPressedNTimes": 1, "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
+  { "key": "Backspace", "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
   { "key": "Backspace", "ifHeldFor": 400, "send": "CmdL:down W CmdL:up" },
   // keeps Cmd down until the key is released
   { "key": "AltR", "ifHeldFor": 300, "send": "CmdL:down Tab", "afterKeyUp": "CmdL:up" }
