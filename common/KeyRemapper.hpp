@@ -39,8 +39,9 @@ class KeyRemapper {
   KeyEvents afterKeyUpKeyEvents = {};
   // mappedKeys item of the matched keybinding, for the mappedKey placeholder
   String mappedKey;
-  // Keys a keybinding sent down on key down that are still down, with the key
-  // that triggered it. They're released with that key, unless they're held
+  // Keys sent down on key down, by a keybinding or because no keybinding
+  // matched, that are still down, with the key that was pressed. They're
+  // released with that key, unless they're held
   json pressedKeys = json::object();
 
   void trackPressedKeys(const KeyEvents &keyEvents, String triggerKey = "") {
@@ -127,22 +128,18 @@ class KeyRemapper {
     profile = profileEl;
     symbols = symbolsEl;
     keybindings = profileEl["keybindings"].get<JsonArray>();
-    for (auto &keybinding : keybindings) {
-      auto mappedKeys = keybinding["mappedKeys"];
-      if (mappedKeys.is_null()) continue;
-      bool isValid = mappedKeys.is_array() &&
-                     mappedKeys.size() == keybinding["keys"].size();
-      for (auto &key : mappedKeys) isValid = isValid && key.is_string();
-      if (!isValid)
-        throw std::runtime_error(
-            "\"mappedKeys\" needs one key name per item of \"keys\": " +
-            keybinding["keys"].dump());
-    }
     keyPressesDelay = profileEl["keyPressesDelay"].is_null()
                           ? 200
                           : profileEl["keyPressesDelay"].get<short>();
     remaps = profileEl["remaps"];
     keyPresses = profileEl["keyPresses"];
+    if (keyPresses.is_null()) keyPresses = json::array();
+
+    for (auto &keybinding : keybindings) {
+      validateMappedKeys(keybinding);
+      addKeybindingKeyPresses(keybinding);
+    }
+
     reset();
   }
 
@@ -192,7 +189,7 @@ class KeyRemapper {
         trackPressedKeys(sentKeyEvents, isKeyDown ? keyName : "");
         localKeyEvents = Helpers::concatArrays(localKeyEvents, sentKeyEvents);
       } else {
-        trackPressedKeys({remappedKeyEvent});
+        trackPressedKeys({remappedKeyEvent}, isKeyDown ? keyName : "");
         localKeyEvents =
             Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
       }
@@ -370,6 +367,40 @@ class KeyRemapper {
   }
 
  private:
+  void validateMappedKeys(json &keybinding) {
+    auto mappedKeys = keybinding["mappedKeys"];
+    if (mappedKeys.is_null()) return;
+
+    bool isValid = mappedKeys.is_array() &&
+                   mappedKeys.size() == keybinding["keys"].size();
+    for (auto &key : mappedKeys) isValid = isValid && key.is_string();
+    if (!isValid)
+      throw std::runtime_error(
+          "\"mappedKeys\" needs one key name per item of \"keys\": " +
+          keybinding["keys"].dump());
+  }
+
+  // A keybinding's keyPresses are added after the profile ones, one per key,
+  // with the keybinding's "if" plus their own
+  void addKeybindingKeyPresses(json &keybinding) {
+    auto ownKeyPresses = keybinding["keyPresses"];
+    if (ownKeyPresses.is_null()) return;
+    if (!ownKeyPresses.is_array())
+      throw std::runtime_error("\"keyPresses\" of a keybinding isn't an array: " +
+                               keybinding["keys"].dump());
+
+    for (auto &key : keybinding["keys"]) {
+      for (auto keypress : ownKeyPresses) {
+        json ifConds = keybinding["if"].is_object() ? keybinding["if"]
+                                                    : json::object();
+        if (keypress["if"].is_object()) ifConds.update(keypress["if"]);
+        keypress["key"] = key;
+        keypress["if"] = ifConds;
+        keyPresses.push_back(keypress);
+      }
+    }
+  }
+
   bool ifConditions(json ifConds) {
     if (ifConds.is_null()) return true;
 

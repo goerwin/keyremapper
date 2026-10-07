@@ -62,6 +62,7 @@ int main(int argc, const char *argv[]) {
       Helpers::getJsonFile(dirPath + "/rules10.json"),
       Helpers::getJsonFile(dirPath + "/rules11.json"),
       Helpers::getJsonFile(dirPath + "/rules12.json"),
+      Helpers::getJsonFile(dirPath + "/rules13.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {
@@ -180,6 +181,20 @@ int main(int argc, const char *argv[]) {
   }
 
   Helpers::print("Test4: mappedKeys validation tests passed");
+
+  // Test5: keyPresses of a keybinding has to be an array
+
+  bool t5_threw = false;
+  try {
+    KeyRemapper(nlohmann::json::parse(
+                    R"({ "keybindings": [{ "keys": ["A"], "keyPresses": {} }] })"),
+                symbols);
+  } catch (const std::runtime_error &) {
+    t5_threw = true;
+  }
+  expect(t5_threw, "Test5: no error for a keyPresses object");
+
+  Helpers::print("Test5: keybinding keyPresses validation tests passed");
 
   // Array Object JSON helpers
 

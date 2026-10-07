@@ -1,6 +1,6 @@
 {
   "description": [
-    "keys a keybinding pressed on key down are released with its key",
+    "keys sent down on key down are released with that key",
     "unless they're held or were already released"
   ],
   "keybindings": [
@@ -34,6 +34,8 @@
     ["Caps:down F Caps:up", "Shift:down Shift:up"],
     ["Caps:down F:down J F:up Caps:up", "Shift:down DownArrow Shift:up"],
     ["Caps:down F:down Shift:down Shift:up F:up Caps:up", "Shift:down Shift:down Shift:up"],
-    ["Caps:down K Caps:up", "K"]
+    ["Caps:down K Caps:up", "K"],
+    ["J:down Caps:down J:up Caps:up", "J:down DownArrow:up J:up"],
+    ["H:down Win:down H:up Win:up", "H:down Win:down H:up Win:up"]
   ]
 }

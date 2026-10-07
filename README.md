@@ -78,7 +78,20 @@ With `ifHeldFor` (ms) instead, they fire while the key is held, unless another k
 ]
 ```
 
-To only tap or hold, without the key's own output, add a keybinding with `"send": [null, null]` for it. In `tests`, `test_hold` stands for the held key's `ifHeldFor` time passing (eg. `["Backspace:down test_hold Backspace:up", "CmdL:down W CmdL:up"]`).
+A keybinding can also have its own `keyPresses`. They're added after the profile's ones, for each of its keys and with its `if` plus their own. Without `send`, the keybinding also silences the key, so only the tap or hold is sent:
+
+```jsonc
+{
+  "keys": ["Backspace"],
+  "if": { "keyboard": "4133:6421" },
+  "keyPresses": [
+    { "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
+    { "ifHeldFor": 400, "send": "CmdL:down W CmdL:up" }
+  ]
+}
+```
+
+In `tests`, `test_hold` stands for the held key's `ifHeldFor` time passing (eg. `["Backspace:down test_hold Backspace:up", "CmdL:down W CmdL:up"]`).
 
 ### Keybindings
 
@@ -135,7 +148,7 @@ For complex flows. The first one that matches wins.
 }
 ```
 
-Conditions are checked again on key up, so key down and key up can match different keybindings. Keys a keybinding sends down on key down and doesn't release are released with its key anyway, unless you're holding them (eg. the `CmdL:down` that restores a held Cmd).
+Conditions are checked again on key up, so key down and key up can match different keybindings. Keys sent down on key down (by a keybinding, or the key itself when none matched) that are still down are released with that key anyway, unless you're holding them (eg. the `CmdL:down` that restores a held Cmd). So `send[1]` only needs what's different on key up.
 
 ### Sharing parts of the config
 
