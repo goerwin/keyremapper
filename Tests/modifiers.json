@@ -23,8 +23,10 @@
     // The held CmdL stays down instead of being released and pressed again
     ["CmdL:down L CmdL:up", "CmdL:down CmdL:up CmdL:down ShiftL:down L:down L:up ShiftL:up CmdL:up"],
 
-    // Any key can be a modifier, only the real modifiers have to be listed
-    ["F:down M F:up", "F:down F:up Enter F:down F:up"],
+    // Any key can be a modifier, only the real modifiers have to be listed.
+    // Only the real modifiers are pressed again, F would type another F
+    ["F:down M F:up", "F:down F:up Enter"],
+    ["F:down M:down F:up M:up", "F:down F:up Enter:down Enter:up"],
     ["M", "M"],
     ["N", "Y"],
     ["F:down N F:up", "F:down Y F:up"],

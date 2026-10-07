@@ -289,8 +289,11 @@ class KeyRemapper {
 
     auto keyEvents = releaseSentKeys(key);
 
+    // Only the real modifiers come back, pressing any other key again would
+    // type it
     for (auto &[liftedKey, sender] : press.liftedKeys) {
-      if (!heldKeys.count(sender) || findSentKey(liftedKey) != sentKeys.end())
+      if (!MODIFIERS.count(liftedKey) || !heldKeys.count(sender) ||
+          findSentKey(liftedKey) != sentKeys.end())
         continue;
       keyEvents.push_back(getKeyEvent(liftedKey, true));
       sentKeys.push_back({liftedKey, sender});

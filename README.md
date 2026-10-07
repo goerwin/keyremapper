@@ -73,7 +73,7 @@ The first rule that matches the pressed key replaces it, until it's released. Ke
 ]
 ```
 
-Only `from` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`.
+Only `from` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`. After it's released, only the real modifiers are pressed again (any other key would be typed again).
 
 Each action is space separated. Like Karabiner, the last key of `to` and `hold` is held until the key is released, the others are tapped. `tap` and `doubleTap` come on release, so all their keys are tapped. The keys of `hold` don't repeat.
 

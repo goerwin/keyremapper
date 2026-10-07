@@ -25,6 +25,8 @@
     ["F18:down J:down F18:up J:up", "DownArrow"],
     ["F18:down F:down H F:up F18:up", "ShiftL:down LeftArrow:down LeftArrow:up ShiftL:up"],
     ["F18:down F:down F:up F18:up", ""],
+    // F pressed before F18 isn't typed again over the selection
+    ["F:down F18:down K F18:up F:up", "F:down F:up ShiftL:down UpArrow:down UpArrow:up ShiftL:up"],
     ["ShiftL:down F18:down H F18:up ShiftL:up", "ShiftL:down LeftArrow ShiftL:up"],
     ["ShiftL:down F18:down F:down H F:up F18:up ShiftL:up", "ShiftL:down ShiftL:down LeftArrow ShiftL:up"],
     ["CmdL:down F18:down L F18:up CmdL:up", "CmdL:down RightArrow CmdL:up"],
