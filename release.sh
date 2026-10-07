@@ -4,7 +4,7 @@ set -euo pipefail
 #
 # Previews and creates a release: bumps the latest version tag on origin, shows the commits that
 # will go in it and, after confirmation, pushes an annotated tag whose message is the release notes.
-# Pushing the tag triggers .github/workflows/release.yml, which builds the apps and publishes them.
+# Pushing the tag triggers .github/workflows/release.yml, which builds the app and publishes it.
 #
 # Usage: ./release.sh patch|minor|major
 #

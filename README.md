@@ -4,21 +4,16 @@
   <img src="common/images/readme-icon.png" width="128" alt="KeyRemapper icon">
 </p>
 
-Keyboard remapper for macOS and Windows, configured with a JSON file. On macOS it seizes the keyboards via IOKit and posts the remapped events, so no driver is needed. On Windows it uses the Interception driver.
+Keyboard remapper for macOS, configured with a JSON file. It seizes the keyboards via IOKit and posts the remapped events, so no driver is needed.
 
 ## Installation
 
-- Mac
-  1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
-  2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
-  3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_.
-  4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
+1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
+2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
+3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_
+4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
 
 _Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
-- Windows
-  1. Install the [Interception driver](https://github.com/oblitum/Interception) and restart
-  2. Download `win.zip` from [Releases](https://github.com/goerwin/keyremapper/releases) and copy the `keyRemapperWin` folder to your home directory (eg. `C:\Users\me`)
-  3. Run the .exe, as Administrator if it has to work in privileged apps (eg. Task Manager)
 
 ## Config
 
@@ -140,13 +135,12 @@ make icon                            # regenerates the app and menu bar icons fr
 - Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version
 - Icons: `common/images/icon.svg` and `common/images/menubar-icon.svg` are the sources, edit them and run `make icon` (needs `brew install librsvg`). Don't edit the files in `Assets.xcassets` directly
-- Windows: open the solution with Visual Studio 2019+. Tests: `cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe` from a Developer PowerShell
 
 More dev notes in [NOTES.md](NOTES.md).
 
 ## Release
 
-Push to `main`, then run `make release-patch`, `make release-minor` or `make release-major`. It previews the new version and its commits and, after confirmation, pushes an annotated tag. The [release workflow](.github/workflows/release.yml) builds both apps and publishes them, using the commits as release notes.
+Push to `main`, then run `make release-patch`, `make release-minor` or `make release-major`. It previews the new version and its commits and, after confirmation, pushes an annotated tag. The [release workflow](.github/workflows/release.yml) builds the app and publishes it, using the commits as release notes.
 
 The workflow can also be run manually (_Actions > Run workflow_) to build without releasing.
 
