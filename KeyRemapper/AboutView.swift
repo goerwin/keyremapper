@@ -8,9 +8,6 @@ struct AboutView: View {
       Text("\(Constants.BUNDLE_NAME)").font(.system(size: 20, weight: .bold)).padding(.bottom, -10)
       Text("\(Constants.VERSION)")  .foregroundStyle(.gray)
 
-      Text("Daemon Service Name").font(.system(size: 10)).foregroundStyle(.gray).padding(.bottom, -10)
-      Text("\(Constants.MACH_SERVICE_NAME)")
-
       Text("\(Constants.OWNER_NAME)").font(.system(size: 10)).foregroundStyle(.blue)
         .onTapGesture {
           NSWorkspace.shared.open(URL(string: "\(Constants.OWNER_WEBSITE)")!)
