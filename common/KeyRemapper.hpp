@@ -39,6 +39,28 @@ class KeyRemapper {
   KeyEvents afterKeyUpKeyEvents = {};
   // mappedKeys item of the matched keybinding, for the mappedKey placeholder
   String mappedKey;
+  // Keys a keybinding sent down on key down that are still down, with the key
+  // that triggered it. They're released with that key, unless they're held
+  json pressedKeys = json::object();
+
+  void trackPressedKeys(const KeyEvents &keyEvents, String triggerKey = "") {
+    for (auto &keyEvent : keyEvents) {
+      if (!symbols.contains(keyEvent.name)) continue;
+      if (keyEvent.isKeyDown && !triggerKey.empty())
+        pressedKeys[keyEvent.name] = triggerKey;
+      else
+        pressedKeys.erase(keyEvent.name);
+    }
+  }
+
+  KeyEvents releasePressedKeys(String triggerKey) {
+    KeyEvents keyEvents = {};
+    for (auto &[key, value] : pressedKeys.items())
+      if (value == triggerKey && globals[key] != true)
+        keyEvents.push_back(getKeyEvent(key, false));
+    trackPressedKeys(keyEvents);
+    return keyEvents;
+  }
 
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
@@ -131,6 +153,7 @@ class KeyRemapper {
       KeyEvents localKeyEvents = afterKeyUpKeyEvents;
       afterKeyUpKeyEvents = {};
       mappedKey = "";
+      trackPressedKeys(localKeyEvents);
 
       auto keyEvent = keyEvents[i];
       auto code = keyEvent.code;
@@ -164,12 +187,19 @@ class KeyRemapper {
         }
 
         json send = keybindingInfo["send"];
-        localKeyEvents = Helpers::concatArrays(
-            localKeyEvents,
-            getKeyEventsFromString(isKeyDown ? send[0] : send[1]));
-      } else
+        auto sentKeyEvents =
+            getKeyEventsFromString(isKeyDown ? send[0] : send[1]);
+        trackPressedKeys(sentKeyEvents, isKeyDown ? keyName : "");
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, sentKeyEvents);
+      } else {
+        trackPressedKeys({remappedKeyEvent});
         localKeyEvents =
             Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
+      }
+
+      if (!isKeyDown)
+        localKeyEvents =
+            Helpers::concatArrays(localKeyEvents, releasePressedKeys(keyName));
 
       // Windows keeps sending key downs while a key is held
       bool isRepeat = isKeyDown && lastKeyName == keyName && keyDownTime != 0;
@@ -193,8 +223,9 @@ class KeyRemapper {
 
       if (!keyPressesInfo.is_null()) {
         setValues(keyPressesInfo["set"]);
-        localKeyEvents = Helpers::concatArrays(
-            localKeyEvents, getKeyEventsFromString(keyPressesInfo["send"]));
+        auto sentKeyEvents = getKeyEventsFromString(keyPressesInfo["send"]);
+        trackPressedKeys(sentKeyEvents);
+        localKeyEvents = Helpers::concatArrays(localKeyEvents, sentKeyEvents);
         afterKeyUpKeyEvents = Helpers::concatArrays(
             afterKeyUpKeyEvents,
             getKeyEventsFromString(keyPressesInfo["afterKeyUp"]));
@@ -238,6 +269,7 @@ class KeyRemapper {
     afterKeyUpKeyEvents = Helpers::concatArrays(
         afterKeyUpKeyEvents, getKeyEventsFromString(hold["afterKeyUp"]));
     auto keyEvents = getKeyEventsFromString(hold["send"]);
+    trackPressedKeys(keyEvents);
 
     if (applyKeysCb)
       applyKeysCb(globals["appName"], globals["keyboard"],
@@ -328,6 +360,7 @@ class KeyRemapper {
     globals["isKeyDown"] = "";
 
     afterKeyUpKeyEvents = {};
+    pressedKeys = json::object();
     pendingHold = {};
     firedHoldKeyName = "";
     lastKeyName = "";
@@ -460,8 +493,9 @@ class KeyRemapper {
   }
 
   KeyEvent getKeyEvent(String keyName, bool isKeyDown) {
-    auto symbol = symbols[keyName];
-    if (symbol.is_null()) return {"Unknown", 0, 0, false};
+    auto it = symbols.find(keyName);
+    if (it == symbols.end() || it->is_null()) return {"Unknown", 0, 0, false};
+    auto &symbol = *it;
     return {keyName, symbol[0], isKeyDown ? symbol[1] : symbol[2], isKeyDown};
   }
 };

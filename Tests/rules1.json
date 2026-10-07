@@ -36,7 +36,7 @@
 
     ["F:down G F:up", "F:down H F:up"],
     ["G:down F G:up", "G:down F G:up"],
-    ["F:down G:down F:up G:up", "F:down H:down F:up G:up"],
+    ["F:down G:down F:up G:up", "F:down H:down F:up G:up H:up"],
 
     [
       "Ctrl:down Caps:down H Caps:up Ctrl:up",

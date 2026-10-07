@@ -61,6 +61,7 @@ int main(int argc, const char *argv[]) {
       Helpers::getJsonFile(dirPath + "/rules9.json"),
       Helpers::getJsonFile(dirPath + "/rules10.json"),
       Helpers::getJsonFile(dirPath + "/rules11.json"),
+      Helpers::getJsonFile(dirPath + "/rules12.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {

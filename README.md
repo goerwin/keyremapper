@@ -135,7 +135,7 @@ For complex flows. The first one that matches wins.
 }
 ```
 
-Conditions are checked again on key up, so a keybinding that holds a key down needs a matching rule that releases it.
+Conditions are checked again on key up, so key down and key up can match different keybindings. Keys a keybinding sends down on key down and doesn't release are released with its key anyway, unless you're holding them (eg. the `CmdL:down` that restores a held Cmd).
 
 ### Sharing parts of the config
 

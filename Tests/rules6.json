@@ -60,7 +60,7 @@
     // keybindings
     ["D", "F"],
     ["keyboard:1234 D", "E"],
-    ["keyboard:1234 D:down keyboard:_ D:up", "E:down F:up"],
+    ["keyboard:1234 D:down keyboard:_ D:up", "E:down F:up E:up"],
     ["keyboard:1234 Caps:down Caps:up", "Win"],
     ["keyboard:_ Caps:down Caps:up", "Esc"],
     ["keyboard:_ Caps:down keyboard:1234 Caps:up", "Win"],

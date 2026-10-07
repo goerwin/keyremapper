@@ -1,0 +1,39 @@
+{
+  "description": [
+    "keys a keybinding pressed on key down are released with its key",
+    "unless they're held or were already released"
+  ],
+  "keybindings": [
+    {
+      "keys": ["J"],
+      "if": { "Caps": true },
+      "send": ["DownArrow:down", "DownArrow:up"]
+    },
+    {
+      "keys": ["H"],
+      "if": { "Win": true },
+      "send": ["Win:up Ctrl:down A Ctrl:up Win:down", "currentKey:up"]
+    },
+    {
+      "keys": ["F"],
+      "if": { "Caps": true },
+      "send": ["Shift:down", null]
+    },
+    {
+      "keys": ["K"],
+      "if": { "Caps": true },
+      "send": ["currentKey:down", null]
+    },
+    { "keys": ["Caps"], "send": [null, null] }
+  ],
+  "tests": [
+    ["Caps:down J Caps:up", "DownArrow"],
+    ["Caps:down J:down Caps:up J:up", "DownArrow:down J:up DownArrow:up"],
+    ["Win:down H Win:up", "Win:down Win:up Ctrl:down A Ctrl:up Win:down H:up Win:up"],
+    ["Win:down H:down Win:up H:up", "Win:down Win:up Ctrl:down A Ctrl:up Win:down Win:up H:up"],
+    ["Caps:down F Caps:up", "Shift:down Shift:up"],
+    ["Caps:down F:down J F:up Caps:up", "Shift:down DownArrow Shift:up"],
+    ["Caps:down F:down Shift:down Shift:up F:up Caps:up", "Shift:down Shift:down Shift:up"],
+    ["Caps:down K Caps:up", "K"]
+  ]
+}
