@@ -1,5 +1,9 @@
 # KeyRemapper
 
+<p align="center">
+  <img src="common/images/readme-icon.png" width="128" alt="KeyRemapper icon">
+</p>
+
 Keyboard remapper for macOS and Windows, configured with a JSON file. On macOS it seizes the keyboards via IOKit and posts the remapped events, so no driver is needed. On Windows it uses the Interception driver.
 
 ## Installation
@@ -157,6 +161,7 @@ make test-app                        # builds, installs and drives the signed ap
 make test-config [CONFIG=...]        # tests of each profile (default ~/KeyRemapperMac/config.json)
 make build                           # unsigned Debug build of the Mac app
 make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
+make icon                            # regenerates the app and menu bar icons from common/images/*.svg
 ```
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
@@ -164,6 +169,7 @@ make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
 - Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version
+- Icons: `common/images/icon.svg` and `common/images/menubar-icon.svg` are the sources, edit them and run `make icon` (needs `brew install librsvg`). Don't edit the files in `Assets.xcassets` directly
 - Windows: open the solution with Visual Studio 2019+. Tests: `cl .\Tests\index.cpp /std:c++17 /Fe"Tests/output.exe" /Fo"Tests/output.obj" | .\Tests\output.exe` from a Developer PowerShell
 
 More dev notes in [NOTES.md](NOTES.md).
