@@ -90,6 +90,28 @@ void check(std::string name, bool value) {
   Helpers::print("FAIL: " + name);
 }
 
+CGEventRef systemDefinedEvent(int nxKeyType, short subtype = 8) {
+  NSEvent* nsEvent = [NSEvent otherEventWithType:NSEventTypeSystemDefined
+                                        location:NSMakePoint(0, 0)
+                                   modifierFlags:0xa00
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:0
+                                         subtype:subtype
+                                           data1:(nxKeyType << 16) | (0xa << 8)
+                                           data2:-1];
+  return [nsEvent CGEvent];
+}
+
+CGEventRef keyboardEvent(ushort vkCode) {
+  return (CGEventRef)CFAutorelease(
+      CGEventCreateKeyboardEvent(NULL, vkCode, true));
+}
+
+bool isConsumerKeyEvent(CGEventRef event) {
+  return Keyboards::isConsumerKeyEvent(CGEventGetType(event), event);
+}
+
 std::string key(std::string name, std::string suffix) {
   return "key:" + std::to_string(vkCode(name)) + ":" + suffix;
 }
@@ -120,6 +142,45 @@ int main(int argc, const char* argv[]) {
 
   tap(runtime, "Z");
   expect("passes unmapped keys through", {key("Z", "down"), key("Z", "up")});
+
+  // Keypad 1, which has no symbol
+  runtime.handleInput(89, true, 1, 2, "Test", "Keyboard");
+  runtime.handleInput(89, false, 1, 2, "Test", "Keyboard");
+  expect("drops keys without a symbol", {});
+
+  tap(runtime, "Application");
+  expect("passes the Application key through",
+         {key("Application", "down"), key("Application", "up")});
+
+  check("maps the consumer keys to their symbols",
+        Keyboards::getScancode(kHIDPage_Consumer, 0xcd) == scancode("PlayPause") &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0xcf) == scancode("Dictation") &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0xe2) == scancode("Mute") &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0xea) == scancode("VolumeDown") &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0xe9) == scancode("VolumeUp"));
+  check("ignores the other consumer usages",
+        Keyboards::getScancode(kHIDPage_Consumer, 0) == -1 &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0xffffffff) == -1);
+  check("doesn't take consumer usages as keyboard ones",
+        Keyboards::getScancode(kHIDPage_KeyboardOrKeypad, 0xe2) == scancode("AltL") &&
+            Keyboards::getScancode(0xff, 3) == scancode("Fn"));
+
+  check("tells the events macOS makes from consumer keys apart",
+        isConsumerKeyEvent(systemDefinedEvent(NX_KEYTYPE_PLAY)) &&
+            isConsumerKeyEvent(systemDefinedEvent(NX_KEYTYPE_SOUND_UP)) &&
+            isConsumerKeyEvent(keyboardEvent(176)) &&
+            !isConsumerKeyEvent(systemDefinedEvent(NX_KEYTYPE_BRIGHTNESS_UP)) &&
+            !isConsumerKeyEvent(systemDefinedEvent(NX_KEYTYPE_PLAY, 7)) &&
+            !isConsumerKeyEvent(keyboardEvent(vkCode("A"))));
+
+  tap(runtime, "Mute");
+  expect("passes consumer keys through",
+         {"media:" + std::to_string(NX_KEYTYPE_MUTE) + ":down",
+          "media:" + std::to_string(NX_KEYTYPE_MUTE) + ":up"});
+
+  tap(runtime, "Dictation");
+  expect("passes the Dictation key through",
+         {key("Dictation", "down"), key("Dictation", "up")});
 
   tap(runtime, "C");
   expect("adds the held modifiers to the keys",

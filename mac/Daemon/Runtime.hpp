@@ -39,20 +39,19 @@ class Runtime {
     try {
       auto result = load(configPath, symbolsPath, profileIdx, appName);
       if (result == 0) result = mouse.start();
-      if (result != 0) {
-        stop();
-        return result;
+      if (result == 0) {
+        capslock = Capslock::getState();
+        keyboards.onInput = [this](ushort scancode, bool isKeyDown,
+                                   int vendorId, int productId,
+                                   std::string manufacturer,
+                                   std::string product) {
+          handleInput(scancode, isKeyDown, vendorId, productId, manufacturer,
+                      product);
+        };
+        result = keyboards.start();
       }
-
-      capslock = Capslock::getState();
-      keyboards.onInput = [this](ushort scancode, bool isKeyDown, int vendorId,
-                                 int productId, std::string manufacturer,
-                                 std::string product) {
-        handleInput(scancode, isKeyDown, vendorId, productId, manufacturer,
-                    product);
-      };
-      keyboards.start();
-      return 0;
+      if (result != 0) stop();
+      return result;
     } catch (const std::exception& err) {
       onError("StartError: " + std::string(err.what()));
     } catch (...) {
@@ -157,8 +156,12 @@ class Runtime {
         continue;
       }
 
+      // Keys without a symbol have no vkCode
+      auto it = vkCodes.find(keyEvent.code);
+      if (it == vkCodes.end()) continue;
+
       auto isKeyDown = keyEvent.isKeyDown;
-      auto vkCode = getVkCode(keyEvent.code);
+      auto vkCode = it->second;
 
       if (!isKeyDown) stopKeyRepeat();
 
@@ -191,11 +194,6 @@ class Runtime {
         handleKeyRepeat(vkCode, isKeyDown);
       }
     }
-  }
-
-  ushort getVkCode(ushort scancode) {
-    auto it = vkCodes.find(scancode);
-    return it == vkCodes.end() ? 0 : it->second;
   }
 
   void setModifierFlags(CGEventRef event, ushort vkCode) {
