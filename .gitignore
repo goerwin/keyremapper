@@ -1,8 +1,8 @@
 .DS_Store
+.env
 Tests/output
 Tests/output.*
-mac/output
-mac/build
-.env
-.zip
-dist
+build/
+dist/
+DerivedData/
+xcuserdata/

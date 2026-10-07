@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../../common/Helpers.hpp"
+#include "../Engine/Helpers.hpp"
 
 namespace Config {
 // The config at path with its imports resolved, as JSON. Throws when it or a

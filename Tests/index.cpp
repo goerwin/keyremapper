@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-#include "../common/Helpers.hpp"
-#include "../common/KeyRemapper.hpp"
-#include "../common/TestHelpers.hpp"
-#include "../common/vendors/json.hpp"
+#include "../Engine/Helpers.hpp"
+#include "../Engine/KeyRemapper.hpp"
+#include "../Engine/TestHelpers.hpp"
+#include "../Engine/vendors/json.hpp"
 
 using json = nlohmann::json;
 
@@ -37,7 +37,7 @@ int main(int argc, const char *argv[]) {
   dirPath = dirPath.substr(0, dirPath.find_last_of('/'));
 
   auto symbols = Helpers::getJsonFile(
-      dirPath + "/../mac/KeyRemapper/Resources/symbols.json");
+      dirPath + "/../KeyRemapper/Resources/symbols.json");
 
   for (auto name : {"send", "modifiers", "conditions", "taps", "holds", "keys",
                     "vim"}) {

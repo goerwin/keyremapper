@@ -5,8 +5,8 @@
 
 #import "IOKit/hidsystem/ev_keymap.h"
 
-#import "../../common/Helpers.hpp"
-#import "../../common/KeyRemapper.hpp"
+#import "../Engine/Helpers.hpp"
+#import "../Engine/KeyRemapper.hpp"
 #import "../Common/StartResult.h"
 
 #import "./Keyboards.hpp"

@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-#include "../common/Helpers.hpp"
-#include "../common/KeyRemapper.hpp"
-#include "../common/TestHelpers.hpp"
+#include "../Engine/Helpers.hpp"
+#include "../Engine/KeyRemapper.hpp"
+#include "../Engine/TestHelpers.hpp"
 
 int main(int argc, const char *argv[]) {
   if (argc != 3) {

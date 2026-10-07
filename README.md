@@ -1,7 +1,7 @@
 # KeyRemapper
 
 <p align="center">
-  <img src="common/images/readme-icon.png" width="128" alt="KeyRemapper icon">
+  <img src="images/readme-icon.png" width="128" alt="KeyRemapper icon">
 </p>
 
 Keyboard remapper for macOS, configured with a JSON file. It seizes the keyboards via IOKit and posts the remapped events, so no driver is needed.
@@ -37,7 +37,7 @@ _Uninstall KeyRemapper…_ in the menu removes the background service, login ite
 }
 ```
 
-Key names come from [symbols.json](mac/KeyRemapper/Resources/symbols.json). The app's _Logger_ shows the current app and keyboard names. Mistakes (unknown fields or keys) are reported when the profile loads.
+Key names come from [symbols.json](KeyRemapper/Resources/symbols.json). The app's _Logger_ shows the current app and keyboard names. Mistakes (unknown fields or keys) are reported when the profile loads.
 
 ### Remaps
 
@@ -121,20 +121,20 @@ Each profile can have `tests`: pairs of input key events and the expected events
 
 ```sh
 make test                            # engine tests (Tests/)
-make test-runtime                    # Mac runtime tests: key events in, posted events out (mac/Tests/runtime.mm)
-make test-app                        # builds, installs and drives the signed app's menu (mac/Tests/app.sh)
+make test-runtime                    # Mac runtime tests: key events in, posted events out (Tests/runtime.mm)
+make test-app                        # builds, installs and drives the signed app's menu (Tests/app.sh)
 make test-config [CONFIG=...]        # tests of each profile (default ~/KeyRemapperMac/config.json)
 make build                           # unsigned Debug build of the Mac app
 make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
-make icon                            # regenerates the app and menu bar icons from common/images/*.svg
+make icon                            # regenerates the app and menu bar icons from images/*.svg
 ```
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
 - `make test-app` replaces the installed app and needs _Accessibility_ for the terminal app. It briefly saves an invalid config to check reloading, and restores yours after. Physical keystrokes can't be automated (it would need a virtual HID driver), so try a few keys after it
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
-- Xcode: open `mac/KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
+- Xcode: open `KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version
-- Icons: `common/images/icon.svg` and `common/images/menubar-icon.svg` are the sources, edit them and run `make icon` (needs `brew install librsvg`). Don't edit the files in `Assets.xcassets` directly
+- Icons: `images/icon.svg` and `images/menubar-icon.svg` are the sources, edit them and run `make icon` (needs `brew install librsvg`). Don't edit the files in `Assets.xcassets` directly
 
 More dev notes in [NOTES.md](NOTES.md).
 

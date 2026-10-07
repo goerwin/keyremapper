@@ -24,7 +24,6 @@ jobs:
         run: make test test-runtime
 
       - name: Build app
-        working-directory: ./mac
         run: bash buildApp.sh ${{github.ref_name}}
 
       - name: Upload zip
@@ -33,7 +32,7 @@ jobs:
           name: macArtifact
           retention-days: 1
           path: |
-            mac/dist/mac.zip
+            dist/mac.zip
 
   release:
     runs-on: ubuntu-latest

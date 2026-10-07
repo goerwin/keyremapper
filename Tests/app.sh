@@ -4,7 +4,7 @@ set -euo pipefail
 #
 # Smoke test of the installed app: builds and installs the signed app, then drives its menu with
 # UI scripting and checks that the daemon keeps running. The terminal app needs Accessibility.
-# Usage: mac/Tests/app.sh [--no-build]
+# Usage: Tests/app.sh [--no-build]
 #
 
 app=/Applications/KeyRemapper.app
