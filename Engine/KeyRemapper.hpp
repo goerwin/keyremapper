@@ -105,7 +105,7 @@ class KeyRemapper {
     press.isHoldFired = true;
 
     auto keyEvents =
-        getActionKeyEvents(rules[press.ruleIdx].holds[press.keyIdx], key, true);
+        applyAction(rules[press.ruleIdx].holds[press.keyIdx], key, true);
     for (auto &keyEvent : keyEvents) keyEvent.repeats = false;
     trackSentKeys(keyEvents, key);
 
@@ -171,6 +171,7 @@ class KeyRemapper {
   void reset() {
     keyNames.clear();
     heldKeys.clear();
+    variables.clear();
     presses.clear();
     sentKeys.clear();
     pendingHoldKey = "";
@@ -184,6 +185,8 @@ class KeyRemapper {
 
  private:
   const String DELAY = "delay";
+  const String SET = "set";
+  const String UNSET = "unset";
   const std::set<String> MODIFIERS = {"CmdL",   "CmdR",   "AltL",
                                       "AltR",   "CtrlL",  "CtrlR",
                                       "ShiftL", "ShiftR", "Fn"};
@@ -194,9 +197,9 @@ class KeyRemapper {
   };
 
   struct Rule {
-    Strings keys, modifiers, optional, apps, keyboards;
+    Strings keys, modifiers, optional, apps, keyboards, ifs, unlesses;
     // One per key, empty when not set
-    Strings tos, taps, doubleTaps, holds;
+    Strings tos, taps, doubleTaps, holds, afterKeyUps;
   };
 
   // A pressed key, until it's released
@@ -224,6 +227,7 @@ class KeyRemapper {
 
   std::map<ushort, String> keyNames;  // scancode -> name after the remaps
   std::set<String> heldKeys;
+  std::set<String> variables;  // the ones that are on
   std::map<String, Press> presses;
   // Keys sent down that are still down, with the key that sent them, in the
   // order they were sent
@@ -267,7 +271,7 @@ class KeyRemapper {
         keyEvents.push_back(getKeyEvent(it->first, false));
       trackSentKeys(keyEvents);
 
-      auto sent = getActionKeyEvents(rule.tos[press.keyIdx], key, true);
+      auto sent = applyAction(rule.tos[press.keyIdx], key, true);
       trackSentKeys(sent, key);
       keyEvents = Helpers::concatArrays(keyEvents, sent);
 
@@ -304,34 +308,48 @@ class KeyRemapper {
     if (!isTap) {
       lastTapKey = "";
       tapCount = 0;
-      return keyEvents;
     }
+    if (press.ruleIdx < 0) return keyEvents;
 
     auto &rule = rules[press.ruleIdx];
-    bool isNextTap = lastTapKey == key && press.downTime - lastTapTime < tapDelay;
-    tapCount = isNextTap ? tapCount + 1 : 1;
-    lastTapKey = key;
-    lastTapTime = now();
+    if (isTap) {
+      bool isNextTap =
+          lastTapKey == key && press.downTime - lastTapTime < tapDelay;
+      tapCount = isNextTap ? tapCount + 1 : 1;
+      lastTapKey = key;
+      lastTapTime = now();
 
-    auto tap = rule.taps[press.keyIdx];
-    if (tapCount == 2 && !rule.doubleTaps[press.keyIdx].empty()) {
-      tap = rule.doubleTaps[press.keyIdx];
-      lastTapKey = "";
-      tapCount = 0;
-    } else {
-      tapCount = 1;
+      auto tap = rule.taps[press.keyIdx];
+      if (tapCount == 2 && !rule.doubleTaps[press.keyIdx].empty()) {
+        tap = rule.doubleTaps[press.keyIdx];
+        lastTapKey = "";
+        tapCount = 0;
+      } else {
+        tapCount = 1;
+      }
+
+      auto tapped = applyAction(tap, key, false);
+      trackSentKeys(tapped);
+      keyEvents = Helpers::concatArrays(keyEvents, tapped);
     }
 
-    auto tapped = getActionKeyEvents(tap, key, false);
-    trackSentKeys(tapped);
-    return Helpers::concatArrays(keyEvents, tapped);
+    auto afterKeyUp = applyAction(rule.afterKeyUps[press.keyIdx], key, false);
+    trackSentKeys(afterKeyUp);
+    return Helpers::concatArrays(keyEvents, afterKeyUp);
   }
 
-  // The keys of action, tapped. With holdsLast, the last one is left down
-  KeyEvents getActionKeyEvents(String action, String currentKey,
-                               bool holdsLast) {
-    auto tokens = Helpers::split(action, ' ');
-    tokens.erase(std::remove(tokens.begin(), tokens.end(), ""), tokens.end());
+  // Sets and unsets the variables of action and returns its keys, tapped. With
+  // holdsLast, the last one is left down
+  KeyEvents applyAction(String action, String currentKey, bool holdsLast) {
+    Strings tokens;
+    for (auto &token : Helpers::split(action, ' ')) {
+      if (token.rfind(SET + ":", 0) == 0)
+        variables.insert(token.substr(SET.size() + 1));
+      else if (token.rfind(UNSET + ":", 0) == 0)
+        variables.erase(token.substr(UNSET.size() + 1));
+      else if (!token.empty())
+        tokens.push_back(token);
+    }
 
     String str = "";
     for (size_t i = 0; i < tokens.size(); i++) {
@@ -354,6 +372,10 @@ class KeyRemapper {
     if (!rule.apps.empty() && !contains(rule.apps, appName)) return false;
     if (!rule.keyboards.empty() && !contains(rule.keyboards, keyboard))
       return false;
+    for (auto &variable : rule.ifs)
+      if (!variables.count(variable)) return false;
+    for (auto &variable : rule.unlesses)
+      if (variables.count(variable)) return false;
 
     for (auto &modifier : rule.modifiers)
       if (!heldKeys.count(modifier)) return false;
@@ -443,8 +465,8 @@ class KeyRemapper {
                                         ? rule["from"].dump()
                                         : rule.dump());
     validateFields(rule, where,
-                   {"from", "modifiers", "optional", "app", "keyboard", "to",
-                    "tap", "doubleTap", "hold"});
+                   {"from", "modifiers", "optional", "app", "keyboard", "if",
+                    "unless", "to", "tap", "doubleTap", "hold", "afterKeyUp"});
 
     Rule parsed;
     parsed.keys = getKeys(rule, "from", where);
@@ -456,11 +478,17 @@ class KeyRemapper {
       if (key != "any") validateKey(key, where);
     parsed.apps = getStrings(rule, "app", where);
     parsed.keyboards = getStrings(rule, "keyboard", where);
+    parsed.ifs = getStrings(rule, "if", where);
+    parsed.unlesses = getStrings(rule, "unless", where);
+    for (auto &variable : Helpers::concatArrays(parsed.ifs, parsed.unlesses))
+      validateVariable(variable, where);
 
     parsed.tos = getActions(rule, "to", parsed.keys.size(), where);
     parsed.taps = getActions(rule, "tap", parsed.keys.size(), where);
     parsed.doubleTaps = getActions(rule, "doubleTap", parsed.keys.size(), where);
     parsed.holds = getActions(rule, "hold", parsed.keys.size(), where);
+    parsed.afterKeyUps =
+        getActions(rule, "afterKeyUp", parsed.keys.size(), where);
     return parsed;
   }
 
@@ -494,6 +522,15 @@ class KeyRemapper {
         continue;
       }
 
+      if (token.rfind(SET + ":", 0) == 0) {
+        validateVariable(token.substr(SET.size() + 1), where);
+        continue;
+      }
+      if (token.rfind(UNSET + ":", 0) == 0) {
+        validateVariable(token.substr(UNSET.size() + 1), where);
+        continue;
+      }
+
       auto [keys, state] = splitToken(token);
       if (state != "")
         throw std::runtime_error(where + ": invalid \"" + token +
@@ -506,6 +543,15 @@ class KeyRemapper {
   void validateKey(String key, String where) {
     if (!codes.count(key))
       throw std::runtime_error(where + ": unknown key \"" + key + "\"");
+  }
+
+  // Key names aren't variables, "modifiers" checks the held keys
+  void validateVariable(String variable, String where) {
+    if (variable.empty())
+      throw std::runtime_error(where + ": empty variable name");
+    if (codes.count(variable))
+      throw std::runtime_error(where + ": the variable \"" + variable +
+                               "\" is a key, use \"modifiers\" for keys");
   }
 
   void validateFields(json &object, String where, std::set<String> fields) {

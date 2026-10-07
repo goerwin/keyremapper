@@ -64,24 +64,28 @@ The first rule that matches the pressed key replaces it, until it's released. Ke
     "optional": ["ShiftL"], // can also be held, ["any"] for all (optional)
     "app": "com.google.Chrome", // or ["com.google.Chrome", "com.apple.finder"] (optional)
     "keyboard": "50475:1133", // productId:vendorId, a string or array too (optional)
+    "if": "myVar", // these variables are on, a string or array (optional)
+    "unless": "myVar", // these variables are off, a string or array (optional)
 
     "to": "LeftArrow", // on key down, without it the key is silenced
     "tap": "Esc", // released within tapDelay, without pressing other keys
     "doubleTap": "CmdL+F", // tapped twice
-    "hold": "CmdL+W" // held for holdDelay, without other key events
+    "hold": "CmdL+W", // held for holdDelay, without other key events
+    "afterKeyUp": "Esc" // on release, after the tap
   }
 ]
 ```
 
 Only `from` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`. After it's released, only the real modifiers are pressed again (any other key would be typed again).
 
-Each action is space separated. Like Karabiner, the last key of `to` and `hold` is held until the key is released, the others are tapped. `tap` and `doubleTap` come on release, so all their keys are tapped. The keys of `hold` don't repeat.
+Each action is space separated. Like Karabiner, the last key of `to` and `hold` is held until the key is released, the others are tapped. `tap`, `doubleTap` and `afterKeyUp` come on release, so all their keys are tapped. The keys of `hold` don't repeat.
 
 ```jsonc
 "to": "C"                      // C, held
 "to": "CmdL+ShiftL+C"          // with modifiers
 "to": "Tab delay:250 Tab"      // waits 250ms
 "to": "currentKey"             // the pressed key
+"to": "set:myVar"              // turns on a variable, unset:myVar turns it off
 ```
 
 With several keys, an action can also have one item per key:
@@ -93,6 +97,33 @@ With several keys, an action can also have one item per key:
   "optional": ["any"],
   "to": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"]
 }
+```
+
+### Variables
+
+Like Karabiner's `set_variable`, a variable stays on or off until an action changes it, and `if` and `unless` check it on key down. Reloading the profile turns them all off. Here F18 + F + H selects only if F is pressed after F18. If F is pressed first, it's typed and H only moves:
+
+```jsonc
+[
+  {
+    "from": ["F"],
+    "modifiers": ["F18"],
+    "optional": ["any"],
+    "to": "set:vimShift",
+    "afterKeyUp": "unset:vimShift"
+  },
+  { "from": ["H"], "modifiers": ["F18"], "if": "vimShift", "to": "ShiftL+LeftArrow" },
+  { "from": ["H"], "modifiers": ["F18"], "to": "LeftArrow" }
+]
+```
+
+A mode that a tap toggles:
+
+```jsonc
+[
+  { "from": ["F19"], "unless": "myMode", "tap": "set:myMode" },
+  { "from": ["F19"], "if": "myMode", "tap": "unset:myMode" }
+]
 ```
 
 ### Sharing parts of the config

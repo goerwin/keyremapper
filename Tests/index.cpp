@@ -39,8 +39,8 @@ int main(int argc, const char *argv[]) {
   auto symbols = Helpers::getJsonFile(
       dirPath + "/../KeyRemapper/Resources/symbols.json");
 
-  for (auto name : {"to", "modifiers", "conditions", "taps", "holds", "keys",
-                    "vim"}) {
+  for (auto name : {"to", "modifiers", "conditions", "variables", "taps",
+                    "holds", "keys", "vim"}) {
     auto profile = Helpers::getJsonFile(dirPath + "/" + name + ".json");
     auto results = TestHelpers::runTests(profile["tests"], profile, symbols);
 
@@ -107,6 +107,13 @@ int main(int argc, const char *argv[]) {
            R"({ "rules": [{ "from": ["A"], "tap": "delay:x" }] })",
            R"({ "rules": [{ "from": ["A", "B"], "hold": ["C"] }] })",
            R"({ "rules": [{ "from": ["A"], "to": ["C", 1] }] })",
+           R"({ "rules": [{ "from": ["A"], "set": "a" }] })",
+           R"({ "rules": [{ "from": ["A"], "to": "set:" }] })",
+           R"({ "rules": [{ "from": ["A"], "afterKeyUp": "unset:F18" }] })",
+           R"({ "rules": [{ "from": ["A"], "afterKeyUp": "B:down" }] })",
+           R"({ "rules": [{ "from": ["A"], "if": ["F18"] }] })",
+           R"({ "rules": [{ "from": ["A"], "unless": "" }] })",
+           R"({ "rules": [{ "from": ["A"], "unless": { "a": true } }] })",
            R"({ "remaps": [{ "from": "A" }] })",
            R"({ "remaps": [{ "from": "A", "to": "NoExist" }] })",
            R"({ "remaps": [{ "from": "A", "to": "B", "if": {} }] })",
@@ -126,7 +133,10 @@ int main(int argc, const char *argv[]) {
                "modifiers": ["CmdL", "F"],
                "optional": ["any"],
                "keyboard": "1",
-               "to": ["CmdL+C delay:5 currentKey", "D"]
+               "if": ["b", "c"],
+               "unless": "d",
+               "to": ["CmdL+C delay:5 currentKey set:a", "D"],
+               "afterKeyUp": "unset:a E"
              }]
            })"),
                        symbols);

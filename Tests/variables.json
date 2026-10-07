@@ -1,0 +1,44 @@
+// "set:{name}" and "unset:{name}" in an action turn a variable on and off,
+// until another action changes it. "if" needs all of its variables on and
+// "unless" all of them off. They're checked on key down
+{
+  "rules": [
+    // On while A is pressed
+    { "from": ["A"], "optional": ["any"], "to": "set:a", "afterKeyUp": "unset:a" },
+    // Toggled with taps, B keeps its key
+    { "from": ["B"], "unless": "b", "to": "B", "tap": "set:b" },
+    { "from": ["B"], "if": "b", "to": "B", "tap": "unset:b" },
+    // Held, with keys
+    { "from": ["C"], "hold": "set:c Enter", "afterKeyUp": "unset:c Esc" },
+    // afterKeyUp comes after the tap
+    { "from": ["D"], "tap": "D", "afterKeyUp": "E" },
+    // The last key is still held
+    { "from": ["E"], "to": "Y set:e" },
+
+    { "from": ["H"], "if": ["a", "b"], "to": "Y" },
+    { "from": ["H"], "if": "a", "to": "X" },
+    { "from": ["H"], "if": "c", "to": "W" },
+    { "from": ["H"], "unless": "a", "to": "Z" },
+    { "from": ["J"], "modifiers": ["CmdL"], "if": "a", "to": "Enter" }
+  ],
+  "tests": [
+    ["H", "Z"],
+    ["A", ""],
+    ["A:down H A:up", "X"],
+    ["A:down H A:up H", "X Z"],
+    ["A:down H:down A:up H:up", "X:down X:up"],
+    ["CmdL:down A:down J A:up CmdL:up", "CmdL:down CmdL:up Enter CmdL:down CmdL:up"],
+    ["A:down J A:up", "J"],
+
+    ["B A:down H A:up", "B Y"],
+    ["B A:down H A:up B A:down H A:up", "B Y B X"],
+    ["B:down A:down H A:up B:up A:down H A:up", "B:down X B:up X"],
+
+    ["C:down delay:400 H C:up H", "Enter:down W Enter:up Esc Z"],
+    ["C:down H C:up", "Z Esc"],
+
+    ["D", "D E"],
+    ["D:down delay:300 D:up", "E"],
+    ["E:down", "Y:down"]
+  ]
+}

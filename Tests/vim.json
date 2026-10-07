@@ -5,8 +5,9 @@
     { "from": ["F18"], "optional": ["any"], "tap": "Esc" },
     {
       "from": ["H", "J", "K", "L"],
-      "modifiers": ["F18", "F"],
+      "modifiers": ["F18"],
       "optional": ["any"],
+      "if": "vimShift",
       "to": ["ShiftL+LeftArrow", "ShiftL+DownArrow", "ShiftL+UpArrow", "ShiftL+RightArrow"]
     },
     {
@@ -15,7 +16,13 @@
       "optional": ["any"],
       "to": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"]
     },
-    { "from": ["F"], "modifiers": ["F18"], "optional": ["any"] },
+    {
+      "from": ["F"],
+      "modifiers": ["F18"],
+      "optional": ["any"],
+      "to": "set:vimShift",
+      "afterKeyUp": "unset:vimShift"
+    },
     { "from": ["C"], "modifiers": ["AltL", "F18"], "to": "RightClick" },
     { "from": ["C"], "modifiers": ["AltL"], "to": "LeftClick" }
   ],
@@ -25,8 +32,12 @@
     ["F18:down J:down F18:up J:up", "DownArrow"],
     ["F18:down F:down H F:up F18:up", "ShiftL:down LeftArrow:down LeftArrow:up ShiftL:up"],
     ["F18:down F:down F:up F18:up", ""],
-    // F pressed before F18 isn't typed again over the selection
-    ["F:down F18:down K F18:up F:up", "F:down F:up ShiftL:down UpArrow:down UpArrow:up ShiftL:up"],
+    // F pressed before F18 types F and doesn't select
+    ["F:down F18:down K F18:up F:up", "F:down UpArrow F:up"],
+    // Releasing F18 leaves the mode, even with F held, until F18 is pressed
+    // again
+    ["F18:down F:down F18:up H F:up", "H"],
+    ["F18:down F:down F18:up F18:down H F:up F18:up", "ShiftL:down LeftArrow:down LeftArrow:up ShiftL:up"],
     ["ShiftL:down F18:down H F18:up ShiftL:up", "ShiftL:down LeftArrow ShiftL:up"],
     ["ShiftL:down F18:down F:down H F:up F18:up ShiftL:up", "ShiftL:down ShiftL:down LeftArrow ShiftL:up"],
     ["CmdL:down F18:down L F18:up CmdL:up", "CmdL:down RightArrow CmdL:up"],
