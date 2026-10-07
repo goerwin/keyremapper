@@ -63,6 +63,19 @@ Fire when a key is tapped N times within `keyPressesDelay`.
 ]
 ```
 
+With `ifHeldFor` (ms) instead, they fire while the key is held, unless another key is pressed or released first. A held key isn't also a tap. Mac only.
+
+```jsonc
+[
+  { "key": "Backspace", "ifPressedNTimes": 1, "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
+  { "key": "Backspace", "ifHeldFor": 400, "send": "CmdL:down W CmdL:up" },
+  // keeps Cmd down until the key is released
+  { "key": "AltR", "ifHeldFor": 300, "send": "CmdL:down Tab", "afterKeyUp": "CmdL:up" }
+]
+```
+
+To only tap or hold, without the key's own output, add a keybinding with `"send": [null, null]` for it. In `tests`, `test_hold` stands for the held key's `ifHeldFor` time passing (eg. `["Backspace:down test_hold Backspace:up", "CmdL:down W CmdL:up"]`).
+
 ### Keybindings
 
 For complex flows. The first one that matches wins.

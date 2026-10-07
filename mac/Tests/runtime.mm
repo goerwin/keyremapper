@@ -167,6 +167,41 @@ int main(int argc, const char* argv[]) {
          {"media:" + std::to_string(NX_KEYTYPE_SOUND_UP) + ":down",
           "media:" + std::to_string(NX_KEYTYPE_SOUND_UP) + ":up"});
 
+  // Wide margins, since timers fire late on slow machines (CI)
+  press(runtime, "I", true);
+  wait(50);
+  expect("waits for ifHeldFor", {});
+  press(runtime, "I", false);
+  expect("taps when released before ifHeldFor", {key("J", "down"), key("J", "up")});
+  wait(300);
+  expect("cancels the hold on release", {});
+
+  // Resets the tap count, so the release after the hold would be a single tap
+  tap(runtime, "Z");
+  posted.clear();
+  press(runtime, "I", true);
+  wait(400);
+  expect("sends the hold while the key is held", {key("K", "down"), key("K", "up")});
+  press(runtime, "I", false);
+  expect("doesn't tap after a hold", {});
+
+  press(runtime, "I", true);
+  tap(runtime, "Z");
+  wait(400);
+  press(runtime, "I", false);
+  expect("cancels the hold when another key is pressed",
+         {key("Z", "down"), key("Z", "up")});
+
+  press(runtime, "I", true);
+  wait(50);
+  press(runtime, "I", false);
+  wait(200);
+  press(runtime, "I", true);
+  wait(150);
+  expect("restarts the hold time on each press", {key("J", "down"), key("J", "up")});
+  press(runtime, "I", false);
+  posted.clear();
+
   tap(runtime, "F");
   tap(runtime, "F");
   expect("posts clicks, counting double clicks",

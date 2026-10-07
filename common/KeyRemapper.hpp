@@ -41,6 +41,10 @@ class KeyRemapper {
 
   double getTimeDifference(double time1, double time2) { return time1 - time2; }
 
+  // keyPresses rule with ifHeldFor for the key being held, until applyHold
+  json pendingHold;
+  String firedHoldKeyName;
+
   String lastKeyName;
   short keyPressesCount = 0;
   double keyDownTime = 0;  // in ms
@@ -146,7 +150,20 @@ class KeyRemapper {
         localKeyEvents =
             Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
 
+      // Windows keeps sending key downs while a key is held
+      bool isRepeat = isKeyDown && lastKeyName == keyName && keyDownTime != 0;
+      if (!isRepeat) {
+        pendingHold = isKeyDown ? getKeyHoldInfo(keyName) : json();
+      }
+
       setKeyPressesCount(keyName, isKeyDown);
+
+      // A held key isn't also a tap
+      if (!isKeyDown && keyName == firedHoldKeyName) {
+        keyPressesCount = 0;
+        firedHoldKeyName = "";
+      }
+
       auto keyPressesInfo = getKeyPressesInfo(keyName, isKeyDown);
       if (!keyPressesInfo.is_null()) {
         setValues(keyPressesInfo["set"]);
@@ -173,6 +190,35 @@ class KeyRemapper {
     }
 
     return newKeyEvents;
+  }
+
+  // ms the key that was just pressed has to be held for its ifHeldFor rule, or
+  // -1. After that time, the caller calls applyHold
+  int getHoldDelay() {
+    return pendingHold.is_null() ? -1 : pendingHold["ifHeldFor"].get<int>();
+  }
+
+  // Sends the ifHeldFor rule of the held key, unless another key event came
+  // after it was pressed
+  KeyEvents applyHold() {
+    if (pendingHold.is_null()) return {};
+
+    auto hold = pendingHold;
+    pendingHold = {};
+    if (!ifConditions(hold["if"])) return {};
+
+    firedHoldKeyName = hold["key"];
+    setValues(hold["set"]);
+    afterKeyUpKeyEvents = Helpers::concatArrays(
+        afterKeyUpKeyEvents, getKeyEventsFromString(hold["afterKeyUp"]));
+    auto keyEvents = getKeyEventsFromString(hold["send"]);
+
+    if (applyKeysCb)
+      applyKeysCb(globals["appName"], globals["keyboard"],
+                  globals["keyboardDescription"],
+                  firedHoldKeyName + ":hold -> " + stringifyKeyEvents(keyEvents));
+
+    return keyEvents;
   }
 
   void setAppName(String appName) { globals["appName"] = appName; }
@@ -255,6 +301,8 @@ class KeyRemapper {
     globals["isKeyDown"] = "";
 
     afterKeyUpKeyEvents = {};
+    pendingHold = {};
+    firedHoldKeyName = "";
     lastKeyName = "";
     keyPressesCount = 0;
     keyDownTime = 0;
@@ -317,6 +365,17 @@ class KeyRemapper {
       return {{"send", keypress["send"]},
               {"set", keypress["set"]},
               {"afterKeyUp", keypress["afterKeyUp"]}};
+    }
+
+    return {};
+  }
+
+  json getKeyHoldInfo(String key) {
+    for (auto &keypress : keyPresses) {
+      if (!keypress["ifHeldFor"].is_number()) continue;
+      if (key != keypress["key"]) continue;
+      if (!ifConditions(keypress["if"])) continue;
+      return keypress;
     }
 
     return {};

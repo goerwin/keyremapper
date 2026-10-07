@@ -51,6 +51,13 @@ json runTests(json tests, json profile, json symbols) {
         continue;
       }
 
+      // As if the held key's ifHeldFor time passed
+      if (item == "test_hold") {
+        resultKeyEvents =
+            Helpers::concatArrays(resultKeyEvents, keyRemapper->applyHold());
+        continue;
+      }
+
       if (delayTokenIdx != std::string::npos) {
         auto delayTimeStr = item.substr(delayKey.size(), item.size());
         int delayTimeMs = atoi(delayTimeStr.c_str());

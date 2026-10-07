@@ -92,6 +92,7 @@ class Runtime {
 
   void stop() {
     stopKeyRepeat();
+    stopHoldTimer();
     keyboards.stop();
     mouse.stop();
     keyRemapper = nullptr;
@@ -125,50 +126,10 @@ class Runtime {
     keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
 
     try {
-      auto keyEvents = keyRemapper->applyKeys(
-          {{"", scancode, ushort(isKeyDown ? 0 : 1), false}});
-
-      for (auto& keyEvent : keyEvents) {
-        if (keyEvent.name == "SK:Delay") {
-          std::this_thread::sleep_for(
-              std::chrono::milliseconds(keyEvent.state));
-          continue;
-        }
-
-        auto isKeyDown = keyEvent.isKeyDown;
-        auto vkCode = getVkCode(keyEvent.code);
-
-        if (!isKeyDown) stopKeyRepeat();
-
-        if (vkCode == 55 || vkCode == 54) {
-          modifiers.cmd = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 56 || vkCode == 60) {
-          modifiers.shift = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 58 || vkCode == 61) {
-          modifiers.alt = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 59 || vkCode == 62) {
-          modifiers.ctrl = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 63) {
-          modifiers.fn = isKeyDown;
-          postKey(vkCode, isKeyDown);
-        } else if (vkCode == 57) {
-          if (isKeyDown) setCapslock(capslock = !capslock);
-        } else if (vkCode == 241) {
-          mouse.postClick(isKeyDown);
-        } else if (vkCode == 242) {
-          mouse.postClick(isKeyDown, true);
-        } else if (Keys::isMedia(vkCode)) {
-          if (isKeyDown) postMediaKey(vkCode);
-          handleKeyRepeat(vkCode, isKeyDown);
-        } else {
-          postKey(vkCode, isKeyDown);
-          handleKeyRepeat(vkCode, isKeyDown);
-        }
-      }
+      stopHoldTimer();
+      postKeyEvents(keyRemapper->applyKeys(
+          {{"", scancode, ushort(isKeyDown ? 0 : 1), false}}));
+      startHoldTimer();
     } catch (const std::exception& err) {
       onError("ApplyKeysError: " + std::string(err.what()));
     } catch (...) {
@@ -184,8 +145,53 @@ class Runtime {
   int delayUntilRepeat = 250;
   int keyRepeatInterval = 25;
   dispatch_source_t keyRepeatTimer = nil;
+  dispatch_source_t holdTimer = nil;
   Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
+
+  void postKeyEvents(const KeyRemapper::KeyEvents& keyEvents) {
+    for (auto& keyEvent : keyEvents) {
+      if (keyEvent.name == "SK:Delay") {
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(keyEvent.state));
+        continue;
+      }
+
+      auto isKeyDown = keyEvent.isKeyDown;
+      auto vkCode = getVkCode(keyEvent.code);
+
+      if (!isKeyDown) stopKeyRepeat();
+
+      if (vkCode == 55 || vkCode == 54) {
+        modifiers.cmd = isKeyDown;
+        postKey(vkCode, isKeyDown);
+      } else if (vkCode == 56 || vkCode == 60) {
+        modifiers.shift = isKeyDown;
+        postKey(vkCode, isKeyDown);
+      } else if (vkCode == 58 || vkCode == 61) {
+        modifiers.alt = isKeyDown;
+        postKey(vkCode, isKeyDown);
+      } else if (vkCode == 59 || vkCode == 62) {
+        modifiers.ctrl = isKeyDown;
+        postKey(vkCode, isKeyDown);
+      } else if (vkCode == 63) {
+        modifiers.fn = isKeyDown;
+        postKey(vkCode, isKeyDown);
+      } else if (vkCode == 57) {
+        if (isKeyDown) setCapslock(capslock = !capslock);
+      } else if (vkCode == 241) {
+        mouse.postClick(isKeyDown);
+      } else if (vkCode == 242) {
+        mouse.postClick(isKeyDown, true);
+      } else if (Keys::isMedia(vkCode)) {
+        if (isKeyDown) postMediaKey(vkCode);
+        handleKeyRepeat(vkCode, isKeyDown);
+      } else {
+        postKey(vkCode, isKeyDown);
+        handleKeyRepeat(vkCode, isKeyDown);
+      }
+    }
+  }
 
   ushort getVkCode(ushort scancode) {
     auto it = vkCodes.find(scancode);
@@ -278,5 +284,34 @@ class Runtime {
         postKey(vkCode, true, true);
     });
     dispatch_resume(keyRepeatTimer);
+  }
+
+  void stopHoldTimer() {
+    if (!holdTimer) return;
+    dispatch_source_cancel(holdTimer);
+    holdTimer = nil;
+  }
+
+  // For the ifHeldFor rule of the key that was just pressed. Any key event
+  // before it fires cancels it
+  void startHoldTimer() {
+    auto delay = keyRemapper->getHoldDelay();
+    if (delay < 0) return;
+
+    holdTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                       dispatch_get_main_queue());
+    dispatch_source_set_timer(
+        holdTimer, dispatch_time(DISPATCH_TIME_NOW, delay * NSEC_PER_MSEC),
+        DISPATCH_TIME_FOREVER, 0);
+    // The timer is cancelled in stop(), before this object goes away
+    dispatch_source_set_event_handler(holdTimer, ^{
+      stopHoldTimer();
+      try {
+        postKeyEvents(keyRemapper->applyHold());
+      } catch (const std::exception& err) {
+        onError("ApplyHoldError: " + std::string(err.what()));
+      }
+    });
+    dispatch_resume(holdTimer);
   }
 };

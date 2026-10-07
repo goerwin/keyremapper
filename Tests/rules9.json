@@ -1,0 +1,33 @@
+{
+  "description": [
+    "ifHeldFor",
+    "it should send keys when a key is held, instead of when it's tapped"
+  ],
+  "remaps": [],
+  "keyPresses": [
+    { "key": "H", "ifPressedNTimes": 1, "send": "T" },
+    { "key": "H", "ifHeldFor": 400, "send": "W" },
+    {
+      "key": "M",
+      "ifHeldFor": 400,
+      "send": "Ctrl:down A",
+      "afterKeyUp": "Ctrl:up"
+    }
+  ],
+  "keybindings": [
+    { "keys": ["H"], "send": [null, null] },
+    { "keys": ["M"], "send": [null, null] }
+  ],
+  "tests": [
+    ["H", "T"],
+    ["H:down test_hold H:up", "W"],
+    ["H:down test_hold test_hold H:up", "W"],
+    ["H:down H:down test_hold H:up", "W"],
+    ["H:down A test_hold H:up", "A"],
+    ["A:down H:down A:up test_hold H:up", "A"],
+    ["H:down test_hold H:up H", "W T"],
+    ["M:down test_hold M:up", "Ctrl:down A Ctrl:up"],
+    ["Z:down test_hold Z:up", "Z"],
+    ["test_hold", ""]
+  ]
+}
