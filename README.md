@@ -100,8 +100,19 @@ For complex flows. The first one that matches wins.
 "send": ["C:down C:up", null]                       // same as "C", with granular control
 "send": ["CmdL:down C CmdL:up", null]
 "send": ["currentKey:down", "currentKey:up"]         // the key that triggered the keybinding
+"send": ["mappedKey:down", "mappedKey:up"]           // its item in "mappedKeys" (see below)
 "send": ["LeftClick:down", "LeftClick:up"]
 "send": ["CmdL:down Tab SK:Delay:250 Tab CmdL:up", null] // SK:Delay:{ms}
+```
+
+`mappedKeys` gives each key of `keys` its own key, used as `mappedKey` in `send` and `afterKeyUp`:
+
+```jsonc
+{
+  "keys": ["H", "J", "K", "L"],
+  "mappedKeys": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"],
+  "send": ["mappedKey:down", "mappedKey:up"]
+}
 ```
 
 ### Conditions and variables

@@ -59,6 +59,7 @@ int main(int argc, const char *argv[]) {
       Helpers::getJsonFile(dirPath + "/rules7.json"),
       Helpers::getJsonFile(dirPath + "/rules8.json"),
       Helpers::getJsonFile(dirPath + "/rules9.json"),
+      Helpers::getJsonFile(dirPath + "/rules10.json"),
   });
 
   for (size_t i = 0; i < ruleFiles.size(); i++) {
@@ -158,6 +159,25 @@ int main(int argc, const char *argv[]) {
          "Test3: Not same string output");
 
   Helpers::print("Test3: Unknown keys passed through string tests passed");
+
+  // Test4: mappedKeys needs one key name per item of keys
+
+  for (auto mappedKeys : {R"(["B"])", R"(["B", 1])", R"("B")"}) {
+    auto profile = nlohmann::json::parse(
+        R"({ "keybindings": [{ "keys": ["A", "C"], "mappedKeys": )" +
+        std::string(mappedKeys) + R"(, "send": [null, null] }] })");
+    bool threw = false;
+
+    try {
+      KeyRemapper(profile, symbols);
+    } catch (const std::runtime_error &) {
+      threw = true;
+    }
+
+    expect(threw, std::string("Test4: no error for mappedKeys ") + mappedKeys);
+  }
+
+  Helpers::print("Test4: mappedKeys validation tests passed");
 
   // Array Object JSON helpers
 

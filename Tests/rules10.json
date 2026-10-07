@@ -1,0 +1,27 @@
+{
+  "description": [
+    "mappedKeys",
+    "mappedKey in send is the mappedKeys item of the key that matched"
+  ],
+  "keybindings": [
+    {
+      "keys": ["H", "J", "K"],
+      "mappedKeys": ["LeftArrow", "DownArrow", "UpArrow"],
+      "if": { "Shift": false },
+      "send": ["mappedKey:down", "mappedKey:up"]
+    },
+    {
+      "keys": ["H", "J"],
+      "mappedKeys": ["A", "B"],
+      "send": ["Ctrl:down mappedKey Ctrl:up", null],
+      "afterKeyUp": "mappedKey"
+    }
+  ],
+  "tests": [
+    ["H", "LeftArrow"],
+    ["J:down K:down K:up J:up", "DownArrow:down UpArrow:down UpArrow:up DownArrow:up"],
+    ["Shift:down H Shift:up", "Shift:down Ctrl:down A Ctrl:up A Shift:up"],
+    ["Shift:down J Shift:up", "Shift:down Ctrl:down B Ctrl:up B Shift:up"],
+    ["L", "L"]
+  ]
+}

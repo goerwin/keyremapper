@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -35,6 +36,8 @@ class KeyRemapper {
   String SPECIAL_KEY = "SK";
   ushort SPECIAL_KEY_CODE = 6969;
   KeyEvents afterKeyUpKeyEvents = {};
+  // mappedKeys item of the matched keybinding, for the mappedKey placeholder
+  String mappedKey;
 
   // appName, keyboardId, keyboardDescription, keyEvents
   std::function<void(String, String, String, String)> applyKeysCb;
@@ -101,6 +104,17 @@ class KeyRemapper {
     profile = profileEl;
     symbols = symbolsEl;
     keybindings = profileEl["keybindings"].get<JsonArray>();
+    for (auto &keybinding : keybindings) {
+      auto mappedKeys = keybinding["mappedKeys"];
+      if (mappedKeys.is_null()) continue;
+      bool isValid = mappedKeys.is_array() &&
+                     mappedKeys.size() == keybinding["keys"].size();
+      for (auto &key : mappedKeys) isValid = isValid && key.is_string();
+      if (!isValid)
+        throw std::runtime_error(
+            "\"mappedKeys\" needs one key name per item of \"keys\": " +
+            keybinding["keys"].dump());
+    }
     keyPressesDelay = profileEl["keyPressesDelay"].is_null()
                           ? 200
                           : profileEl["keyPressesDelay"].get<short>();
@@ -115,6 +129,7 @@ class KeyRemapper {
     for (size_t i = 0; i < keyEvents.size(); i++) {
       KeyEvents localKeyEvents = afterKeyUpKeyEvents;
       afterKeyUpKeyEvents = {};
+      mappedKey = "";
 
       auto keyEvent = keyEvents[i];
       auto code = keyEvent.code;
@@ -138,6 +153,7 @@ class KeyRemapper {
 
       auto keybindingInfo = getKeybindingInfo(keyName, isKeyDown);
       if (!keybindingInfo.is_null()) {
+        mappedKey = keybindingInfo["mappedKey"];
         if (isKeyDown)
           setValues(keybindingInfo["set"]);
         else {
@@ -273,7 +289,8 @@ class KeyRemapper {
       String strKey = strKeys[i];
       Strings keyDesc = Helpers::split(strKey, ':');
       String keyName = keyDesc[0];
-      keyName = keyName == "currentKey" ? currentKey : keyName;
+      if (keyName == "currentKey") keyName = currentKey;
+      if (keyName == "mappedKey") keyName = mappedKey;
 
       if (keyName == SPECIAL_KEY) {
         ushort val = atoi(keyDesc[2].c_str());
@@ -343,6 +360,7 @@ class KeyRemapper {
     for (size_t i = 0; i < keybindingsSize; i++) {
       auto keybinding = keybindings[i];
       auto keys = keybinding["keys"];
+      auto mappedKeys = keybinding["mappedKeys"];
 
       if (!ifConditions(keybinding["if"])) continue;
 
@@ -350,6 +368,7 @@ class KeyRemapper {
         if (key != keys[j]) continue;
 
         return {{"send", keybinding["send"]},
+                {"mappedKey", mappedKeys.is_array() ? mappedKeys[j] : json("")},
                 {"afterKeyUp", keybinding["afterKeyUp"]},
                 {"set", keybinding["set"]},
                 {"setOnKeyUp", keybinding["setOnKeyUp"]}};
