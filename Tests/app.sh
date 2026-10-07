@@ -19,12 +19,13 @@ failures=0
 ui() { osascript -e "tell application \"System Events\" to $1"; }
 menuItems() { ui "get name of every menu item of $menu" | sed 's/, /\n/g'; }
 menuHas() { menuItems | grep -qx "$1"; }
-# Profiles are the menu items between the 1st and 2nd separators
-profileItems() { menuItems | awk '/^missing value$/ { n++; next } n == 1'; }
+# Profiles are the menu items under the "Profiles" header, until the next separator
+profileItems() { menuItems | awk '/^Profiles$/ { p = 1; next } /^missing value$/ { p = 0 } p'; }
 profilesAre() { [[ "$(profileItems)" == "$1" ]]; }
-# Profile items start with a checkmark when active
+# The active profile has a checkmark
+isChecked() { [[ "$(ui "get value of attribute \"AXMenuItemMarkChar\" of menu item \"$1\" of $menu")" == "✓" ]]; }
 clickMenu() {
-  ui "click (first menu item of $menu whose name is \"$1\" or name is \"✔  $1\")" >/dev/null || true
+  ui "click menu item \"$1\" of $menu" >/dev/null || true
   sleep 1
 }
 daemonPid() { pgrep -f 'MacOS/co.goerwin.KeyRemapperDaemon' || true; }
@@ -86,11 +87,10 @@ clickMenu Resume
 check "resumes" menuHas Pause
 
 profiles=$(profileItems)
-active=$(echo "$profiles" | grep '^✔  ' | sed 's/^✔  //')
-while read -r profile; do
-  name=${profile#✔  }
+active=$(while read -r name; do isChecked "$name" && echo "$name"; done <<< "$profiles")
+while read -r name; do
   clickMenu "$name"
-  check "switches to profile \"$name\"" menuHas "✔  $name"
+  check "switches to profile \"$name\"" isChecked "$name"
 done <<< "$profiles"
 clickMenu "$active"
 check "survives switching profiles" daemonIs "$pid"

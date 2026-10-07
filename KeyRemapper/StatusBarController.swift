@@ -37,42 +37,55 @@ final class StatusBarController: NSObject {
     button.title = activeName.map { " \($0)" } ?? ""
 
     let menu = NSMenu(title: "Status Bar Item Menu")
-    addItem(to: menu, state.isRunning ? "Pause" : "Resume", #selector(toggle))
+    // Without an action, so it's disabled
+    menu.addItem(
+      withTitle: "\(Constants.BUNDLE_NAME) \(Constants.VERSION)", action: nil, keyEquivalent: "")
 
     menu.addItem(.separator())
-    for (idx, name) in state.profileNames.enumerated() {
-      let itemName = name ?? "Profile \(idx + 1)"
-      let item = addItem(
-        to: menu, idx == state.activeProfileIdx ? "✔  \(itemName)" : itemName,
-        #selector(selectProfile), String(idx + 1))
-      item.tag = idx
+    if state.isRunning {
+      addItem(to: menu, "Pause", "pause.circle", #selector(toggle))
+    } else {
+      addItem(to: menu, "Resume", "play.circle", #selector(toggle))
+    }
+
+    if !state.profileNames.isEmpty {
+      menu.addItem(.separator())
+      menu.addItem(.sectionHeader(title: "Profiles"))
+      for (idx, name) in state.profileNames.enumerated() {
+        let item = addItem(
+          to: menu, name ?? "Profile \(idx + 1)", "keyboard", #selector(selectProfile),
+          String(idx + 1))
+        item.tag = idx
+        item.state = idx == state.activeProfileIdx ? .on : .off
+      }
     }
 
     menu.addItem(.separator())
-    addItem(to: menu, "Open Config Folder", #selector(openConfigFolder))
-    addItem(to: menu, "Logger", #selector(openLogger))
-
-    menu.addItem(.separator())
-    addItem(to: menu, "Launch at Login", #selector(toggleLaunchAtLogin)).state =
+    addItem(to: menu, "Open Config Folder", "folder", #selector(openConfigFolder))
+    addItem(to: menu, "Logger", "doc.text.magnifyingglass", #selector(openLogger))
+    addItem(to: menu, "Launch at Login", "power", #selector(toggleLaunchAtLogin)).state =
       state.launchesAtLogin ? .on : .off
 
     menu.addItem(.separator())
-    addItem(to: menu, "About \(Constants.BUNDLE_NAME)", #selector(openAbout))
-    addItem(to: menu, "Check for Updates…", #selector(checkForUpdates))
+    addItem(to: menu, "About \(Constants.BUNDLE_NAME)", "info.circle", #selector(openAbout))
+    addItem(to: menu, "Check for Updates…", "arrow.down.circle", #selector(checkForUpdates))
 
     menu.addItem(.separator())
-    addItem(to: menu, "Uninstall \(Constants.BUNDLE_NAME)…", #selector(uninstall))
-    addItem(to: menu, "Quit", #selector(quit), "q")
+    addItem(to: menu, "Uninstall \(Constants.BUNDLE_NAME)…", "trash", #selector(uninstall))
+    addItem(to: menu, "Quit", "xmark.circle", #selector(quit), "q")
 
     statusItem.menu = menu
   }
 
+  // symbol is the name of an SF Symbol
   @discardableResult
   private func addItem(
-    to menu: NSMenu, _ title: String, _ action: Selector, _ keyEquivalent: String = ""
+    to menu: NSMenu, _ title: String, _ symbol: String, _ action: Selector,
+    _ keyEquivalent: String = ""
   ) -> NSMenuItem {
     let item = menu.addItem(withTitle: title, action: action, keyEquivalent: keyEquivalent)
     item.target = self
+    item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
     return item
   }
 
