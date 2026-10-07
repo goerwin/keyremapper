@@ -66,8 +66,7 @@ class KeyRemapper {
         return;
       }
 
-      keyDownTime = std::chrono::system_clock::now().time_since_epoch() /
-                    std::chrono::milliseconds(1);
+      keyDownTime = now();
 
       if (!keyUpTime ||
           getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
@@ -77,8 +76,7 @@ class KeyRemapper {
       return;
     }
 
-    keyUpTime = std::chrono::system_clock::now().time_since_epoch() /
-                std::chrono::milliseconds(1);
+    keyUpTime = now();
 
     if (keyDownTime != 0 &&
         getTimeDifference(keyUpTime, keyDownTime) < keyPressesDelay) {
@@ -93,6 +91,12 @@ class KeyRemapper {
   }
 
  public:
+  // In ms, never 0. Replaceable so the tests don't depend on the real time
+  std::function<double()> now = [] {
+    return std::chrono::system_clock::now().time_since_epoch() /
+           std::chrono::milliseconds(1);
+  };
+
   KeyRemapper(json profileEl, json symbolsEl) {
     profile = profileEl;
     symbols = symbolsEl;

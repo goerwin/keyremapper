@@ -232,17 +232,17 @@ int main(int argc, const char* argv[]) {
   runtime.load(config, symbolsJson, 0, "");
 
   // The main run loop also serves the keyboards and the mouse, so it can't
-  // sleep through the delay
+  // sleep through the delay. Blocking would post everything during the taps
   auto start = std::chrono::steady_clock::now();
   tap(runtime, "D");
   tap(runtime, "Z");
-  check("doesn't block during SK:Delay",
-        msSince(start, std::chrono::steady_clock::now()) < 60);
-  expect("sends the keys before SK:Delay",
+  expect("doesn't block during SK:Delay, sends the keys before it",
          {key("Tab", "down"), key("Tab", "up")});
-  wait(30);
-  expect("waits for SK:Delay", {});
-  wait(100);
+  while (posted.empty() && msSince(start, std::chrono::steady_clock::now()) < 1000)
+    wait(5);
+  auto delayTime = msSince(start, std::chrono::steady_clock::now());
+  check("waits for SK:Delay (" + std::to_string(delayTime) + "ms)",
+        delayTime >= 60);
   expect("sends the keys after SK:Delay, then the ones pressed meanwhile",
          {key("Tab", "down"), key("Tab", "up"), key("Z", "down"),
           key("Z", "up")});

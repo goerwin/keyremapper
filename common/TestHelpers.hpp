@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "KeyRemapper.hpp"
 #include "vendors/json.hpp"
 
@@ -11,7 +13,10 @@ namespace TestHelpers {
 json runTests(json tests, json profile, json symbols) {
   if (tests.is_null()) return {};
 
-  auto keyRemapper = new KeyRemapper(profile, symbols);
+  auto keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
+  // test_delay moves it, so slow machines (CI) don't change the results
+  double time = 1;
+  keyRemapper->now = [&time] { return time; };
 
   bool ok = true;
   auto testsSize = tests.size();
@@ -60,8 +65,7 @@ json runTests(json tests, json profile, json symbols) {
 
       if (delayTokenIdx != std::string::npos) {
         auto delayTimeStr = item.substr(delayKey.size(), item.size());
-        int delayTimeMs = atoi(delayTimeStr.c_str());
-        std::this_thread::sleep_for(std::chrono::milliseconds(delayTimeMs));
+        time += atoi(delayTimeStr.c_str());
         continue;
       }
 
