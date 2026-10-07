@@ -13,7 +13,13 @@ class ServiceDelegateXPC: NSObject, NSXPCListenerDelegate {
     guard
       let requirement = Self.clientRequirement,
       Self.isClientValid(pid: newConnection.processIdentifier, requirement: requirement)
-    else { return false }
+    else {
+      NSLog("Rejected the connection of pid \(newConnection.processIdentifier)")
+      // It was launched for this connection (eg. from a client that already quit), so nothing
+      // else would stop it
+      if GlobalSwift.connection == nil { DispatchQueue.main.async { GlobalSwift.kill() } }
+      return false
+    }
     newConnection.setCodeSigningRequirement(requirement)
 
     newConnection.interruptionHandler = {

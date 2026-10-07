@@ -219,8 +219,9 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     controller.showWindow(controller.window)
   }
 
+  // The daemon quits when the connection closes. Killing it before would make the connection,
+  // still open, launch a new one that nobody stops
   private func quit() {
-    daemon.kill()
     NSApplication.shared.terminate(self)
   }
 }

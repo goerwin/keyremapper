@@ -62,7 +62,7 @@ final class DaemonClient {
 
   // config and symbols are JSON, with the config imports already resolved
   func start(config: String, symbols: String, profileIdx: Int) throws {
-    if version() != Constants.VERSION { restart() }
+    if let version = version(), version != Constants.VERSION { restart() }
 
     guard let version = version() else { throw DaemonError.unreachable }
     if version != Constants.VERSION { throw DaemonError.wrongVersion(version) }

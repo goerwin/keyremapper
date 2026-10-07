@@ -67,7 +67,7 @@ frontApp=$(lsappinfo info -only bundleid "$(lsappinfo front)" | cut -d'"' -f4)
 
 # The daemon quits with the app, then launchd starts the new one for the new app
 pkill -x KeyRemapper || true
-waitFor daemonStopped
+waitFor daemonStopped || { echo "FAIL: the daemon didn't quit with the app"; exit 1; }
 rm -rf "$app"
 ditto "$build/Release/KeyRemapper.app" "$app"
 open "$app"
