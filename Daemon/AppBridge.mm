@@ -27,10 +27,8 @@ NSString* toNSString(std::string str) {
 
 - (StartResult)start:(NSString*)config
          withSymbols:(NSString*)symbols
-      withProfileIdx:(int)profileIdx
-         withAppName:(NSString*)appName {
-  return runtime.start([config UTF8String], [symbols UTF8String], profileIdx,
-                       [appName UTF8String]);
+      withProfileIdx:(int)profileIdx {
+  return runtime.start([config UTF8String], [symbols UTF8String], profileIdx);
 }
 
 - (void)stop {
@@ -45,9 +43,5 @@ NSString* toNSString(std::string str) {
 
 - (void)stopLogging {
   runtime.stopLogging();
-}
-
-- (void)setAppName:(NSString*)appName {
-  runtime.setAppName([appName UTF8String]);
 }
 @end

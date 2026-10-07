@@ -10,13 +10,6 @@
 
 static Runtime runtime;
 
-std::string getFrontmostAppName() {
-  NSRunningApplication* app = NSWorkspace.sharedWorkspace.frontmostApplication;
-  if (app.bundleIdentifier) return [app.bundleIdentifier UTF8String];
-  if (app.localizedName) return [app.localizedName UTF8String];
-  return "Unknown";
-}
-
 void stopOnSignal(int sig) {
   signal(sig, SIG_IGN);
   dispatch_source_t source =
@@ -76,8 +69,7 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
 
-    auto startResult =
-        runtime.start(config, symbols, profileIdx, getFrontmostAppName());
+    auto startResult = runtime.start(config, symbols, profileIdx);
 
     if (startResult == StartResultReportedError) return 1;
 
@@ -95,14 +87,6 @@ int main(int argc, const char* argv[]) {
 
     if (shouldLog)
       runtime.startLogging([](std::string log) { Helpers::print(log); });
-
-    [NSWorkspace.sharedWorkspace.notificationCenter
-        addObserverForName:NSWorkspaceDidActivateApplicationNotification
-                    object:nil
-                     queue:nil
-                usingBlock:^(NSNotification* notification) {
-                  runtime.setAppName(getFrontmostAppName());
-                }];
 
     stopOnSignal(SIGINT);
     stopOnSignal(SIGTERM);

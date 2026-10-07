@@ -8,12 +8,10 @@
 @interface AppBridge : NSObject
 - (StartResult)start:(NSString*)config
          withSymbols:(NSString*)symbols
-      withProfileIdx:(int)profileIdx
-         withAppName:(NSString*)appName;
+      withProfileIdx:(int)profileIdx;
 - (void)stop;
 - (void)startLogging;
 - (void)stopLogging;
-- (void)setAppName:(NSString*)appName;
 @end
 
 #endif

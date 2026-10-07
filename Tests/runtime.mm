@@ -143,7 +143,7 @@ int main(int argc, const char* argv[]) {
   runtime.setCapslock = [&](bool state) { capslockStates.push_back(state); };
   runtime.onError = [&](std::string err) { errors.push_back(err); };
 
-  runtime.load(config, symbolsJson, 0, "");
+  runtime.load(config, symbolsJson, 0);
 
   tap(runtime, "A");
   expect("remaps", {key("B", "down"), key("B", "up")});
@@ -229,7 +229,7 @@ int main(int argc, const char* argv[]) {
   runtime.stop();
   wait(150);
   expect("stops repeating on stop", {key("B", "down")});
-  runtime.load(config, symbolsJson, 0, "");
+  runtime.load(config, symbolsJson, 0);
 
   // The main run loop also serves the keyboards and the mouse, so it can't
   // sleep through the delay. Blocking would post everything during the taps
@@ -252,7 +252,7 @@ int main(int argc, const char* argv[]) {
   wait(100);
   expect("drops the keys after a delay on stop",
          {key("Tab", "down"), key("Tab", "up")});
-  runtime.load(config, symbolsJson, 0, "");
+  runtime.load(config, symbolsJson, 0);
 
   tap(runtime, "E");
   expect("posts media keys down and up",
@@ -341,22 +341,22 @@ int main(int argc, const char* argv[]) {
   for (auto& err : errors) Helpers::print("  error: " + err);
   check("reports no errors", errors.empty());
 
-  runtime.start(config, symbolsJson, 0, "");
-  auto startResult = runtime.start(config, symbolsJson, 99, "");
+  runtime.start(config, symbolsJson, 0);
+  auto startResult = runtime.start(config, symbolsJson, 99);
   check("reports an invalid profile index",
         startResult == StartResultReportedError && errors.size() == 1 &&
             errors.back() == "StartError: Profile 100 not found");
   tap(runtime, "A");
   expect("stays stopped after a failed start", {});
 
-  startResult = runtime.start("{\"profiles\": {}}", symbolsJson, 0, "");
+  startResult = runtime.start("{\"profiles\": {}}", symbolsJson, 0);
   check("reports a config without profiles",
         startResult == StartResultReportedError &&
             errors.back() == "StartError: The config has no \"profiles\" array");
 
   startResult = runtime.start(
       R"({"profiles": [{"rules": [{"from": ["A"], "to": "NoExist"}]}]})",
-      symbolsJson, 0, "");
+      symbolsJson, 0);
   check("reports an invalid rule when it starts",
         startResult == StartResultReportedError &&
             errors.back().find("unknown key \"NoExist\"") != std::string::npos);

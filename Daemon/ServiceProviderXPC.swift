@@ -12,9 +12,7 @@ import Foundation
   ) {
     let startResult = DispatchQueue.main.sync {
       GlobalSwift.appBridge.start(
-        config, withSymbols: symbols,
-        withProfileIdx: Int32(profileIdx),
-        withAppName: GlobalSwift.getFrontmostAppName())
+        config, withSymbols: symbols, withProfileIdx: Int32(profileIdx))
     }
 
     return reply(startResult)
@@ -37,6 +35,6 @@ import Foundation
   }
 
   func getVersion(withReply reply: @escaping (String) -> Void) {
-    reply(GlobalSwift.VERSION)
+    reply(Constants.VERSION)
   }
 }

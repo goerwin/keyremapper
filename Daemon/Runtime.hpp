@@ -35,15 +35,23 @@ class Runtime {
 
   // config and symbols are JSON, with the config imports already resolved. It
   // stays stopped when it fails
-  StartResult start(std::string config, std::string symbols, int profileIdx,
-                    std::string appName) {
+  StartResult start(std::string config, std::string symbols, int profileIdx) {
     try {
-      load(config, symbols, profileIdx, appName);
+      load(config, symbols, profileIdx);
       auto result = startEventTap();
       if (result != StartResultOk) {
         stop();
         return result;
       }
+
+      setAppName(getFrontmostAppName());
+      appObserver = [NSWorkspace.sharedWorkspace.notificationCenter
+          addObserverForName:NSWorkspaceDidActivateApplicationNotification
+                      object:nil
+                       queue:nil
+                  usingBlock:^(NSNotification*) {
+                    setAppName(getFrontmostAppName());
+                  }];
 
       capslock = Capslock::getState();
       keyboards.onInput = [this](ushort scancode, bool isKeyDown, int vendorId,
@@ -65,8 +73,7 @@ class Runtime {
 
   // Loads the profile without touching the keyboards or the mouse. Throws on
   // invalid JSON or profiles
-  void load(std::string configJson, std::string symbolsJson, int profileIdx,
-            std::string appName) {
+  void load(std::string configJson, std::string symbolsJson, int profileIdx) {
     stop();
 
     // symbols.json has comments
@@ -89,7 +96,6 @@ class Runtime {
         vkCodes[value[0].get<ushort>()] = value[1].get<ushort>();
 
     keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
-    keyRemapper->setAppName(appName);
 
     delayUntilRepeat = profile.value("delayUntilRepeat", 250);
     keyRepeatInterval = profile.value("keyRepeatInterval", 25);
@@ -101,6 +107,10 @@ class Runtime {
     stopTimer(holdTimer);
     stopTimer(delayTimer);
     pendingKeyEvents.clear();
+    if (appObserver) {
+      [NSWorkspace.sharedWorkspace.notificationCenter removeObserver:appObserver];
+      appObserver = nil;
+    }
     keyboards.stop();
     stopEventTap();
     keyRemapper = nullptr;
@@ -156,6 +166,7 @@ class Runtime {
   dispatch_source_t delayTimer = nil;
   // Waiting for a delay to be over
   std::deque<KeyRemapper::KeyEvent> pendingKeyEvents;
+  id appObserver = nil;  // of the frontmost app
   Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
   CFMachPortRef eventTap = NULL;
@@ -214,6 +225,13 @@ class Runtime {
       return NULL;
 
     return event;
+  }
+
+  static std::string getFrontmostAppName() {
+    auto app = NSWorkspace.sharedWorkspace.frontmostApplication;
+    if (app.bundleIdentifier) return app.bundleIdentifier.UTF8String;
+    if (app.localizedName) return app.localizedName.UTF8String;
+    return "Unknown";
   }
 
   void fail(std::string err) {
