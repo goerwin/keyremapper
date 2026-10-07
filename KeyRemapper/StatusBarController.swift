@@ -37,10 +37,6 @@ final class StatusBarController: NSObject {
     button.title = activeName.map { " \($0)" } ?? ""
 
     let menu = NSMenu(title: "Status Bar Item Menu")
-    addItem(to: menu, "Open Config Folder", #selector(openConfigFolder))
-    addItem(to: menu, "Logger", #selector(openLogger))
-
-    menu.addItem(.separator())
     addItem(to: menu, state.isRunning ? "Pause" : "Resume", #selector(toggle))
 
     menu.addItem(.separator())
@@ -53,13 +49,19 @@ final class StatusBarController: NSObject {
     }
 
     menu.addItem(.separator())
-    addItem(to: menu, "Launch at Login", #selector(toggleLaunchAtLogin)).state =
-      state.launchesAtLogin ? .on : .off
-    addItem(to: menu, "About \(Constants.BUNDLE_NAME)", #selector(openAbout))
-    addItem(to: menu, "Check for Updates…", #selector(checkForUpdates))
-    addItem(to: menu, "Uninstall \(Constants.BUNDLE_NAME)…", #selector(uninstall))
+    addItem(to: menu, "Open Config Folder", #selector(openConfigFolder))
+    addItem(to: menu, "Logger", #selector(openLogger))
 
     menu.addItem(.separator())
+    addItem(to: menu, "Launch at Login", #selector(toggleLaunchAtLogin)).state =
+      state.launchesAtLogin ? .on : .off
+
+    menu.addItem(.separator())
+    addItem(to: menu, "About \(Constants.BUNDLE_NAME)", #selector(openAbout))
+    addItem(to: menu, "Check for Updates…", #selector(checkForUpdates))
+
+    menu.addItem(.separator())
+    addItem(to: menu, "Uninstall \(Constants.BUNDLE_NAME)…", #selector(uninstall))
     addItem(to: menu, "Quit", #selector(quit), "q")
 
     statusItem.menu = menu

@@ -19,8 +19,8 @@ failures=0
 ui() { osascript -e "tell application \"System Events\" to $1"; }
 menuItems() { ui "get name of every menu item of $menu" | sed 's/, /\n/g'; }
 menuHas() { menuItems | grep -qx "$1"; }
-# Profiles are the menu items between the 2nd and 3rd separators
-profileItems() { menuItems | awk '/^missing value$/ { n++; next } n == 2'; }
+# Profiles are the menu items between the 1st and 2nd separators
+profileItems() { menuItems | awk '/^missing value$/ { n++; next } n == 1'; }
 profilesAre() { [[ "$(profileItems)" == "$1" ]]; }
 # Profile items start with a checkmark when active
 clickMenu() {
