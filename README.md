@@ -126,7 +126,7 @@ For complex flows. The first one that matches wins.
 
     // reserved
     "isKeyDown": false, // the current key was just released
-    "appName": "com.google.Chrome",
+    "appName": "com.google.Chrome", // or ["com.google.Chrome", "com.apple.finder"] for any of them
     "keyboard": "4133:6421" // Mac: productId:vendorId, Windows: hardware id
   },
   "set": { "MY_VAR": true }, // on key down

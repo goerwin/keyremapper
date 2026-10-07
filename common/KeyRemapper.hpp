@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <stdexcept>
 #include <string>
@@ -343,6 +344,11 @@ class KeyRemapper {
       auto globalValue = globals[key];
 
       if (globalValue.is_null() && value == false) continue;
+      if (value.is_array()) {
+        if (std::find(value.begin(), value.end(), globalValue) == value.end())
+          return false;
+        continue;
+      }
       if (value != globalValue) return false;
     }
 
