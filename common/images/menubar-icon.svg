@@ -1,31 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
-  <g>
-    <title>Layer 1</title>
-    <!-- <rect height="400" width="400" y="0" x="0" /> -->
-
-    <!-- <path d="M 0,0 h400 v400 h-400 z -->
-    <path fill="black" d="
-      M50,0
-      h300 a50,50 0 0 1 50,50
-      v300 a50,50 0 0 1 -50,50
-      h-300 a50,50 0 0 1 -50,-50
-      v-300 a50,50 0 0 1 50,-50 z
-
-      M50,100
-      v200 a50,50 0 0 0 50,50
-      h200 a50,50 0 0 0 50,-50
-      v-200 a50,50 0 0 0 -50,-50
-      h-200 a50,50 0 0 0 -50,50 z
-      "
-      />
-  </g>
-
-  <g>
-   <rect fill="black" height="30" width="115" y="90" x="90"/>
-   <rect fill="black" height="100" width="40" y="120" x="90"/>
-   <rect fill="black" height="30" width="90" y="155" x="90"/>
-   <rect fill="black" height="30" width="115" y="220" x="90" />
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <path fill="black" fill-rule="evenodd" d="M88 0H312A88 88 0 0 1 400 88V312A88 88 0 0 1 312 400H88A88 88 0 0 1 0 312V88A88 88 0 0 1 88 0Z M98 50A48 48 0 0 0 50 98V302A48 48 0 0 0 98 350H302A48 48 0 0 0 350 302V98A48 48 0 0 0 302 50Z"/>
+  <g fill="black">
+    <rect x="125" y="100" width="150" height="50" rx="10"/>
+    <rect x="125" y="100" width="50" height="200" rx="10"/>
+    <rect x="125" y="175" width="125" height="50" rx="10"/>
+    <rect x="125" y="250" width="150" height="50" rx="10"/>
   </g>
 </svg>

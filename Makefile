@@ -1,10 +1,14 @@
 CONFIG ?= $(HOME)/KeyRemapperMac/config.json
 PROFILE ?= 0
 SYMBOLS := mac/KeyRemapper/Resources/symbols.json
+ICON_SVG := common/images/icon.svg
+MENUBAR_ICON_SVG := common/images/menubar-icon.svg
+APP_ICONSET := mac/KeyRemapper/Assets.xcassets/AppIcon.appiconset
+MENUBAR_IMAGESET := mac/KeyRemapper/Assets.xcassets/MenuBarIcon.imageset
 
 FRAMEWORKS := -framework AppKit -framework IOKit -framework ApplicationServices
 
-.PHONY: test test-runtime test-app test-config build dev-build dev release-patch release-minor release-major
+.PHONY: test test-runtime test-app test-config build dev-build dev icon release-patch release-minor release-major
 
 test:
 	g++ -o Tests/output -std=c++17 Tests/index.cpp && ./Tests/output
@@ -26,6 +30,11 @@ dev-build:
 
 dev: dev-build
 	sudo mac/build/keyremapper-dev "$(CONFIG)" $(SYMBOLS) --profile $(PROFILE) $(if $(LOG),--log)
+
+# Requires rsvg-convert (brew install librsvg)
+icon:
+	for size in 16 32 64 128 256 512 1024; do rsvg-convert -w $$size -h $$size $(ICON_SVG) -o $(APP_ICONSET)/$$size.png; done
+	cp $(MENUBAR_ICON_SVG) $(MENUBAR_IMAGESET)/icon.svg
 
 release-patch release-minor release-major:
 	./release.sh $(@:release-%=%)
