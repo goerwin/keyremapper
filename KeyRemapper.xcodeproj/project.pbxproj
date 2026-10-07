@@ -16,7 +16,6 @@
 		F99C5DF727E7CDB60080117D /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99C5DF627E7CDB60080117D /* AboutView.swift */; };
 		F9A8926027644E33009ACA0A /* KeyRemapperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */; };
 		F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926327644E35009ACA0A /* Assets.xcassets */; };
-		F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9A8926627644E35009ACA0A /* Preview Assets.xcassets */; };
 		F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B127F2754300FC513C /* LoggerView.swift */; };
 		F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B327F27C2100FC513C /* LoggerWindowController.swift */; };
 		F9B4D1B627F292B400FC513C /* AppProviderXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */; };
@@ -94,7 +93,6 @@
 		F9A8925C27644E33009ACA0A /* KeyRemapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyRemapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9A8925F27644E33009ACA0A /* KeyRemapperApp.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = KeyRemapperApp.swift; sourceTree = "<group>"; tabWidth = 2; };
 		F9A8926327644E35009ACA0A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F9A8926627644E35009ACA0A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F9A8926827644E35009ACA0A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyRemapper.entitlements; sourceTree = "<group>"; };
 		F9B4D1B127F2754300FC513C /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
@@ -195,17 +193,8 @@
 				F9A8926327644E35009ACA0A /* Assets.xcassets */,
 				F9A8926927644E35009ACA0A /* KeyRemapper.entitlements */,
 				F9600A3027F014D10051BFE1 /* Resources */,
-				F9A8926527644E35009ACA0A /* Preview Content */,
 			);
 			path = KeyRemapper;
-			sourceTree = "<group>";
-		};
-		F9A8926527644E35009ACA0A /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				F9A8926627644E35009ACA0A /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		F9C75A2927ED938700F2E31C /* Daemon */ = {
@@ -331,7 +320,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9A8926727644E35009ACA0A /* Preview Assets.xcassets in Resources */,
 				F9A8926427644E35009ACA0A /* Assets.xcassets in Resources */,
 				F9600A3427F016780051BFE1 /* symbols.json in Resources */,
 				F9600A3227F015250051BFE1 /* config.json in Resources */,
@@ -424,6 +412,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(MARKETING_VERSION)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -444,6 +433,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -487,6 +477,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(MARKETING_VERSION)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -501,6 +492,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -513,26 +505,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = Universal;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"KeyRemapper/Preview Content\"";
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -546,26 +533,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = KeyRemapper/KeyRemapper.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = Universal;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"KeyRemapper/Preview Content\"";
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -582,7 +564,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
-				CURRENT_PROJECT_VERSION = Universal;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				DONT_GENERATE_INFOPLIST_FILE = NO;
@@ -595,7 +576,6 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;
@@ -615,7 +595,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
-				CURRENT_PROJECT_VERSION = Universal;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PCZ58H68H5;
 				DONT_GENERATE_INFOPLIST_FILE = NO;
@@ -628,7 +607,6 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 4.4.5;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;

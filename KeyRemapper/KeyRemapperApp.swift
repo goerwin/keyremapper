@@ -4,8 +4,9 @@ import SwiftUI
 @main
 struct KeyRemapperApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) fileprivate var appDelegate
+  // It lives in the menu bar, its windows are opened by AppDelegate
   var body: some Scene {
-    WindowGroup {}
+    Settings { EmptyView() }
   }
 }
 
@@ -45,8 +46,6 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
   }()
 
   func applicationDidFinishLaunching(_ notification: Notification) {
-    if let window = NSApplication.shared.windows.first { window.close() }
-
     statusBar.onToggle = { [unowned self] in self.isRunning ? self.pause() : self.start() }
     statusBar.onSelectProfile = { [unowned self] idx in
       self.activeProfileIdx = idx
