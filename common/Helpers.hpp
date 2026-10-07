@@ -4,6 +4,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include "./vendors/json.hpp"
@@ -63,67 +64,58 @@ void print(string str, string str2 = "\n") {
   std::cout << res << "";
 }
 
-json getJsonFile(String filePath) {
-  auto pathParts = split(filePath, '/');
-  String dirPath = pathParts[0];
-  auto pathPartsSize = pathParts.size();
-  for (size_t i = 1; i < pathPartsSize - 1; i++)
-    dirPath = dirPath + "/" + pathParts[i];
+json getJsonFile(String filePath);
 
-  std::ifstream file(filePath);
-  String fileStr((std::istreambuf_iterator<char>(file)),
-                 std::istreambuf_iterator<char>());
+// "%import(file)" is replaced by the JSON of file, relative to dirPath. In an
+// array, an imported array is spread into it
+json resolveImports(json value, String dirPath) {
+  static const std::regex importRegex("^%import\\((.+)\\)$");
 
-  std::vector<std::vector<String>> importKeys = {
-      {"dotdotdotObject", "\"%dotdotdotObject\".*\".*\""},
-      {"object", "\"%object.*\""},
-      {"array", "\"%array.*\""},
-      {"dotdotdotArray", "\"%dotdotdotArray.*\""}};
+  auto getImport = [&](json &item, json &result) {
+    std::smatch matches;
+    if (!item.is_string()) return false;
+    auto str = item.get<String>();
+    if (!std::regex_match(str, matches, importRegex)) return false;
+    result = getJsonFile(dirPath + "/" + String(matches[1]));
+    return true;
+  };
 
-  for (size_t i = 0; i < importKeys.size(); i++) {
-    auto importKey = importKeys[i];
-    auto name = importKey[0];
-    auto regex = std::regex(importKey[1]);
-
-    std::regex_token_iterator<std::string::iterator> rend;
-    std::regex_token_iterator<std::string::iterator> a(fileStr.begin(),
-                                                       fileStr.end(), regex);
-
-    std::vector<std::string> res;
-    while (a != rend) {
-      res.push_back(*a);
-      a++;
-    };
-
-    for (size_t j = 0; j < res.size(); j++) {
-      std::smatch matches;
-      auto resItem = res[j];
-      if (std::regex_search(resItem, matches, std::regex("\\((.*)\\)"))) {
-        String innerFileStr = "";
-
-        if (matches.size() == 2) {
-          innerFileStr =
-              getJsonFile(dirPath + "/" + std::string(matches[1])).dump();
-
-          if (name == "dotdotdotArray" || name == "dotdotdotObject") {
-            auto openingBracketIdx = name == "dotdotdotArray"
-                                         ? innerFileStr.find("[")
-                                         : innerFileStr.find("{");
-            auto closingBracketIdx = name == "dotdotdotArray"
-                                         ? innerFileStr.find_last_of("]")
-                                         : innerFileStr.find_last_of("}");
-            innerFileStr = innerFileStr.substr(openingBracketIdx + 1,
-                                               closingBracketIdx - 1);
-          }
-        }
-
-        fileStr = Helpers::replaceAll(fileStr, resItem, innerFileStr);
-      }
+  if (value.is_object()) {
+    for (auto &[key, item] : value.items()) {
+      json imported;
+      item = getImport(item, imported) ? imported
+                                       : resolveImports(item, dirPath);
     }
+  } else if (value.is_array()) {
+    json result = json::array();
+    for (auto &item : value) {
+      json imported;
+      if (!getImport(item, imported))
+        result.push_back(resolveImports(item, dirPath));
+      else if (imported.is_array())
+        result.insert(result.end(), imported.begin(), imported.end());
+      else
+        result.push_back(imported);
+    }
+    return result;
+  } else {
+    json imported;
+    if (getImport(value, imported)) return imported;
   }
 
-  if (fileStr.size() == 0) return {};
-  return json::parse(fileStr, nullptr, false, true);
+  return value;
+}
+
+// Comments are allowed. Throws when it or a file it imports isn't valid JSON
+json getJsonFile(String filePath) {
+  auto slashIdx = filePath.find_last_of('/');
+  auto dirPath = slashIdx == String::npos ? "." : filePath.substr(0, slashIdx);
+
+  std::ifstream file(filePath);
+  auto fileJson = json::parse(file, nullptr, false, true);
+  if (fileJson.is_discarded())
+    throw std::runtime_error(filePath + " isn't valid JSON");
+  return resolveImports(fileJson, dirPath);
 }
 
 template <class T>

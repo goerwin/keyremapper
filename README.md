@@ -11,7 +11,7 @@ Keyboard remapper for macOS and Windows, configured with a JSON file. On macOS i
 - Mac
   1. Download `mac.zip` from [Releases](https://github.com/goerwin/keyremapper/releases), unzip it and move `KeyRemapper.app` to Applications
   2. Open it. The first time macOS blocks it (it isn't notarized), so click _Open Anyway_ in _System Settings > Privacy & Security_
-  3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_. Updating from 4.x asks for your password once, to remove the old helper
+  3. Turn it on in _System Settings > General > Login Items & Extensions_ (it runs a background service that listens to the keyboards) and grant _Accessibility_ and _Input Monitoring_.
   4. Edit `~/KeyRemapperMac/config.json` (menu bar > _Open Config folder_). Saving any JSON file in that folder reloads the active profile
 
 _Uninstall KeyRemapper…_ in the menu removes the background service, login item and permissions (the config folder is kept).
@@ -28,151 +28,97 @@ _Uninstall KeyRemapper…_ in the menu removes the background service, login ite
     {
       "name": "My profile",
       // optionals, in ms
-      "keyPressesDelay": 200,
+      "tapDelay": 200,
+      "holdDelay": 400,
       "delayUntilRepeat": 300,
       "keyRepeatInterval": 25,
       "doubleClickSpeed": 500,
 
       "remaps": [],
-      "keyPresses": [],
-      "keybindings": [],
+      "rules": [],
       "tests": []
     }
   ]
 }
 ```
 
-Key names come from `symbols.json` ([Mac](mac/KeyRemapper/Resources/symbols.json), [Windows](win/src/files/symbols.json)). The app's _Logger_ shows the current app and keyboard names.
+Key names come from [symbols.json](mac/KeyRemapper/Resources/symbols.json). The app's _Logger_ shows the current app and keyboard names. Mistakes (unknown fields or keys) are reported when the profile loads.
 
 ### Remaps
 
-One to one remaps. The first one that matches wins.
+One to one, before the rules. The first one that matches wins.
 
 ```jsonc
-[{ "from": "A", "to": "B" /* optional: "if" */ }]
+[
+  { "from": "CmdL", "to": "AltL", "keyboard": "50475:1133" },
+  { "from": "Caps", "to": "F18" }
+]
 ```
 
-### KeyPresses
+### Rules
 
-Fire when a key is tapped N times within `keyPressesDelay` (`ifPressedNTimes`, 1 by default). After the highest `ifPressedNTimes` of the key, the count starts over, so a single tap rule fires on every tap, however fast.
+The first rule that matches the pressed key replaces it, until it's released. Keys without a rule pass through.
 
 ```jsonc
 [
   {
-    "key": "Shift",
-    "ifPressedNTimes": 2,
-    "send": "Cmd:down C Cmd:up"
-    // optionals: "if", "set", "afterKeyUp"
+    "keys": ["H"], // any of these keys
+    "modifiers": ["CmdL"], // held, the others can't be (optional)
+    "optional": ["ShiftL"], // can also be held, ["any"] for all (optional)
+    "app": "com.google.Chrome", // or ["com.google.Chrome", "com.apple.finder"] (optional)
+    "keyboard": "50475:1133", // productId:vendorId, a string or array too (optional)
+
+    "send": "LeftArrow:down", // on key down, without it the key is silenced
+    "tap": "Esc", // released within tapDelay, without pressing other keys
+    "doubleTap": "CmdL+F", // tapped twice
+    "hold": "CmdL+W" // held for holdDelay, without other key events
   }
 ]
 ```
 
-With `ifHeldFor` (ms) instead, they fire while the key is held, unless another key is pressed or released first. A held key isn't also a tap. Mac only.
+Only `keys` is required. Any key can be a modifier (eg. `["F18", "F"]`), but only the real modifiers (Cmd, Alt, Ctrl, Shift and Fn) have to be listed in `modifiers` or `optional` to be held. The keys sent by the `modifiers` are released while the rule's key is pressed, so `Cmd + H` sending `LeftArrow` doesn't send `Cmd + LeftArrow`.
+
+Each action is space separated:
 
 ```jsonc
-[
-  { "key": "Backspace", "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
-  { "key": "Backspace", "ifHeldFor": 400, "send": "CmdL:down W CmdL:up" },
-  // keeps Cmd down until the key is released
-  { "key": "AltR", "ifHeldFor": 300, "send": "CmdL:down Tab", "afterKeyUp": "CmdL:up" }
-]
+"send": "C"                    // tap
+"send": "CmdL+ShiftL+C"        // with modifiers
+"send": "LeftArrow:down"       // kept down until the key is released
+"send": "Tab delay:250 Tab"    // waits 250ms
+"send": "currentKey"           // the pressed key
 ```
 
-A keybinding can also have its own `keyPresses`. They're added after the profile's ones, for each of its keys and with its `if` plus their own. Without `send`, the keybinding also silences the key, so only the tap or hold is sent:
-
-```jsonc
-{
-  "keys": ["Backspace"],
-  "if": { "keyboard": "4133:6421" },
-  "keyPresses": [
-    { "send": "CtrlL:down ShiftL:down Tab ShiftL:up CtrlL:up" },
-    { "ifHeldFor": 400, "send": "CmdL:down W CmdL:up" }
-  ]
-}
-```
-
-In `tests`, `test_hold` stands for the held key's `ifHeldFor` time passing (eg. `["Backspace:down test_hold Backspace:up", "CmdL:down W CmdL:up"]`).
-
-### Keybindings
-
-For complex flows. The first one that matches wins.
-
-```jsonc
-[
-  {
-    "keys": ["A", "B"], // any of these keys
-    "send": ["C", null], // [on key down, on key up]
-    // optionals: "if", "set", "setOnKeyUp", "afterKeyUp"
-  }
-]
-```
-
-`send` examples:
-
-```jsonc
-"send": ["C:down C:up", null]                       // same as "C", with granular control
-"send": ["CmdL:down C CmdL:up", null]
-"send": ["currentKey:down", "currentKey:up"]         // the key that triggered the keybinding
-"send": ["mappedKey:down", "mappedKey:up"]           // its item in "mappedKeys" (see below)
-"send": ["LeftClick:down", "LeftClick:up"]
-"send": ["CmdL:down Tab SK:Delay:250 Tab CmdL:up", null] // SK:Delay:{ms}
-```
-
-`mappedKeys` gives each key of `keys` its own key, used as `mappedKey` in `send` and `afterKeyUp`:
+With several keys, an action can also have one item per key:
 
 ```jsonc
 {
   "keys": ["H", "J", "K", "L"],
-  "mappedKeys": ["LeftArrow", "DownArrow", "UpArrow", "RightArrow"],
-  "send": ["mappedKey:down", "mappedKey:up"]
+  "modifiers": ["F18"],
+  "optional": ["any"],
+  "send": ["LeftArrow:down", "DownArrow:down", "UpArrow:down", "RightArrow:down"]
 }
 ```
-
-### Conditions and variables
-
-```jsonc
-{
-  "if": {
-    "CmdL": true, // held
-    "AltL": false, // not held (keys not listed aren't checked)
-    "MY_VAR": false,
-
-    // reserved
-    "isKeyDown": false, // the current key was just released
-    "appName": "com.google.Chrome", // or ["com.google.Chrome", "com.apple.finder"] for any of them
-    "keyboard": "4133:6421" // Mac: productId:vendorId, Windows: hardware id
-  },
-  "set": { "MY_VAR": true }, // on key down
-  "setOnKeyUp": { "MY_VAR": false },
-  "afterKeyUp": "C:down C:up O O L" // sent on the next key event after this key up
-}
-```
-
-Conditions are checked again on key up, so key down and key up can match different keybindings. Keys sent down on key down (by a keybinding, or the key itself when none matched) that are still down are released with that key anyway, unless you're holding them (eg. the `CmdL:down` that restores a held Cmd). So `send[1]` only needs what's different on key up.
 
 ### Sharing parts of the config
 
-`%array`, `%dotdotdotArray`, `%object` and `%dotdotdotObject` load other JSON files (see [Tests/imports.json](Tests/imports.json) or my [config](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)).
+`"%import(file.json)"` is replaced by that file, relative to the one importing it. In an array, an imported array is spread into it (see [Tests/imports.json](Tests/imports.json) or my [config](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)).
 
 ```jsonc
 {
-  "remaps": "%array(_remaps.json)",
-  "keybindings": [
-    "%dotdotdotArray(_vimMode.json)",
-    "%object(_sharedKeybinding.json)",
-    { "%dotdotdotObject": "(_sharedKeybinding2.json)" }
-  ]
+  "remaps": "%import(_remaps.json)",
+  "rules": ["%import(_vimMode.json)", { "keys": ["A"], "send": "B" }]
 }
 ```
 
 ### Tests
 
-Each profile can have `tests`: pairs of input key events and the expected events sent to the OS.
+Each profile can have `tests`: pairs of input key events and the expected events sent to the OS. Inputs can also have `delay:{ms}`, `app:{name}` and `keyboard:{id}`.
 
 ```jsonc
 "tests": [
-  ["Caps:down Caps:up", "Esc"],
-  ["Caps:down test_delay:251 Caps:up", ""]
+  ["Caps", "Esc"],
+  ["Caps:down delay:250 Caps:up", ""],
+  ["app:com.google.Chrome CmdL:down H CmdL:up", "CmdL:down CmdL:up LeftArrow CmdL:down CmdL:up"]
 ]
 ```
 

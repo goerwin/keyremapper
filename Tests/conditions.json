@@ -1,0 +1,29 @@
+// app and keyboard, a string or an array matching any of its values. They're
+// checked on key down
+{
+  "remaps": [
+    { "from": "N", "to": "X", "keyboard": ["1", "2"] },
+    { "from": "O", "to": "P", "app": "com.app" }
+  ],
+  "rules": [
+    { "keys": ["D"], "app": ["com.app1", "com.app2"], "send": "E" },
+    { "keys": ["D"], "keyboard": "1", "send": "F" },
+    { "keys": ["X"], "send": "Y" }
+  ],
+  "tests": [
+    ["app:com.app1 D", "E"],
+    ["app:com.app2 D", "E"],
+    ["app:com.app3 D", "D"],
+    ["D", "D"],
+    ["keyboard:1 D", "F"],
+    ["app:com.app1 keyboard:1 D", "E"],
+    ["keyboard:1 D:down keyboard: D:up", "F"],
+
+    ["keyboard:2 N", "Y"],
+    ["keyboard:3 N", "N"],
+    ["keyboard:1 N:down keyboard: N:up", "Y"],
+    ["X", "Y"],
+    ["app:com.app O", "P"],
+    ["O", "O"]
+  ]
+}

@@ -10,12 +10,16 @@ typedef std::string String;
 typedef unsigned short ushort;
 
 namespace TestHelpers {
+// Each test is [input, expected]. The input has the keys pressed, "delay:N" (N
+// ms pass, firing the hold of the held key like the real timer), "app:X" and
+// "keyboard:X" (empty X for none)
 json runTests(json tests, json profile, json symbols) {
   if (tests.is_null()) return {};
 
   auto keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
-  // test_delay moves it, so slow machines (CI) don't change the results
+  // delay moves it, so slow machines (CI) don't change the results
   double time = 1;
+  double lastKeyTime = time;
   keyRemapper->now = [&time] { return time; };
 
   bool ok = true;
@@ -29,49 +33,48 @@ json runTests(json tests, json profile, json symbols) {
 
     keyRemapper->reset();
 
-    auto resultKeyEvents = keyRemapper->getKeyEventsFromString("");
+    KeyRemapper::KeyEvents resultKeyEvents = {};
     std::stringstream ss(inputKeysStr);
 
     while (ss.good()) {
       String item;
       getline(ss, item, ' ');
-      String delayKey = "test_delay:";
-      String appNameKey = "appName:";
+      if (item.empty()) continue;
+
+      String delayKey = "delay:";
+      String appKey = "app:";
       String keyboardKey = "keyboard:";
-      auto delayTokenIdx = item.find(delayKey);
-      auto appNameTokenIdx = item.find(appNameKey);
-      auto keyboardTokenIdx = item.find(keyboardKey);
 
-      if (keyboardTokenIdx != std::string::npos) {
-        auto keyboard = item.substr(keyboardKey.size(), item.size());
-        keyboard = keyboard == "_" ? "" : keyboard;
-        keyRemapper->setKeyboard(keyboard, "keyboard description");
+      if (item.rfind(keyboardKey, 0) == 0) {
+        keyRemapper->setKeyboard(item.substr(keyboardKey.size()),
+                                 "keyboard description");
         continue;
       }
 
-      if (appNameTokenIdx != std::string::npos) {
-        auto appName = item.substr(appNameKey.size(), item.size());
-        appName = appName == "_" ? "" : appName;
-        keyRemapper->setAppName(appName);
+      if (item.rfind(appKey, 0) == 0) {
+        keyRemapper->setAppName(item.substr(appKey.size()));
         continue;
       }
 
-      // As if the held key's ifHeldFor time passed
-      if (item == "test_hold") {
-        resultKeyEvents =
-            Helpers::concatArrays(resultKeyEvents, keyRemapper->applyHold());
+      if (item.rfind(delayKey, 0) == 0) {
+        auto endTime = time + atoi(item.substr(delayKey.size()).c_str());
+        auto holdDelay = keyRemapper->getHoldDelay();
+
+        if (holdDelay >= 0 && endTime >= lastKeyTime + holdDelay) {
+          time = lastKeyTime + holdDelay;
+          resultKeyEvents =
+              Helpers::concatArrays(resultKeyEvents, keyRemapper->applyHold());
+        }
+
+        time = endTime;
         continue;
       }
 
-      if (delayTokenIdx != std::string::npos) {
-        auto delayTimeStr = item.substr(delayKey.size(), item.size());
-        time += atoi(delayTimeStr.c_str());
-        continue;
+      for (auto &inputKey : keyRemapper->getKeyEventsFromString(item)) {
+        resultKeyEvents = Helpers::concatArrays(
+            resultKeyEvents, keyRemapper->applyKeys({inputKey}));
+        lastKeyTime = time;
       }
-
-      auto inputKeys = keyRemapper->getKeyEventsFromString(item);
-      auto resKeyEvents = keyRemapper->applyKeys(inputKeys);
-      resultKeyEvents = Helpers::concatArrays(resultKeyEvents, resKeyEvents);
     }
 
     String expectedKeysStr = test[1];
@@ -80,8 +83,9 @@ json runTests(json tests, json profile, json symbols) {
 
     if (resultKeysStr != keyRemapper->stringifyKeyEvents(expectedKeys)) {
       ok = false;
-      message = "TEST " + std::to_string(i) + " FAILED: expected \"" +
-                expectedKeysStr + "\", got \n\"" + resultKeysStr + "\"";
+      message = "TEST " + std::to_string(i) + " (\"" + inputKeysStr +
+                "\") FAILED: expected \"" + expectedKeysStr + "\", got \n\"" +
+                resultKeysStr + "\"";
       break;
     }
   }

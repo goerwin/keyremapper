@@ -155,7 +155,7 @@ class Runtime {
   dispatch_source_t keyRepeatTimer = nil;
   dispatch_source_t holdTimer = nil;
   dispatch_source_t delayTimer = nil;
-  // Waiting for an SK:Delay to be over
+  // Waiting for a delay to be over
   std::deque<KeyRemapper::KeyEvent> pendingKeyEvents;
   Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
@@ -222,7 +222,7 @@ class Runtime {
     onError(err);
   }
 
-  // In order. An SK:Delay holds the events after it, also the ones that come
+  // In order. A delay holds the events after it, also the ones that come
   // later, until it's over
   void postKeyEvents(const KeyRemapper::KeyEvents& keyEvents) {
     pendingKeyEvents.insert(pendingKeyEvents.end(), keyEvents.begin(),
@@ -233,7 +233,7 @@ class Runtime {
       auto keyEvent = pendingKeyEvents.front();
       pendingKeyEvents.pop_front();
 
-      if (keyEvent.name == "SK:Delay") {
+      if (keyEvent.name == "delay") {
         delayTimer = startTimer(keyEvent.state, 0, ^{
           stopTimer(delayTimer);
           postKeyEvents({});
@@ -380,7 +380,7 @@ class Runtime {
     });
   }
 
-  // For the ifHeldFor rule of the key that was just pressed. Any key event
+  // For the hold of the key that was just pressed. Any key event
   // before it fires cancels it
   void startHoldTimer() {
     auto delay = keyRemapper->getHoldDelay();

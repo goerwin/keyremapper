@@ -2,9 +2,12 @@
 
 #include <algorithm>
 #include <chrono>
+#include <functional>
+#include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
-#include <thread>
+#include <utility>
 #include <vector>
 
 #include "./Helpers.hpp"
@@ -15,7 +18,6 @@ class KeyRemapper {
   typedef std::string String;
   typedef std::vector<String> Strings;
   typedef unsigned short ushort;
-  typedef std::vector<json> JsonArray;
 
  public:
   struct KeyEvent {
@@ -26,266 +28,95 @@ class KeyRemapper {
   };
   typedef std::vector<KeyEvent> KeyEvents;
 
- private:
-  json globals = {};
-  json symbols;
-  json profile;
-  json keybindings;
-  json keyPresses;
-  json remaps;
-  short keyPressesDelay;
-  String SPECIAL_KEY = "SK";
-  ushort SPECIAL_KEY_CODE = 6969;
-  KeyEvents afterKeyUpKeyEvents = {};
-  // mappedKeys item of the matched keybinding, for the mappedKey placeholder
-  String mappedKey;
-  // Keys sent down on key down, by a keybinding or because no keybinding
-  // matched, that are still down, with the key that was pressed. They're
-  // released with that key, unless they're held
-  json pressedKeys = json::object();
-
-  void trackPressedKeys(const KeyEvents &keyEvents, String triggerKey = "") {
-    for (auto &keyEvent : keyEvents) {
-      if (!symbols.contains(keyEvent.name)) continue;
-      if (keyEvent.isKeyDown && !triggerKey.empty())
-        pressedKeys[keyEvent.name] = triggerKey;
-      else
-        pressedKeys.erase(keyEvent.name);
-    }
-  }
-
-  KeyEvents releasePressedKeys(String triggerKey) {
-    KeyEvents keyEvents = {};
-    for (auto &[key, value] : pressedKeys.items())
-      if (value == triggerKey && globals[key] != true)
-        keyEvents.push_back(getKeyEvent(key, false));
-    trackPressedKeys(keyEvents);
-    return keyEvents;
-  }
-
-  // appName, keyboardId, keyboardDescription, keyEvents
-  std::function<void(String, String, String, String)> applyKeysCb;
-
-  double getTimeDifference(double time1, double time2) { return time1 - time2; }
-
-  // keyPresses rule with ifHeldFor for the key being held, until applyHold
-  json pendingHold;
-  String firedHoldKeyName;
-
-  String lastKeyName;
-  short keyPressesCount = 0;
-  double keyDownTime = 0;  // in ms
-  double keyUpTime = 0;    // in ms
-
-  void setKeyPressesCount(String keyName, bool isKeyDown) {
-    if (lastKeyName != keyName) {
-      keyPressesCount = 0;
-      keyDownTime = 0;
-      keyUpTime = 0;
-      lastKeyName = keyName;
-    }
-
-    if (isKeyDown) {
-      // this is for windows, since interception keeps sending the keydown
-      // events when key is held down
-      if (lastKeyName == keyName && keyDownTime != 0) {
-        keyUpTime = 0;
-        return;
-      }
-
-      keyDownTime = now();
-
-      if (!keyUpTime ||
-          getTimeDifference(keyDownTime, keyUpTime) >= keyPressesDelay)
-        keyPressesCount = 0;
-
-      keyUpTime = 0;
-      return;
-    }
-
-    keyUpTime = now();
-
-    if (keyDownTime != 0 &&
-        getTimeDifference(keyUpTime, keyDownTime) < keyPressesDelay) {
-      keyDownTime = 0;
-      keyPressesCount = lastKeyName == keyName ? keyPressesCount + 1 : 1;
-      return;
-    }
-
-    keyPressesCount = 0;
-    keyDownTime = 0;
-    keyUpTime = 0;
-  }
-
- public:
   // In ms, never 0. Replaceable so the tests don't depend on the real time
   std::function<double()> now = [] {
     return std::chrono::system_clock::now().time_since_epoch() /
            std::chrono::milliseconds(1);
   };
 
-  KeyRemapper(json profileEl, json symbolsEl) {
-    profile = profileEl;
-    symbols = symbolsEl;
-    keybindings = profileEl["keybindings"].get<JsonArray>();
-    keyPressesDelay = profileEl["keyPressesDelay"].is_null()
-                          ? 200
-                          : profileEl["keyPressesDelay"].get<short>();
-    remaps = profileEl["remaps"];
-    keyPresses = profileEl["keyPresses"];
-    if (keyPresses.is_null()) keyPresses = json::array();
+  KeyRemapper(json profile, json symbolsEl) : symbols(symbolsEl) {
+    validateFields(profile, "The profile",
+                   {"name", "tapDelay", "holdDelay", "delayUntilRepeat",
+                    "keyRepeatInterval", "doubleClickSpeed", "remaps", "rules",
+                    "tests"});
+    tapDelay = getNumber(profile, "tapDelay", 200);
+    holdDelay = getNumber(profile, "holdDelay", 400);
 
-    for (auto &keybinding : keybindings) {
-      validateMappedKeys(keybinding);
-      addKeybindingKeyPresses(keybinding);
-    }
+    for (auto &remap : getArray(profile, "remaps", "The profile"))
+      remaps.push_back(parseRemap(remap));
+    for (auto &rule : getArray(profile, "rules", "The profile"))
+      rules.push_back(parseRule(rule));
 
     reset();
   }
 
   KeyEvents applyKeys(KeyEvents keyEvents) {
-    KeyEvents newKeyEvents = {};
+    KeyEvents result = {};
 
-    for (size_t i = 0; i < keyEvents.size(); i++) {
-      KeyEvents localKeyEvents = afterKeyUpKeyEvents;
-      afterKeyUpKeyEvents = {};
-      mappedKey = "";
-      trackPressedKeys(localKeyEvents);
+    for (auto &keyEvent : keyEvents) {
+      auto physical = getKeyEvent(keyEvent.code, keyEvent.state);
+      if (physical.name == "Unknown") continue;
 
-      auto keyEvent = keyEvents[i];
-      auto code = keyEvent.code;
-
-      if (code == SPECIAL_KEY_CODE) {
-        newKeyEvents = Helpers::concatArrays(newKeyEvents, {{keyEvent}});
-        continue;
-      }
-
-      auto state = keyEvent.state;
-      auto parsedKeyEvent = getKeyEvent(code, state);
-      auto remappedKeyEvent = getRemappedKeyEvent(parsedKeyEvent);
-      auto remappedCode = remappedKeyEvent.code;
-      auto remappedState = remappedKeyEvent.state;
-      auto keyName = remappedKeyEvent.name;
-      auto isKeyDown = remappedKeyEvent.isKeyDown;
-
-      globals["currentKey"] = remappedKeyEvent.name;
-      globals["isKeyDown"] = remappedKeyEvent.isKeyDown;
-      globals[keyName] = remappedKeyEvent.isKeyDown;
-
-      auto keybindingInfo = getKeybindingInfo(keyName, isKeyDown);
-      if (!keybindingInfo.is_null()) {
-        mappedKey = keybindingInfo["mappedKey"];
-        if (isKeyDown)
-          setValues(keybindingInfo["set"]);
-        else {
-          setValues(keybindingInfo["setOnKeyUp"]);
-          afterKeyUpKeyEvents =
-              getKeyEventsFromString(keybindingInfo["afterKeyUp"]);
-        }
-
-        json send = keybindingInfo["send"];
-        auto sentKeyEvents =
-            getKeyEventsFromString(isKeyDown ? send[0] : send[1]);
-        trackPressedKeys(sentKeyEvents, isKeyDown ? keyName : "");
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, sentKeyEvents);
+      // The key keeps the name it got on key down, until it's released
+      String key;
+      if (physical.isKeyDown) {
+        if (keyNames.count(physical.code)) continue;
+        key = keyNames[physical.code] = remap(physical.name);
       } else {
-        trackPressedKeys({remappedKeyEvent}, isKeyDown ? keyName : "");
-        localKeyEvents =
-            Helpers::concatArrays(localKeyEvents, {remappedKeyEvent});
+        auto it = keyNames.find(physical.code);
+        key = it == keyNames.end() ? remap(physical.name) : it->second;
+        keyNames.erase(physical.code);
       }
 
-      if (!isKeyDown)
-        localKeyEvents =
-            Helpers::concatArrays(localKeyEvents, releasePressedKeys(keyName));
-
-      // Windows keeps sending key downs while a key is held
-      bool isRepeat = isKeyDown && lastKeyName == keyName && keyDownTime != 0;
-      if (!isRepeat) {
-        pendingHold = isKeyDown ? getKeyHoldInfo(keyName) : json();
-      }
-
-      setKeyPressesCount(keyName, isKeyDown);
-
-      // A held key isn't also a tap
-      if (!isKeyDown && keyName == firedHoldKeyName) {
-        keyPressesCount = 0;
-        firedHoldKeyName = "";
-      }
-
-      auto keyPressesInfo = getKeyPressesInfo(keyName, isKeyDown);
-
-      // No later tap could fire, so the next one starts a new count
-      if (!isKeyDown && !hasKeyPressesAbove(keyName, keyPressesCount))
-        keyPressesCount = 0;
-
-      if (!keyPressesInfo.is_null()) {
-        setValues(keyPressesInfo["set"]);
-        auto sentKeyEvents = getKeyEventsFromString(keyPressesInfo["send"]);
-        trackPressedKeys(sentKeyEvents);
-        localKeyEvents = Helpers::concatArrays(localKeyEvents, sentKeyEvents);
-        afterKeyUpKeyEvents = Helpers::concatArrays(
-            afterKeyUpKeyEvents,
-            getKeyEventsFromString(keyPressesInfo["afterKeyUp"]));
-      }
+      auto sent = physical.isKeyDown ? onKeyDown(key) : onKeyUp(key);
 
       if (applyKeysCb)
-        applyKeysCb(globals["appName"], globals["keyboard"],
-                    globals["keyboardDescription"],
-                    // inputCode:inputState -> remappedCode:remappedState ->
-                    // parsedKeyEvent -> remappedKeyEvent -> keyEventsSent
-                    std::to_string(code) + ":" + std::to_string(state) +
-                        " -> " + std::to_string(remappedCode) + ":" +
-                        std::to_string(remappedState) + " -> " +
-                        stringifyKeyEvents({parsedKeyEvent}) + " -> " +
-                        stringifyKeyEvents({remappedKeyEvent}) + " -> " +
-                        stringifyKeyEvents(localKeyEvents));
+        applyKeysCb(appName, keyboard, keyboardDescription,
+                    std::to_string(keyEvent.code) + ":" +
+                        std::to_string(keyEvent.state) + " -> " +
+                        stringifyKeyEvents({physical}) + " -> " + key +
+                        " -> " + stringifyKeyEvents(sent));
 
-      newKeyEvents = Helpers::concatArrays(newKeyEvents, localKeyEvents);
+      result = Helpers::concatArrays(result, sent);
     }
 
-    return newKeyEvents;
+    return result;
   }
 
-  // ms the key that was just pressed has to be held for its ifHeldFor rule, or
-  // -1. After that time, the caller calls applyHold
-  int getHoldDelay() {
-    return pendingHold.is_null() ? -1 : pendingHold["ifHeldFor"].get<int>();
-  }
+  // ms the key that was just pressed has to be held for its hold, or -1.
+  // After that time, the caller calls applyHold
+  int getHoldDelay() { return pendingHoldKey.empty() ? -1 : holdDelay; }
 
-  // Sends the ifHeldFor rule of the held key, unless another key event came
-  // after it was pressed
+  // Sends the hold of the held key, unless another key event came after it was
+  // pressed
   KeyEvents applyHold() {
-    if (pendingHold.is_null()) return {};
+    if (pendingHoldKey.empty()) return {};
 
-    auto hold = pendingHold;
-    pendingHold = {};
-    if (!ifConditions(hold["if"])) return {};
+    auto key = pendingHoldKey;
+    pendingHoldKey = "";
+    auto &press = presses.at(key);
+    press.isHoldFired = true;
 
-    firedHoldKeyName = hold["key"];
-    setValues(hold["set"]);
-    afterKeyUpKeyEvents = Helpers::concatArrays(
-        afterKeyUpKeyEvents, getKeyEventsFromString(hold["afterKeyUp"]));
-    auto keyEvents = getKeyEventsFromString(hold["send"]);
-    trackPressedKeys(keyEvents);
+    auto keyEvents = getKeyEventsFromString(
+        rules[press.ruleIdx].holds[press.keyIdx], key);
+    trackSentKeys(keyEvents, key);
 
     if (applyKeysCb)
-      applyKeysCb(globals["appName"], globals["keyboard"],
-                  globals["keyboardDescription"],
-                  firedHoldKeyName + ":hold -> " + stringifyKeyEvents(keyEvents));
+      applyKeysCb(appName, keyboard, keyboardDescription,
+                  key + ":hold -> " + stringifyKeyEvents(keyEvents));
 
     return keyEvents;
   }
 
-  void setAppName(String appName) { globals["appName"] = appName; }
+  void setAppName(String name) { appName = name; }
 
-  void setKeyboard(String keyboard, String description) {
-    globals["keyboard"] = keyboard;
-    globals["keyboardDescription"] = description;
+  void setKeyboard(String id, String description) {
+    keyboard = id;
+    keyboardDescription = description;
   }
 
-  void setApplyKeysCb(
-      std::function<void(String, String, String, String)> _applyKeysCb) {
-    applyKeysCb = _applyKeysCb;
+  void setApplyKeysCb(std::function<void(String, String, String, String)> cb) {
+    applyKeysCb = cb;
   }
 
   String stringifyKeyEvents(KeyEvents keyEvents) {
@@ -293,224 +124,416 @@ class KeyRemapper {
 
     for (size_t i = 0; i < keyEvents.size(); i++) {
       if (i != 0) result += " ";
+      auto &keyEvent = keyEvents[i];
 
-      auto keyEvent = keyEvents[i];
-      auto keyName = keyEvent.name;
-      auto isKeyDown = keyEvent.isKeyDown;
-
-      if (keyEvent.code == SPECIAL_KEY_CODE)
-        result += keyName + ":" + std::to_string(keyEvent.state);
+      if (keyEvent.code == DELAY_CODE)
+        result += DELAY + ":" + std::to_string(keyEvent.state);
       else
-        result += keyName + (isKeyDown ? ":down" : ":up");
+        result += keyEvent.name + (keyEvent.isKeyDown ? ":down" : ":up");
     }
 
     return result;
   }
 
-  KeyEvents getKeyEventsFromString(json str) {
-    if (str.is_null()) return {};
-
-    Strings strKeys = Helpers::split(str, ' ');
-    auto strKeysSize = strKeys.size();
-    String currentKey = globals["currentKey"];
+  // Space separated: "A" (tap), "A:down", "A:up", "CmdL+A" (with the keys
+  // before it held, also with :down or :up), "delay:25" and currentKey
+  KeyEvents getKeyEventsFromString(String str, String currentKey = "") {
     KeyEvents keyEvents = {};
 
-    for (size_t i = 0; i < strKeysSize; i++) {
-      String strKey = strKeys[i];
-      Strings keyDesc = Helpers::split(strKey, ':');
-      String keyName = keyDesc[0];
-      if (keyName == "currentKey") keyName = currentKey;
-      if (keyName == "mappedKey") keyName = mappedKey;
+    for (auto &token : Helpers::split(str, ' ')) {
+      if (token.empty()) continue;
 
-      if (keyName == SPECIAL_KEY) {
-        ushort val = atoi(keyDesc[2].c_str());
-        keyEvents = Helpers::concatArrays(
-            keyEvents,
-            {{keyName + ":" + keyDesc[1], SPECIAL_KEY_CODE, val, true}});
+      if (token.rfind(DELAY + ":", 0) == 0) {
+        keyEvents.push_back({DELAY, DELAY_CODE,
+                             (ushort)atoi(token.substr(DELAY.size() + 1).c_str()),
+                             true});
         continue;
       }
 
-      KeyEvent keyEventDown = getKeyEvent(keyName, true);
-      KeyEvent keyEventUp = getKeyEvent(keyName, false);
-      String keyStateStr;
+      auto [keys, state] = splitToken(token);
+      for (auto &key : keys)
+        if (key == "currentKey") key = currentKey;
 
-      if (keyDesc.size() == 2) keyStateStr = keyDesc[1];
-
-      if (keyStateStr == "down")
-        keyEvents = Helpers::concatArrays(keyEvents, {keyEventDown});
-      else if (keyStateStr == "up")
-        keyEvents = Helpers::concatArrays(keyEvents, {keyEventUp});
-      else
-        keyEvents =
-            Helpers::concatArrays(keyEvents, {keyEventDown, keyEventUp});
+      if (state != "up")
+        for (auto &key : keys) keyEvents.push_back(getKeyEvent(key, true));
+      if (state != "down")
+        for (auto it = keys.rbegin(); it != keys.rend(); it++)
+          keyEvents.push_back(getKeyEvent(*it, false));
     }
 
     return keyEvents;
   }
 
   void reset() {
-    globals = {};
-    globals["appName"] = "";
-    globals["keyboard"] = "";
-    globals["keyboardDescription"] = "";
-    globals["currentKey"] = "";
-    globals["isKeyDown"] = "";
-
-    afterKeyUpKeyEvents = {};
-    pressedKeys = json::object();
-    pendingHold = {};
-    firedHoldKeyName = "";
-    lastKeyName = "";
-    keyPressesCount = 0;
-    keyDownTime = 0;
-    keyUpTime = 0;
+    keyNames.clear();
+    heldKeys.clear();
+    presses.clear();
+    sentKeys.clear();
+    pendingHoldKey = "";
+    lastTapKey = "";
+    tapCount = 0;
+    lastTapTime = 0;
+    appName = "";
+    keyboard = "";
+    keyboardDescription = "";
   }
 
  private:
-  void validateMappedKeys(json &keybinding) {
-    auto mappedKeys = keybinding["mappedKeys"];
-    if (mappedKeys.is_null()) return;
+  const String DELAY = "delay";
+  const ushort DELAY_CODE = 6969;
+  const std::set<String> MODIFIERS = {"CmdL",   "CmdR",   "AltL",
+                                      "AltR",   "CtrlL",  "CtrlR",
+                                      "ShiftL", "ShiftR", "Fn"};
 
-    bool isValid = mappedKeys.is_array() &&
-                   mappedKeys.size() == keybinding["keys"].size();
-    for (auto &key : mappedKeys) isValid = isValid && key.is_string();
-    if (!isValid)
-      throw std::runtime_error(
-          "\"mappedKeys\" needs one key name per item of \"keys\": " +
-          keybinding["keys"].dump());
-  }
+  struct Remap {
+    String from, to;
+    Strings apps, keyboards;
+  };
 
-  // A keybinding's keyPresses are added after the profile ones, one per key,
-  // with the keybinding's "if" plus their own
-  void addKeybindingKeyPresses(json &keybinding) {
-    auto ownKeyPresses = keybinding["keyPresses"];
-    if (ownKeyPresses.is_null()) return;
-    if (!ownKeyPresses.is_array())
-      throw std::runtime_error("\"keyPresses\" of a keybinding isn't an array: " +
-                               keybinding["keys"].dump());
+  struct Rule {
+    Strings keys, modifiers, optional, apps, keyboards;
+    // One per key, empty when not set
+    Strings sends, taps, doubleTaps, holds;
+  };
 
-    for (auto &key : keybinding["keys"]) {
-      for (auto keypress : ownKeyPresses) {
-        json ifConds = keybinding["if"].is_object() ? keybinding["if"]
-                                                    : json::object();
-        if (keypress["if"].is_object()) ifConds.update(keypress["if"]);
-        keypress["key"] = key;
-        keypress["if"] = ifConds;
-        keyPresses.push_back(keypress);
-      }
+  // A pressed key, until it's released
+  struct Press {
+    int ruleIdx;  // -1 when no rule matched, then the key itself is sent
+    size_t keyIdx;
+    // Keys of its modifiers that were released while it's pressed, with the
+    // modifier that sent them
+    std::vector<std::pair<String, String>> liftedKeys;
+    bool isAlone;
+    bool isHoldFired;
+    double downTime;
+  };
+
+  json symbols;
+  std::vector<Remap> remaps;
+  std::vector<Rule> rules;
+  double tapDelay;
+  int holdDelay;
+
+  String appName, keyboard, keyboardDescription;
+  // appName, keyboardId, keyboardDescription, keyEvents
+  std::function<void(String, String, String, String)> applyKeysCb;
+
+  std::map<ushort, String> keyNames;  // scancode -> name after the remaps
+  std::set<String> heldKeys;
+  std::map<String, Press> presses;
+  // Keys sent down that are still down, with the key that sent them, in the
+  // order they were sent
+  std::vector<std::pair<String, String>> sentKeys;
+  String pendingHoldKey;
+  String lastTapKey;
+  int tapCount;
+  double lastTapTime;
+
+  KeyEvents onKeyDown(String key) {
+    pendingHoldKey = "";
+    for (auto &[_, press] : presses) press.isAlone = false;
+    if (key != lastTapKey) {
+      lastTapKey = "";
+      tapCount = 0;
     }
+    heldKeys.insert(key);
+
+    Press press = {-1, 0, {}, true, false, now()};
+    KeyEvents keyEvents = {};
+
+    for (size_t i = 0; i < rules.size() && press.ruleIdx < 0; i++) {
+      auto &keys = rules[i].keys;
+      auto it = std::find(keys.begin(), keys.end(), key);
+      if (it == keys.end() || !matches(rules[i], key)) continue;
+      press.ruleIdx = i;
+      press.keyIdx = it - keys.begin();
+    }
+
+    if (press.ruleIdx < 0) {
+      keyEvents = {getKeyEvent(key, true)};
+      trackSentKeys(keyEvents, key);
+    } else {
+      auto &rule = rules[press.ruleIdx];
+
+      for (auto &[sentKey, sender] : sentKeys)
+        if (contains(rule.modifiers, sender))
+          press.liftedKeys.push_back({sentKey, sender});
+      for (auto it = press.liftedKeys.rbegin(); it != press.liftedKeys.rend();
+           it++)
+        keyEvents.push_back(getKeyEvent(it->first, false));
+      trackSentKeys(keyEvents);
+
+      auto sent = getKeyEventsFromString(rule.sends[press.keyIdx], key);
+      trackSentKeys(sent, key);
+      keyEvents = Helpers::concatArrays(keyEvents, sent);
+
+      if (!rule.holds[press.keyIdx].empty()) pendingHoldKey = key;
+    }
+
+    presses[key] = press;
+    return keyEvents;
   }
 
-  bool ifConditions(json ifConds) {
-    if (ifConds.is_null()) return true;
+  KeyEvents onKeyUp(String key) {
+    pendingHoldKey = "";
+    heldKeys.erase(key);
 
-    for (auto &[key, value] : ifConds.items()) {
-      auto globalValue = globals[key];
+    auto it = presses.find(key);
+    if (it == presses.end()) return releaseSentKeys(key);
+    auto press = it->second;
+    presses.erase(it);
 
-      if (globalValue.is_null() && value == false) continue;
-      if (value.is_array()) {
-        if (std::find(value.begin(), value.end(), globalValue) == value.end())
-          return false;
+    auto keyEvents = releaseSentKeys(key);
+
+    for (auto &[liftedKey, sender] : press.liftedKeys) {
+      if (!heldKeys.count(sender) || findSentKey(liftedKey) != sentKeys.end())
         continue;
-      }
-      if (value != globalValue) return false;
+      keyEvents.push_back(getKeyEvent(liftedKey, true));
+      sentKeys.push_back({liftedKey, sender});
+    }
+
+    bool isTap = press.ruleIdx >= 0 && press.isAlone && !press.isHoldFired &&
+                 now() - press.downTime < tapDelay;
+    if (!isTap) {
+      lastTapKey = "";
+      tapCount = 0;
+      return keyEvents;
+    }
+
+    auto &rule = rules[press.ruleIdx];
+    bool isNextTap = lastTapKey == key && press.downTime - lastTapTime < tapDelay;
+    tapCount = isNextTap ? tapCount + 1 : 1;
+    lastTapKey = key;
+    lastTapTime = now();
+
+    auto tap = rule.taps[press.keyIdx];
+    if (tapCount == 2 && !rule.doubleTaps[press.keyIdx].empty()) {
+      tap = rule.doubleTaps[press.keyIdx];
+      lastTapKey = "";
+      tapCount = 0;
+    } else {
+      tapCount = 1;
+    }
+
+    auto tapped = getKeyEventsFromString(tap, key);
+    trackSentKeys(tapped, key);
+    keyEvents = Helpers::concatArrays(keyEvents, tapped);
+    return Helpers::concatArrays(keyEvents, releaseSentKeys(key));
+  }
+
+  bool matches(Rule &rule, String key) {
+    if (!rule.apps.empty() && !contains(rule.apps, appName)) return false;
+    if (!rule.keyboards.empty() && !contains(rule.keyboards, keyboard))
+      return false;
+
+    for (auto &modifier : rule.modifiers)
+      if (!heldKeys.count(modifier)) return false;
+
+    if (contains(rule.optional, "any")) return true;
+    for (auto &heldKey : heldKeys) {
+      if (heldKey == key || !MODIFIERS.count(heldKey)) continue;
+      if (!contains(rule.modifiers, heldKey) &&
+          !contains(rule.optional, heldKey))
+        return false;
     }
 
     return true;
   }
 
-  void setValues(json values) {
-    if (values.is_null()) return;
-    for (auto &[key, value] : values.items()) globals[key] = value;
+  String remap(String key) {
+    for (auto &remap : remaps) {
+      if (remap.from != key) continue;
+      if (!remap.apps.empty() && !contains(remap.apps, appName)) continue;
+      if (!remap.keyboards.empty() && !contains(remap.keyboards, keyboard))
+        continue;
+      return remap.to;
+    }
+
+    return key;
   }
 
-  json getKeybindingInfo(String key, bool isKeyDown) {
-    size_t keybindingsSize = keybindings.size();
+  // sender is who keeps the keys down, empty for the keys that aren't left down
+  void trackSentKeys(const KeyEvents &keyEvents, String sender = "") {
+    for (auto &keyEvent : keyEvents) {
+      if (!symbols.contains(keyEvent.name)) continue;
+      auto it = findSentKey(keyEvent.name);
+      if (it != sentKeys.end()) sentKeys.erase(it);
+      if (keyEvent.isKeyDown && !sender.empty())
+        sentKeys.push_back({keyEvent.name, sender});
+    }
+  }
 
-    for (size_t i = 0; i < keybindingsSize; i++) {
-      auto keybinding = keybindings[i];
-      auto keys = keybinding["keys"];
-      auto mappedKeys = keybinding["mappedKeys"];
+  // The keys sender left down, the last sent first. The ones the user is
+  // holding are released when the user releases them
+  KeyEvents releaseSentKeys(String sender) {
+    KeyEvents keyEvents = {};
+    for (auto it = sentKeys.rbegin(); it != sentKeys.rend(); it++) {
+      if (it->second != sender) continue;
+      if (heldKeys.count(it->first))
+        it->second = it->first;
+      else
+        keyEvents.push_back(getKeyEvent(it->first, false));
+    }
+    trackSentKeys(keyEvents);
+    return keyEvents;
+  }
 
-      if (!ifConditions(keybinding["if"])) continue;
+  std::vector<std::pair<String, String>>::iterator findSentKey(String key) {
+    return std::find_if(sentKeys.begin(), sentKeys.end(),
+                        [&](auto &sentKey) { return sentKey.first == key; });
+  }
 
-      for (size_t j = 0; j < keys.size(); j++) {
-        if (key != keys[j]) continue;
+  static bool contains(const Strings &strings, const String &str) {
+    return std::find(strings.begin(), strings.end(), str) != strings.end();
+  }
 
-        return {{"send", keybinding["send"]},
-                {"mappedKey", mappedKeys.is_array() ? mappedKeys[j] : json("")},
-                {"afterKeyUp", keybinding["afterKeyUp"]},
-                {"set", keybinding["set"]},
-                {"setOnKeyUp", keybinding["setOnKeyUp"]}};
+  // "CmdL+A:down" -> {CmdL, A}, "down"
+  std::pair<Strings, String> splitToken(String token) {
+    String state = "";
+    auto colonIdx = token.find(':');
+    if (colonIdx != String::npos) {
+      state = token.substr(colonIdx + 1);
+      token = token.substr(0, colonIdx);
+    }
+    return {Helpers::split(token, '+'), state};
+  }
+
+  // Config parsing. Everything is validated here, so a mistake fails when the
+  // profile loads instead of when a key is pressed
+
+  Remap parseRemap(json &remap) {
+    auto where = "The remap " + remap.dump();
+    validateFields(remap, where, {"from", "to", "app", "keyboard"});
+    return {getKey(remap, "from", where), getKey(remap, "to", where),
+            getStrings(remap, "app", where),
+            getStrings(remap, "keyboard", where)};
+  }
+
+  Rule parseRule(json &rule) {
+    auto where = "The rule for " + (rule.is_object() && rule.contains("keys")
+                                        ? rule["keys"].dump()
+                                        : rule.dump());
+    validateFields(rule, where,
+                   {"keys", "modifiers", "optional", "app", "keyboard", "send",
+                    "tap", "doubleTap", "hold"});
+
+    Rule parsed;
+    parsed.keys = getKeys(rule, "keys", where);
+    if (parsed.keys.empty())
+      throw std::runtime_error(where + " needs \"keys\"");
+    parsed.modifiers = getKeys(rule, "modifiers", where);
+    parsed.optional = getStrings(rule, "optional", where);
+    for (auto &key : parsed.optional)
+      if (key != "any") validateKey(key, where);
+    parsed.apps = getStrings(rule, "app", where);
+    parsed.keyboards = getStrings(rule, "keyboard", where);
+
+    parsed.sends = getActions(rule, "send", parsed.keys.size(), where);
+    parsed.taps = getActions(rule, "tap", parsed.keys.size(), where);
+    parsed.doubleTaps = getActions(rule, "doubleTap", parsed.keys.size(), where);
+    parsed.holds = getActions(rule, "hold", parsed.keys.size(), where);
+    return parsed;
+  }
+
+  // A string for all the keys, or an array with one per key
+  Strings getActions(json &rule, String field, size_t keysSize, String where) {
+    if (!rule.contains(field)) return Strings(keysSize, "");
+
+    auto &value = rule[field];
+    Strings actions;
+    if (value.is_string())
+      actions = Strings(keysSize, value.get<String>());
+    else if (value.is_array() && value.size() == keysSize)
+      actions = getStrings(rule, field, where);
+    else
+      throw std::runtime_error(where + ": \"" + field +
+                               "\" isn't a string or an array with one item "
+                               "per key");
+
+    for (auto &action : actions) validateAction(action, where + ", " + field);
+    return actions;
+  }
+
+  void validateAction(String action, String where) {
+    for (auto &token : Helpers::split(action, ' ')) {
+      if (token.empty()) continue;
+
+      if (token.rfind(DELAY + ":", 0) == 0) {
+        auto ms = token.substr(DELAY.size() + 1);
+        if (ms.empty() || ms.find_first_not_of("0123456789") != String::npos)
+          throw std::runtime_error(where + ": invalid \"" + token + "\"");
+        continue;
       }
-    }
 
-    return {};
+      auto [keys, state] = splitToken(token);
+      if (state != "" && state != "down")
+        throw std::runtime_error(where + ": invalid \"" + token +
+                                 "\", keys are released by themselves");
+      for (auto &key : keys)
+        if (key != "currentKey") validateKey(key, where);
+    }
   }
 
-  json getKeyPressesInfo(String key, bool isKeyDown) {
-    size_t keyPressesSize = keyPresses.size();
-
-    if (isKeyDown) return {};
-
-    for (size_t i = 0; i < keyPressesSize; i++) {
-      auto keypress = keyPresses[i];
-
-      if (!ifConditions(keypress["if"])) continue;
-      if (key != keypress["key"]) continue;
-      if (keyPressesCount != getPressedNTimes(keypress)) continue;
-
-      return {{"send", keypress["send"]},
-              {"set", keypress["set"]},
-              {"afterKeyUp", keypress["afterKeyUp"]}};
-    }
-
-    return {};
+  void validateKey(String key, String where) {
+    if (!symbols.contains(key))
+      throw std::runtime_error(where + ": unknown key \"" + key + "\"");
   }
 
-  bool hasKeyPressesAbove(String key, short count) {
-    for (auto &keypress : keyPresses) {
-      if (key != keypress["key"]) continue;
-      if (getPressedNTimes(keypress) <= count) continue;
-      if (!ifConditions(keypress["if"])) continue;
-      return true;
-    }
-
-    return false;
+  void validateFields(json &object, String where, std::set<String> fields) {
+    if (!object.is_object())
+      throw std::runtime_error(where + " isn't an object");
+    for (auto &[field, _] : object.items())
+      if (!fields.count(field))
+        throw std::runtime_error(where + " has an unknown field \"" + field +
+                                 "\"");
   }
 
-  // A single tap by default. -1 for the ifHeldFor ones, they aren't taps
-  int getPressedNTimes(json &keypress) {
-    if (keypress["ifPressedNTimes"].is_number())
-      return keypress["ifPressedNTimes"].get<int>();
-    return keypress["ifHeldFor"].is_number() ? -1 : 1;
+  json getArray(json &object, String field, String where) {
+    if (!object.contains(field)) return json::array();
+    if (!object[field].is_array())
+      throw std::runtime_error(where + ": \"" + field + "\" isn't an array");
+    return object[field];
   }
 
-  json getKeyHoldInfo(String key) {
-    for (auto &keypress : keyPresses) {
-      if (!keypress["ifHeldFor"].is_number()) continue;
-      if (key != keypress["key"]) continue;
-      if (!ifConditions(keypress["if"])) continue;
-      return keypress;
-    }
+  // A string or an array of strings
+  Strings getStrings(json &object, String field, String where) {
+    if (!object.contains(field)) return {};
 
-    return {};
+    auto &value = object[field];
+    if (value.is_string()) return {value.get<String>()};
+
+    Strings strings;
+    bool isValid = value.is_array();
+    for (auto &item : value) {
+      isValid = isValid && item.is_string();
+      if (isValid) strings.push_back(item.get<String>());
+    }
+    if (!isValid)
+      throw std::runtime_error(where + ": \"" + field +
+                               "\" isn't a string or an array of strings");
+    return strings;
   }
 
-  KeyEvent getRemappedKeyEvent(KeyEvent keyEvent) {
-    size_t remapsSize = remaps.size();
-    auto keyName = keyEvent.name;
+  Strings getKeys(json &object, String field, String where) {
+    auto keys = getStrings(object, field, where);
+    for (auto &key : keys) validateKey(key, where);
+    return keys;
+  }
 
-    for (size_t i = 0; i < remapsSize; i++) {
-      auto remap = remaps[i];
-      if (keyName != remap["from"]) continue;
-      if (!ifConditions(remap["if"])) continue;
+  String getKey(json &object, String field, String where) {
+    if (!object.contains(field) || !object[field].is_string())
+      throw std::runtime_error(where + " needs \"" + field + "\"");
+    auto key = object[field].get<String>();
+    validateKey(key, where);
+    return key;
+  }
 
-      String newKeyName = remap["to"];
-      return getKeyEvent(newKeyName, keyEvent.isKeyDown);
-    }
-
-    return keyEvent;
+  double getNumber(json &object, String field, double defaultValue) {
+    if (!object.contains(field)) return defaultValue;
+    if (!object[field].is_number())
+      throw std::runtime_error("The profile: \"" + field +
+                               "\" isn't a number");
+    return object[field].get<double>();
   }
 
   KeyEvent getKeyEvent(ushort code, ushort state) {
@@ -525,7 +548,7 @@ class KeyRemapper {
 
   KeyEvent getKeyEvent(String keyName, bool isKeyDown) {
     auto it = symbols.find(keyName);
-    if (it == symbols.end() || it->is_null()) return {"Unknown", 0, 0, false};
+    if (it == symbols.end()) return {"Unknown", 0, 0, isKeyDown};
     auto &symbol = *it;
     return {keyName, symbol[0], isKeyDown ? symbol[1] : symbol[2], isKeyDown};
   }

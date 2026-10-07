@@ -1,31 +1,31 @@
-#include <iostream>
-
-#if __APPLE__
 #include <mach-o/dyld.h>
-#elif defined(WIN32) || defined(_WIN32) || \
-    defined(__WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-#endif
+
+#include <iostream>
 
 #include "../common/Helpers.hpp"
 #include "../common/KeyRemapper.hpp"
 #include "../common/TestHelpers.hpp"
 #include "../common/vendors/json.hpp"
 
-void expect(bool value, std::string errorMsg = "") {
+using json = nlohmann::json;
+
+void expect(bool value, std::string errorMsg) {
   if (value) return;
 
-  Helpers::print(!errorMsg.empty() ? "Error: " + errorMsg
-                                   : "Error, expect condition failed");
+  Helpers::print("Error: " + errorMsg);
   exit(1);
 }
 
-int main(int argc, const char *argv[]) {
-  std::string dirPath;
+bool throws(std::function<void()> fn) {
+  try {
+    fn();
+  } catch (const std::runtime_error &) {
+    return true;
+  }
+  return false;
+}
 
-// find absolute path for executable in different OSs
-// https://stackoverflow.com/a/1024937/1623282
-#if __APPLE__
+int main(int argc, const char *argv[]) {
   char path[1024];
   uint32_t size = sizeof(path);
   if (_NSGetExecutablePath(path, &size) != 0) {
@@ -33,175 +33,100 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
-  dirPath = Helpers::replaceAll(path, "/./", "/");
-  dirPath = Helpers::replaceAll(path, "/output", "");
-#elif defined(WIN32) || defined(_WIN32) || \
-    defined(__WIN32) && !defined(__CYGWIN__)
-  char moduleFilepath[MAX_PATH];
-  GetModuleFileNameA(NULL, moduleFilepath, MAX_PATH);
-  auto strModuleFilepath = std::string(moduleFilepath);
+  std::string dirPath = path;
+  dirPath = dirPath.substr(0, dirPath.find_last_of('/'));
 
-  dirPath = strModuleFilepath.substr(0, strModuleFilepath.find_last_of("\\"));
-  Helpers::print(dirPath);
-#endif
+  auto symbols = Helpers::getJsonFile(
+      dirPath + "/../mac/KeyRemapper/Resources/symbols.json");
 
-  auto symbols = Helpers::getJsonFile(dirPath + "/symbols.json");
+  for (auto name : {"send", "modifiers", "conditions", "taps", "holds", "keys",
+                    "vim"}) {
+    auto profile = Helpers::getJsonFile(dirPath + "/" + name + ".json");
+    auto results = TestHelpers::runTests(profile["tests"], profile, symbols);
 
-  // TESTS
-
-  auto ruleFiles = nlohmann::json::array({
-      Helpers::getJsonFile(dirPath + "/rules1.json"),
-      Helpers::getJsonFile(dirPath + "/rules2.json"),
-      Helpers::getJsonFile(dirPath + "/rules3.json"),
-      Helpers::getJsonFile(dirPath + "/rules4.json"),
-      Helpers::getJsonFile(dirPath + "/rules5.json"),
-      Helpers::getJsonFile(dirPath + "/rules6.json"),
-      Helpers::getJsonFile(dirPath + "/rules7.json"),
-      Helpers::getJsonFile(dirPath + "/rules8.json"),
-      Helpers::getJsonFile(dirPath + "/rules9.json"),
-      Helpers::getJsonFile(dirPath + "/rules10.json"),
-      Helpers::getJsonFile(dirPath + "/rules11.json"),
-      Helpers::getJsonFile(dirPath + "/rules12.json"),
-      Helpers::getJsonFile(dirPath + "/rules13.json"),
-  });
-
-  for (size_t i = 0; i < ruleFiles.size(); i++) {
-    auto results =
-        TestHelpers::runTests(ruleFiles[i]["tests"], ruleFiles[i], symbols);
-    int testsSize = results["testsSize"];
-
-    expect(!results.is_null() && testsSize > 0, "No tests ran");
-
-    Helpers::print("rules" + std::to_string(i + 1) +
+    expect(!results.is_null() && int(results["testsSize"]) > 0,
+           std::string(name) + ".json: no tests ran");
+    Helpers::print(std::string(name) +
                    ".json: " + std::string(results["message"]));
-
-    expect(bool(results["ok"]) == true, results["message"]);
+    expect(bool(results["ok"]), results["message"]);
   }
 
-  // Test1: Special Keys are properly parsed
+  // Key events from and to strings
 
-  auto t1_keyRemapper =
-      new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
-  auto t1_keyEvents =
-      t1_keyRemapper->getKeyEventsFromString("A SK:kekw:1234 B");
+  KeyRemapper keyRemapper(json::object(), symbols);
+  auto keyEvents = keyRemapper.getKeyEventsFromString(
+      "A CmdL+B:down CmdL+B:up delay:25 currentKey NoExist", "C");
+  expect(keyRemapper.stringifyKeyEvents(keyEvents) ==
+             "A:down A:up CmdL:down B:down B:up CmdL:up delay:25 C:down C:up "
+             "Unknown:down Unknown:up",
+         "getKeyEventsFromString/stringifyKeyEvents");
+  expect(keyEvents[2].code == 227 && keyEvents[2].state == 0 &&
+             keyEvents[3].code == 5 && keyEvents[4].state == 1,
+         "getKeyEventsFromString codes and states");
 
-  std::vector<KeyRemapper::KeyEvent> t1_keyEvents2 = {
-      {"A", 30, 0, true},
-      {"A", 30, 1, false},
-      {"SK:kekw", 6969, 1234, true},
-      {"B", 48, 0, true},
-      {"B", 48, 1, false}};
+  // Key codes without a symbol are dropped
 
-  expect(t1_keyEvents.size() == 5, "Test1: results wrong size");
-  expect(t1_keyEvents.size() == t1_keyEvents2.size(),
-         "Test1: results not same size");
+  expect(keyRemapper.applyKeys({{"", 999, 0, true}, {"", 4, 0, true}}).size() ==
+             1,
+         "applyKeys with an unknown key code");
 
-  for (size_t i = 0; i < t1_keyEvents.size(); i++) {
-    auto keyEvent = t1_keyEvents[i];
-    auto keyEvent2 = t1_keyEvents2[i];
+  Helpers::print("Key events tests passed");
 
-    expect(keyEvent.name == keyEvent2.name, "Test1: results not same name");
-    expect(keyEvent.code == keyEvent2.code, "Test1: results not same code");
-    expect(keyEvent.state == keyEvent2.state, "Test1: results not same state");
-    expect(keyEvent.isKeyDown == keyEvent2.isKeyDown,
-           "Test1: results not same isKeyDown");
+  // Invalid profiles fail when they load
+
+  for (auto profile : {
+           R"({ "keybindings": [] })",
+           R"({ "tapDelay": "100" })",
+           R"({ "rules": {} })",
+           R"({ "rules": [{ "send": "A" }] })",
+           R"({ "rules": [{ "keys": [] }] })",
+           R"({ "rules": [{ "keys": ["NoExist"] }] })",
+           R"({ "rules": [{ "keys": ["A"], "if": {} }] })",
+           R"({ "rules": [{ "keys": ["A"], "modifiers": ["NoExist"] }] })",
+           R"({ "rules": [{ "keys": ["A"], "optional": ["NoExist"] }] })",
+           R"({ "rules": [{ "keys": ["A"], "app": 1 }] })",
+           R"({ "rules": [{ "keys": ["A"], "send": "NoExist" }] })",
+           R"({ "rules": [{ "keys": ["A"], "send": "A:up" }] })",
+           R"({ "rules": [{ "keys": ["A"], "tap": "delay:x" }] })",
+           R"({ "rules": [{ "keys": ["A", "B"], "hold": ["C"] }] })",
+           R"({ "rules": [{ "keys": ["A"], "send": ["C", 1] }] })",
+           R"({ "remaps": [{ "from": "A" }] })",
+           R"({ "remaps": [{ "from": "A", "to": "NoExist" }] })",
+           R"({ "remaps": [{ "from": "A", "to": "B", "if": {} }] })",
+       }) {
+    expect(throws([&] { KeyRemapper(json::parse(profile), symbols); }),
+           std::string("no error for the profile ") + profile);
   }
 
-  expect(t1_keyRemapper->stringifyKeyEvents(t1_keyEvents2) ==
-             "A:down A:up SK:kekw:1234 B:down B:up",
-         "Test1: results for stringifyKeyEvents not equal");
+  expect(!throws([&] {
+           KeyRemapper(json::parse(R"({
+             "name": "Profile",
+             "tapDelay": 100,
+             "holdDelay": 300,
+             "remaps": [{ "from": "A", "to": "B", "app": ["com.app"] }],
+             "rules": [{
+               "keys": ["A", "B"],
+               "modifiers": ["CmdL", "F"],
+               "optional": ["any"],
+               "keyboard": "1",
+               "send": ["CmdL+C:down delay:5 currentKey", "D"]
+             }]
+           })"),
+                       symbols);
+         }),
+         "error for a valid profile");
 
-  Helpers::print("Test1: Special keys (SK:) tests passed");
+  Helpers::print("Profile validation tests passed");
 
-  // Test2: Unknown keyEvents passed to applyKeys are passed through
+  // Imports
 
-  auto t2_keyRemapper =
-      new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
-  std::vector<KeyRemapper::KeyEvent> t2_keyEvents = {
-      {"", 30, 0, false},
-      {"", 30, 1, false},
-      {"", 420, 0, false},
-      {"", 420, 1, false},
-  };
-  std::vector<std::tuple<std::string, ushort, ushort, bool>>
-      t2_expectedResults = {
-          {"A", 30, 0, true},
-          {"A", 30, 1, false},
-          {"Unknown", 420, 0, false},
-          {"Unknown", 420, 1, false},
-      };
-
-  auto t2_keyEventsRes = t2_keyRemapper->applyKeys(t2_keyEvents);
-  expect(t2_keyEventsRes.size() == t2_keyEvents.size(), "Test2: wrong size");
-
-  for (size_t i = 0; i < t2_keyEventsRes.size(); i++) {
-    auto keyEvent = t2_keyEvents[i];
-    auto keyEvent2 = t2_keyEventsRes[i];
-
-    expect(keyEvent2.name == std::get<0>(t2_expectedResults[i]),
-           "Test2: not same name");
-    expect(keyEvent2.code == std::get<1>(t2_expectedResults[i]),
-           "Test2: not same code");
-    expect(keyEvent2.state == std::get<2>(t2_expectedResults[i]),
-           "Test2: not same state");
-    expect(keyEvent2.isKeyDown == std::get<3>(t2_expectedResults[i]),
-           "Test2: not same isKeyDown");
-  }
-
-  Helpers::print("Test2: Unknown keys not in symbols tests passed");
-
-  // Test3: Unknown keys passed through string are properly handled
-
-  auto t3_keyRemapper =
-      new KeyRemapper(Helpers::getJsonFile(dirPath + "/rules7.json"), symbols);
-  auto t3_keyEvents =
-      t3_keyRemapper->getKeyEventsFromString("A NoExist:down NoExist:up B");
-
-  expect(t3_keyRemapper->stringifyKeyEvents(t3_keyEvents) ==
-             "A:down A:up Unknown:up Unknown:up B:down B:up",
-         "Test3: Not same string output");
-
-  Helpers::print("Test3: Unknown keys passed through string tests passed");
-
-  // Test4: mappedKeys needs one key name per item of keys
-
-  for (auto mappedKeys : {R"(["B"])", R"(["B", 1])", R"("B")"}) {
-    auto profile = nlohmann::json::parse(
-        R"({ "keybindings": [{ "keys": ["A", "C"], "mappedKeys": )" +
-        std::string(mappedKeys) + R"(, "send": [null, null] }] })");
-    bool threw = false;
-
-    try {
-      KeyRemapper(profile, symbols);
-    } catch (const std::runtime_error &) {
-      threw = true;
-    }
-
-    expect(threw, std::string("Test4: no error for mappedKeys ") + mappedKeys);
-  }
-
-  Helpers::print("Test4: mappedKeys validation tests passed");
-
-  // Test5: keyPresses of a keybinding has to be an array
-
-  bool t5_threw = false;
-  try {
-    KeyRemapper(nlohmann::json::parse(
-                    R"({ "keybindings": [{ "keys": ["A"], "keyPresses": {} }] })"),
-                symbols);
-  } catch (const std::runtime_error &) {
-    t5_threw = true;
-  }
-  expect(t5_threw, "Test5: no error for a keyPresses object");
-
-  Helpers::print("Test5: keybinding keyPresses validation tests passed");
-
-  // Array Object JSON helpers
-
-  auto jsonFile = Helpers::getJsonFile(dirPath + "/imports.json");
-  auto expectedFile = Helpers::getJsonFile(dirPath + "/importsExpected.json");
-  expect(jsonFile.dump() == expectedFile.dump(),
+  expect(Helpers::getJsonFile(dirPath + "/imports.json") ==
+             Helpers::getJsonFile(dirPath + "/importsExpected.json"),
          "imports.json and importsExpected.json didn't match");
+  expect(throws([&] { Helpers::getJsonFile(dirPath + "/noExist.json"); }),
+         "no error for a missing file");
+
+  Helpers::print("Imports tests passed");
 
   Helpers::print("SUCCESS!");
   return 0;

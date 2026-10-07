@@ -1,0 +1,21 @@
+// A rule for several keys, with an action for all of them or one per key
+{
+  "rules": [
+    {
+      "keys": ["H", "J", "K", "L"],
+      "modifiers": ["Caps"],
+      "send": ["LeftArrow:down", "DownArrow:down", "UpArrow:down", "RightArrow:down"]
+    },
+    { "keys": ["A", "B"], "tap": ["X", "Y"], "hold": "Z" },
+    { "keys": ["Caps"] }
+  ],
+  "tests": [
+    ["Caps:down H Caps:up", "LeftArrow"],
+    ["Caps:down J:down K:down K:up J:up Caps:up", "DownArrow:down UpArrow:down UpArrow:up DownArrow:up"],
+    ["Caps:down J:down Caps:up J:up", "DownArrow"],
+    ["H", "H"],
+    ["A", "X"],
+    ["B", "Y"],
+    ["B:down delay:400 B:up", "Z"]
+  ]
+}

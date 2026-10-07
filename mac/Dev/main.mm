@@ -67,17 +67,17 @@ int main(int argc, const char* argv[]) {
 
     runtime.onError = [](std::string err) { std::cerr << err << std::endl; };
 
-    std::string config;
+    std::string config, symbols;
     try {
       config = Config::resolve(configPath);
+      symbols = Helpers::getJsonFile(symbolsPath).dump();
     } catch (const std::exception& err) {
       Helpers::print("Error: " + std::string(err.what()));
       return 1;
     }
 
     auto startResult =
-        runtime.start(config, Helpers::getJsonFile(symbolsPath).dump(),
-                      profileIdx, getFrontmostAppName());
+        runtime.start(config, symbols, profileIdx, getFrontmostAppName());
 
     if (startResult == StartResultReportedError) return 1;
 

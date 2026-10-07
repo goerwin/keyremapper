@@ -1,1 +1,1 @@
-["1", "2", "%dotdotdotArray(importsArray2.json)"]
+["1", "2", "%import(importsArray2.json)"]

@@ -236,21 +236,21 @@ int main(int argc, const char* argv[]) {
   auto start = std::chrono::steady_clock::now();
   tap(runtime, "D");
   tap(runtime, "Z");
-  expect("doesn't block during SK:Delay, sends the keys before it",
+  expect("doesn't block during a delay, sends the keys before it",
          {key("Tab", "down"), key("Tab", "up")});
   while (posted.empty() && msSince(start, std::chrono::steady_clock::now()) < 1000)
     wait(5);
   auto delayTime = msSince(start, std::chrono::steady_clock::now());
-  check("waits for SK:Delay (" + std::to_string(delayTime) + "ms)",
+  check("waits for the delay (" + std::to_string(delayTime) + "ms)",
         delayTime >= 60);
-  expect("sends the keys after SK:Delay, then the ones pressed meanwhile",
+  expect("sends the keys after the delay, then the ones pressed meanwhile",
          {key("Tab", "down"), key("Tab", "up"), key("Z", "down"),
           key("Z", "up")});
 
   tap(runtime, "D");
   runtime.stop();
   wait(100);
-  expect("drops the keys after SK:Delay on stop",
+  expect("drops the keys after a delay on stop",
          {key("Tab", "down"), key("Tab", "up")});
   runtime.load(config, symbolsJson, 0, "");
 
@@ -262,15 +262,12 @@ int main(int argc, const char* argv[]) {
   // Wide margins, since timers fire late on slow machines (CI)
   press(runtime, "I", true);
   wait(50);
-  expect("waits for ifHeldFor", {});
+  expect("waits for the hold", {});
   press(runtime, "I", false);
-  expect("taps when released before ifHeldFor", {key("J", "down"), key("J", "up")});
+  expect("taps when released before the hold", {key("J", "down"), key("J", "up")});
   wait(300);
   expect("cancels the hold on release", {});
 
-  // Resets the tap count, so the release after the hold would be a single tap
-  tap(runtime, "Z");
-  posted.clear();
   press(runtime, "I", true);
   wait(400);
   expect("sends the hold while the key is held", {key("K", "down"), key("K", "up")});
@@ -330,14 +327,6 @@ int main(int argc, const char* argv[]) {
   for (auto& err : errors) Helpers::print("  error: " + err);
   check("reports no errors", errors.empty());
 
-  // Its send isn't a string
-  runtime.load(config, symbolsJson, 0, "");
-  tap(runtime, "L");
-  tap(runtime, "A");
-  check("reports a rule that fails",
-        errors.size() == 1 && errors[0].rfind("ApplyKeysError: ", 0) == 0);
-  expect("stops when a rule fails", {});
-  errors.clear();
   runtime.start(config, symbolsJson, 0, "");
   auto startResult = runtime.start(config, symbolsJson, 99, "");
   check("reports an invalid profile index",
@@ -351,11 +340,18 @@ int main(int argc, const char* argv[]) {
         startResult == StartResultReportedError &&
             errors.back() == "StartError: The config has no \"profiles\" array");
 
+  startResult = runtime.start(
+      R"({"profiles": [{"rules": [{"keys": ["A"], "send": "NoExist"}]}]})",
+      symbolsJson, 0, "");
+  check("reports an invalid rule when it starts",
+        startResult == StartResultReportedError &&
+            errors.back().find("unknown key \"NoExist\"") != std::string::npos);
+
   // Comments and imports are resolved before the runtime gets the config
   auto dir = std::filesystem::temp_directory_path() / "keyremapper-tests";
   std::filesystem::create_directories(dir);
   std::ofstream(dir / "config.json")
-      << "{\n  // comment\n  \"profiles\": \"%array(profiles.json)\"\n}";
+      << "{\n  // comment\n  \"profiles\": \"%import(profiles.json)\"\n}";
   std::ofstream(dir / "profiles.json") << "[{ \"name\": \"Imported\" }]";
   check("resolves the comments and imports of the config",
         nlohmann::json::parse(Config::resolve(dir / "config.json")) ==

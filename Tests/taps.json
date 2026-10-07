@@ -1,0 +1,33 @@
+// tap: on release, if it was pressed less than tapDelay and no key was pressed
+// meanwhile. doubleTap: on the second tap, when it starts less than tapDelay
+// after the first one
+{
+  "tapDelay": 100,
+  "rules": [
+    { "keys": ["Caps"], "tap": "Esc" },
+    { "keys": ["ShiftR"], "send": "ShiftR:down", "tap": "Caps" },
+    { "keys": ["Fn"], "send": "Fn:down", "doubleTap": "F11" },
+    { "keys": ["Q"], "send": "Q", "doubleTap": "W" },
+    { "keys": ["R"], "tap": "A", "doubleTap": "B" }
+  ],
+  "tests": [
+    ["Caps", "Esc"],
+    ["Caps:down delay:50 Caps:up", "Esc"],
+    ["Caps:down delay:100 Caps:up", ""],
+    ["Caps:down A Caps:up", "A"],
+    ["A:down Caps A:up", "A:down Esc A:up"],
+    ["ShiftR", "ShiftR Caps"],
+    ["ShiftR:down A ShiftR:up", "ShiftR:down A ShiftR:up"],
+
+    ["Fn Fn", "Fn Fn F11"],
+    ["Fn delay:100 Fn", "Fn Fn"],
+    ["Fn A Fn", "Fn A Fn"],
+    ["Fn Fn Fn", "Fn Fn F11 Fn"],
+    ["Fn Fn Fn Fn", "Fn Fn F11 Fn Fn F11"],
+    ["Q Q", "Q Q W"],
+    ["R", "A"],
+    ["R R", "A B"],
+    ["R R R", "A B A"],
+    ["R:down delay:100 R:up R", "A"]
+  ]
+}

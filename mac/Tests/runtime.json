@@ -3,24 +3,20 @@
     {
       "delayUntilRepeat": 100,
       "keyRepeatInterval": 20,
-      "keyPressesDelay": 1000,
+      "tapDelay": 1000,
+      "holdDelay": 300,
       "remaps": [
         { "from": "A", "to": "B" },
         { "from": "Back", "to": "Enter" }
       ],
-      "keyPresses": [
-        { "key": "I", "ifPressedNTimes": 1, "send": "J" },
-        { "key": "I", "ifHeldFor": 300, "send": "K" }
-      ],
-      "keybindings": [
-        { "keys": ["I"], "send": [null, null] },
-        { "keys": ["C"], "send": ["CmdL:down V CmdL:up", null] },
-        { "keys": ["D"], "send": ["Tab SK:Delay:60 Tab", null] },
-        { "keys": ["E"], "send": ["VolumeUp", null] },
-        { "keys": ["F"], "send": ["LeftClick:down", "LeftClick:up"] },
-        { "keys": ["G"], "if": { "appName": "com.test.app" }, "send": ["H", null] },
-        { "keys": ["L"], "send": [5, null] },
-        { "keys": ["M"], "send": ["Back", null] }
+      "rules": [
+        { "keys": ["I"], "tap": "J", "hold": "K" },
+        { "keys": ["C"], "send": "CmdL+V" },
+        { "keys": ["D"], "send": "Tab delay:60 Tab" },
+        { "keys": ["E"], "send": "VolumeUp" },
+        { "keys": ["F"], "send": "LeftClick:down" },
+        { "keys": ["G"], "app": "com.test.app", "send": "H" },
+        { "keys": ["M"], "send": "Back" }
       ]
     }
   ]

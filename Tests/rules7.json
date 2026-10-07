@@ -1,7 +1,0 @@
-{
-  "description": ["Special keys (SK:)"],
-  "remaps": [],
-  "keyPresses": [],
-  "keybindings": [],
-  "tests": [["A SK:kekw:1234 B", "A:down A:up SK:kekw:1234 B:down B:up"]]
-}

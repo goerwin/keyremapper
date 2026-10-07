@@ -1,0 +1,33 @@
+// send: the first rule that matches replaces the key, keys without a rule pass
+// through. Keys sent down are released with the key that sent them
+{
+  "rules": [
+    { "keys": ["A"], "send": "B" },
+    { "keys": ["A"], "send": "C" },
+    { "keys": ["D"], "send": "CmdL+W" },
+    { "keys": ["E"], "send": "ShiftL+Tab:down" },
+    { "keys": ["G"], "send": "Tab delay:25 Tab" },
+    { "keys": ["H"], "send": "X currentKey" },
+    { "keys": ["I"] },
+    { "keys": ["J"], "optional": ["any"], "send": "CmdL:down" }
+  ],
+  "tests": [
+    ["A", "B"],
+    ["A:down", "B"],
+    ["A:down A:down A:up", "B"],
+    ["Z", "Z"],
+    ["Z:down Y Z:up", "Z:down Y Z:up"],
+    ["D", "CmdL+W"],
+    ["E", "ShiftL:down Tab:down Tab:up ShiftL:up"],
+    ["E:down Y E:up", "ShiftL:down Tab:down Y Tab:up ShiftL:up"],
+    ["E:down Tab:down E:up Tab:up", "ShiftL:down Tab:down Tab:down ShiftL:up Tab:up"],
+    ["G", "Tab delay:25 Tab"],
+    ["H", "X H"],
+    ["I", ""],
+
+    // A key the user holds is released when the user releases it
+    ["CmdL:down J CmdL:up", "CmdL:down CmdL:down CmdL:up"],
+    ["J:down CmdL:down J:up CmdL:up", "CmdL:down CmdL:down CmdL:up"],
+    ["J:down Y J:up", "CmdL:down Y CmdL:up"]
+  ]
+}

@@ -1,0 +1,33 @@
+// modifiers have to be held and other held modifiers have to be in optional
+// (or optional has "any"). The keys sent by the modifiers are released while
+// the rule's key is pressed
+{
+  "rules": [
+    { "keys": ["H"], "modifiers": ["CmdL"], "send": "LeftArrow" },
+    { "keys": ["J"], "modifiers": ["CmdL"], "optional": ["ShiftL"], "send": "DownArrow" },
+    { "keys": ["K"], "modifiers": ["CmdL"], "optional": ["any"], "send": "UpArrow" },
+    { "keys": ["L"], "modifiers": ["CmdL"], "send": "CmdL+ShiftL+L" },
+    { "keys": ["M"], "modifiers": ["F"], "send": "Enter" },
+    { "keys": ["N"], "send": "Y" },
+    { "keys": ["ShiftR"], "modifiers": ["ShiftL"], "send": "Caps" }
+  ],
+  "tests": [
+    ["CmdL:down H CmdL:up", "CmdL:down CmdL:up LeftArrow CmdL:down CmdL:up"],
+    ["CmdL:down H:down CmdL:up H:up", "CmdL:down CmdL:up LeftArrow"],
+    ["H", "H"],
+    ["CmdL:down ShiftL:down H ShiftL:up CmdL:up", "CmdL:down ShiftL:down H ShiftL:up CmdL:up"],
+
+    ["CmdL:down ShiftL:down J ShiftL:up CmdL:up", "CmdL:down ShiftL:down CmdL:up DownArrow CmdL:down ShiftL:up CmdL:up"],
+    ["CmdL:down AltL:down J AltL:up CmdL:up", "CmdL:down AltL:down J AltL:up CmdL:up"],
+    ["CmdL:down AltL:down K AltL:up CmdL:up", "CmdL:down AltL:down CmdL:up UpArrow CmdL:down AltL:up CmdL:up"],
+    ["CmdL:down L CmdL:up", "CmdL:down CmdL:up CmdL+ShiftL+L CmdL:down CmdL:up"],
+
+    // Any key can be a modifier, only the real modifiers have to be listed
+    ["F:down M F:up", "F:down F:up Enter F:down F:up"],
+    ["M", "M"],
+    ["N", "Y"],
+    ["F:down N F:up", "F:down Y F:up"],
+    ["ShiftL:down N ShiftL:up", "ShiftL:down N ShiftL:up"],
+    ["ShiftL:down ShiftR ShiftL:up", "ShiftL:down ShiftL:up Caps ShiftL:down ShiftL:up"]
+  ]
+}
