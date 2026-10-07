@@ -187,6 +187,18 @@ And the updates with:
 
 - `SPARKLE_PRIVATE_KEY`: the private EdDSA key whose public key is `SUPublicEDKey` in `KeyRemapper/Info.plist`. Sparkle's `generate_keys` keeps it in the login keychain (account `keyremapper`), `generate_keys --account keyremapper -x key.txt` exports it
 
+## Troubleshooting
+
+If you see **"Couldn't register the Daemon: The operation couldn't be completed. Operation not permitted"** on a Mac that had an older KeyRemapper version installed, a leftover legacy daemon may be blocking registration. Quit KeyRemapper, open Terminal, and run:
+
+```sh
+sudo launchctl remove co.goerwin.KeyRemapperDaemon
+sudo rm -f /Library/LaunchDaemons/co.goerwin.KeyRemapperDaemon.plist
+sudo rm -f /Library/PrivilegedHelperTools/co.goerwin.KeyRemapperDaemon
+```
+
+Then reopen KeyRemapper and allow it under **System Settings > General > Login Items & Extensions** if prompted.
+
 ## License
 
 KeyRemapper's source code is licensed under the [MIT License](LICENSE). The KeyRemapper name, logo, app icon, menu bar icon, and artwork in `images/` and `KeyRemapper/Assets.xcassets/` are not covered by that license and are all rights reserved. Unofficial forks and redistributions must use their own branding and must not imply endorsement or affiliation.
