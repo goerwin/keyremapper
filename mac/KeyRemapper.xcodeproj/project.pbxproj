@@ -24,6 +24,7 @@
 		F9D1A0022E00000000000002 /* DaemonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000001 /* DaemonClient.swift */; };
 		F9D1A0022E00000000000004 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000003 /* ConfigStore.swift */; };
 		F9D1A0022E00000000000006 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0022E00000000000005 /* StatusBarController.swift */; };
+		F9D1A0032E00000000000002 /* ConfigFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0032E00000000000001 /* ConfigFile.mm */; };
 		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
 		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -103,6 +104,11 @@
 		F9D1A0022E00000000000001 /* DaemonClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonClient.swift; sourceTree = "<group>"; };
 		F9D1A0022E00000000000003 /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		F9D1A0022E00000000000005 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		F9D1A0032E00000000000001 /* ConfigFile.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConfigFile.mm; sourceTree = "<group>"; };
+		F9D1A0032E00000000000003 /* ConfigFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConfigFile.h; sourceTree = "<group>"; };
+		F9D1A0032E00000000000004 /* KeyRemapper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KeyRemapper-Bridging-Header.h"; sourceTree = "<group>"; };
+		F9D1A0032E00000000000005 /* StartResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StartResult.h; sourceTree = "<group>"; };
+		F9D1A0032E00000000000006 /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
 		F9C759FB27ED7BE000F2E31C /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -181,6 +187,9 @@
 				F9C759FB27ED7BE000F2E31C /* Global.swift */,
 				F9D1A0022E00000000000005 /* StatusBarController.swift */,
 				F9D1A0022E00000000000003 /* ConfigStore.swift */,
+				F9D1A0032E00000000000003 /* ConfigFile.h */,
+				F9D1A0032E00000000000001 /* ConfigFile.mm */,
+				F9D1A0032E00000000000004 /* KeyRemapper-Bridging-Header.h */,
 				F9D1A0022E00000000000001 /* DaemonClient.swift */,
 				F9B4D1B527F292B400FC513C /* AppProviderXPC.swift */,
 				F9A8926327644E35009ACA0A /* Assets.xcassets */,
@@ -223,6 +232,8 @@
 			children = (
 				F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */,
 				F95EC5BE27EF1F2900B370B2 /* Constants.swift */,
+				F9D1A0032E00000000000005 /* StartResult.h */,
+				F9D1A0032E00000000000006 /* Config.hpp */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -338,6 +349,7 @@
 				F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */,
 				F9D1A0022E00000000000006 /* StatusBarController.swift in Sources */,
 				F9D1A0022E00000000000004 /* ConfigStore.swift in Sources */,
+				F9D1A0032E00000000000002 /* ConfigFile.mm in Sources */,
 				F9D1A0022E00000000000002 /* DaemonClient.swift in Sources */,
 				F9B4D1B227F2754300FC513C /* LoggerView.swift in Sources */,
 				F9B4D1B427F27C2100FC513C /* LoggerWindowController.swift in Sources */,
@@ -524,6 +536,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "KeyRemapper/KeyRemapper-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -556,6 +569,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "KeyRemapper/KeyRemapper-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

@@ -12,6 +12,9 @@
 	</array>
 	<key>ProcessType</key>
 	<string>Interactive</string>
+	<!-- The daemon quits with the app, reopening it would wait for the default 10s to relaunch it -->
+	<key>ThrottleInterval</key>
+	<integer>1</integer>
 	<key>MachServices</key>
 	<dict>
 		<key>co.goerwin.KeyRemapperDaemon</key>

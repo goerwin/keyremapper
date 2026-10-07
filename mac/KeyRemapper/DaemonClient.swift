@@ -34,13 +34,13 @@ final class DaemonClient {
 
   // Called when the daemon quits or crashes, after that it isn't remapping anymore
   var onDisconnect: (() -> Void)?
+  // The daemon stops remapping when it reports an error (eg. a rule that fails)
+  var onError: ((String) -> Void)?
 
   private var connection: NSXPCConnection?
-  private let appProvider = AppProviderXPC()
+  private lazy var appProvider = AppProviderXPC { [weak self] err in self?.onError?(err) }
 
   func register() -> Registration {
-    if !removeLegacyDaemon() { return .failed("Couldn't remove the previous Daemon") }
-
     if service.status != .enabled && service.status != .requiresApproval {
       do {
         try service.register()
@@ -60,24 +60,23 @@ final class DaemonClient {
     try service.unregister()
   }
 
-  func start(configPath: String, symbolsPath: String, profileIdx: Int) throws {
-    if version() != Constants.VERSION { restart() }
+  // config and symbols are JSON, with the config imports already resolved
+  func start(config: String, symbols: String, profileIdx: Int) throws {
+    if let version = version(), version != Constants.VERSION { restart() }
 
     guard let version = version() else { throw DaemonError.unreachable }
     if version != Constants.VERSION { throw DaemonError.wrongVersion(version) }
 
     let result = call { proxy, reply in
-      proxy.start(
-        configPath: configPath, symbolsPath: symbolsPath, profileIdx: profileIdx,
-        withReply: reply)
+      proxy.start(config: config, symbols: symbols, profileIdx: profileIdx, withReply: reply)
     }
 
     switch result {
-    case 0: return
+    case .ok?: return
     case nil: throw DaemonError.unreachable
-    case 1: throw DaemonError.noAccessibility
-    case 3: throw DaemonError.reported
-    case let code?: throw DaemonError.startFailed(code)
+    case .noAccessibility?: throw DaemonError.noAccessibility
+    case .reportedError?: throw DaemonError.reported
+    case let result?: throw DaemonError.startFailed(result.rawValue)
     }
   }
 
@@ -162,23 +161,5 @@ final class DaemonClient {
     let connection = self.connection
     self.connection = nil
     connection?.invalidate()
-  }
-
-  // Versions up to 4.x installed the daemon with SMJobBless. It uses the same label, so it has
-  // to be removed (as admin, once) before registering the daemon bundled in the app
-  private func removeLegacyDaemon() -> Bool {
-    let label = Constants.MACH_SERVICE_NAME
-    let paths = [
-      "/Library/LaunchDaemons/\(label).plist", "/Library/PrivilegedHelperTools/\(label)",
-    ].filter { FileManager.default.fileExists(atPath: $0) }
-
-    if paths.isEmpty { return true }
-
-    let command = "launchctl bootout system/\(label); rm -f \(paths.joined(separator: " "))"
-    var error: NSDictionary?
-    NSAppleScript(source: "do shell script \"\(command)\" with administrator privileges")?
-      .executeAndReturnError(&error)
-
-    return error == nil
   }
 }

@@ -4,10 +4,10 @@
 #import "AppKit/AppKit.h"
 #import "Foundation/Foundation.h"
 
-#import "co_goerwin_KeyRemapperDaemon-Swift.h"
-
 #import "./AppBridge.h"
 #import "./Runtime.hpp"
+
+#import "co_goerwin_KeyRemapperDaemon-Swift.h"
 
 NSString* toNSString(std::string str) {
   return [NSString stringWithUTF8String:str.c_str()];
@@ -25,12 +25,12 @@ NSString* toNSString(std::string str) {
   return self;
 }
 
-- (int)start:(NSString*)configPath
-    withSymbolsPath:(NSString*)symbolsPath
-     withProfileIdx:(int)profileIdx
-        withAppName:(NSString*)appName {
-  return runtime.start([configPath UTF8String], [symbolsPath UTF8String],
-                       profileIdx, [appName UTF8String]);
+- (StartResult)start:(NSString*)config
+         withSymbols:(NSString*)symbols
+      withProfileIdx:(int)profileIdx
+         withAppName:(NSString*)appName {
+  return runtime.start([config UTF8String], [symbols UTF8String], profileIdx,
+                       [appName UTF8String]);
 }
 
 - (void)stop {

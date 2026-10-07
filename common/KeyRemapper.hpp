@@ -165,6 +165,11 @@ class KeyRemapper {
       }
 
       auto keyPressesInfo = getKeyPressesInfo(keyName, isKeyDown);
+
+      // No later tap could fire, so the next one starts a new count
+      if (!isKeyDown && !hasKeyPressesAbove(keyName, keyPressesCount))
+        keyPressesCount = 0;
+
       if (!keyPressesInfo.is_null()) {
         setValues(keyPressesInfo["set"]);
         localKeyEvents = Helpers::concatArrays(
@@ -360,7 +365,7 @@ class KeyRemapper {
 
       if (!ifConditions(keypress["if"])) continue;
       if (key != keypress["key"]) continue;
-      if (keyPressesCount != keypress["ifPressedNTimes"]) continue;
+      if (keyPressesCount != getPressedNTimes(keypress)) continue;
 
       return {{"send", keypress["send"]},
               {"set", keypress["set"]},
@@ -368,6 +373,24 @@ class KeyRemapper {
     }
 
     return {};
+  }
+
+  bool hasKeyPressesAbove(String key, short count) {
+    for (auto &keypress : keyPresses) {
+      if (key != keypress["key"]) continue;
+      if (getPressedNTimes(keypress) <= count) continue;
+      if (!ifConditions(keypress["if"])) continue;
+      return true;
+    }
+
+    return false;
+  }
+
+  // A single tap by default. -1 for the ifHeldFor ones, they aren't taps
+  int getPressedNTimes(json &keypress) {
+    if (keypress["ifPressedNTimes"].is_number())
+      return keypress["ifPressedNTimes"].get<int>();
+    return keypress["ifHeldFor"].is_number() ? -1 : 1;
   }
 
   json getKeyHoldInfo(String key) {

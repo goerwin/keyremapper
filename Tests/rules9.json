@@ -5,7 +5,7 @@
   ],
   "remaps": [],
   "keyPresses": [
-    { "key": "H", "ifPressedNTimes": 1, "send": "T" },
+    { "key": "H", "send": "T" },
     { "key": "H", "ifHeldFor": 400, "send": "W" },
     {
       "key": "M",

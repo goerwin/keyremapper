@@ -1,9 +1,10 @@
 import Foundation
 
 @objc(ServiceProviderXPCProtocol) protocol ServiceProviderXPCProtocol {
+  // config and symbols are JSON, with the config imports already resolved
   func start(
-    configPath: String, symbolsPath: String, profileIdx: Int,
-    withReply reply: @escaping (Int) -> Void)
+    config: String, symbols: String, profileIdx: Int,
+    withReply reply: @escaping (StartResult) -> Void)
   func stop()
   func kill()
   func startLogging()

@@ -5,6 +5,7 @@
 #import "AppKit/AppKit.h"
 #import "Foundation/Foundation.h"
 
+#import "../Common/Config.hpp"
 #import "../Daemon/Runtime.hpp"
 
 static Runtime runtime;
@@ -66,19 +67,27 @@ int main(int argc, const char* argv[]) {
 
     runtime.onError = [](std::string err) { std::cerr << err << std::endl; };
 
+    std::string config;
+    try {
+      config = Config::resolve(configPath);
+    } catch (const std::exception& err) {
+      Helpers::print("Error: " + std::string(err.what()));
+      return 1;
+    }
+
     auto startResult =
-        runtime.start(configPath, symbolsPath, profileIdx,
-                       getFrontmostAppName());
+        runtime.start(config, Helpers::getJsonFile(symbolsPath).dump(),
+                      profileIdx, getFrontmostAppName());
 
-    if (startResult == 3) return 1;
+    if (startResult == StartResultReportedError) return 1;
 
-    if (startResult == 1) {
+    if (startResult == StartResultNoAccessibility) {
       Helpers::print(
           "Error: Accessibility permission is missing for this terminal app");
       return 1;
     }
 
-    if (startResult != 0) {
+    if (startResult != StartResultOk) {
       Helpers::print("Error: start failed with code " +
                      std::to_string(startResult));
       return 1;

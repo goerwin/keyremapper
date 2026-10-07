@@ -3,11 +3,13 @@
 
 #import <Foundation/Foundation.h>
 
+#import "../Common/StartResult.h"
+
 @interface AppBridge : NSObject
-- (int)start:(NSString*)configPath
-    withSymbolsPath:(NSString*)symbolsPath
-     withProfileIdx:(int)profileIdx
-        withAppName:(NSString*)appName;
+- (StartResult)start:(NSString*)config
+         withSymbols:(NSString*)symbols
+      withProfileIdx:(int)profileIdx
+         withAppName:(NSString*)appName;
 - (void)stop;
 - (void)startLogging;
 - (void)stopLogging;

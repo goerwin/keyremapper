@@ -11,56 +11,21 @@
 // modifiers posted by the remapper, adds them to every native mouse event
 class Mouse {
  public:
+  // The native events updateNativeEvent takes
+  static constexpr CGEventMask eventMask =
+      CGEventMaskBit(kCGEventLeftMouseDown) |
+      CGEventMaskBit(kCGEventLeftMouseUp) |
+      CGEventMaskBit(kCGEventLeftMouseDragged) |
+      CGEventMaskBit(kCGEventRightMouseDown) |
+      CGEventMaskBit(kCGEventRightMouseUp) |
+      CGEventMaskBit(kCGEventRightMouseDragged) |
+      CGEventMaskBit(kCGEventMouseMoved);
+
   double doubleClickSpeed = 500;
 
   Mouse(const Modifiers& modifiers,
         const std::function<void(CGEventRef)>& postEvent)
       : modifiers(modifiers), postEvent(postEvent) {}
-  ~Mouse() { stop(); }
-
-  // 1: no Accessibility permission, 2: couldn't add the event tap
-  int start() {
-    stop();
-
-    // NOTE: kCGEventTapOptionListenOnly does not fail when clicking the app's
-    // menu bar but it doesnt let me modify the event
-    eventTap = CGEventTapCreate(
-        kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
-        CGEventMaskBit(kCGEventLeftMouseDown) |
-            CGEventMaskBit(kCGEventLeftMouseUp) |
-            CGEventMaskBit(kCGEventLeftMouseDragged) |
-            CGEventMaskBit(kCGEventRightMouseDown) |
-            CGEventMaskBit(kCGEventRightMouseUp) |
-            CGEventMaskBit(kCGEventRightMouseDragged) |
-            CGEventMaskBit(kCGEventMouseMoved),
-        eventTapCb, this);
-
-    if (!eventTap) return 1;
-
-    runLoopSource =
-        CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
-    if (!runLoopSource) return 2;
-
-    // NOTE: kCFRunLoopDefaultMode has issues with clicking the app's menubar
-    CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource,
-                       kCFRunLoopCommonModes);
-    return 0;
-  }
-
-  void stop() {
-    if (eventTap) {
-      CFMachPortInvalidate(eventTap);
-      CFRelease(eventTap);
-      eventTap = NULL;
-    }
-
-    if (runLoopSource) {
-      CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource,
-                            kCFRunLoopCommonModes);
-      CFRelease(runLoopSource);
-      runLoopSource = NULL;
-    }
-  }
 
   void postClick(bool isMouseDown, bool isRight = false) {
     CGEventRef locationEvent = CGEventCreate(NULL);
@@ -98,44 +63,12 @@ class Mouse {
     CFRelease(event);
   }
 
- private:
-  enum class Status { none, down, up };
-
-  // Tells the clicks posted here apart from the native mouse events
-  static constexpr double postedEventMark = 69;
-
-  const Modifiers& modifiers;
-  const std::function<void(CGEventRef)>& postEvent;
-  CFMachPortRef eventTap = NULL;
-  CFRunLoopSourceRef runLoopSource = NULL;
-
-  int clickCount = 0;
-  CGPoint location = {};
-  double lastPressTime = 0;
-  bool isRightButton = false;
-  Status status = Status::none;
-
-  static CGEventRef eventTapCb(CGEventTapProxy proxy, CGEventType type,
-                               CGEventRef event, void* refcon) {
-    auto self = (Mouse*)refcon;
-
-    // macOS disables the tap when the main thread is too slow to answer and
-    // it doesn't come back on its own
-    if (type == kCGEventTapDisabledByTimeout ||
-        type == kCGEventTapDisabledByUserInput) {
-      if (self->eventTap) CGEventTapEnable(self->eventTap, true);
-      return event;
-    }
-
-    if (CGEventGetDoubleValueField(event, kCGEventSourceUserData) !=
-        postedEventMark)
-      self->updateNativeEvent(event, type);
-
-    return event;
-  }
-
   // While a remapped click is held, moving the mouse has to drag
-  void updateNativeEvent(CGEventRef event, CGEventType type) {
+  void updateNativeEvent(CGEventType type, CGEventRef event) {
+    if (CGEventGetDoubleValueField(event, kCGEventSourceUserData) ==
+        postedEventMark)
+      return;
+
     bool isMoving = type == kCGEventMouseMoved ||
                     type == kCGEventLeftMouseDragged ||
                     type == kCGEventRightMouseDragged;
@@ -150,4 +83,19 @@ class Mouse {
 
     CGEventSetFlags(event, modifiers.flags());
   }
+
+ private:
+  enum class Status { none, down, up };
+
+  // Tells the clicks posted here apart from the native mouse events
+  static constexpr double postedEventMark = 69;
+
+  const Modifiers& modifiers;
+  const std::function<void(CGEventRef)>& postEvent;
+
+  int clickCount = 0;
+  CGPoint location = {};
+  double lastPressTime = 0;
+  bool isRightButton = false;
+  Status status = Status::none;
 };

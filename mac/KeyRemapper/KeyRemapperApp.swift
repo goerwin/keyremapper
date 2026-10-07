@@ -63,6 +63,11 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
       self.isRunning = false
       self.updateMenu()
     }
+    daemon.onError = { [unowned self] err in
+      self.isRunning = false
+      self.updateMenu()
+      Global.showCloseAlert("Error in Daemon", err)
+    }
 
     // Saving the config reloads the active profile, also after errors so fixing them resumes it
     config.onChange = { [unowned self] in
@@ -71,7 +76,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     }
     config.startWatching()
 
-    activeProfileIdx = config.activeProfileIdx() ?? 0
+    activeProfileIdx = (try? config.load())?.activeProfileIdx ?? 0
     start()
   }
 
@@ -88,16 +93,23 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     if !config.exists {
       return Global.showCloseAlert("File not found", "\(config.configPath) not found")
     }
-    guard let symbolsPath = Global.getResourceSymbolsPath() else { return }
+    guard let symbols = Global.getResourceSymbols() else { return }
+
+    let loadedConfig: ConfigStore.Config
+    do {
+      loadedConfig = try config.load()
+    } catch {
+      return Global.showCloseAlert("Invalid config", error.localizedDescription)
+    }
 
     // The active profile could have been removed from the config. No profiles means the config
     // is invalid, the daemon reports it
-    let profileCount = config.profileNames().count
+    let profileCount = loadedConfig.profileNames.count
     if profileCount > 0 && activeProfileIdx >= profileCount { activeProfileIdx = 0 }
 
     do {
       try daemon.start(
-        configPath: config.configPath, symbolsPath: symbolsPath, profileIdx: activeProfileIdx)
+        config: loadedConfig.json, symbols: symbols, profileIdx: activeProfileIdx)
       isRunning = true
       updateMenu()
     } catch DaemonClient.DaemonError.noAccessibility {
@@ -139,7 +151,7 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
   private func updateMenu() {
     statusBar.update(
       .init(
-        isRunning: isRunning, profileNames: config.profileNames(),
+        isRunning: isRunning, profileNames: (try? config.load())?.profileNames ?? [],
         activeProfileIdx: activeProfileIdx,
         launchesAtLogin: SMAppService.mainApp.status == .enabled))
   }
@@ -207,8 +219,9 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
     controller.showWindow(controller.window)
   }
 
+  // The daemon quits when the connection closes. Killing it before would make the connection,
+  // still open, launch a new one that nobody stops
   private func quit() {
-    daemon.kill()
     NSApplication.shared.terminate(self)
   }
 }

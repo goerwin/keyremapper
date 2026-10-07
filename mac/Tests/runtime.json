@@ -15,7 +15,8 @@
         { "keys": ["D"], "send": ["Tab SK:Delay:60 Tab", null] },
         { "keys": ["E"], "send": ["VolumeUp", null] },
         { "keys": ["F"], "send": ["LeftClick:down", "LeftClick:up"] },
-        { "keys": ["G"], "if": { "appName": "com.test.app" }, "send": ["H", null] }
+        { "keys": ["G"], "if": { "appName": "com.test.app" }, "send": ["H", null] },
+        { "keys": ["L"], "send": [5, null] }
       ]
     }
   ]
