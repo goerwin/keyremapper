@@ -12,8 +12,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../Common/StartResult.h"
-
 // https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/HID/new_api_10_5/tn2187.html
 
 // Consumer keys (eg. media buttons): their scancode in symbols.json and the
@@ -38,29 +36,22 @@ inline const std::vector<ConsumerKey> consumerKeys = {
 // Consumer devices that aren't keyboards (eg. the media buttons of a remote,
 // which share the device with its pointer) can't be seized without losing the
 // pointer. Their consumer keys are read without seizing, and the events macOS
-// makes from them are dropped by an event tap
+// makes from them have to be dropped (shouldDrop)
 class Keyboards {
  public:
+  // The native events shouldDrop takes
+  static constexpr CGEventMask eventMask =
+      CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) |
+      CGEventMaskBit(NSEventTypeSystemDefined);
+
   // scancode, isKeyDown, vendorId, productId, manufacturer, product
   std::function<void(ushort, bool, int, int, std::string, std::string)>
       onInput;
 
   ~Keyboards() { stop(); }
 
-  StartResult start() {
+  void start() {
     stop();
-
-    eventTap = CGEventTapCreate(
-        kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
-        CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) |
-            CGEventMaskBit(NSEventTypeSystemDefined),
-        eventTapCb, this);
-    if (!eventTap) return StartResultNoAccessibility;
-
-    runLoopSource =
-        CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
-    CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource,
-                       kCFRunLoopCommonModes);
 
     manager = createManager(
         {{kHIDPage_GenericDesktop, kHIDUsage_GD_Keyboard},
@@ -74,26 +65,18 @@ class Keyboards {
     IOHIDManagerRegisterDeviceMatchingCallback(consumerManager,
                                                consumerDeviceMatchedCb, this);
     IOHIDManagerOpen(consumerManager, kIOHIDOptionsTypeNone);
-    return StartResultOk;
   }
 
   void stop() {
     stopManager(manager, kIOHIDOptionsTypeSeizeDevice);
     stopManager(consumerManager, kIOHIDOptionsTypeNone);
     isSenderConsumerDevice.clear();
+  }
 
-    if (eventTap) {
-      CFMachPortInvalidate(eventTap);
-      CFRelease(eventTap);
-      eventTap = NULL;
-    }
-
-    if (runLoopSource) {
-      CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource,
-                            kCFRunLoopCommonModes);
-      CFRelease(runLoopSource);
-      runLoopSource = NULL;
-    }
+  // Whether macOS made the event from a consumer key of a device that isn't
+  // seized
+  bool shouldDrop(CGEventType type, CGEventRef event) {
+    return isConsumerKeyEvent(type, event) && isFromConsumerDevice(event);
   }
 
   // -1 for the usages that aren't keys
@@ -135,8 +118,6 @@ class Keyboards {
 
   IOHIDManagerRef manager = NULL;
   IOHIDManagerRef consumerManager = NULL;
-  CFMachPortRef eventTap = NULL;
-  CFRunLoopSourceRef runLoopSource = NULL;
   std::unordered_map<uint64_t, bool> isSenderConsumerDevice;
 
   IOHIDManagerRef createManager(
@@ -250,23 +231,6 @@ class Keyboards {
     // The events of the new device could have been taken as not from a
     // consumer device
     ((Keyboards *)context)->isSenderConsumerDevice.clear();
-  }
-
-  static CGEventRef eventTapCb(CGEventTapProxy proxy, CGEventType type,
-                               CGEventRef event, void *refcon) {
-    auto self = (Keyboards *)refcon;
-
-    // macOS disables the tap when the main thread is too slow to answer and
-    // it doesn't come back on its own
-    if (type == kCGEventTapDisabledByTimeout ||
-        type == kCGEventTapDisabledByUserInput) {
-      if (self->eventTap) CGEventTapEnable(self->eventTap, true);
-      return event;
-    }
-
-    if (isConsumerKeyEvent(type, event) && self->isFromConsumerDevice(event))
-      return NULL;
-    return event;
   }
 
   bool isFromConsumerDevice(CGEventRef event) {

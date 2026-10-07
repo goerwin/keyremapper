@@ -7,6 +7,7 @@
 
 #import "../../common/Helpers.hpp"
 #import "../../common/KeyRemapper.hpp"
+#import "../Common/StartResult.h"
 
 #import "./Keyboards.hpp"
 #import "./Keys.hpp"
@@ -21,6 +22,7 @@
 // Everything runs on the main run loop
 class Runtime {
  public:
+  // It's already stopped by then, it doesn't keep running after an error
   std::function<void(std::string)> onError = [](std::string) {};
 
   // Replaceable so the tests can record what would reach the OS
@@ -37,27 +39,27 @@ class Runtime {
                     std::string appName) {
     try {
       load(config, symbols, profileIdx, appName);
-      auto result = mouse.start();
-      if (result == StartResultOk) {
-        capslock = Capslock::getState();
-        keyboards.onInput = [this](ushort scancode, bool isKeyDown,
-                                   int vendorId, int productId,
-                                   std::string manufacturer,
-                                   std::string product) {
-          handleInput(scancode, isKeyDown, vendorId, productId, manufacturer,
-                      product);
-        };
-        result = keyboards.start();
+      auto result = startEventTap();
+      if (result != StartResultOk) {
+        stop();
+        return result;
       }
-      if (result != StartResultOk) stop();
-      return result;
+
+      capslock = Capslock::getState();
+      keyboards.onInput = [this](ushort scancode, bool isKeyDown, int vendorId,
+                                 int productId, std::string manufacturer,
+                                 std::string product) {
+        handleInput(scancode, isKeyDown, vendorId, productId, manufacturer,
+                    product);
+      };
+      keyboards.start();
+      return StartResultOk;
     } catch (const std::exception& err) {
-      onError("StartError: " + std::string(err.what()));
+      fail("StartError: " + std::string(err.what()));
     } catch (...) {
-      onError("StartError: Unknown error");
+      fail("StartError: Unknown error");
     }
 
-    stop();
     return StartResultReportedError;
   }
 
@@ -99,7 +101,7 @@ class Runtime {
     stopTimer(delayTimer);
     pendingKeyEvents.clear();
     keyboards.stop();
-    mouse.stop();
+    stopEventTap();
     keyRemapper = nullptr;
     vkCodes.clear();
     modifiers = {};
@@ -136,9 +138,9 @@ class Runtime {
           {{"", scancode, ushort(isKeyDown ? 0 : 1), false}}));
       startHoldTimer();
     } catch (const std::exception& err) {
-      onError("ApplyKeysError: " + std::string(err.what()));
+      fail("ApplyKeysError: " + std::string(err.what()));
     } catch (...) {
-      onError("ApplyKeysError: Unknown error");
+      fail("ApplyKeysError: Unknown error");
     }
   }
 
@@ -156,6 +158,68 @@ class Runtime {
   std::deque<KeyRemapper::KeyEvent> pendingKeyEvents;
   Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
+  CFMachPortRef eventTap = NULL;
+  CFRunLoopSourceRef eventTapSource = NULL;
+
+  // For the native events of the mouse and the keyboards
+  StartResult startEventTap() {
+    // NOTE: kCGEventTapOptionListenOnly does not fail when clicking the app's
+    // menu bar but it doesnt let me modify the event
+    eventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap,
+                                kCGEventTapOptionDefault,
+                                Mouse::eventMask | Keyboards::eventMask,
+                                eventTapCb, this);
+    if (!eventTap) return StartResultNoAccessibility;
+
+    eventTapSource =
+        CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
+    if (!eventTapSource) return StartResultEventTapFailed;
+
+    // NOTE: kCFRunLoopDefaultMode has issues with clicking the app's menubar
+    CFRunLoopAddSource(CFRunLoopGetMain(), eventTapSource,
+                       kCFRunLoopCommonModes);
+    return StartResultOk;
+  }
+
+  void stopEventTap() {
+    if (eventTap) {
+      CFMachPortInvalidate(eventTap);
+      CFRelease(eventTap);
+      eventTap = NULL;
+    }
+
+    if (eventTapSource) {
+      CFRunLoopRemoveSource(CFRunLoopGetMain(), eventTapSource,
+                            kCFRunLoopCommonModes);
+      CFRelease(eventTapSource);
+      eventTapSource = NULL;
+    }
+  }
+
+  static CGEventRef eventTapCb(CGEventTapProxy proxy, CGEventType type,
+                               CGEventRef event, void* refcon) {
+    auto self = (Runtime*)refcon;
+
+    // macOS disables the tap when the main thread is too slow to answer and
+    // it doesn't come back on its own
+    if (type == kCGEventTapDisabledByTimeout ||
+        type == kCGEventTapDisabledByUserInput) {
+      if (self->eventTap) CGEventTapEnable(self->eventTap, true);
+      return event;
+    }
+
+    if (CGEventMaskBit(type) & Mouse::eventMask)
+      self->mouse.updateNativeEvent(type, event);
+    else if (self->keyboards.shouldDrop(type, event))
+      return NULL;
+
+    return event;
+  }
+
+  void fail(std::string err) {
+    stop();
+    onError(err);
+  }
 
   // In order. An SK:Delay holds the events after it, also the ones that come
   // later, until it's over
@@ -326,7 +390,9 @@ class Runtime {
       try {
         postKeyEvents(keyRemapper->applyHold());
       } catch (const std::exception& err) {
-        onError("ApplyHoldError: " + std::string(err.what()));
+        fail("ApplyHoldError: " + std::string(err.what()));
+      } catch (...) {
+        fail("ApplyHoldError: Unknown error");
       }
     });
   }

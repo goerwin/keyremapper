@@ -63,6 +63,11 @@ private class AppDelegate: NSObject, NSApplicationDelegate {
       self.isRunning = false
       self.updateMenu()
     }
+    daemon.onError = { [unowned self] err in
+      self.isRunning = false
+      self.updateMenu()
+      Global.showCloseAlert("Error in Daemon", err)
+    }
 
     // Saving the config reloads the active profile, also after errors so fixing them resumes it
     config.onChange = { [unowned self] in

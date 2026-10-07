@@ -109,6 +109,12 @@ dismissAlert
 check "stops remapping with an invalid config" menuHas Resume
 cp -p "$configBackup" "$config"
 check "resumes when the config is fixed" waitFor menuHas Pause
+echo '{ "profiles": {} }' > "$config"
+check "reports the errors of the daemon" waitFor hasAlert
+dismissAlert
+check "stops remapping on errors of the daemon" menuHas Resume
+cp -p "$configBackup" "$config"
+check "resumes when the config is fixed again" waitFor menuHas Pause
 check "shows no alerts after fixing the config" hasNoAlerts
 clickMenu Pause
 touch "$config" && sleep 1.5

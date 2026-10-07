@@ -321,6 +321,15 @@ int main(int argc, const char* argv[]) {
 
   for (auto& err : errors) Helpers::print("  error: " + err);
   check("reports no errors", errors.empty());
+
+  // Its send isn't a string
+  runtime.load(config, symbolsJson, 0, "");
+  tap(runtime, "L");
+  tap(runtime, "A");
+  check("reports a rule that fails",
+        errors.size() == 1 && errors[0].rfind("ApplyKeysError: ", 0) == 0);
+  expect("stops when a rule fails", {});
+  errors.clear();
   runtime.start(config, symbolsJson, 0, "");
   auto startResult = runtime.start(config, symbolsJson, 99, "");
   check("reports an invalid profile index",
