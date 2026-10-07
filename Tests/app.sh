@@ -28,7 +28,7 @@ clickMenu() {
   ui "click menu item \"$1\" of $menu" >/dev/null || true
   sleep 1
 }
-daemonPid() { pgrep -f 'MacOS/co.goerwin.KeyRemapperDaemon' || true; }
+daemonPid() { pgrep -f 'MacOS/KeyRemapperDaemon' || true; }
 daemonIs() { [[ "$(daemonPid)" == "$1" ]]; }
 daemonRuns() { [[ -n "$(daemonPid)" ]]; }
 daemonStopped() { [[ -z "$(daemonPid)" ]]; }

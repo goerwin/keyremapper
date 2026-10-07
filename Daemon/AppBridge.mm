@@ -7,7 +7,7 @@
 #import "./AppBridge.h"
 #import "./Runtime.hpp"
 
-#import "co_goerwin_KeyRemapperDaemon-Swift.h"
+#import "KeyRemapperDaemon-Swift.h"
 
 NSString* toNSString(std::string str) {
   return [NSString stringWithUTF8String:str.c_str()];

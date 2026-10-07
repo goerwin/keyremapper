@@ -26,7 +26,7 @@
 		F9D1A0032E00000000000002 /* ConfigFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = F9D1A0032E00000000000001 /* ConfigFile.mm */; };
 		F9C759FC27ED7BE000F2E31C /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C759FB27ED7BE000F2E31C /* Global.swift */; };
 		F9C75A2B27ED938700F2E31C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A2A27ED938700F2E31C /* main.swift */; };
-		F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F9C75A3027ED974B00F2E31C /* KeyRemapperDaemon in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9C75A2827ED938700F2E31C /* KeyRemapperDaemon */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F9D1A0012E00000000000002 /* co.goerwin.KeyRemapperDaemon.plist in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9D1A0012E00000000000001 /* co.goerwin.KeyRemapperDaemon.plist */; };
 		F9C75A3527EEC9A900F2E31C /* ServiceDelegateXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3427EEC9A900F2E31C /* ServiceDelegateXPC.swift */; };
 		F9C75A3727EED2B000F2E31C /* ServiceProviderXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C75A3627EED2B000F2E31C /* ServiceProviderXPCProtocol.swift */; };
@@ -58,7 +58,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F9C75A3027ED974B00F2E31C /* co.goerwin.KeyRemapperDaemon in CopyFiles */,
+				F9C75A3027ED974B00F2E31C /* KeyRemapperDaemon in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,7 +109,7 @@
 		F9D1A0032E00000000000005 /* StartResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StartResult.h; sourceTree = "<group>"; };
 		F9D1A0032E00000000000006 /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
 		F9C759FB27ED7BE000F2E31C /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
-		F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = co.goerwin.KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9C75A2827ED938700F2E31C /* KeyRemapperDaemon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KeyRemapperDaemon; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C75A2A27ED938700F2E31C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F9D1A0012E00000000000001 /* co.goerwin.KeyRemapperDaemon.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = co.goerwin.KeyRemapperDaemon.plist; sourceTree = "<group>"; };
 		F9C75A2F27ED93BC00F2E31C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -170,7 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				F9A8925C27644E33009ACA0A /* KeyRemapper.app */,
-				F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */,
+				F9C75A2827ED938700F2E31C /* KeyRemapperDaemon */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -278,7 +278,7 @@
 			);
 			name = Daemon;
 			productName = Daemon;
-			productReference = F9C75A2827ED938700F2E31C /* co.goerwin.KeyRemapperDaemon */;
+			productReference = F9C75A2827ED938700F2E31C /* KeyRemapperDaemon */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -586,7 +586,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;
+				PRODUCT_NAME = KeyRemapperDaemon;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Daemon/Daemon-Bridging-Header.h";
@@ -617,7 +617,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.goerwin.KeyRemapperDaemon;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
-				PRODUCT_NAME = co.goerwin.KeyRemapperDaemon;
+				PRODUCT_NAME = KeyRemapperDaemon;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Daemon/Daemon-Bridging-Header.h";

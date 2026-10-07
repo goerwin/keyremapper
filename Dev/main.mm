@@ -52,7 +52,7 @@ int main(int argc, const char* argv[]) {
       return 1;
     }
 
-    if (system("pgrep -f co.goerwin.KeyRemapperDaemon > /dev/null") == 0) {
+    if (system("pgrep -f KeyRemapperDaemon > /dev/null") == 0) {
       Helpers::print(
           "Error: the KeyRemapper daemon is running, quit KeyRemapper first");
       return 1;
