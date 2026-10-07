@@ -29,13 +29,13 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>Owner</key>
-	<string>@goerwin/keyremapper</string>
+	<string>@goerwin/key-remapper</string>
 	<key>OwnerWebsite</key>
-	<string>https://github.com/goerwin/keyremapper</string>
+	<string>https://github.com/goerwin/key-remapper</string>
 	<key>SUEnableAutomaticChecks</key>
 	<false/>
 	<key>SUFeedURL</key>
-	<string>https://github.com/goerwin/keyremapper/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/goerwin/key-remapper/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>T7cl4Bn07ZZ+yjhtYJMHWob5sijJ4bgK6/vX3Niw508=</string>
 </dict>
