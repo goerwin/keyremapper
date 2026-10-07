@@ -125,17 +125,19 @@ int main(int argc, const char* argv[]) {
   expect("adds the held modifiers to the keys",
          {"mod:55+cmd", key("V", "down+cmd"), key("V", "up+cmd"), "mod:55"});
 
-  // Timers fire late on slow machines (CI) but never early, so only the
-  // minimum times are checked. The default delay (250) wouldn't repeat here
+  // Timers fire late on slow machines (CI) but never before their deadline,
+  // so only the minimum times are checked. A late repeat can be followed
+  // closely by the next one, as the deadlines don't move. The default delay
+  // (250) wouldn't repeat here
   repeatTimes.clear();
   auto pressTime = std::chrono::steady_clock::now();
   press(runtime, "A", true);
   wait(100 + 20 * 5);
   std::string times;
-  bool isOnTime = !repeatTimes.empty() && msSince(pressTime, repeatTimes[0]) >= 100;
+  bool isOnTime = !repeatTimes.empty();
   for (size_t i = 0; i < repeatTimes.size(); i++) {
     times += std::to_string(msSince(pressTime, repeatTimes[i])) + "ms ";
-    if (i > 0 && msSince(repeatTimes[i - 1], repeatTimes[i]) < 20 / 2)
+    if (msSince(pressTime, repeatTimes[i]) < 100 + 20 * (long)i)
       isOnTime = false;
   }
   check("repeats after delayUntilRepeat, every keyRepeatInterval (" + times +
