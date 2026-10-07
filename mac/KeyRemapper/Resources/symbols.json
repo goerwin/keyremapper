@@ -2,7 +2,7 @@
 // http://macbiblioblog.blogspot.com/2014/12/key-codes-for-function-and-special-keys.html
 // https://stackoverflow.com/questions/3202629/where-can-i-find-a-list-of-mac-virtual-key-codes?noredirect=1&lq=1
 
-// { "keyName": [scanCode, keyDownState, keyUpState, vkCode] }
+// { "keyName": [scanCode, keyDownState, keyUpState, vkCode?] }
 
 {
   "A": [4, 0, 1, 0],
@@ -128,6 +128,9 @@
   "VolumeDown": [310, 0, 1, 310],
   "VolumeUp": [311, 0, 1, 311],
   "Dictation": [312, 0, 1, 176],
+
+  // Without a Mac key, they are only read
+  "Back": [313, 0, 1],
 
   // MS Windows keys (do not exist in mac)
   "PrtScr": [70, 0, 1, 320],

@@ -15,7 +15,7 @@
 // https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/HID/new_api_10_5/tn2187.html
 
 // Consumer keys (eg. media buttons): their scancode in symbols.json and the
-// event macOS turns them into (a media key or a vkCode)
+// event macOS turns them into (a media key, a vkCode or none, -1)
 struct ConsumerKey {
   uint32_t usage;
   ushort scancode;
@@ -29,6 +29,7 @@ inline const std::vector<ConsumerKey> consumerKeys = {
     {kHIDUsage_Csmr_VolumeDecrement, 310, NX_KEYTYPE_SOUND_DOWN, -1},
     {kHIDUsage_Csmr_VolumeIncrement, 311, NX_KEYTYPE_SOUND_UP, -1},
     {kHIDUsage_Csmr_VoiceCommand, 312, -1, 176},
+    {kHIDUsage_Csmr_ACBack, 313, -1, -1},
 };
 
 // Seizes the keyboards (also the ones connected later), so their events only

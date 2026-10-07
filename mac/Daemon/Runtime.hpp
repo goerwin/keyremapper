@@ -83,9 +83,10 @@ class Runtime {
     if (!profile.is_object())
       throw std::runtime_error(profileName + " isn't an object");
 
-    // { "keyName": [scanCode, keyDownState, keyUpState, vkCode] }
+    // { "keyName": [scanCode, keyDownState, keyUpState, vkCode?] }
     for (auto& [key, value] : symbols.items())
-      vkCodes[value[0].get<ushort>()] = value[3].get<ushort>();
+      if (value.size() > 3)
+        vkCodes[value[0].get<ushort>()] = value[3].get<ushort>();
 
     keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
     keyRemapper->setAppName(appName);
@@ -245,7 +246,7 @@ class Runtime {
   }
 
   void postKeyEvent(const KeyRemapper::KeyEvent& keyEvent) {
-    // Keys without a symbol have no vkCode
+    // Keys without a symbol or a Mac key have no vkCode
     auto it = vkCodes.find(keyEvent.code);
     if (it == vkCodes.end()) return;
 

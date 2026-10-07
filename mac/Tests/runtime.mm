@@ -165,7 +165,8 @@ int main(int argc, const char* argv[]) {
             Keyboards::getScancode(kHIDPage_Consumer, 0xcf) == scancode("Dictation") &&
             Keyboards::getScancode(kHIDPage_Consumer, 0xe2) == scancode("Mute") &&
             Keyboards::getScancode(kHIDPage_Consumer, 0xea) == scancode("VolumeDown") &&
-            Keyboards::getScancode(kHIDPage_Consumer, 0xe9) == scancode("VolumeUp"));
+            Keyboards::getScancode(kHIDPage_Consumer, 0xe9) == scancode("VolumeUp") &&
+            Keyboards::getScancode(kHIDPage_Consumer, 0x224) == scancode("Back"));
   check("ignores the other consumer usages",
         Keyboards::getScancode(kHIDPage_Consumer, 0) == -1 &&
             Keyboards::getScancode(kHIDPage_Consumer, 0xffffffff) == -1);
@@ -189,6 +190,13 @@ int main(int argc, const char* argv[]) {
   tap(runtime, "Dictation");
   expect("passes the Dictation key through",
          {key("Dictation", "down"), key("Dictation", "up")});
+
+  tap(runtime, "Back");
+  expect("remaps the keys without a Mac key",
+         {key("Enter", "down"), key("Enter", "up")});
+
+  tap(runtime, "M");
+  expect("doesn't post the keys without a Mac key", {});
 
   tap(runtime, "C");
   expect("adds the held modifiers to the keys",

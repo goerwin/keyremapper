@@ -4,7 +4,10 @@
       "delayUntilRepeat": 100,
       "keyRepeatInterval": 20,
       "keyPressesDelay": 1000,
-      "remaps": [{ "from": "A", "to": "B" }],
+      "remaps": [
+        { "from": "A", "to": "B" },
+        { "from": "Back", "to": "Enter" }
+      ],
       "keyPresses": [
         { "key": "I", "ifPressedNTimes": 1, "send": "J" },
         { "key": "I", "ifHeldFor": 300, "send": "K" }
@@ -16,7 +19,8 @@
         { "keys": ["E"], "send": ["VolumeUp", null] },
         { "keys": ["F"], "send": ["LeftClick:down", "LeftClick:up"] },
         { "keys": ["G"], "if": { "appName": "com.test.app" }, "send": ["H", null] },
-        { "keys": ["L"], "send": [5, null] }
+        { "keys": ["L"], "send": [5, null] },
+        { "keys": ["M"], "send": ["Back", null] }
       ]
     }
   ]
