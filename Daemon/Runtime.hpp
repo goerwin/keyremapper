@@ -83,10 +83,10 @@ class Runtime {
     if (!profile.is_object())
       throw std::runtime_error(profileName + " isn't an object");
 
-    // { "keyName": [scanCode, keyDownState, keyUpState, vkCode?] }
+    // { "keyName": [scanCode, vkCode?] }
     for (auto& [key, value] : symbols.items())
-      if (value.size() > 3)
-        vkCodes[value[0].get<ushort>()] = value[3].get<ushort>();
+      if (value.size() > 1)
+        vkCodes[value[0].get<ushort>()] = value[1].get<ushort>();
 
     keyRemapper = std::make_unique<KeyRemapper>(profile, symbols);
     keyRemapper->setAppName(appName);
@@ -135,8 +135,7 @@ class Runtime {
 
     try {
       stopTimer(holdTimer);
-      postKeyEvents(keyRemapper->applyKeys(
-          {{"", scancode, ushort(isKeyDown ? 0 : 1), false}}));
+      postKeyEvents(keyRemapper->applyKeys({{"", scancode, isKeyDown}}));
       startHoldTimer();
     } catch (const std::exception& err) {
       fail("ApplyKeysError: " + std::string(err.what()));
@@ -234,7 +233,7 @@ class Runtime {
       pendingKeyEvents.pop_front();
 
       if (keyEvent.name == "delay") {
-        delayTimer = startTimer(keyEvent.state, 0, ^{
+        delayTimer = startTimer(keyEvent.delay, 0, ^{
           stopTimer(delayTimer);
           postKeyEvents({});
         });

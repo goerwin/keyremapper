@@ -60,13 +60,14 @@ int main(int argc, const char *argv[]) {
              "A:down A:up CmdL:down B:down B:up CmdL:up delay:25 Unknown:down "
              "Unknown:up",
          "getKeyEventsFromString/stringifyKeyEvents");
-  expect(keyEvents[2].code == 227 && keyEvents[2].state == 0 &&
-             keyEvents[3].code == 5 && keyEvents[4].state == 1,
-         "getKeyEventsFromString codes and states");
+  expect(keyEvents[2].code == 227 && keyEvents[2].isKeyDown &&
+             keyEvents[3].code == 5 && !keyEvents[4].isKeyDown &&
+             keyEvents[6].delay == 25,
+         "getKeyEventsFromString codes, states and delays");
 
   // Key codes without a symbol are dropped
 
-  expect(keyRemapper.applyKeys({{"", 999, 0, true}, {"", 4, 0, true}}).size() ==
+  expect(keyRemapper.applyKeys({{"", 999, true}, {"", 4, true}}).size() ==
              1,
          "applyKeys with an unknown key code");
 

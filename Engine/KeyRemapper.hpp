@@ -21,11 +21,11 @@ class KeyRemapper {
 
  public:
   struct KeyEvent {
-    String name;
-    ushort code;
-    ushort state;
+    String name;  // "delay" for a delay
+    ushort code;  // scancode
     bool isKeyDown;
     bool repeats = true;  // while it's down, like a held key
+    int delay = 0;        // ms, for a delay
   };
   typedef std::vector<KeyEvent> KeyEvents;
 
@@ -35,7 +35,13 @@ class KeyRemapper {
            std::chrono::milliseconds(1);
   };
 
-  KeyRemapper(json profile, json symbolsEl) : symbols(symbolsEl) {
+  // symbols is { "keyName": [scanCode, vkCode?] }
+  KeyRemapper(json profile, json symbols) {
+    for (auto &[name, symbol] : symbols.items()) {
+      codes[name] = symbol[0];
+      names[symbol[0]] = name;
+    }
+
     validateFields(profile, "The profile",
                    {"name", "tapDelay", "holdDelay", "delayUntilRepeat",
                     "keyRepeatInterval", "doubleClickSpeed", "remaps", "rules",
@@ -55,8 +61,9 @@ class KeyRemapper {
     KeyEvents result = {};
 
     for (auto &keyEvent : keyEvents) {
-      auto physical = getKeyEvent(keyEvent.code, keyEvent.state);
-      if (physical.name == "Unknown") continue;
+      auto name = names.find(keyEvent.code);
+      if (name == names.end()) continue;
+      KeyEvent physical = {name->second, keyEvent.code, keyEvent.isKeyDown};
 
       // The key keeps the name it got on key down, until it's released
       String key;
@@ -73,8 +80,7 @@ class KeyRemapper {
 
       if (applyKeysCb)
         applyKeysCb(appName, keyboard, keyboardDescription,
-                    std::to_string(keyEvent.code) + ":" +
-                        std::to_string(keyEvent.state) + " -> " +
+                    std::to_string(physical.code) + " -> " +
                         stringifyKeyEvents({physical}) + " -> " + key +
                         " -> " + stringifyKeyEvents(sent));
 
@@ -128,8 +134,8 @@ class KeyRemapper {
       if (i != 0) result += " ";
       auto &keyEvent = keyEvents[i];
 
-      if (keyEvent.code == DELAY_CODE)
-        result += DELAY + ":" + std::to_string(keyEvent.state);
+      if (keyEvent.name == DELAY)
+        result += DELAY + ":" + std::to_string(keyEvent.delay);
       else
         result += keyEvent.name + (keyEvent.isKeyDown ? ":down" : ":up");
     }
@@ -146,9 +152,8 @@ class KeyRemapper {
       if (token.empty()) continue;
 
       if (token.rfind(DELAY + ":", 0) == 0) {
-        keyEvents.push_back({DELAY, DELAY_CODE,
-                             (ushort)atoi(token.substr(DELAY.size() + 1).c_str()),
-                             true});
+        keyEvents.push_back(
+            {DELAY, 0, true, false, atoi(token.substr(DELAY.size() + 1).c_str())});
         continue;
       }
 
@@ -179,7 +184,6 @@ class KeyRemapper {
 
  private:
   const String DELAY = "delay";
-  const ushort DELAY_CODE = 6969;
   const std::set<String> MODIFIERS = {"CmdL",   "CmdR",   "AltL",
                                       "AltR",   "CtrlL",  "CtrlR",
                                       "ShiftL", "ShiftR", "Fn"};
@@ -207,7 +211,8 @@ class KeyRemapper {
     double downTime;
   };
 
-  json symbols;
+  std::map<String, ushort> codes;  // key name -> scancode
+  std::map<ushort, String> names;  // scancode -> key name
   std::vector<Remap> remaps;
   std::vector<Rule> rules;
   double tapDelay;
@@ -376,7 +381,7 @@ class KeyRemapper {
   // sender is who keeps the keys down, empty for the keys that aren't left down
   void trackSentKeys(const KeyEvents &keyEvents, String sender = "") {
     for (auto &keyEvent : keyEvents) {
-      if (!symbols.contains(keyEvent.name)) continue;
+      if (!codes.count(keyEvent.name)) continue;
       auto it = findSentKey(keyEvent.name);
       if (it != sentKeys.end()) sentKeys.erase(it);
       if (keyEvent.isKeyDown && !sender.empty())
@@ -496,7 +501,7 @@ class KeyRemapper {
   }
 
   void validateKey(String key, String where) {
-    if (!symbols.contains(key))
+    if (!codes.count(key))
       throw std::runtime_error(where + ": unknown key \"" + key + "\"");
   }
 
@@ -557,20 +562,9 @@ class KeyRemapper {
     return object[field].get<double>();
   }
 
-  KeyEvent getKeyEvent(ushort code, ushort state) {
-    for (auto &[key, value] : symbols.items()) {
-      if (value[0] != code) continue;
-      if (state != value[1] && state != value[2]) continue;
-      return {key, code, state, state == value[1]};
-    }
-
-    return {"Unknown", code, state, false};
-  }
-
   KeyEvent getKeyEvent(String keyName, bool isKeyDown) {
-    auto it = symbols.find(keyName);
-    if (it == symbols.end()) return {"Unknown", 0, 0, isKeyDown};
-    auto &symbol = *it;
-    return {keyName, symbol[0], isKeyDown ? symbol[1] : symbol[2], isKeyDown};
+    auto it = codes.find(keyName);
+    if (it == codes.end()) return {"Unknown", 0, isKeyDown};
+    return {keyName, it->second, isKeyDown};
   }
 };

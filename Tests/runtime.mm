@@ -21,7 +21,7 @@ long msSince(std::chrono::steady_clock::time_point from,
 }
 
 ushort scancode(std::string key) { return symbols[key][0]; }
-ushort vkCode(std::string key) { return symbols[key][3]; }
+ushort vkCode(std::string key) { return symbols[key][1]; }
 
 // eg. "key:11:down", "key:9:up+cmd", "key:11:down:repeat", "mod:55+cmd",
 // "media:0:down", "click:left:down:1"
