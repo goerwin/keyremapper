@@ -4,6 +4,14 @@ import Foundation
 // The config folder (~/keyRemapperMac). Configs can import other files from it, so any JSON
 // file saved in it counts as a config change
 final class ConfigStore {
+  struct Config {
+    // With the imports resolved
+    let json: String
+    // nil for the ones without a name
+    let profileNames: [String?]
+    let activeProfileIdx: Int?
+  }
+
   let folderPath = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent("keyRemapperMac").path
   var configPath: String { "\(folderPath)/config.json" }
@@ -16,14 +24,16 @@ final class ConfigStore {
 
   var exists: Bool { FileManager.default.fileExists(atPath: configPath) }
 
-  // Names of the profiles, nil for the ones without a name
-  func profileNames() -> [String?] {
-    let profiles = read()?["profiles"] as? [[String: Any]] ?? []
-    return profiles.map { $0["name"] as? String }
-  }
+  // The imports and comments are only understood by the C++ code, the JSON it
+  // resolves to is plain
+  func load() throws -> Config {
+    let json = try ConfigFile.resolve(configPath)
+    let object = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any]
+    let profiles = object?["profiles"] as? [Any] ?? []
 
-  func activeProfileIdx() -> Int? {
-    read()?["activeProfileIdx"] as? Int
+    return Config(
+      json: json, profileNames: profiles.map { ($0 as? [String: Any])?["name"] as? String },
+      activeProfileIdx: object?["activeProfileIdx"] as? Int)
   }
 
   func createIfMissing() throws {
@@ -70,10 +80,5 @@ final class ConfigStore {
     FSEventStreamInvalidate(stream)
     FSEventStreamRelease(stream)
     self.stream = nil
-  }
-
-  private func read() -> [String: Any]? {
-    guard let data = FileManager.default.contents(atPath: configPath) else { return nil }
-    return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
   }
 }

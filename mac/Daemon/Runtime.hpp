@@ -12,8 +12,8 @@
 #import "./Keys.hpp"
 #import "./Mouse.hpp"
 
+#include <deque>
 #include <memory>
-#include <thread>
 #include <unordered_map>
 
 // Remapping runtime shared by the daemon and the dev runner: listens to the
@@ -31,15 +31,14 @@ class Runtime {
 
   ~Runtime() { stop(); }
 
-  // 1: no Accessibility permission, 2: couldn't listen to the mouse,
-  // 3: error sent to onError (eg. invalid config), 5: invalid profiles,
-  // 6: invalid profile. It stays stopped when it fails
-  int start(std::string configPath, std::string symbolsPath, int profileIdx,
-            std::string appName) {
+  // config and symbols are JSON, with the config imports already resolved. It
+  // stays stopped when it fails
+  StartResult start(std::string config, std::string symbols, int profileIdx,
+                    std::string appName) {
     try {
-      auto result = load(configPath, symbolsPath, profileIdx, appName);
-      if (result == 0) result = mouse.start();
-      if (result == 0) {
+      load(config, symbols, profileIdx, appName);
+      auto result = mouse.start();
+      if (result == StartResultOk) {
         capslock = Capslock::getState();
         keyboards.onInput = [this](ushort scancode, bool isKeyDown,
                                    int vendorId, int productId,
@@ -50,7 +49,7 @@ class Runtime {
         };
         result = keyboards.start();
       }
-      if (result != 0) stop();
+      if (result != StartResultOk) stop();
       return result;
     } catch (const std::exception& err) {
       onError("StartError: " + std::string(err.what()));
@@ -59,22 +58,28 @@ class Runtime {
     }
 
     stop();
-    return 3;
+    return StartResultReportedError;
   }
 
   // Loads the profile without touching the keyboards or the mouse. Throws on
-  // invalid files
-  int load(std::string configPath, std::string symbolsPath, int profileIdx,
-           std::string appName) {
+  // invalid JSON or profiles
+  void load(std::string configJson, std::string symbolsJson, int profileIdx,
+            std::string appName) {
     stop();
 
-    auto config = Helpers::getJsonFile(configPath);
-    auto symbols = Helpers::getJsonFile(symbolsPath);
-    auto profiles = config["profiles"];
+    // symbols.json has comments
+    auto config = nlohmann::json::parse(configJson, nullptr, true, true);
+    auto symbols = nlohmann::json::parse(symbolsJson, nullptr, true, true);
+    auto profiles = config.is_object() ? config["profiles"] : nlohmann::json();
+    auto profileName = "Profile " + std::to_string(profileIdx + 1);
 
-    if (!profiles.is_array()) return 5;
-    auto profile = profiles.at(profileIdx);
-    if (!profile.is_object()) return 6;
+    if (!profiles.is_array())
+      throw std::runtime_error("The config has no \"profiles\" array");
+    if (profileIdx < 0 || profileIdx >= (int)profiles.size())
+      throw std::runtime_error(profileName + " not found");
+    auto profile = profiles[profileIdx];
+    if (!profile.is_object())
+      throw std::runtime_error(profileName + " isn't an object");
 
     // { "keyName": [scanCode, keyDownState, keyUpState, vkCode] }
     for (auto& [key, value] : symbols.items())
@@ -86,12 +91,13 @@ class Runtime {
     delayUntilRepeat = profile.value("delayUntilRepeat", 250);
     keyRepeatInterval = profile.value("keyRepeatInterval", 25);
     mouse.doubleClickSpeed = profile.value("doubleClickSpeed", 500.0);
-    return 0;
   }
 
   void stop() {
-    stopKeyRepeat();
-    stopHoldTimer();
+    stopTimer(keyRepeatTimer);
+    stopTimer(holdTimer);
+    stopTimer(delayTimer);
+    pendingKeyEvents.clear();
     keyboards.stop();
     mouse.stop();
     keyRemapper = nullptr;
@@ -125,7 +131,7 @@ class Runtime {
     keyRemapper->setKeyboard(keyboard, manufacturer + " | " + product);
 
     try {
-      stopHoldTimer();
+      stopTimer(holdTimer);
       postKeyEvents(keyRemapper->applyKeys(
           {{"", scancode, ushort(isKeyDown ? 0 : 1), false}}));
       startHoldTimer();
@@ -145,54 +151,72 @@ class Runtime {
   int keyRepeatInterval = 25;
   dispatch_source_t keyRepeatTimer = nil;
   dispatch_source_t holdTimer = nil;
+  dispatch_source_t delayTimer = nil;
+  // Waiting for an SK:Delay to be over
+  std::deque<KeyRemapper::KeyEvent> pendingKeyEvents;
   Mouse mouse{modifiers, postEvent};
   Keyboards keyboards;
 
+  // In order. An SK:Delay holds the events after it, also the ones that come
+  // later, until it's over
   void postKeyEvents(const KeyRemapper::KeyEvents& keyEvents) {
-    for (auto& keyEvent : keyEvents) {
+    pendingKeyEvents.insert(pendingKeyEvents.end(), keyEvents.begin(),
+                            keyEvents.end());
+    if (delayTimer) return;
+
+    while (!pendingKeyEvents.empty()) {
+      auto keyEvent = pendingKeyEvents.front();
+      pendingKeyEvents.pop_front();
+
       if (keyEvent.name == "SK:Delay") {
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(keyEvent.state));
-        continue;
+        delayTimer = startTimer(keyEvent.state, 0, ^{
+          stopTimer(delayTimer);
+          postKeyEvents({});
+        });
+        return;
       }
 
-      // Keys without a symbol have no vkCode
-      auto it = vkCodes.find(keyEvent.code);
-      if (it == vkCodes.end()) continue;
+      postKeyEvent(keyEvent);
+    }
+  }
 
-      auto isKeyDown = keyEvent.isKeyDown;
-      auto vkCode = it->second;
+  void postKeyEvent(const KeyRemapper::KeyEvent& keyEvent) {
+    // Keys without a symbol have no vkCode
+    auto it = vkCodes.find(keyEvent.code);
+    if (it == vkCodes.end()) return;
 
-      if (!isKeyDown) stopKeyRepeat();
+    auto isKeyDown = keyEvent.isKeyDown;
+    auto vkCode = it->second;
 
-      if (vkCode == 55 || vkCode == 54) {
-        modifiers.cmd = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 56 || vkCode == 60) {
-        modifiers.shift = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 58 || vkCode == 61) {
-        modifiers.alt = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 59 || vkCode == 62) {
-        modifiers.ctrl = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 63) {
-        modifiers.fn = isKeyDown;
-        postKey(vkCode, isKeyDown);
-      } else if (vkCode == 57) {
-        if (isKeyDown) setCapslock(capslock = !capslock);
-      } else if (vkCode == 241) {
-        mouse.postClick(isKeyDown);
-      } else if (vkCode == 242) {
-        mouse.postClick(isKeyDown, true);
-      } else if (Keys::isMedia(vkCode)) {
-        if (isKeyDown) postMediaKey(vkCode);
-        handleKeyRepeat(vkCode, isKeyDown);
-      } else {
-        postKey(vkCode, isKeyDown);
-        handleKeyRepeat(vkCode, isKeyDown);
-      }
+    if (!isKeyDown) stopTimer(keyRepeatTimer);
+
+    if (vkCode == 55 || vkCode == 54) {
+      modifiers.cmd = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 56 || vkCode == 60) {
+      modifiers.shift = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 58 || vkCode == 61) {
+      modifiers.alt = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 59 || vkCode == 62) {
+      modifiers.ctrl = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 63) {
+      modifiers.fn = isKeyDown;
+      postKey(vkCode, isKeyDown);
+    } else if (vkCode == 57) {
+      if (isKeyDown) setCapslock(capslock = !capslock);
+    } else if (vkCode == 241) {
+      mouse.postClick(isKeyDown);
+    } else if (vkCode == 242) {
+      mouse.postClick(isKeyDown, true);
+    } else if (Keys::isMedia(vkCode)) {
+      if (isKeyDown) postMediaKey(vkCode);
+      handleKeyRepeat(vkCode, isKeyDown);
+    } else {
+      postKey(vkCode, isKeyDown);
+      handleKeyRepeat(vkCode, isKeyDown);
     }
   }
 
@@ -258,36 +282,37 @@ class Runtime {
     CFRelease(upEvent);
   }
 
-  void stopKeyRepeat() {
-    if (!keyRepeatTimer) return;
-    dispatch_source_cancel(keyRepeatTimer);
-    keyRepeatTimer = nil;
+  // On the main queue. Without interval it fires once. The handlers capture
+  // this, so every timer is stopped in stop(), before this object goes away
+  static dispatch_source_t startTimer(int delayMs, int intervalMs,
+                                      dispatch_block_t handler) {
+    auto timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                        dispatch_get_main_queue());
+    dispatch_source_set_timer(
+        timer, dispatch_time(DISPATCH_TIME_NOW, delayMs * NSEC_PER_MSEC),
+        intervalMs > 0 ? intervalMs * NSEC_PER_MSEC : DISPATCH_TIME_FOREVER,
+        0);
+    dispatch_source_set_event_handler(timer, handler);
+    dispatch_resume(timer);
+    return timer;
+  }
+
+  static void stopTimer(__strong dispatch_source_t& timer) {
+    if (!timer) return;
+    dispatch_source_cancel(timer);
+    timer = nil;
   }
 
   void handleKeyRepeat(ushort vkCode, bool isKeyDown) {
-    stopKeyRepeat();
+    stopTimer(keyRepeatTimer);
     if (!isKeyDown) return;
 
-    keyRepeatTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                            dispatch_get_main_queue());
-    dispatch_source_set_timer(
-        keyRepeatTimer,
-        dispatch_time(DISPATCH_TIME_NOW, delayUntilRepeat * NSEC_PER_MSEC),
-        keyRepeatInterval * NSEC_PER_MSEC, 0);
-    // The timer is cancelled in stop(), before this object goes away
-    dispatch_source_set_event_handler(keyRepeatTimer, ^{
+    keyRepeatTimer = startTimer(delayUntilRepeat, keyRepeatInterval, ^{
       if (Keys::isMedia(vkCode))
         postMediaKey(vkCode);
       else
         postKey(vkCode, true, true);
     });
-    dispatch_resume(keyRepeatTimer);
-  }
-
-  void stopHoldTimer() {
-    if (!holdTimer) return;
-    dispatch_source_cancel(holdTimer);
-    holdTimer = nil;
   }
 
   // For the ifHeldFor rule of the key that was just pressed. Any key event
@@ -296,20 +321,13 @@ class Runtime {
     auto delay = keyRemapper->getHoldDelay();
     if (delay < 0) return;
 
-    holdTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                       dispatch_get_main_queue());
-    dispatch_source_set_timer(
-        holdTimer, dispatch_time(DISPATCH_TIME_NOW, delay * NSEC_PER_MSEC),
-        DISPATCH_TIME_FOREVER, 0);
-    // The timer is cancelled in stop(), before this object goes away
-    dispatch_source_set_event_handler(holdTimer, ^{
-      stopHoldTimer();
+    holdTimer = startTimer(delay, 0, ^{
+      stopTimer(holdTimer);
       try {
         postKeyEvents(keyRemapper->applyHold());
       } catch (const std::exception& err) {
         onError("ApplyHoldError: " + std::string(err.what()));
       }
     });
-    dispatch_resume(holdTimer);
   }
 };

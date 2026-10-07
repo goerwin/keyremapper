@@ -4,6 +4,9 @@
 
 #import "AppKit/AppKit.h"
 
+#include <filesystem>
+
+#import "../Common/Config.hpp"
 #import "../Daemon/Runtime.hpp"
 
 static nlohmann::json symbols;
@@ -123,6 +126,11 @@ int main(int argc, const char* argv[]) {
   }
 
   symbols = Helpers::getJsonFile(argv[2]);
+  // As the app sends them
+  auto config = Config::resolve(argv[1]);
+  std::ifstream symbolsFile(argv[2]);
+  std::string symbolsJson((std::istreambuf_iterator<char>(symbolsFile)),
+                          std::istreambuf_iterator<char>());
   std::vector<std::string> errors;
   std::vector<bool> capslockStates;
 
@@ -135,7 +143,7 @@ int main(int argc, const char* argv[]) {
   runtime.setCapslock = [&](bool state) { capslockStates.push_back(state); };
   runtime.onError = [&](std::string err) { errors.push_back(err); };
 
-  check("loads the profile", runtime.load(argv[1], argv[2], 0, "") == 0);
+  runtime.load(config, symbolsJson, 0, "");
 
   tap(runtime, "A");
   expect("remaps", {key("B", "down"), key("B", "up")});
@@ -213,17 +221,30 @@ int main(int argc, const char* argv[]) {
   runtime.stop();
   wait(150);
   expect("stops repeating on stop", {key("B", "down")});
-  runtime.load(argv[1], argv[2], 0, "");
+  runtime.load(config, symbolsJson, 0, "");
 
+  // The main run loop also serves the keyboards and the mouse, so it can't
+  // sleep through the delay
   auto start = std::chrono::steady_clock::now();
   tap(runtime, "D");
-  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                     std::chrono::steady_clock::now() - start)
-                     .count();
-  expect("sends keys around SK:Delay",
-         {key("Tab", "down"), key("Tab", "up"), key("Tab", "down"),
-          key("Tab", "up")});
-  check("waits for SK:Delay", elapsed >= 60);
+  tap(runtime, "Z");
+  check("doesn't block during SK:Delay",
+        msSince(start, std::chrono::steady_clock::now()) < 60);
+  expect("sends the keys before SK:Delay",
+         {key("Tab", "down"), key("Tab", "up")});
+  wait(30);
+  expect("waits for SK:Delay", {});
+  wait(100);
+  expect("sends the keys after SK:Delay, then the ones pressed meanwhile",
+         {key("Tab", "down"), key("Tab", "up"), key("Z", "down"),
+          key("Z", "up")});
+
+  tap(runtime, "D");
+  runtime.stop();
+  wait(100);
+  expect("drops the keys after SK:Delay on stop",
+         {key("Tab", "down"), key("Tab", "up")});
+  runtime.load(config, symbolsJson, 0, "");
 
   tap(runtime, "E");
   expect("posts media keys down and up",
@@ -300,12 +321,38 @@ int main(int argc, const char* argv[]) {
 
   for (auto& err : errors) Helpers::print("  error: " + err);
   check("reports no errors", errors.empty());
-  runtime.start(argv[1], argv[2], 0, "");
-  auto startResult = runtime.start(argv[1], argv[2], 99, "");
+  runtime.start(config, symbolsJson, 0, "");
+  auto startResult = runtime.start(config, symbolsJson, 99, "");
   check("reports an invalid profile index",
-        startResult == 3 && errors.size() == 1);
+        startResult == StartResultReportedError && errors.size() == 1 &&
+            errors.back() == "StartError: Profile 100 not found");
   tap(runtime, "A");
   expect("stays stopped after a failed start", {});
+
+  startResult = runtime.start("{\"profiles\": {}}", symbolsJson, 0, "");
+  check("reports a config without profiles",
+        startResult == StartResultReportedError &&
+            errors.back() == "StartError: The config has no \"profiles\" array");
+
+  // Comments and imports are resolved before the runtime gets the config
+  auto dir = std::filesystem::temp_directory_path() / "keyremapper-tests";
+  std::filesystem::create_directories(dir);
+  std::ofstream(dir / "config.json")
+      << "{\n  // comment\n  \"profiles\": \"%array(profiles.json)\"\n}";
+  std::ofstream(dir / "profiles.json") << "[{ \"name\": \"Imported\" }]";
+  check("resolves the comments and imports of the config",
+        nlohmann::json::parse(Config::resolve(dir / "config.json")) ==
+            nlohmann::json::parse("{\"profiles\": [{\"name\": \"Imported\"}]}"));
+
+  std::ofstream(dir / "profiles.json") << "[{";
+  std::string resolveError;
+  try {
+    Config::resolve(dir / "config.json");
+  } catch (const std::exception& err) {
+    resolveError = err.what();
+  }
+  check("reports invalid JSON in the imported files",
+        resolveError.find("isn't valid JSON") != std::string::npos);
 
   Helpers::print(failures ? std::to_string(failures) + " FAILED" : "SUCCESS!");
   return failures ? 1 : 0;

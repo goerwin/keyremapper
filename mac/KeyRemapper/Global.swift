@@ -39,8 +39,8 @@ struct Global {
     return image
   }
 
-  static func getResourceSymbolsPath() -> String? {
-    guard let resourcePath = Bundle.main.resourcePath else { return nil }
-    return "\(resourcePath)/symbols.json"
+  static func getResourceSymbols() -> String? {
+    guard let path = Bundle.main.path(forResource: "symbols", ofType: "json") else { return nil }
+    return try? String(contentsOfFile: path, encoding: .utf8)
   }
 }

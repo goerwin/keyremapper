@@ -19,6 +19,9 @@ failures=0
 ui() { osascript -e "tell application \"System Events\" to $1"; }
 menuItems() { ui "get name of every menu item of $menu" | sed 's/, /\n/g'; }
 menuHas() { menuItems | grep -qx "$1"; }
+# Profiles are the menu items between the 2nd and 3rd separators
+profileItems() { menuItems | awk '/^missing value$/ { n++; next } n == 2'; }
+profilesAre() { [[ "$(profileItems)" == "$1" ]]; }
 # Profile items start with a checkmark when active
 clickMenu() {
   ui "click (first menu item of $menu whose name is \"$1\" or name is \"✔  $1\")" >/dev/null || true
@@ -82,8 +85,7 @@ check "survives switching apps while paused" daemonIs "$pid"
 clickMenu Resume
 check "resumes" menuHas Pause
 
-# Profiles are the menu items between the 2nd and 3rd separators
-profiles=$(menuItems | awk '/^missing value$/ { n++; next } n == 2')
+profiles=$(profileItems)
 active=$(echo "$profiles" | grep '^✔  ' | sed 's/^✔  //')
 while read -r profile; do
   name=${profile#✔  }
@@ -95,6 +97,12 @@ check "survives switching profiles" daemonIs "$pid"
 
 cp -p "$config" "$configBackup"
 trap 'cp -p "$configBackup" "$config"' EXIT
+{ echo '// A comment'; cat "$configBackup"; } > "$config"
+sleep 1.5
+check "lists the profiles of a config with comments" waitFor profilesAre "$profiles"
+check "keeps remapping with comments in the config" menuHas Pause
+check "shows no alerts with comments in the config" hasNoAlerts
+
 echo '{' > "$config"
 check "reloads the config when it's saved, reporting errors" waitFor hasAlert
 dismissAlert

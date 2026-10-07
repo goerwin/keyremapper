@@ -5,6 +5,7 @@
 #include <chrono>
 #include <functional>
 
+#include "../Common/StartResult.h"
 #include "./Keys.hpp"
 
 // Posts the remapped clicks and, since real mouse events don't see the
@@ -18,8 +19,7 @@ class Mouse {
       : modifiers(modifiers), postEvent(postEvent) {}
   ~Mouse() { stop(); }
 
-  // 1: no Accessibility permission, 2: couldn't add the event tap
-  int start() {
+  StartResult start() {
     stop();
 
     // NOTE: kCGEventTapOptionListenOnly does not fail when clicking the app's
@@ -35,16 +35,16 @@ class Mouse {
             CGEventMaskBit(kCGEventMouseMoved),
         eventTapCb, this);
 
-    if (!eventTap) return 1;
+    if (!eventTap) return StartResultNoAccessibility;
 
     runLoopSource =
         CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
-    if (!runLoopSource) return 2;
+    if (!runLoopSource) return StartResultEventTapFailed;
 
     // NOTE: kCFRunLoopDefaultMode has issues with clicking the app's menubar
     CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource,
                        kCFRunLoopCommonModes);
-    return 0;
+    return StartResultOk;
   }
 
   void stop() {

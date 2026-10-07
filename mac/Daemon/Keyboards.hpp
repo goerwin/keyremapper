@@ -12,6 +12,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "../Common/StartResult.h"
+
 // https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/HID/new_api_10_5/tn2187.html
 
 // Consumer keys (eg. media buttons): their scancode in symbols.json and the
@@ -45,8 +47,7 @@ class Keyboards {
 
   ~Keyboards() { stop(); }
 
-  // 1: couldn't add the event tap (no Accessibility permission)
-  int start() {
+  StartResult start() {
     stop();
 
     eventTap = CGEventTapCreate(
@@ -54,7 +55,7 @@ class Keyboards {
         CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) |
             CGEventMaskBit(NSEventTypeSystemDefined),
         eventTapCb, this);
-    if (!eventTap) return 1;
+    if (!eventTap) return StartResultNoAccessibility;
 
     runLoopSource =
         CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
@@ -73,7 +74,7 @@ class Keyboards {
     IOHIDManagerRegisterDeviceMatchingCallback(consumerManager,
                                                consumerDeviceMatchedCb, this);
     IOHIDManagerOpen(consumerManager, kIOHIDOptionsTypeNone);
-    return 0;
+    return StartResultOk;
   }
 
   void stop() {

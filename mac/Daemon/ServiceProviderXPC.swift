@@ -7,17 +7,17 @@ import Foundation
 // lives on the main run loop, so every call that touches it runs on main
 @objc class ServiceProviderXPC: NSObject, ServiceProviderXPCProtocol {
   func start(
-    configPath: String, symbolsPath: String, profileIdx: Int,
-    withReply reply: @escaping (Int) -> Void
+    config: String, symbols: String, profileIdx: Int,
+    withReply reply: @escaping (StartResult) -> Void
   ) {
     let startResult = DispatchQueue.main.sync {
       GlobalSwift.appBridge.start(
-        configPath, withSymbolsPath: symbolsPath,
+        config, withSymbols: symbols,
         withProfileIdx: Int32(profileIdx),
         withAppName: GlobalSwift.getFrontmostAppName())
     }
 
-    return reply(Int(startResult))
+    return reply(startResult)
   }
 
   func stop() {
