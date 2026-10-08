@@ -86,6 +86,10 @@ final class StatusBarController: NSObject {
     let item = menu.addItem(withTitle: title, action: action, keyEquivalent: keyEquivalent)
     item.target = self
     item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+    // macOS 27 hides menu item symbol images by default, so opt back in
+    if #available(macOS 27.0, *) {
+      item.preferredImageVisibility = .visible
+    }
     return item
   }
 
