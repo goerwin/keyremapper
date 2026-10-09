@@ -11,6 +11,8 @@
       ],
       "rules": [
         { "from": ["I"], "tap": "J", "hold": "K" },
+        { "from": ["AltL"], "optional": ["any"], "to": "AltL set:clickMode", "afterKeyUp": "unset:clickMode" },
+        { "from": ["C"], "optional": ["any"], "if": "clickMode", "to": "AltL:up LeftClick" },
         { "from": ["C"], "to": "CmdL+V" },
         { "from": ["D"], "to": "Tab delay:60 Tab" },
         { "from": ["E"], "to": "VolumeUp" },

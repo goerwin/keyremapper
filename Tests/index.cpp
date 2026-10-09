@@ -39,7 +39,7 @@ int main(int argc, const char *argv[]) {
   auto symbols = Helpers::getJsonFile(
       dirPath + "/../KeyRemapper/Resources/symbols.json");
 
-  for (auto name : {"to", "modifiers", "conditions", "variables", "taps",
+  for (auto name : {"to", "modifiers", "clicks", "conditions", "variables", "taps",
                     "holds", "keys", "vim"}) {
     auto profile = Helpers::getJsonFile(dirPath + "/" + name + ".json");
     auto results = TestHelpers::runTests(profile["tests"], profile, symbols);
@@ -87,6 +87,23 @@ int main(int argc, const char *argv[]) {
 
   Helpers::print("Key events tests passed");
 
+  for (std::string modifier : {"AltL", "AltR", "CmdL", "CmdR", "CtrlL",
+                               "CtrlR", "ShiftL", "ShiftR", "Fn"}) {
+    auto profile = json::parse(R"({"rules": [
+      {"from": ["AltL"], "optional": ["any"], "to": "AltL set:mode", "afterKeyUp": "unset:mode"},
+      {"from": ["C"], "optional": ["any"], "if": "mode", "to": "AltL:up LeftClick"}
+    ]})");
+    profile["rules"][0]["from"] = {modifier};
+    profile["rules"][0]["to"] = modifier + " set:mode";
+    profile["rules"][1]["to"] = modifier + ":up LeftClick";
+    auto results = TestHelpers::runTests(
+        json::array({json::array({modifier + ":down C " + modifier + ":up",
+                                 modifier + ":down " + modifier + ":up LeftClick"})}),
+        profile, symbols);
+    expect(bool(results["ok"]), modifier + ": " + std::string(results["message"]));
+  }
+  Helpers::print("Variable click modes passed for all modifiers");
+
   // Invalid profiles fail when they load
 
   for (auto profile : {
@@ -103,7 +120,7 @@ int main(int argc, const char *argv[]) {
            R"({ "rules": [{ "from": ["A"], "app": 1 }] })",
            R"({ "rules": [{ "from": ["A"], "to": "NoExist" }] })",
            R"({ "rules": [{ "from": ["A"], "to": "B:down" }] })",
-           R"({ "rules": [{ "from": ["A"], "to": "B:up" }] })",
+           R"({ "rules": [{ "from": ["A"], "to": "B:repeat" }] })",
            R"({ "rules": [{ "from": ["A"], "tap": "delay:x" }] })",
            R"({ "rules": [{ "from": ["A", "B"], "hold": ["C"] }] })",
            R"({ "rules": [{ "from": ["A"], "to": ["C", 1] }] })",

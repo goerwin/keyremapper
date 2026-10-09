@@ -1,0 +1,18 @@
+{
+  "rules": [
+    { "from": ["AltL"], "optional": ["any"], "to": "AltL set:clickMode", "afterKeyUp": "unset:clickMode" },
+    { "from": ["C"], "modifiers": ["F18"], "optional": ["any"], "if": "clickMode", "to": "AltL:up RightClick" },
+    { "from": ["C"], "optional": ["any"], "if": "clickMode", "to": "AltL:up LeftClick" },
+    { "from": ["H"], "modifiers": ["AltL"], "to": "LeftArrow" }
+  ],
+  "tests": [
+    ["AltL:down C:down delay:500 C:up AltL:up", "AltL:down AltL:up LeftClick"],
+    ["AltL:down C:down AltL:up C:up", "AltL:down AltL:up LeftClick"],
+    ["AltL:down C C AltL:up", "AltL:down AltL:up LeftClick AltL:up LeftClick"],
+    ["AltL:down F18:down C F18:up AltL:up", "AltL:down F18:down F18:up AltL:up RightClick"],
+    ["AltL:down ShiftL:down C ShiftL:up AltL:up", "AltL:down ShiftL:down AltL:up LeftClick ShiftL:up"],
+    ["AltL:down C H AltL:up", "AltL:down AltL:up LeftClick LeftArrow"],
+    ["AltL:down C AltL:up AltL:down H AltL:up", "AltL:down AltL:up LeftClick AltL:down AltL:up LeftArrow AltL:down AltL:up"],
+    ["C", "C"]
+  ]
+}

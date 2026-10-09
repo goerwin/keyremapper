@@ -86,6 +86,7 @@ Each action is space separated. Like Karabiner, the last key of `to` and `hold` 
 "to": "CmdL+ShiftL+C"          // with modifiers
 "to": "Tab delay:250 Tab"      // waits 250ms
 "to": "currentKey"             // the pressed key
+"to": "AltL:up LeftClick"      // releases Alt, then holds the click
 "to": "set:myVar"              // turns on a variable, unset:myVar turns it off
 ```
 
@@ -127,6 +128,27 @@ A mode that a tap toggles:
 ]
 ```
 
+For a click mode, a variable can track the physical modifier while `:up` releases its output. This avoids pressing the modifier again when the drag ends. Normal modifier shortcuts work before entering click mode; afterward, release and press the modifier again to use it normally. The same pattern works with Cmd, Ctrl, or any other key:
+
+```jsonc
+[
+  {
+    "from": ["AltL"],
+    "optional": ["any"],
+    "to": "AltL set:clickMode",
+    "afterKeyUp": "unset:clickMode"
+  },
+  {
+    "from": ["C"],
+    "optional": ["any"],
+    "if": "clickMode",
+    "to": "AltL:up LeftClick"
+  }
+]
+```
+
+An explicit `:up` works in any action and releases the named key even when another rule pressed it. It doesn't release the physical key or turn off variables, so repeated C presses still click until Alt is physically released.
+
 ### Sharing parts of the config
 
 `"%import(file.json)"` is replaced by that file, relative to the one importing it. In an array, an imported array is spread into it (see [Tests/imports.json](Tests/imports.json) or my [config](https://github.com/goerwin/dotfiles/blob/master/src/keyRemapperMac/config.json)).
@@ -158,12 +180,14 @@ make test-runtime                    # Mac runtime tests: key events in, posted 
 make test-app                        # builds, installs and drives the signed app's menu (Tests/app.sh)
 make test-config [CONFIG=...]        # tests of each profile (default ~/KeyRemapperMac/config.json)
 make build                           # unsigned Debug build of the Mac app
+make dev-app                         # quits the app, builds and runs a local signed Debug app
 make dev [CONFIG=... PROFILE=1 LOG=1] # run the remapper from the terminal
 make icon                            # regenerates the app and menu bar icons from images/*.svg
 ```
 
 - Use `$HOME` instead of `~` in `CONFIG`, zsh doesn't expand it there
 - `make test-app` replaces the installed app and needs _Accessibility_ for the terminal app. It briefly saves an invalid config to check reloading, and restores yours after. Physical keystrokes can't be automated (it would need a virtual HID driver), so try a few keys after it
+- `make dev-app` launches `build/dev-app/Build/Products/Debug/KeyRemapper.app` without replacing the installed app or running tests. It uses your existing config and signing identity.
 - `make dev` needs no app, helper or signing. Quit KeyRemapper first and grant _Input Monitoring_ and _Accessibility_ to the terminal app. Stop it with Ctrl+C
 - Xcode: open `KeyRemapper.xcodeproj` and sign both targets (KeyRemapper, Daemon) with your Apple Development certificate. The daemon only accepts apps signed by the same team
 - The app only restarts the daemon when its version changes, so after changing the daemon bump the version

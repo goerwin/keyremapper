@@ -31,6 +31,7 @@ std::string describe(CGEventRef event) {
   std::string mods;
   if (flags & kCGEventFlagMaskCommand) mods += "+cmd";
   if (flags & kCGEventFlagMaskShift) mods += "+shift";
+  if (flags & kCGEventFlagMaskAlternate) mods += "+alt";
   if (flags & kCGEventFlagMaskAlphaShift) mods += "+caps";
 
   if (type == kCGEventKeyDown || type == kCGEventKeyUp) {
@@ -310,6 +311,23 @@ int main(int argc, const char* argv[]) {
   expect("posts clicks, counting double clicks",
          {"click:left:down:1", "click:left:up:1", "click:left:down:2",
           "click:left:up:2"});
+
+  {
+    Runtime dragRuntime;
+    dragRuntime.postEvent = runtime.postEvent;
+    dragRuntime.load(config, symbolsJson, 0);
+    press(dragRuntime, "AltL", true);
+    tap(dragRuntime, "Z");
+    expect("preserves normal Alt shortcuts before click mode",
+           {"mod:58+alt", key("Z", "down+alt"), key("Z", "up+alt")});
+    press(dragRuntime, "C", true);
+    wait(50);
+    press(dragRuntime, "C", false);
+    expect("keeps Alt released when ending a remapped drag",
+           {"mod:58", "click:left:down:1", "click:left:up:1"});
+    press(dragRuntime, "AltL", false);
+    expect("doesn't restore Alt before its physical release", {});
+  }
 
   tap(runtime, "Caps");
   tap(runtime, "A");

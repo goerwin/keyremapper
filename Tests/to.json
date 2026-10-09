@@ -10,7 +10,10 @@
     { "from": ["H"], "to": "X currentKey" },
     { "from": ["I"] },
     { "from": ["J"], "optional": ["any"], "to": "CmdL" },
-    { "from": ["K"], "to": "X delay:25" }
+    { "from": ["K"], "to": "X delay:25" },
+    { "from": ["L"], "to": "X:up" },
+    { "from": ["M"], "to": "currentKey:up" },
+    { "from": ["N"], "optional": ["any"], "to": "CmdL+X:up Y" }
   ],
   "tests": [
     ["A", "B"],
@@ -31,6 +34,11 @@
     // A key the user holds is released when the user releases it
     ["CmdL:down J CmdL:up", "CmdL:down CmdL:down CmdL:up"],
     ["J:down CmdL:down J:up CmdL:up", "CmdL:down CmdL:down CmdL:up"],
-    ["J:down Y J:up", "CmdL:down Y CmdL:up"]
+    ["J:down Y J:up", "CmdL:down Y CmdL:up"],
+
+    ["X:down L X:up", "X:down X:up"],
+    ["L", "X:up"],
+    ["M", "M:up"],
+    ["CmdL:down X:down N X:up CmdL:up", "CmdL:down X:down X:up CmdL:up Y"]
   ]
 }

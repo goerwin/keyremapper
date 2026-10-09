@@ -355,12 +355,15 @@ class KeyRemapper {
     for (size_t i = 0; i < tokens.size(); i++) {
       auto token = tokens[i];
       if (token.rfind(DELAY + ":", 0) != 0) {
-        auto keys = Helpers::split(token, '+');
+        auto [keys, state] = splitToken(token);
         token = "";
         for (auto &key : keys)
           token += (token.empty() ? "" : "+") +
                    (key == "currentKey" ? currentKey : key);
-        if (holdsLast && i == tokens.size() - 1) token += ":down";
+        if (!state.empty())
+          token += ":" + state;
+        else if (holdsLast && i == tokens.size() - 1)
+          token += ":down";
       }
       str += token + " ";
     }
@@ -532,7 +535,7 @@ class KeyRemapper {
       }
 
       auto [keys, state] = splitToken(token);
-      if (state != "")
+      if (state != "" && state != "up")
         throw std::runtime_error(where + ": invalid \"" + token +
                                  "\", keys are released by themselves");
       for (auto &key : keys)
