@@ -329,6 +329,60 @@ int main(int argc, const char* argv[]) {
     expect("doesn't restore Alt before its physical release", {});
   }
 
+  {
+    Modifiers mouseModifiers;
+    std::vector<CGEventRef> clicks;
+    const std::function<void(CGEventRef)> recordClick = [&](CGEventRef event) {
+      clicks.push_back(CGEventCreateCopy(event));
+    };
+    Mouse mouse(mouseModifiers, recordClick);
+    mouse.postClick(true);
+    auto down = clicks.back();
+    auto number = CGEventGetIntegerValueField(down, kCGMouseEventNumber);
+    check("posts clicks with a HID system source and an event number",
+          CGEventGetIntegerValueField(down, kCGEventSourceStateID) ==
+                  kCGEventSourceStateHIDSystemState &&
+              number > 0);
+
+    auto movement = CGEventCreateMouseEvent(
+        NULL, kCGEventMouseMoved, CGPointMake(300, 400), kCGMouseButtonLeft);
+    CGEventSetIntegerValueField(movement, kCGMouseEventDeltaX, 7);
+    CGEventSetIntegerValueField(movement, kCGMouseEventDeltaY, -4);
+    mouse.updateNativeEvent(kCGEventMouseMoved, movement);
+    check("ties the drag to its held click and preserves motion",
+          CGEventGetType(movement) == kCGEventLeftMouseDragged &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventNumber) == number &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventClickState) == 1 &&
+              CGEventGetDoubleValueField(movement, kCGMouseEventPressure) == 1 &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventDeltaX) == 7 &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventDeltaY) == -4 &&
+              CGPointEqualToPoint(CGEventGetLocation(movement), CGPointMake(300, 400)));
+
+    mouse.postClick(false);
+    auto up = clicks.back();
+    check("pairs the mouse release with its press",
+          CGEventGetIntegerValueField(up, kCGMouseEventNumber) == number &&
+              CGEventGetDoubleValueField(up, kCGMouseEventPressure) == 0);
+    mouse.updateNativeEvent(kCGEventMouseMoved, movement);
+    check("stops dragging after release",
+          CGEventGetType(movement) == kCGEventMouseMoved);
+
+    mouse.postClick(true, true);
+    auto rightDown = clicks.back();
+    mouse.updateNativeEvent(kCGEventMouseMoved, movement);
+    check("uses a new event number and the right button for right drags",
+          CGEventGetType(movement) == kCGEventRightMouseDragged &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventButtonNumber) ==
+                  kCGMouseButtonRight &&
+              CGEventGetIntegerValueField(rightDown, kCGMouseEventNumber) > number &&
+              CGEventGetIntegerValueField(movement, kCGMouseEventNumber) ==
+                  CGEventGetIntegerValueField(rightDown, kCGMouseEventNumber));
+    mouse.postClick(false, true);
+
+    CFRelease(movement);
+    for (auto event : clicks) CFRelease(event);
+  }
+
   tap(runtime, "Caps");
   tap(runtime, "A");
   tap(runtime, "Caps");

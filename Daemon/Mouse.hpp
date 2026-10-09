@@ -27,6 +27,13 @@ class Mouse {
         const std::function<void(CGEventRef)>& postEvent)
       : modifiers(modifiers), postEvent(postEvent) {}
 
+  ~Mouse() {
+    if (eventSource) CFRelease(eventSource);
+  }
+
+  Mouse(const Mouse&) = delete;
+  Mouse& operator=(const Mouse&) = delete;
+
   void postClick(bool isMouseDown, bool isRight = false) {
     CGEventRef locationEvent = CGEventCreate(NULL);
     CGPoint newLocation = CGEventGetLocation(locationEvent);
@@ -46,6 +53,7 @@ class Mouse {
       isRightButton = isRight;
       location = newLocation;
       lastPressTime = now;
+      eventNumber++;
     }
 
     status = isMouseDown ? Status::down : Status::up;
@@ -54,9 +62,9 @@ class Mouse {
                          ? (isRight ? kCGEventRightMouseDown : kCGEventLeftMouseDown)
                          : (isRight ? kCGEventRightMouseUp : kCGEventLeftMouseUp);
     CGEventRef event = CGEventCreateMouseEvent(
-        NULL, eventType, newLocation,
+        eventSource, eventType, newLocation,
         isRight ? kCGMouseButtonRight : kCGMouseButtonLeft);
-    CGEventSetIntegerValueField(event, kCGMouseEventClickState, clickCount);
+    setClickFields(event, isMouseDown);
     CGEventSetDoubleValueField(event, kCGEventSourceUserData, postedEventMark);
     CGEventSetFlags(event, modifiers.flags());
     postEvent(event);
@@ -76,6 +84,7 @@ class Mouse {
     if (isMoving && status == Status::down) {
       CGEventSetType(event, isRightButton ? kCGEventRightMouseDragged
                                           : kCGEventLeftMouseDragged);
+      setClickFields(event, true);
     } else if (isMoving && status == Status::up) {
       CGEventSetType(event, kCGEventMouseMoved);
       status = Status::none;
@@ -92,10 +101,23 @@ class Mouse {
 
   const Modifiers& modifiers;
   const std::function<void(CGEventRef)>& postEvent;
+  CGEventSourceRef eventSource =
+      CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 
+  int64_t eventNumber = 0;
   int clickCount = 0;
   CGPoint location = {};
   double lastPressTime = 0;
   bool isRightButton = false;
   Status status = Status::none;
+
+  void setClickFields(CGEventRef event, bool isMouseDown) const {
+    CGEventSetIntegerValueField(event, kCGMouseEventNumber, eventNumber);
+    CGEventSetIntegerValueField(event, kCGMouseEventClickState, clickCount);
+    CGEventSetIntegerValueField(event, kCGMouseEventButtonNumber,
+                               isRightButton ? kCGMouseButtonRight
+                                             : kCGMouseButtonLeft);
+    CGEventSetDoubleValueField(event, kCGMouseEventPressure,
+                              isMouseDown ? 1 : 0);
+  }
 };
